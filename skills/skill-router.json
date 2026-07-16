@@ -98,9 +98,9 @@
       "priority": 7
     },
     {
-      "triggers": ["tutoring", "teach", "socratic", "quiz", "exam", "flashcard"],
-      "skills": ["tutoring"],
-      "priority": 8
+      "triggers": ["tutoring", "teach", "socratic", "quiz", "exam", "flashcard", "study tip", "learning technique", "active recall", "spaced repetition", "memory technique", "how to study", "exam prep", "study strategy", "study method"],
+      "skills": ["study-tutor", "tutoring"],
+      "priority": 9
     },
     {
       "triggers": ["security", "vulnerability", "cve", "harden", "encrypt", "authentication", "authorization", "csp", "xss", "sql injection", "owasp", "pen test", "audit security"],
