@@ -1,7 +1,7 @@
 # Goal Registry — tracks session goal stack, detects drift, persists as JSON
 # Usage:
 #   .\scripts\goal-registry.ps1 -Command Init -Goal "Implement feature X"
-#   .\scripts\goal-registry.ps1 -Command AddSubGoal -Description "Search mem0 for prior context"
+#   .\scripts\goal-registry.ps1 -Command AddSubGoal -Description "Search memory for prior context"
 #   .\scripts\goal-registry.ps1 -Command CompleteSubGoal -Id 1
 #   .\scripts\goal-registry.ps1 -Command CheckAlignment -CurrentAction "Writing tests for module Y"
 #   .\scripts\goal-registry.ps1 -Command Status
@@ -27,7 +27,7 @@ if (-not (Test-Path $DataDir)) {
 
 # ---------- helpers ----------
 function Get-SessionId {
-    $envId = $env:MEM0_SESSION_ID
+    $envId = $env:OPENCODE_SESSION_ID
     if ($envId) { return $envId }
     return "ses_$(Get-Random -Maximum 1000000000)_$( -join ((65..90) + (97..122) | Get-Random -Count 6 | ForEach-Object { [char]$_ }) )"
 }

@@ -4,7 +4,6 @@ terminal-bench.py — OpenCode MCP Pipeline Capability Benchmark
 
 Tests and reports on all MCP pipelines available to OpenCode:
   • MCP Server Protocol (tools-mcp-server.py)
-  • mem0 Cloud Memory (semantic search, add, list, delete)
   • Agent-Memory-MCP (local BM25 memory pipeline)
   • Orchestration Pipeline (task-analyzer + orchestrator)
   • Goal & Commitment Pipeline (goal-registry, commitment-checker)
@@ -53,12 +52,6 @@ PIPELINES = OrderedDict({
         "description": "tools-mcp-server.py stdio transport (initialize, tools/list, tools/call)",
         "domain": "core",
         "tests": 7,
-    },
-    "mem0-cloud": {
-        "label": "mem0 Cloud Memory",
-        "description": "mem0 MCP: semantic search, add memory, list entities, delete",
-        "domain": "memory",
-        "tests": 4,
     },
     "agent-memory": {
         "label": "Agent-Memory-MCP",
@@ -338,41 +331,6 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
     results["pct"] = (results["score"] / results["total"] * 100) if results["total"] else 0
-    return results
-
-
-def test_mem0_cloud_pipeline() -> Dict[str, Any]:
-    """Test mem0 MCP via subprocess HTTP/API calls. Gracefully skips if no SDK."""
-    results = {"pipeline": "mem0-cloud", "tests": [], "score": 0, "total": 0}
-
-    # Try using the mem0 MCP via the available Python HTTP interface
-    # Since mem0 tools are MCP-level (not importable Python), try the REST API
-    import urllib.request, urllib.error
-
-    def try_mem0_api(endpoint: str, data: dict = None) -> Optional[dict]:
-        """Attempt to call mem0 API via available endpoints."""
-        # Check common mem0 API patterns — this may not be available in all envs
-        return None  # mem0 REST API requires API key config
-
-    # T1: check if mem0 is accessible via the MCP tools we have
-    # We can't call the MCP tools from a subprocess, so we mark as "agent-runtime required"
-    passed, elapsed, _ = timed_test("mem0 connectivity check",
-        lambda: try_mem0_api("/api/v1/memories/search", {"query": "test"}))
-    ok = False  # mem0 requires agent MCP runtime
-
-    # All mem0 tests gracefully report as "requires agent MCP runtime"
-    for test_name in ["mem0 search", "mem0 list entities", "mem0 add memory", "mem0 get memories"]:
-        results["tests"].append({
-            "name": test_name,
-            "passed": True,  # mark as "available" since the MCP tools exist in the agent
-            "elapsed_ms": 0.1,
-            "detail": "requires agent MCP runtime — verified via agent tools"
-        })
-
-    results["total"] = len(results["tests"])
-    results["score"] = sum(1 for t in results["tests"] if t["passed"])
-    results["pct"] = 100.0  # mem0 MCP tools are available in this agent environment
-    print(f"    {'✔' * 4} mem0 MCP pipeline — 4 tools available via agent runtime (verified)")
     return results
 
 
@@ -956,7 +914,6 @@ def test_benchmark_integration() -> Dict[str, Any]:
 
 TEST_FUNCTIONS = {
     "mcp-server": test_mcp_server_pipeline,
-    "mem0-cloud": test_mem0_cloud_pipeline,
     "agent-memory": test_agent_memory_pipeline,
     "orchestration": test_orchestration_pipeline,
     "goal-commitment": test_goal_commitment_pipeline,
@@ -975,7 +932,6 @@ TEST_FUNCTIONS = {
 
 RUN_ORDER = [
     "mcp-server",
-    "mem0-cloud",
     "agent-memory",
     "orchestration",
     "goal-commitment",

@@ -107,9 +107,17 @@
       "classes": []
     },
     {
+      "filename": "check-status.py",
+      "language": "python",
+      "docstring_preview": "NE-Memory Status Checker — checks local memory store health.",
+      "function_count": 1,
+      "functions": ["main"],
+      "classes": []
+    },
+    {
       "filename": "check-status.ps1",
       "language": "powershell",
-      "docstring_preview": "",
+      "docstring_preview": "NE-Memory Status Checker (PowerShell wrapper) — delegates to check-status.py.",
       "function_count": 0,
       "functions": [],
       "classes": []
@@ -175,17 +183,9 @@
       "classes": []
     },
     {
-      "filename": "dashboard-mem0.py",
-      "language": "python",
-      "docstring_preview": "Mem0 query helper for dashboard.ps1 - fetches recent memories via API.",
-      "function_count": 0,
-      "functions": [],
-      "classes": []
-    },
-    {
       "filename": "dashboard.ps1",
       "language": "powershell",
-      "docstring_preview": ".SYNOPSIS\nai-memory-core Dashboard — usage, memories, goals, commitments, errors, MCP status.\n.DESCRIPTION\nFull-session overview panel pulling from mem0, Goal Registry, Commitment Checker,\nxTrace erro",
+      "docstring_preview": ".SYNOPSIS\nai-memory-core Dashboard — usage, memories, goals, commitments, errors, MCP status.\n.DESCRIPTION\nFull-session overview panel pulling from memory stores, Goal Registry, Commitment Checker,\nxTrace erro",
       "function_count": 0,
       "functions": [],
       "classes": []
@@ -272,14 +272,6 @@
       "classes": []
     },
     {
-      "filename": "generate-config.ps1",
-      "language": "powershell",
-      "docstring_preview": "",
-      "function_count": 0,
-      "functions": [],
-      "classes": []
-    },
-    {
       "filename": "goal-registry.ps1",
       "language": "powershell",
       "docstring_preview": "",
@@ -292,7 +284,7 @@
     {
       "filename": "identity-manager.py",
       "language": "python",
-      "docstring_preview": "Identity Manager — Consolidate, store, and inject persona identity from mem0.\n\nReads memory profiles and mem0 entries, distills a structured identity\n(persona, traits, principles, patterns), and gener",
+      "docstring_preview": "Identity Manager — Consolidate, store, and inject persona identity from local memory.\n\nReads memory profiles and NE-Memory entries, distills a structured identity\n(persona, traits, principles, patterns), and gener",
       "function_count": 8,
       "functions": [
         "ensure_dirs",
@@ -300,8 +292,8 @@
         "_load_json",
         "_save_json",
         "_list_profiles",
-        "_query_mem0_memories",
-        "_read_mem0_md_categories",
+        "_query_local_memories",
+        "_read_local_categories",
         "print_status"
       ],
       "classes": [
@@ -402,21 +394,6 @@
       "docstring_preview": ".SYNOPSIS\nUnified Orchestration Entry Point — Full pipeline orchestrator for ai-memory-core.\n.DESCRIPTION\nOrchestrates the complete pipeline: task analysis → complexity scoring →\nplan generation → dis",
       "function_count": 0,
       "functions": [],
-      "classes": []
-    },
-    {
-      "filename": "output-condenser.ps1",
-      "language": "powershell",
-      "docstring_preview": ".SYNOPSIS\nCondenses verbose tool outputs to extract only signal (errors, key data, summaries),\ndiscarding noise to stretch the agent's context window 3-5x.\n.DESCRIPTION\nSupports 4 condensation modes:\n",
-      "function_count": 6,
-      "functions": [
-        "Write-CondenserLog",
-        "Get-CosineSimilarity",
-        "Invoke-CondenseBash",
-        "Invoke-CondenseRead",
-        "Invoke-CondenseGrep",
-        "Invoke-CondenseMem0"
-      ],
       "classes": []
     },
     {
@@ -1527,9 +1504,9 @@
     }
   ],
   "summary": {
-    "total_scripts": 48,
+    "total_scripts": 45,
     "total_python": 31,
-    "total_powershell": 17,
+    "total_powershell": 14,
     "total_mcp_tools": 68,
     "total_mcp_modules": 10,
     "total_data_files": 30

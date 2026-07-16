@@ -15,7 +15,7 @@ function Seed-DefaultRegistry {
     version = 1
     commitments = @(
       @{ id = "b1"; text = "Batch-load skills at session start before any tool execution"; source = "code_preference"; stored_date = "2026-07-15"; verified_sessions = @(); next_verify = "2026-07-16" }
-      @{ id = "b2"; text = "Use 2 targeted mem0 queries max per round"; source = "code_preference"; stored_date = "2026-07-15"; verified_sessions = @(); next_verify = "2026-07-16" }
+      @{ id = "b2"; text = "Use 2 targeted memory queries max per round"; source = "code_preference"; stored_date = "2026-07-15"; verified_sessions = @(); next_verify = "2026-07-16" }
       @{ id = "b3"; text = "Verify all file:line claims with read/grep before stating as fact"; source = "code_preference"; stored_date = "2026-07-15"; verified_sessions = @(); next_verify = "2026-07-16" }
       @{ id = "b4"; text = "Group independent reads and searches into single parallel batches"; source = "code_preference"; stored_date = "2026-07-15"; verified_sessions = @(); next_verify = "2026-07-16" }
       @{ id = "b5"; text = "Run lint + typecheck + tests before marking any code task complete"; source = "code_preference"; stored_date = "2026-07-15"; verified_sessions = @(); next_verify = "2026-07-16" }

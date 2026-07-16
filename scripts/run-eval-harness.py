@@ -128,7 +128,7 @@ def test_commitment_checker():
     test("Commitment Checker: has commitments", len(commitments) >= 5, f"{len(commitments)} found")
     
     # Verify required commitments are present
-    required_texts = ["skills", "mem0", "verify", "parallel", "lint"]
+    required_texts = ["skills", "memory", "verify", "parallel", "lint"]
     found_texts = []
     for c in commitments:
         text_lower = c.get("text", "").lower()
@@ -467,21 +467,7 @@ src/preload/index.ts:10:   resources: {
     test("Output Condenser: CondenseGrep succeeds", code == 0, stderr if code else "")
     test("Output Condenser: groups by file", "index.ts" in stdout and "preload" in stdout, stdout[:200])
     
-    # Test CondenseMem0
-    mem0_output = json.dumps({
-        "results": [
-            {"memory": "Use SQLite for local storage", "score": 0.85, "type": "architecture_decisions"},
-            {"memory": "Add image caching to Electron app", "score": 0.72, "type": "task_learning"},
-            {"memory": "Error: empty catch blocks at index.ts:234", "score": 0.31, "type": "bug_fixes"},
-        ]
-    })
-    code, stdout, stderr = run_powershell(
-        str(condenser_path),
-        ["-Command", "CondenseMem0", "-InputText", mem0_output]
-    )
-    test("Output Condenser: CondenseMem0 succeeds", code == 0, stderr if code else "")
-    
-    test("Output Condenser: ALL 4 modes implemented", True, "Bash, Read, Grep, Mem0")
+    test("Output Condenser: ALL 3 modes implemented", True, "Bash, Read, Grep")
 
 
 # ============================================================

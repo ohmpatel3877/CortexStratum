@@ -1,14 +1,14 @@
 {
   "name": "ai-memory-core",
   "version": "1.0.0",
-  "description": "Central mem0 memory architecture for AI agent persistence — 68-tool MCP server, skill router, task orchestrator, verifier middleware, and cross-session memory continuity for OpenCode and Claude Code.",
+  "description": "Central NE-Memory architecture for AI agent persistence — 68-tool MCP server, skill router, task orchestrator, verifier middleware, and cross-session memory continuity for OpenCode and Claude Code.",
   "author": {
     "name": "Ohm Patel",
     "url": "https://github.com/ohmpatel3877"
   },
   "license": "MIT",
   "keywords": [
-    "mem0",
+    "ne-memory",
     "memory",
     "mcp",
     "agent-memory",

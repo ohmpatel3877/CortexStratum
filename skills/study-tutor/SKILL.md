@@ -106,7 +106,7 @@ When tutoring using this skill, use these pedagogical techniques:
 7. **Scaffold to concrete** — End with specific tools and templates, not abstract advice
 8. **Final knowledge check** — Test retention immediately with closed-book questions
 
-## Mem0 Integration
+## NE-Memory Integration
 
 After tutoring sessions, store:
 - `type: user_preference` — their learning style, subject, pain points

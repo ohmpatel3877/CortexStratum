@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Identity Profile",
-  "description": "Schema for consolidated AI agent identity/persona derived from mem0 memories",
+  "description": "Schema for consolidated AI agent identity/persona derived from memory stores",
   "type": "object",
   "required": [
     "persona_name",

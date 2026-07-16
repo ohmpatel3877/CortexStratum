@@ -20,3 +20,7 @@ Output: `opencode-container-server-setup.exe`
 6. Creates Start Menu shortcuts (View Logs, Uninstall, Connect)
 7. Creates optional desktop shortcut
 8. On uninstall: stops the container, removes the image, deletes config files
+
+## Notes
+- The MCP server and all scripts are **pure Python** — no PowerShell scripts shipped in the container
+- The Inno Setup build process runs on Windows only (uses native Windows SDK tools for code signing if configured)

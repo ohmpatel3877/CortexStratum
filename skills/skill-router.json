@@ -123,8 +123,8 @@
       "priority": 10
     },
     {
-      "triggers": ["memory", "mem0", "remember", "forget", "recall", "memories"],
-      "skills": ["mem0-search", "mem0-remember", "mem0-status"],
+      "triggers": ["memory", "ne-memory", "remember", "forget", "recall", "memories"],
+      "skills": ["ne-memory-search", "ne-memory-remember", "ne-memory-status"],
       "priority": 10
     },
     {

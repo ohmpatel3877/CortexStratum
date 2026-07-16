@@ -116,7 +116,7 @@ The router selects strategy based on keyword signals:
 | Medium prompts (50-100 words) | Tree of Thoughts |
 | Short prompts | Chain-of-Thought |
 
-## Mem0 Integration
+## NE-Memory Integration
 
 ```python
 # Store the best strategy for a recurring task type

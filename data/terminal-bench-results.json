@@ -2,11 +2,11 @@
   "benchmark": "terminal-bench",
   "model": "deepseek-v4-flash",
   "version": "1.0.0",
-  "pct": 96.4,
-  "score": 53,
-  "total": 55,
+  "pct": 96.1,
+  "score": 49,
+  "total": 51,
   "avg_latency_ms": 809.5,
-  "pipelines_tested": 16,
+  "pipelines_tested": 15,
   "duration_seconds": 37.5,
   "timestamp": "2026-07-16T04:51:37Z",
   "pipelines": {
@@ -58,38 +58,6 @@
       ],
       "score": 7,
       "total": 7,
-      "pct": 100.0
-    },
-    "mem0-cloud": {
-      "pipeline": "mem0-cloud",
-      "tests": [
-        {
-          "name": "mem0 search",
-          "passed": true,
-          "elapsed_ms": 0.1,
-          "detail": "requires agent MCP runtime — verified via agent tools"
-        },
-        {
-          "name": "mem0 list entities",
-          "passed": true,
-          "elapsed_ms": 0.1,
-          "detail": "requires agent MCP runtime — verified via agent tools"
-        },
-        {
-          "name": "mem0 add memory",
-          "passed": true,
-          "elapsed_ms": 0.1,
-          "detail": "requires agent MCP runtime — verified via agent tools"
-        },
-        {
-          "name": "mem0 get memories",
-          "passed": true,
-          "elapsed_ms": 0.1,
-          "detail": "requires agent MCP runtime — verified via agent tools"
-        }
-      ],
-      "score": 4,
-      "total": 4,
       "pct": 100.0
     },
     "agent-memory": {
@@ -448,7 +416,6 @@
   },
   "pipeline_order": [
     "mcp-server",
-    "mem0-cloud",
     "agent-memory",
     "orchestration",
     "goal-commitment",
@@ -470,12 +437,6 @@
       "description": "tools-mcp-server.py stdio transport (initialize, tools/list, tools/call)",
       "domain": "core",
       "tests": 7
-    },
-    "mem0-cloud": {
-      "label": "mem0 Cloud Memory",
-      "description": "mem0 MCP: semantic search, add memory, list entities, delete",
-      "domain": "memory",
-      "tests": 4
     },
     "agent-memory": {
       "label": "Agent-Memory-MCP",

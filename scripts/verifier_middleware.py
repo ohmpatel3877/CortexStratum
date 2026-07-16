@@ -135,6 +135,7 @@ class VerifierMiddleware:
         self._lock = threading.Lock()
         self._stats = VerifierStats()
         self._state_fingerprints: dict[str, str] = {}
+        self._active_renudges: dict[str, dict] = {}
         self._renudge_strategies: dict[str, dict[str, Any]] = {
             "incremental": {"description": "Adjust parameters incrementally", "needs_human": False},
             "rollback": {"description": "Revert to previous known-good state", "needs_human": True},
@@ -161,6 +162,30 @@ class VerifierMiddleware:
             self._stats.checks_run += 1
 
         violations: list[dict] = []
+
+        # 0a. Active renudge check — halt or override based on stored signal
+        if tool_name in self._active_renudges:
+            nudge = self._active_renudges[tool_name]
+            if time.time() > nudge["expires_at"]:
+                with self._lock:
+                    del self._active_renudges[tool_name]
+            else:
+                strategy = nudge["strategy"]
+                if strategy == "halt":
+                    return {
+                        "passed": False,
+                        "violations": [{
+                            "type": "renudge_halt",
+                            "severity": "high",
+                            "message": f"Tool '{tool_name}' halted by renudge signal",
+                            "signal_id": nudge["signal_id"],
+                            "strategy": "halt",
+                        }],
+                        "severity": "high",
+                    }
+                elif strategy == "override":
+                    for key, value in nudge["correction"].items():
+                        tool_args[key] = value
 
         # 0. Limbic inhibition check — before all other checks
         if self.check_limbic_inhibition(tool_name):
@@ -431,8 +456,19 @@ class VerifierMiddleware:
         signal_id = str(uuid.uuid4())
         needs_human = self._renudge_strategies[strategy]["needs_human"]
 
+        entry = {
+            "target": target,
+            "strategy": strategy,
+            "correction": correction,
+            "signal_id": signal_id,
+            "needs_human": needs_human,
+            "timestamp": time.time(),
+            "expires_at": time.time() + 1800,
+        }
+
         with self._lock:
             self._stats.renudges_sent += 1
+            self._active_renudges[target] = entry
 
         return {
             "target": target,
@@ -441,12 +477,27 @@ class VerifierMiddleware:
             "signal_id": signal_id,
             "needs_human": needs_human,
             "timestamp": time.time(),
+            "expires_at": entry["expires_at"],
         }
+
+    def clear_renudge(self, target: str) -> dict:
+        """Remove an active renudge for the given target."""
+        with self._lock:
+            if target in self._active_renudges:
+                del self._active_renudges[target]
+                return {"status": "cleared", "target": target}
+        return {"status": "not_found", "target": target}
 
     def get_status(self) -> dict:
         """Return verifier statistics and configuration."""
         with self._lock:
             uptime = time.time() - self._stats.start_time
+            now = time.time()
+            active = {
+                target: {"strategy": n["strategy"], "expires_in": round(n["expires_at"] - now, 1)}
+                for target, n in self._active_renudges.items()
+                if now < n["expires_at"]
+            }
             return {
                 "mode": self._mode,
                 "checks_run": self._stats.checks_run,
@@ -456,6 +507,7 @@ class VerifierMiddleware:
                 "uptime_seconds": round(uptime, 2),
                 "active_fingerprints": len(self._state_fingerprints),
                 "strategies_available": list(self._renudge_strategies),
+                "active_renudges": active,
             }
 
     def check_limbic_inhibition(self, tool_name: str) -> bool:

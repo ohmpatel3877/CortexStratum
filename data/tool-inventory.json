@@ -1,546 +1,478 @@
 [
   {
-    "id": "xtrace_log_error",
-    "module": "Core",
-    "name": "xtrace_log_error",
-    "description": "Log an error occurrence with signature for xTrace error tracking",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "xtrace_search",
-    "module": "Core",
-    "name": "xtrace_search",
-    "description": "Search xTrace error registry for a known error signature",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "xtrace_status",
-    "module": "Core",
-    "name": "xtrace_status",
-    "description": "Get xTrace error tracking summary statistics",
-    "param_count": 0,
-    "has_return_value": true
-  },
-  {
-    "id": "dtrace_add",
-    "module": "Core",
-    "name": "dtrace_add",
-    "description": "Log an architectural decision to DTrace",
-    "param_count": 6,
-    "has_return_value": true
-  },
-  {
-    "id": "dtrace_search",
-    "module": "Core",
-    "name": "dtrace_search",
-    "description": "Search DTrace decision registry",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "skill_router_match",
-    "module": "Core",
-    "name": "skill_router_match",
-    "description": "Match a task description to relevant skills using the Skill Router",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "output_condenser",
-    "module": "Core",
-    "name": "output_condenser",
-    "description": "Condense command output to essential information",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "goal_registry_init",
-    "module": "Core",
-    "name": "goal_registry_init",
-    "description": "Initialize a new goal in the Goal Registry",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "goal_registry_add_subgoal",
-    "module": "Core",
-    "name": "goal_registry_add_subgoal",
-    "description": "Add a sub-goal to the current goal stack",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "goal_registry_status",
-    "module": "Core",
-    "name": "goal_registry_status",
-    "description": "Get current goal registry status",
-    "param_count": 0,
-    "has_return_value": true
-  },
-  {
-    "id": "goal_registry_check_alignment",
-    "module": "Core",
-    "name": "goal_registry_check_alignment",
-    "description": "Check if current action aligns with the original goal",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "commitment_checker_list",
-    "module": "Core",
-    "name": "commitment_checker_list",
-    "description": "List pending commitments for this session",
-    "param_count": 0,
-    "has_return_value": true
-  },
-  {
-    "id": "commitment_checker_verify",
-    "module": "Core",
-    "name": "commitment_checker_verify",
-    "description": "Mark a commitment as verified for this session",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "art_generate_svg",
+    "name": "read_art_design_concept",
+    "permission": "read",
     "module": "Art",
-    "name": "art_generate_svg",
-    "description": "Generate SVG diagrams, flowcharts, and illustrations from a text description",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "art_generate_theme",
-    "module": "Art",
-    "name": "art_generate_theme",
-    "description": "Generate a color theme with roles and WCAG contrast validation from a description",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "art_extract_palette",
-    "module": "Art",
-    "name": "art_extract_palette",
-    "description": "Extract complementary, analogous, and triadic palettes from a base hex color",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "art_design_concept",
-    "module": "Art",
-    "name": "art_design_concept",
     "description": "Generate a design concept with layout, typography, and spacing guidelines from requirements",
-    "param_count": 1,
-    "has_return_value": true
+    "param_count": 1
   },
   {
-    "id": "lit_analyze_text",
-    "module": "Literature",
-    "name": "lit_analyze_text",
-    "description": "Analyze text for reading level (Flesch-Kincaid), key concepts, argument structure, and sentiment",
-    "param_count": 1,
-    "has_return_value": true
+    "name": "read_art_extract_palette",
+    "permission": "read",
+    "module": "Art",
+    "description": "Extract complementary, analogous, and triadic palettes from a base hex color",
+    "param_count": 1
   },
   {
-    "id": "lit_extract_concepts",
-    "module": "Literature",
-    "name": "lit_extract_concepts",
-    "description": "Extract key concepts, their definitions, context, and relationships from text",
-    "param_count": 1,
-    "has_return_value": true
+    "name": "read_art_generate_svg",
+    "permission": "read",
+    "module": "Art",
+    "description": "Generate SVG diagrams, flowcharts, and illustrations from a text description",
+    "param_count": 3
   },
   {
-    "id": "lit_generate_study_guide",
-    "module": "Literature",
-    "name": "lit_generate_study_guide",
-    "description": "Generate a study guide from content with key terms, discussion questions, and section summaries",
-    "param_count": 1,
-    "has_return_value": true
+    "name": "read_art_generate_theme",
+    "permission": "read",
+    "module": "Art",
+    "description": "Generate a color theme with roles and WCAG contrast validation from a description",
+    "param_count": 1
   },
   {
-    "id": "lit_analyze_philosophy",
-    "module": "Literature",
-    "name": "lit_analyze_philosophy",
-    "description": "Analyze philosophical arguments: premises, conclusions, reasoning type, detected philosophers, and schools",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_browse",
-    "module": "Sensory",
-    "name": "sensory_browse",
-    "description": "Navigate to a URL using Playwright (headless Firefox) and extract content. Modes: text, html, markdown, links, metadata",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_screenshot",
-    "module": "Sensory",
-    "name": "sensory_screenshot",
-    "description": "Take a screenshot of a web page via Playwright",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_interact",
-    "module": "Sensory",
-    "name": "sensory_interact",
-    "description": "Navigate to URL and perform actions (click, type, press, wait)",
-    "param_count": 5,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_extract_pdf",
-    "module": "Sensory",
-    "name": "sensory_extract_pdf",
-    "description": "Extract text from a PDF file",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_extract_html",
-    "module": "Sensory",
-    "name": "sensory_extract_html",
-    "description": "Extract text from raw HTML content. Modes: clean (trafilatura), soup (BeautifulSoup), tables",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_extract_image",
-    "module": "Sensory",
-    "name": "sensory_extract_image",
-    "description": "Extract text from an image via OCR (if pytesseract installed) or return image metadata",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_scrape",
-    "module": "Sensory",
-    "name": "sensory_scrape",
-    "description": "Fetch a URL via HTTP (no JS) and extract content. Modes: text, html, links, tables, json",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_extract_article",
-    "module": "Sensory",
-    "name": "sensory_extract_article",
-    "description": "Extract clean article content from a URL using trafilatura",
-    "param_count": 1,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_api_request",
-    "module": "Sensory",
-    "name": "sensory_api_request",
-    "description": "Make an HTTP API request (GET/POST/PUT/DELETE/PATCH) with structured response",
-    "param_count": 6,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_fetch_rss",
-    "module": "Sensory",
-    "name": "sensory_fetch_rss",
-    "description": "Parse an RSS/Atom feed and return structured items",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_read_file",
-    "module": "Sensory",
-    "name": "sensory_read_file",
-    "description": "Read a local text file and return its content",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "sensory_search",
-    "module": "Sensory",
-    "name": "sensory_search",
-    "description": "Web search via DuckDuckGo (no API key needed). Returns title, URL, snippet.",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "audio_analyze_file",
+    "name": "read_audio_analyze_file",
+    "permission": "read",
     "module": "Audio",
-    "name": "audio_analyze_file",
     "description": "Analyze WAV audio file: duration, channels, sample rate, amplitude stats",
-    "param_count": 3,
-    "has_return_value": true
+    "param_count": 3
   },
   {
-    "id": "audio_waveform",
+    "name": "read_audio_convert_guide",
+    "permission": "read",
     "module": "Audio",
-    "name": "audio_waveform",
-    "description": "Generate ASCII waveform visualization from audio file",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "audio_frequency_analysis",
-    "module": "Audio",
-    "name": "audio_frequency_analysis",
-    "description": "DFT-based frequency analysis: band energy, dominant frequency, spectral centroid",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "audio_music_theory",
-    "module": "Audio",
-    "name": "audio_music_theory",
-    "description": "Music theory analysis: chord detection, scale matching, intervals from notes or frequencies",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "audio_speech_analysis",
-    "module": "Audio",
-    "name": "audio_speech_analysis",
-    "description": "Speech transcript analysis: WPM, filler words, pace rating, readability",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "audio_convert_guide",
-    "module": "Audio",
-    "name": "audio_convert_guide",
     "description": "Audio format conversion guide with ffmpeg commands and quality comparison",
-    "param_count": 3,
-    "has_return_value": true
+    "param_count": 3
   },
   {
-    "id": "audio_generate_tone",
+    "name": "read_audio_frequency_analysis",
+    "permission": "read",
     "module": "Audio",
-    "name": "audio_generate_tone",
+    "description": "DFT-based frequency analysis: band energy, dominant frequency, spectral centroid",
+    "param_count": 2
+  },
+  {
+    "name": "read_audio_generate_tone",
+    "permission": "read",
+    "module": "Audio",
     "description": "Generate sine/square/saw/triangle wave tone as base64 WAV",
-    "param_count": 5,
-    "has_return_value": true
+    "param_count": 5
   },
   {
-    "id": "coder_analyze_code",
+    "name": "read_audio_music_theory",
+    "permission": "read",
+    "module": "Audio",
+    "description": "Music theory analysis: chord detection, scale matching, intervals from notes or frequencies",
+    "param_count": 2
+  },
+  {
+    "name": "read_audio_speech_analysis",
+    "permission": "read",
+    "module": "Audio",
+    "description": "Speech transcript analysis: WPM, filler words, pace rating, readability",
+    "param_count": 2
+  },
+  {
+    "name": "read_audio_waveform",
+    "permission": "read",
+    "module": "Audio",
+    "description": "Generate ASCII waveform visualization from audio file",
+    "param_count": 3
+  },
+  {
+    "name": "read_coder_analyze_code",
+    "permission": "read",
     "module": "Coder",
-    "name": "coder_analyze_code",
     "description": "Analyze code for quality, complexity, smells, and security issues across 12 languages",
-    "param_count": 2,
-    "has_return_value": true
+    "param_count": 2
   },
   {
-    "id": "coder_generate_framework",
+    "name": "read_coder_architecture",
+    "permission": "read",
     "module": "Coder",
-    "name": "coder_generate_framework",
-    "description": "Generate complete project scaffold (web-api, cli-tool, library, desktop, microservice, data-pipeline, fullstack) for 12 languages",
-    "param_count": 4,
-    "has_return_value": true
-  },
-  {
-    "id": "coder_debug",
-    "module": "Coder",
-    "name": "coder_debug",
-    "description": "Analyze error messages and stack traces, suggest fixes (50+ error patterns across languages)",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "coder_review",
-    "module": "Coder",
-    "name": "coder_review",
-    "description": "Code review with severity ratings (security, performance, readability, architecture, testing)",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "coder_explain",
-    "module": "Coder",
-    "name": "coder_explain",
-    "description": "Educational code explanation at beginner/intermediate/advanced level",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "coder_convert",
-    "module": "Coder",
-    "name": "coder_convert",
-    "description": "Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "coder_architecture",
-    "module": "Coder",
-    "name": "coder_architecture",
     "description": "Architecture pattern recommendation (MVC, Hexagonal, CQRS, Event-Driven, Microservices, etc.)",
-    "param_count": 3,
-    "has_return_value": true
+    "param_count": 3
   },
   {
-    "id": "devops_container_debug",
-    "module": "DevOps",
-    "name": "devops_container_debug",
-    "description": "Diagnose container issues (Podman/Docker) from error logs",
-    "param_count": 3,
-    "has_return_value": true
+    "name": "read_coder_convert",
+    "permission": "read",
+    "module": "Coder",
+    "description": "Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)",
+    "param_count": 3
   },
   {
-    "id": "devops_permissions_analyze",
-    "module": "DevOps",
-    "name": "devops_permissions_analyze",
-    "description": "Analyze permission/usernamespace issues in container environments",
-    "param_count": 4,
-    "has_return_value": true
+    "name": "read_coder_debug",
+    "permission": "read",
+    "module": "Coder",
+    "description": "Analyze error messages and stack traces, suggest fixes (50+ error patterns across languages)",
+    "param_count": 3
   },
   {
-    "id": "devops_compose_generator",
+    "name": "read_coder_explain",
+    "permission": "read",
+    "module": "Coder",
+    "description": "Educational code explanation at beginner/intermediate/advanced level",
+    "param_count": 3
+  },
+  {
+    "name": "read_coder_generate_framework",
+    "permission": "read",
+    "module": "Coder",
+    "description": "Generate complete project scaffold (web-api, cli-tool, library, desktop, microservice, data-pipeline, fullstack) for 12 ",
+    "param_count": 4
+  },
+  {
+    "name": "read_coder_review",
+    "permission": "read",
+    "module": "Coder",
+    "description": "Code review with severity ratings (security, performance, readability, architecture, testing)",
+    "param_count": 3
+  },
+  {
+    "name": "mutate_commitment_checker_verify",
+    "permission": "mutate",
+    "module": "Core",
+    "description": "Mark a commitment as verified for this session",
+    "param_count": 1
+  },
+  {
+    "name": "read_commitment_checker_list",
+    "permission": "read",
+    "module": "Core",
+    "description": "List pending commitments for this session",
+    "param_count": 0
+  },
+  {
+    "name": "read_dtrace_search",
+    "permission": "read",
+    "module": "Core",
+    "description": "Search DTrace decision registry",
+    "param_count": 1
+  },
+  {
+    "name": "read_goal_registry_check_alignment",
+    "permission": "read",
+    "module": "Core",
+    "description": "Check if current action aligns with the original goal",
+    "param_count": 1
+  },
+  {
+    "name": "read_goal_registry_status",
+    "permission": "read",
+    "module": "Core",
+    "description": "Get current goal registry status",
+    "param_count": 0
+  },
+  {
+    "name": "read_skill_router_match",
+    "permission": "read",
+    "module": "Core",
+    "description": "Match a task description to relevant skills using the Skill Router",
+    "param_count": 1
+  },
+  {
+    "name": "read_xtrace_search",
+    "permission": "read",
+    "module": "Core",
+    "description": "Search xTrace error registry for a known error signature",
+    "param_count": 1
+  },
+  {
+    "name": "read_xtrace_status",
+    "permission": "read",
+    "module": "Core",
+    "description": "Get xTrace error tracking summary statistics",
+    "param_count": 0
+  },
+  {
+    "name": "write_dtrace_add",
+    "permission": "write",
+    "module": "Core",
+    "description": "Log an architectural decision to DTrace",
+    "param_count": 6
+  },
+  {
+    "name": "write_goal_registry_add_subgoal",
+    "permission": "write",
+    "module": "Core",
+    "description": "Add a sub-goal to the current goal stack",
+    "param_count": 1
+  },
+  {
+    "name": "write_goal_registry_init",
+    "permission": "write",
+    "module": "Core",
+    "description": "Initialize a new goal in the Goal Registry",
+    "param_count": 1
+  },
+  {
+    "name": "write_xtrace_log_error",
+    "permission": "write",
+    "module": "Core",
+    "description": "Log an error occurrence with signature for xTrace error tracking",
+    "param_count": 3
+  },
+  {
+    "name": "read_devops_compose_generator",
+    "permission": "read",
     "module": "DevOps",
-    "name": "devops_compose_generator",
     "description": "Generate Docker/Podman Compose files from service definitions",
-    "param_count": 3,
-    "has_return_value": true
+    "param_count": 3
   },
   {
-    "id": "devops_samba_config",
+    "name": "read_devops_container_debug",
+    "permission": "read",
     "module": "DevOps",
-    "name": "devops_samba_config",
-    "description": "Generate Samba/SMB share configurations with OS-specific troubleshooting",
-    "param_count": 4,
-    "has_return_value": true
+    "description": "Diagnose container issues (Podman/Docker) from error logs",
+    "param_count": 3
   },
   {
-    "id": "devops_mergerfs_setup",
+    "name": "read_devops_dockerfile_analyze",
+    "permission": "read",
     "module": "DevOps",
-    "name": "devops_mergerfs_setup",
-    "description": "Configure mergerfs for drive pooling with policy explanations and optimization tips",
-    "param_count": 4,
-    "has_return_value": true
-  },
-  {
-    "id": "devops_dockerfile_analyze",
-    "module": "DevOps",
-    "name": "devops_dockerfile_analyze",
     "description": "Analyze and optimize Dockerfiles for security, caching, and size",
-    "param_count": 1,
-    "has_return_value": true
+    "param_count": 1
   },
   {
-    "id": "devops_network_troubleshoot",
+    "name": "read_devops_mergerfs_setup",
+    "permission": "read",
     "module": "DevOps",
-    "name": "devops_network_troubleshoot",
+    "description": "Configure mergerfs for drive pooling with policy explanations and optimization tips",
+    "param_count": 4
+  },
+  {
+    "name": "read_devops_network_troubleshoot",
+    "permission": "read",
+    "module": "DevOps",
     "description": "Diagnose container networking issues (DNS, ports, bridges, host networking)",
-    "param_count": 1,
-    "has_return_value": true
+    "param_count": 1
   },
   {
-    "id": "gamedev_design_analyze",
-    "module": "Game Dev",
-    "name": "gamedev_design_analyze",
-    "description": "Analyze game concept: fun factor, engagement loops, monetization fit, market position",
-    "param_count": 3,
-    "has_return_value": true
+    "name": "read_devops_permissions_analyze",
+    "permission": "read",
+    "module": "DevOps",
+    "description": "Analyze permission/usernamespace issues in container environments",
+    "param_count": 4
   },
   {
-    "id": "gamedev_scaffold_project",
-    "module": "Game Dev",
-    "name": "gamedev_scaffold_project",
-    "description": "Generate Unity/Unreal/Roblox project scaffold with real working boilerplate files",
-    "param_count": 4,
-    "has_return_value": true
+    "name": "read_devops_samba_config",
+    "permission": "read",
+    "module": "DevOps",
+    "description": "Generate Samba/SMB share configurations with OS-specific troubleshooting",
+    "param_count": 4
   },
   {
-    "id": "gamedev_mechanics_guide",
+    "name": "read_gamedev_compare_engines",
+    "permission": "read",
     "module": "Game Dev",
-    "name": "gamedev_mechanics_guide",
-    "description": "Game mechanics design guide: core loops, progression systems, reward schedules by genre",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "gamedev_monetization",
-    "module": "Game Dev",
-    "name": "gamedev_monetization",
-    "description": "Monetization strategy recommendations with revenue estimates and ethical guidance",
-    "param_count": 3,
-    "has_return_value": true
-  },
-  {
-    "id": "gamedev_optimization",
-    "module": "Game Dev",
-    "name": "gamedev_optimization",
-    "description": "Engine-specific optimization advice (FPS, draw calls, memory, load times, network)",
-    "param_count": 2,
-    "has_return_value": true
-  },
-  {
-    "id": "gamedev_compare_engines",
-    "module": "Game Dev",
-    "name": "gamedev_compare_engines",
     "description": "Compare game engines (Unity/Unreal/Godot/Roblox) for specific project types",
-    "param_count": 3,
-    "has_return_value": true
+    "param_count": 3
   },
   {
-    "id": "gamedev_level_design",
+    "name": "read_gamedev_design_analyze",
+    "permission": "read",
     "module": "Game Dev",
-    "name": "gamedev_level_design",
+    "description": "Analyze game concept: fun factor, engagement loops, monetization fit, market position",
+    "param_count": 3
+  },
+  {
+    "name": "read_gamedev_level_design",
+    "permission": "read",
+    "module": "Game Dev",
     "description": "Level design principles, flow diagrams, pacing guides, and playtesting checklists",
-    "param_count": 2,
-    "has_return_value": true
+    "param_count": 2
   },
   {
-    "id": "memory_search",
-    "module": "Memory Search",
-    "name": "memory_search",
-    "description": "Local BM25 memory search with synonym expansion and fuzzy matching — zero LLM cost",
-    "param_count": 3,
-    "has_return_value": true
+    "name": "read_gamedev_mechanics_guide",
+    "permission": "read",
+    "module": "Game Dev",
+    "description": "Game mechanics design guide: core loops, progression systems, reward schedules by genre",
+    "param_count": 2
   },
   {
-    "id": "memory_synthesize",
-    "module": "Memory Search",
-    "name": "memory_synthesize",
-    "description": "Search and synthesize memory results into a narrative with inline citations",
-    "param_count": 3,
-    "has_return_value": true
+    "name": "read_gamedev_monetization",
+    "permission": "read",
+    "module": "Game Dev",
+    "description": "Monetization strategy recommendations with revenue estimates and ethical guidance",
+    "param_count": 3
   },
   {
-    "id": "memory_add",
-    "module": "Memory Search",
-    "name": "memory_add",
-    "description": "Add a memory entry for future BM25 search and synthesis",
-    "param_count": 3,
-    "has_return_value": true
+    "name": "read_gamedev_optimization",
+    "permission": "read",
+    "module": "Game Dev",
+    "description": "Engine-specific optimization advice (FPS, draw calls, memory, load times, network)",
+    "param_count": 2
   },
   {
-    "id": "memory_consolidate",
+    "name": "read_gamedev_scaffold_project",
+    "permission": "read",
+    "module": "Game Dev",
+    "description": "Generate Unity/Unreal/Roblox project scaffold with real working boilerplate files",
+    "param_count": 4
+  },
+  {
+    "name": "read_lit_analyze_philosophy",
+    "permission": "read",
+    "module": "Literature",
+    "description": "Analyze philosophical arguments: premises, conclusions, reasoning type, detected philosophers, and schools",
+    "param_count": 1
+  },
+  {
+    "name": "read_lit_analyze_text",
+    "permission": "read",
+    "module": "Literature",
+    "description": "Analyze text for reading level (Flesch-Kincaid), key concepts, argument structure, and sentiment",
+    "param_count": 1
+  },
+  {
+    "name": "read_lit_extract_concepts",
+    "permission": "read",
+    "module": "Literature",
+    "description": "Extract key concepts, their definitions, context, and relationships from text",
+    "param_count": 1
+  },
+  {
+    "name": "read_lit_generate_study_guide",
+    "permission": "read",
+    "module": "Literature",
+    "description": "Generate a study guide from content with key terms, discussion questions, and section summaries",
+    "param_count": 1
+  },
+  {
+    "name": "mutate_memory_consolidate",
+    "permission": "mutate",
     "module": "Memory Search",
-    "name": "memory_consolidate",
     "description": "Merge duplicate/similar memory entries by Jaccard similarity threshold",
-    "param_count": 1,
-    "has_return_value": true
+    "param_count": 1
   },
   {
-    "id": "memory_status",
+    "name": "read_memory_search",
+    "permission": "read",
     "module": "Memory Search",
-    "name": "memory_status",
+    "description": "Local BM25 memory search with synonym expansion and fuzzy matching — zero LLM cost",
+    "param_count": 3
+  },
+  {
+    "name": "read_memory_status",
+    "permission": "read",
+    "module": "Memory Search",
     "description": "Get NE-Memory engine status: entry count, storage size, unique terms, last timestamp",
-    "param_count": 0,
-    "has_return_value": true
+    "param_count": 0
   },
   {
-    "id": "verifier_status",
+    "name": "read_memory_synthesize",
+    "permission": "read",
+    "module": "Memory Search",
+    "description": "Search and synthesize memory results into a narrative with inline citations",
+    "param_count": 3
+  },
+  {
+    "name": "write_memory_add",
+    "permission": "write",
+    "module": "Memory Search",
+    "description": "Add a memory entry for future BM25 search and synthesis",
+    "param_count": 3
+  },
+  {
+    "name": "mutate_sensory_interact",
+    "permission": "mutate",
+    "module": "Sensory",
+    "description": "Navigate to URL and perform actions (click, type, press, wait) — can modify external state",
+    "param_count": 3
+  },
+  {
+    "name": "read_sensory_api_request",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Make an HTTP API request (GET/POST/PUT/DELETE/PATCH) with structured response",
+    "param_count": 6
+  },
+  {
+    "name": "read_sensory_browse",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Navigate to a URL using Playwright (headless Firefox) and extract content. Modes: text, html, markdown, links, metadata",
+    "param_count": 3
+  },
+  {
+    "name": "read_sensory_extract_article",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Extract clean article content from a URL using trafilatura",
+    "param_count": 1
+  },
+  {
+    "name": "read_sensory_extract_html",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Extract text from raw HTML content. Modes: clean (trafilatura), soup (BeautifulSoup), tables",
+    "param_count": 2
+  },
+  {
+    "name": "read_sensory_extract_image",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Extract text from an image via OCR (if pytesseract installed) or return image metadata",
+    "param_count": 1
+  },
+  {
+    "name": "read_sensory_extract_pdf",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Extract text from a PDF file",
+    "param_count": 2
+  },
+  {
+    "name": "read_sensory_fetch_rss",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Parse an RSS/Atom feed and return structured items",
+    "param_count": 2
+  },
+  {
+    "name": "read_sensory_read_file",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Read a local text file and return its content",
+    "param_count": 2
+  },
+  {
+    "name": "read_sensory_scrape",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Fetch a URL via HTTP (no JS) and extract content. Modes: text, html, links, tables, json",
+    "param_count": 3
+  },
+  {
+    "name": "read_sensory_screenshot",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Take a screenshot of a web page via Playwright",
+    "param_count": 3
+  },
+  {
+    "name": "read_sensory_search",
+    "permission": "read",
+    "module": "Sensory",
+    "description": "Web search via DuckDuckGo (no API key needed). Returns title, URL, snippet.",
+    "param_count": 2
+  },
+  {
+    "name": "read_verifier_status",
+    "permission": "read",
     "module": "Verifier",
-    "name": "verifier_status",
     "description": "Get verifier middleware status: checks run, violations found, renudges sent, uptime",
-    "param_count": 0,
-    "has_return_value": true
+    "param_count": 0
   },
   {
-    "id": "verifier_renudge",
+    "name": "write_verifier_clear_renudge",
+    "permission": "write",
     "module": "Verifier",
-    "name": "verifier_renudge",
+    "description": "Clear an active renudge signal for a target tool or agent",
+    "param_count": 1
+  },
+  {
+    "name": "write_verifier_renudge",
+    "permission": "write",
+    "module": "Verifier",
     "description": "Send a correction signal (renudge) to steer the agent back on track",
-    "param_count": 3,
-    "has_return_value": true
+    "param_count": 3
   }
 ]

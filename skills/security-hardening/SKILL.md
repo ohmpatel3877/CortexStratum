@@ -51,4 +51,4 @@
 3. Contain → Isolate affected component
 4. Eradicate → Apply fix
 5. Recover → Verify fix, restore from clean backup
-6. Postmortem → Log root cause in DTrace, store in mem0
+6. Postmortem → Log root cause in DTrace, store in NE-Memory

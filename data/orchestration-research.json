@@ -129,7 +129,7 @@
 
     "Human-in-the-loop is an afterthought in most frameworks (only LangGraph has it built-in). Our verify subagent and verification-before-completion gate are a stronger pattern than any framework provides natively.",
 
-    "Memory and persistence is the biggest gap across all frameworks. LangGraph has checkpointing; others rely on external stores. Our mem0 integration plus xTrace/error-registry provide a more comprehensive memory layer than any single framework."
+    "Memory and persistence is the biggest gap across all frameworks. LangGraph has checkpointing; others rely on external stores. Our local memory integration plus xTrace/error-registry provide a more comprehensive memory layer than any single framework."
   ],
   "recommended_pattern": "Hybrid Triage-DAG for OpenCode",
   "hybrid_pattern_description": "Combine the Triage Router pattern (from Swarm/CrewAI) with DAG-based state passing (from LangGraph), using our existing task tool as the Agent-as-Tool primitive. A triage subagent or routing script parses the input, builds a JSON state object, and dispatches to specialist subagents via task tool calls. Each specialist reads from state, performs work, writes results back to state, and returns. A merge/reduce step collects all results. The coordinator script (PowerShell or Python) maintains the state file and controls the DAG execution, with no external dependencies beyond the LLM accessed through OpenCode's built-in model.",
@@ -137,7 +137,7 @@
     "Phase 1: State-as-JSON—each subagent receives a JSON state file path, reads its input slice, writes its output slice, and exits.",
     "Phase 2: Routing script—PowerShell/Python script parses task intent, constructs initial state, launches subagents in sequence or parallel per DAG definition.",
     "Phase 3: DAG definition file—JSON config with nodes (subagent specs), edges (dependencies), and merge rules. Coordinator reads DAG, executes in topological order.",
-    "Phase 4: Feedback loop—after execution, verification gate runs; results and error signatures flow to xTrace and mem0 for continuous improvement.",
+    "Phase 4: Feedback loop—after execution, verification gate runs; results and error signatures flow to xTrace and local memory for continuous improvement.",
     "This pattern requires zero external packages (no pip install), uses our existing PowerShell and Python infrastructure, and composes naturally with OpenCode's task tool and skill system."
   ]
 }

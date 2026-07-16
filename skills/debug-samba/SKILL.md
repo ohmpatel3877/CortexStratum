@@ -958,13 +958,13 @@ done
 
 ---
 
-## 9. Mem0 Learning Integration
+## 9. NE-Memory Learning Integration
 
 After resolving each failure type, store the signature and fix:
 
 ```bash
 # Store the resolved case pattern in your memory:
-# /mem0-add type=resolved_bugs
+# /ne-memory-add type=resolved_bugs
 #   error_signature="FUSE: mergerfs + rootless podman permission denied"
 #   root_cause="UID namespace mismatch in --userns mapping"
 #   resolution="Use --userns=keep-id or chown files to container user UID"

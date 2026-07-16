@@ -1,19 +1,18 @@
 {
   "name": "ai-memory-core",
   "version": "1.0.0",
-  "description": "Central mem0 memory architecture for AI agent persistence",
+  "description": "67-tool MCP server — local-only persistent memory, skill routing, task orchestration, and multi-modal AI generation",
   "main": "index.js",
   "scripts": {
-    "mem0:seed": "node scripts/seed-memories.js",
-    "mem0:dream": "node scripts/consolidate.js",
-    "mem0:status": "node scripts/check-status.js",
-    "mem0:categories": "node scripts/set-categories.js"
+    "status": "python scripts/check-status.py",
+    "categories": "python scripts/check-status.py"
   },
   "keywords": [
-    "mem0",
+    "mcp-server",
     "memory",
     "ai-agent",
-    "persistence"
+    "persistence",
+    "local"
   ],
   "license": "MIT",
   "author": {
@@ -21,9 +20,7 @@
     "url": "https://github.com/ohmpatel3877"
   },
   "type": "commonjs",
-  "dependencies": {
-    "opencode-mem": "^2.19.4"
-  },
+  "dependencies": {},
   "install": {
     "harnesses": ["opencode", "claude-code", "cursor"],
     "windows": "pwsh plugin-tools/install-ai-memory-core.ps1",
@@ -33,7 +30,7 @@
   "mcpServers": {
     "ai-memory-core": {
       "name": "ai-memory-core",
-      "description": "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
+      "description": "67-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {}

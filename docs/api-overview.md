@@ -32,7 +32,7 @@
 | `coder-module.py` | py | Coder Module — AI senior developer assistant. Provides code analysis, framework  | `_score_to_grade, _estimate_complexity, _line_number, _detect_long_functions, _get_nesting_depth +11 more` |
 | `consultation-room.ps1` | ps1 | .SYNOPSIS Multi-perspective decision analysis for the Consultation Room. .DESCRI | `Get-Timestamp, Get-FileTimestamp` |
 | `dag-coordinator.py` | py | DAG Coordinator — topological execution engine for multi-agent pipelines.  Reads | `get_state_manager, now_iso, ensure_dirs, load_json, write_json +10 more` |
-| `dashboard-mem0.py` | py | Mem0 query helper for dashboard.ps1 - fetches recent memories via API. | `` |
+| `dashboard-ne-memory.py` | py | NE-Memory query helper for dashboard.ps1 - fetches recent memories via local store. | `` |
 | `dashboard.ps1` | ps1 | .SYNOPSIS ai-memory-core Dashboard — usage, memories, goals, commitments, errors | `` |
 | `decision-trace.ps1` | ps1 | *No docstring* | `Ensure-Registry, Load-Registry, Get-Timestamp, Invoke-Add, Invoke-Update +3 more` |
 | `devops-module.py` | py | DevOps/Container Module — AI DevOps expert for Podman, Docker, permissions, Samb | `dockerfile_analyze, network_troubleshoot, devops_handle_tool_call` |
@@ -42,7 +42,7 @@
 | `generate-blind-test.py` | py | BLIND TEST RUNNER — questions in, answers hidden, score computed at end.  I (the | `` |
 | `generate-config.ps1` | ps1 | *No docstring* | `` |
 | `goal-registry.ps1` | ps1 | *No docstring* | `Get-SessionId` |
-| `identity-manager.py` | py | Identity Manager — Consolidate, store, and inject persona identity from mem0.  R | `ensure_dirs, now_iso, _load_json, _save_json, _list_profiles +3 more` |
+| `identity-manager.py` | py | Identity Manager — Consolidate, store, and inject persona identity from NE-Memory.  R | `ensure_dirs, now_iso, _load_json, _save_json, _list_profiles +3 more` |
 | `inject-identity.ps1` | ps1 | .SYNOPSIS Injects the current identity profile as a session prompt fragment. .DE | `` |
 | `integration-status.py` | py | Integration Status Report Generator — Checks all 5 workstream outputs, validates | `now_iso, check_file, check_dir, check_import, check_adr_completeness +3 more` |
 | `literature-module.py` | py | Literature Module — Text analysis, concept extraction, study guides for social s | `_count_syllables, _flesch_kincaid, _extract_key_phrases, _extract_claims_evidence, analyze_text +3 more` |

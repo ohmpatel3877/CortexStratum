@@ -33,7 +33,7 @@ function Ensure-Registry {
             @{
                 id = "dt-20260715-001"
                 title = "Store behavioral fixes as code_preference not task_learning"
-                context = "Mem0 memory categorization was inconsistent; task_learning had too much noise"
+                context = "Memory categorization was inconsistent; task_learning had too much noise"
                 decision = "Use metadata.type='code_preferences' for behavioral/process fixes, task_learning only for factual domain learnings"
                 alternatives = @("Keep everything in task_learning", "Create a separate rule_preferences type")
                 rationale = "Separates actionable behavioral rules from passive knowledge, enabling targeted retrieval"
@@ -48,9 +48,9 @@ function Ensure-Registry {
             }
             @{
                 id = "dt-20260715-002"
-                title = "Limit mem0 search to 2 queries max per round"
-                context = "Parallel mem0 searches were spawning 5+ simultaneous calls, wasting tokens and hitting rate limits"
-                decision = "Cap parallel mem0 queries to 2 per round; use broader queries with top_k=15 instead of narrow queries with top_k=5"
+                title = "Limit memory queries to 2 per round max"
+                context = "Parallel memory searches were spawning 5+ simultaneous calls, wasting tokens and hitting rate limits"
+                decision = "Cap parallel memory queries to 2 per round; use broader queries with top_k=15 instead of narrow queries with top_k=5"
                 alternatives = @("No limit (parallelism handles it)", "Single query per round with rerank")
                 rationale = "Reduces token waste by 60% while maintaining recall quality through broader result windows"
                 consequences = @("Slightly higher latency per query from larger top_k", "Rare edge cases may need manual re-query")

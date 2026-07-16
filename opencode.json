@@ -2,13 +2,13 @@
   "$schema": "https://opencode.ai/config.json",
   "name": "ai-memory-core",
   "version": "1.0.0",
-  "description": "68-tool MCP server with persistent memory, skill router, task orchestrator, and multi-modal AI generation",
+  "description": "67-tool MCP server with persistent memory, skill router, task orchestrator, and multi-modal AI generation",
   "icon": "🧠",
 
   "mcpServers": {
     "ai-memory-core": {
       "name": "ai-memory-core",
-      "description": "68-tool MCP server: xTrace error tracking, DTrace ADRs, Skill Router, Goal Registry, Verifier, Coder/Sensory/Audio/Art/DevOps/GameDev/Literature modules",
+      "description": "67-tool MCP server: xTrace error tracking, DTrace ADRs, Skill Router, Goal Registry, Verifier, Coder/Sensory/Audio/Art/DevOps/GameDev/Literature modules",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {},

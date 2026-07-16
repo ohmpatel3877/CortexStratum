@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Identity Manager — Consolidate, store, and inject persona identity from mem0.
+Identity Manager — Consolidate, store, and inject persona identity from local memory.
 
-Reads memory profiles and mem0 entries, distills a structured identity
+Reads memory profiles and NE-Memory entries, distills a structured identity
 (persona, traits, principles, patterns), and generates session prompt
 fragments for injection at session start.
 
@@ -94,8 +94,8 @@ def _list_profiles() -> list[dict]:
                 pass
     return profiles
 
-def _query_mem0_memories(category: Optional[str] = None, limit: int = 50) -> list[dict]:
-    """Query mem0 via subprocess call to memory_search.py or direct file reads."""
+def _query_local_memories(category: Optional[str] = None, limit: int = 50) -> list[dict]:
+    """Query NE-Memory via subprocess call to memory_search.py or direct file reads."""
     memories = []
     ne_dir = os.path.join(MEMORY_DIR, "ne")
     ne_json = os.path.join(ne_dir, "memories.json")
@@ -121,20 +121,16 @@ def _query_mem0_memories(category: Optional[str] = None, limit: int = 50) -> lis
         pass
     return memories[:limit]
 
-def _read_mem0_md_categories() -> dict[str, str]:
-    """Parse categories from .mem0.md for description mapping."""
-    mem0_path = os.path.join(BASE, ".mem0.md")
+def _read_local_categories() -> dict[str, str]:
+    """Parse categories from local memory config for description mapping."""
+    cat_path = os.path.join(BASE, "data", "memory-categories.json")
     categories = {}
-    if os.path.isfile(mem0_path):
+    if os.path.isfile(cat_path):
         try:
-            with open(mem0_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("- ") and ":" in line:
-                        parts = line[2:].split(":", 1)
-                        key = parts[0].strip()
-                        val = parts[1].strip() if len(parts) > 1 else ""
-                        categories[key] = val
+            with open(cat_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    categories = data
         except Exception:
             pass
     return categories
@@ -144,7 +140,7 @@ class IdentityManager:
     """
     Core identity manager for persona persistence.
 
-    Scans mem0 memories and profile files, distills structured identity,
+    Scans local memories and profile files, distills structured identity,
     and renders session prompt fragments.
     """
 
@@ -167,8 +163,8 @@ class IdentityManager:
         Returns the consolidated identity dict.
         """
         profiles = _list_profiles()
-        memories = _query_mem0_memories()
-        categories = _read_mem0_md_categories()
+        memories = _query_local_memories()
+        categories = _read_local_categories()
         existing = self._load_current()
 
         # ── Extract principles from architecture decisions ──
@@ -581,7 +577,7 @@ def print_status(status: dict) -> None:
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Identity Manager — persona persistence for ai-memory-core")
-    parser.add_argument("--consolidate", action="store_true", help="Consolidate identity from mem0 memories")
+    parser.add_argument("--consolidate", action="store_true", help="Consolidate identity from local memories")
     parser.add_argument("--render", action="store_true", help="Render session prompt fragment")
     parser.add_argument("--get-trait", type=str, metavar="TRAIT", help="Get strength of a named trait")
     parser.add_argument("--log-behavior", type=str, metavar="TEXT", help="Log a behavioral observation")

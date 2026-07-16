@@ -7,7 +7,7 @@
       - MCP server registration (68 tools via tools-mcp-server.py)
       - Skills linking (task-orchestrator, etc.)
       - npm dependencies
-      - mem0 API key configuration
+      - NE-Memory configuration
       - Environment validation
 
     Usage (OpenCode):
@@ -22,9 +22,6 @@
 .PARAMETER ProjectDir
     Path to ai-memory-core. Defaults to the repo root (parent of this script's directory).
 
-.PARAMETER Mem0ApiKey
-    Mem0 API key (deprecated — project is fully local now).
-
 .PARAMETER Force
     Overwrite existing configurations without prompting.
 #>
@@ -33,7 +30,7 @@ param(
     [ValidateSet("opencode", "claude-code", "cursor", "all")]
     [string]$Harness = "opencode",
     [string]$ProjectDir = "",
-    [string]$Mem0ApiKey = "",
+    [string]$NeMemoryConfig = "",
     [string]$OpenCodeZenApiKey = "",
     [switch]$Force,
     [switch]$Containerized,
@@ -89,9 +86,9 @@ if ($OneClick -or $Containerized) {
         $OpenCodeZenApiKey = Read-Host "`nEnter your OpenCode Zen API key (get one at https://opencode.ai) or press Enter to skip"
     }
 
-    # Write .env (fully local — no MEM0_API_KEY needed)
+    # Write .env (fully local — no cloud API keys needed)
     @"
-MEM0_PROJECT=ai-memory-core
+NE_MEMORY_PROJECT=ai-memory-core
 OPENCODE_ZEN_API_KEY=$OpenCodeZenApiKey
 OPENCODE_ZEN_BASE_URL=https://api.opencode.ai
 OPENCODE_HOST=opencode-container
@@ -178,7 +175,7 @@ Write-Host "▶ Step 3/6: Configuring local memory..." -ForegroundColor Yellow
 
 $envFile = Join-Path $ProjectDir ".env"
 if (-not (Test-Path $envFile)) {
-    "MEM0_PROJECT=ai-memory-core`n# Fully local — no API keys required" | Set-Content -Path $envFile -Force
+    "NE_MEMORY_PROJECT=ai-memory-core`n# Fully local — no API keys required" | Set-Content -Path $envFile -Force
     Write-Host "  ✓ Local memory configured (no API key required)" -ForegroundColor Green
 } else {
     Write-Host "  ✓ .env already exists" -ForegroundColor Green
@@ -284,10 +281,10 @@ $fail = 0
 
 try {
     node "$ScriptsDir\check-status.js" 2>&1 | Out-Null
-    Write-Host "  ✓ mem0 status check passed" -ForegroundColor Green
+    Write-Host "  ✓ NE-Memory status check passed" -ForegroundColor Green
     $pass++
 } catch {
-    Write-Host "  ⚠ mem0 status check: $_" -ForegroundColor DarkYellow
+    Write-Host "  ⚠ NE-Memory status check: $_" -ForegroundColor DarkYellow
 }
 
 try {

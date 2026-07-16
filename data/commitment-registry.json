@@ -13,7 +13,7 @@
     },
     {
       "id": "b2",
-      "text": "Use 2 targeted mem0 queries max per round",
+      "text": "Use 2 targeted memory queries max per round",
       "source": "code_preference",
       "stored_date": "2026-07-15",
       "verified_sessions": [],

@@ -134,7 +134,7 @@ The parameter virtualizer is registered as an MCP tool in `tools-mcp-server.py`.
 }
 ```
 
-## Mem0 Integration
+## NE-Memory Integration
 
 After each session, store the virtualization config for future use:
 ```

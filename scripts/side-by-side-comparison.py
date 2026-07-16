@@ -297,7 +297,7 @@ def test_decision_trace():
                 },
                 {
                     "id": "dt-20260715-002",
-                    "title": "Limit mem0 search to 2 queries max per round",
+                    "title": "Limit memory queries to 2 per round max",
                     "category": "process",
                     "status": "active",
                     "rationale": "Reduces token waste by 60% while maintaining recall quality",
