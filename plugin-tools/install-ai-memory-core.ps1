@@ -55,13 +55,21 @@ if ($OneClick -or $Containerized) {
     try { docker --version | Out-Null; $hasDocker = $true } catch {}
 
     if (-not $hasDocker) {
-        Write-Host "Docker not found. Downloading Docker Desktop..." -ForegroundColor Yellow
-        $installer = "$env:TEMP\DockerDesktopInstaller.exe"
-        Invoke-WebRequest -Uri "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe" -OutFile $installer
-        Write-Host "Installing Docker Desktop (run the installer that opened)..." -ForegroundColor Yellow
-        Start-Process $installer -Wait
-        Write-Host "After install completes, restart this script." -ForegroundColor Green
-        exit
+        Write-Host "Docker not found. Running dedicated installer..." -ForegroundColor Yellow
+        $installerScript = Join-Path $PSScriptRoot "..\docker\install-docker.ps1"
+        if (Test-Path $installerScript) {
+            & $installerScript
+        } else {
+            $tmpScript = "$env:TEMP\install-docker.ps1"
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.ps1" -OutFile $tmpScript
+            & $tmpScript
+        }
+        # Re-check after install
+        try { docker --version | Out-Null; $hasDocker = $true } catch {}
+        if (-not $hasDocker) {
+            Write-Host "Docker installation did not complete. Start Docker Desktop manually, then re-run." -ForegroundColor Red
+            exit 1
+        }
     }
 
     # Get ai-memory-core

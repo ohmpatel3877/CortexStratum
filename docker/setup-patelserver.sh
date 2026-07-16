@@ -53,38 +53,40 @@ case "$(uname -s)" in
 esac
 ok "OS: ${OS} ($(uname -m))"
 
-# ─── Container Engine Detection ───────────────────────────────────
-info "Detecting container engine..."
+# ─── Container Engine Detection / Installation ────────────────────
+info "Checking container engine..."
 ENGINE=""
 ENGINE_COMPOSE=""
 
+# Try Docker first
 if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
   ENGINE="docker"
   ENGINE_COMPOSE="docker compose"
-  ok "Docker found: $(docker --version)"
+  ok "Docker: $(docker --version)"
+# Try Podman next
 elif command -v podman &>/dev/null && podman info &>/dev/null 2>&1; then
   ENGINE="podman"
   ENGINE_COMPOSE="podman-compose"
-  ok "Podman found: $(podman --version)"
+  ok "Podman: $(podman --version)"
+# Force Podman?
 elif [ "${1:-}" = "--engine" ] && [ "${2:-}" = "podman" ]; then
-  fail "Podman specified but not found. Install: https://podman.io/getting-started/installation"
+  fail "Podman specified but not found at: https://podman.io/getting-started/installation"
 else
-  warn "No container engine found. Installing Docker..."
-  case "$OS" in
-    linux)
-      curl -fsSL https://get.docker.com | bash
-      sudo usermod -aG docker "$USER" || true
-      ENGINE="docker"
-      ENGINE_COMPOSE="docker compose"
-      ;;
-    macos)
-      fail "Install Docker Desktop manually: https://docker.com/products/docker-desktop"
-      ;;
-    windows)
-      fail "Run the Windows installer instead: pwsh plugin-tools/install-ai-memory-core.ps1 -Containerized"
-      ;;
-  esac
-  ok "Docker installed: $(docker --version)"
+  warn "No container engine found. Running Docker installer..."
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [ -f "$SCRIPT_DIR/install-docker.sh" ]; then
+    bash "$SCRIPT_DIR/install-docker.sh"
+  else
+    curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.sh | bash
+  fi
+  # Re-check
+  if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
+    ENGINE="docker"
+    ENGINE_COMPOSE="docker compose"
+    ok "Docker ready: $(docker --version)"
+  else
+    fail "Docker installation did not complete. Please install Docker manually: https://docs.docker.com/engine/install/"
+  fi
 fi
 
 # ─── Portainer Setup ──────────────────────────────────────────────
