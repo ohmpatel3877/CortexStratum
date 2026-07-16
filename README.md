@@ -52,11 +52,11 @@ Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent
 **You only need Docker. Nothing else. No Node.js, no Python, no npm, no pip.**
 
 ### Windows
-Send your friend this link. They click it, then double-click the downloaded file:
+Send your friend this link — it downloads the file, then they double-click it:
 ```
-https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/ONE-CLICK.cmd
+https://github.com/ohmpatel3877/ai-memory-core/releases/download/v1.0.0/ONE-CLICK.cmd
 ```
-It auto-installs Docker Desktop (if missing), builds the container, and tests it.
+This is a GitHub Release link, so the browser will **download** it (not display it). They double-click the downloaded file and it runs.
 
 ### Mac / Linux
 Open Terminal, paste this one line, press Enter:
