@@ -103,7 +103,10 @@ function RunPowerShell(Cmd: string; var ExitCode: Integer): string;
 var
   ResultCode: Integer;
   TempFile, Command: string;
+  Lines: TArrayOfString;
+  i: Integer;
 begin
+  Result := '';
   TempFile := ExpandConstant('{tmp}\ps_out.txt');
   Command := Format('powershell -NoProfile -ExecutionPolicy Bypass -Command "%s" > "%s" 2>&1', [Cmd, TempFile]);
   if not Exec('cmd.exe', '/C ' + Command, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
@@ -112,7 +115,11 @@ begin
     ExitCode := ResultCode;
   if FileExists(TempFile) then
   begin
-    LoadStringFromFile(TempFile, Result);
+    if LoadStringsFromFile(TempFile, Lines) then
+    begin
+      for i := 0 to GetArrayLength(Lines) - 1 do
+        Result := Result + Lines[i] + #13#10;
+    end;
     DeleteFile(TempFile);
   end;
 end;
@@ -123,17 +130,15 @@ var
   PSCommand: string;
   ExitCode: Integer;
 begin
-  PSCommand := Format(
-    '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ' +
+  PSCommand := '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ' +
     '$wc = New-Object System.Net.WebClient; ' +
     '$wc.Headers.Add("User-Agent", "opencode-installer/1.0"); ' +
-    'try { $wc.DownloadFile("%s", "%s"); exit 0 } catch { write-host $_; exit 1 }',
-    [URL, DestFile]
-  );
+    'try { $wc.DownloadFile(' + #39 + URL + #39 + ', ' + #39 + DestFile + #39 + '); exit 0 } ' +
+    'catch { write-host $_.Exception.Message; exit 1 }';
   RunPowerShell(PSCommand, ExitCode);
   Result := (ExitCode = 0) and FileExists(DestFile);
   if not Result then
-    ErrorMsg := Format('Download failed: %s', [URL]);
+    ErrorMsg := 'Download failed: ' + URL;
 end;
 
 // ─── Check if Docker is installed ──────────────────────────────────
@@ -281,16 +286,13 @@ begin
   end;
 end;
 
-// ─── Component selection page ──────────────────────────────────────
-var
-  ComponentsPage: TOutputMemoWizardPage;
-
+// ─── Custom wizard text ────────────────────────────────────────────
 procedure InitializeWizard;
 begin
-  WizardForm.WelcomeLabel1.Caption := 'Welcome to opencode-container-server Setup';
-  WizardForm.WelcomeLabel2.Caption := 'This will install the MCP server container and optional pathway modules.'#13#10 +
+  WizardForm.WelcomeLabel1.Caption := 'opencode-container-server Setup';
+  WizardForm.WelcomeLabel2.Caption := 'Installs the MCP server container with optional pathway modules.'#13#10 +
     ''#13#10 +
-    'You need:'#13#10 +
+    'Requires:'#13#10 +
     '  - Windows 10 or later'#13#10 +
     '  - Internet connection'#13#10 +
     ''#13#10 +
@@ -298,31 +300,7 @@ begin
     '  1. Install Docker Desktop (if missing)'#13#10 +
     '  2. Download selected skill modules'#13#10 +
     '  3. Build and start the MCP server container'#13#10 +
-    '  4. Create shortcuts for each module';
-
-  // Components info page
-  ComponentsPage := CreateOutputMemoPage(
-    wpSelectComponents, 'Pathway Modules', 'Additional capabilities to install',
-    'Select the skill modules you want to include:', ''
-  );
-end;
-
-procedure CurPageChanged(CurPageID: Integer);
-var
-  Selected: string;
-begin
-  if CurPageID = ComponentsPage.ID then
-  begin
-    Selected := '';
-    if IsComponentSelected('virtualization') then Selected := Selected + '  ✓ VM Test Engine (Hyper-V, Vagrant, QEMU)'#13#10;
-    if IsComponentSelected('samba') then Selected := Selected + '  ✓ Samba/NAS Debugging (mergerfs, Podman, Jellyfin)'#13#10;
-    if IsComponentSelected('framework') then Selected := Selected + '  ✓ Framework Builder (Rust, FFI, Tauri)'#13#10;
-    if IsComponentSelected('studytools') then Selected := Selected + '  ✓ Study Tutor (learning techniques)'#13#10;
-    if IsComponentSelected('speedopt') then Selected := Selected + '  ✓ Speed Optimizer (bottleneck analysis)'#13#10;
-    if Selected = '' then Selected := '  (none selected)';
-    ComponentsPage.RichEditViewer.Text := 'Selected modules:'#13#10#13#10 + Selected + #13#10#13#10 +
-      'Core MCP Server is always installed (68 tools, mem0, OpenCode).';
-  end;
+    '  4. Create shortcuts';
 end;
 
 // ─── Install logic ─────────────────────────────────────────────────
