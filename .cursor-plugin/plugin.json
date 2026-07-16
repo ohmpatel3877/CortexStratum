@@ -1,0 +1,35 @@
+{
+  "name": "ai-memory-core",
+  "description": "68-tool MCP server: local BM25 memory, trace system, skill routing, multi-modal AI generation. Zero cloud LLM dependencies.",
+  "version": "0.3.0",
+  "author": "Ohm Patel",
+  "repository": "https://github.com/ohmpatel3877/ai-memory-core",
+  "license": "MIT",
+  "homepage": "https://github.com/ohmpatel3877/ai-memory-core",
+  "tools": [
+    {
+      "name": "memory-search",
+      "description": "BM25 local memory search with synonym expansion"
+    },
+    {
+      "name": "skill-router",
+      "description": "Match task descriptions to relevant OpenCode skills"
+    },
+    {
+      "name": "error-trace",
+      "description": "Cross-session error tracking and resolution"
+    },
+    {
+      "name": "decision-trace",
+      "description": "Architecture decision registry"
+    },
+    {
+      "name": "goal-tracking",
+      "description": "Session goal management with alignment checks"
+    },
+    {
+      "name": "commitment-checker",
+      "description": "Cross-session commitment verification"
+    }
+  ]
+}

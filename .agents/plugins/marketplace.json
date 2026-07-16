@@ -1,0 +1,20 @@
+{
+  "name": "ai-memory-core",
+  "interface": {
+    "displayName": "ai-memory-core MCP Server"
+  },
+  "plugins": [
+    {
+      "name": "ai-memory-core",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "NONE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
