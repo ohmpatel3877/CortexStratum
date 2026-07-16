@@ -41,6 +41,16 @@
       "name": "task-orchestrator",
       "description": "Auto-decompose complex tasks into parallel subagent workstreams",
       "path": "skills/task-orchestrator/SKILL.md"
+    },
+    {
+      "name": "debug-samba",
+      "description": "Debug Samba, mergerfs, Podman, Jellyfin, Nextcloud NAS stacks with layer-isolation methodology",
+      "path": "skills/debug-samba/SKILL.md"
+    },
+    {
+      "name": "study-tutor",
+      "description": "Evidence-based collegiate study techniques — active recall, spaced repetition, interleaving, dual coding",
+      "path": "skills/study-tutor/SKILL.md"
     }
   ],
   "install": {

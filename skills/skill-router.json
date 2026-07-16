@@ -8,6 +8,11 @@
       "priority": 10
     },
     {
+      "triggers": ["samba", "smb", "cifs", "mergerfs", "fuse", "nas", "jellyfin", "nextcloud", "container network", "media server", "home server", "permission denied nas"],
+      "skills": ["debug-samba"],
+      "priority": 9
+    },
+    {
       "triggers": ["test", "tdd", "spec", "unit test", "integration test", "coverage"],
       "skills": ["test-driven-development", "test-patterns"],
       "priority": 10
