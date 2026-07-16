@@ -133,10 +133,16 @@ def error_log_error(command: str, error_output: str, exit_code: int = None) -> d
         if entry.get("error_signature") == sig:
             entry["occurrence_count"] = entry.get("occurrence_count", 0) + 1
             entry["last_seen"] = now
+            # Detect recurring: resolved error being logged again
+            was_resolved = entry.get("status") == "resolved"
+            if was_resolved:
+                entry["status"] = "recurring"
+                entry.setdefault("recurrences", []).append(now)
             _save_error_registry(data)
             return _result(True, {
                 "action": "LogError", "id": entry["id"],
-                "status": "incremented", "signature": sig,
+                "status": "recurring" if was_resolved else "incremented",
+                "signature": sig, "occurrence_count": entry["occurrence_count"],
             })
 
     entry = {
@@ -214,11 +220,13 @@ def error_status() -> dict:
     errors = data.get("errors", [])
     total = len(errors)
     resolved = sum(1 for e in errors if e.get("status") == "resolved")
-    unresolved = total - resolved
+    recurring = sum(1 for e in errors if e.get("status") == "recurring")
+    unresolved = total - resolved - recurring
 
     sorted_by_count = sorted(errors, key=lambda e: e.get("occurrence_count", 0), reverse=True)
     top_3 = [
-        {"id": e["id"], "signature": e.get("error_signature", ""), "count": e.get("occurrence_count", 0)}
+        {"id": e["id"], "signature": e.get("error_signature", ""), "count": e.get("occurrence_count", 0),
+         "status": e.get("status", "")}
         for e in sorted_by_count[:3]
     ]
 
@@ -229,6 +237,7 @@ def error_status() -> dict:
         "action": "Status",
         "total": total,
         "resolved": resolved,
+        "recurring": recurring,
         "unresolved": unresolved,
         "top_3_most_frequent": top_3,
         "avg_attempts_to_resolve": avg_attempts,
