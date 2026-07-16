@@ -1002,29 +1002,373 @@ After resolving each failure type, store the signature and fix:
 
 ---
 
-## Quick-Start: 5-Minute Triage
+## 9. Debian System Debugging (OS Layer)
+
+The entire NAS stack runs **on Debian**. Every layer above depends on Debian being healthy. This section covers Debian-specific diagnostics for package, service, network, and kernel issues that cascade into NAS failures.
+
+### 9.1 Debian Quick Health Check
+
+```bash
+# OS version — critical for package compatibility
+cat /etc/debian_version
+lsb_release -a
+uname -a                                    # kernel version
+
+# Is the system healthy?
+uptime                                      # load average
+free -h                                     # memory pressure
+df -h                                       # disk space (especially /var and /tmp)
+dmesg -T | tail -20                         # kernel messages (OOM, I/O errors)
+
+# Check for degraded RAID, failing disks
+cat /proc/mdstat                            # software RAID status
+smartctl -H /dev/sda                        # disk health
+
+# Check systemd overall health
+systemctl --failed                          # any failed units?
+journalctl -p 3 -b --no-pager | tail -20    # error-level messages this boot
+```
+
+### 9.2 Apt / Package Management Debugging
+
+Package corruption is the #1 cause of "it worked yesterday" on Debian.
+
+```bash
+# Fix broken packages
+sudo apt update --fix-missing
+sudo apt install -f                         # fix broken dependencies
+sudo dpkg --configure -a                    # reconfigure half-installed packages
+
+# If apt update fails with GPG errors:
+# "The following signatures couldn't be verified"
+sudo apt-key list                           # list trusted keys (deprecated but still used)
+sudo apt update 2>&1 | grep -i 'NO_PUBKEY' # missing key ID
+# Fix: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys <KEYID>
+# Or for newer Debian:
+sudo mkdir -p /etc/apt/keyrings
+sudo gpg --homedir /tmp --keyserver keyserver.ubuntu.com --recv-keys <KEYID>
+sudo gpg --homedir /tmp --export <KEYID> | sudo tee /etc/apt/keyrings/custom.gpg
+
+# If apt fails with "Could not get lock /var/lib/dpkg/lock"
+sudo fuser -v /var/lib/dpkg/lock           # find process holding lock
+sudo lsof /var/lib/apt/lists/lock
+# Fix: sudo kill -9 <PID>  OR  sudo rm /var/lib/apt/lists/lock
+
+# If a specific package won't install:
+apt-cache policy <package>                  # check available versions
+apt-cache showpkg <package>                 # dependency tree
+sudo apt-get install -o Debug::pkgProblemResolver=yes <package>
+
+# Check for held/broken packages:
+dpkg --audit                               # check package database integrity
+dpkg -l | grep -E '^(iU|rc|pn)'            # half-installed, removed-but-config, purged
+echo "Purge unneeded: dpkg -l | grep '^rc' | awk '{print \$2}' | xargs sudo dpkg --purge"
+
+# Pin a package version to prevent accidental upgrade:
+# /etc/apt/preferences.d/pin-<package>
+# Package: samba
+# Pin: version 4.17.*
+# Pin-Priority: 1001
+```
+
+### 9.3 Debian Systemd Service Debugging
+
+```bash
+# Service status basics
+systemctl list-units --type=service --state=running
+systemctl list-units --type=service --state=failed
+
+# If a service fails to start:
+journalctl -xu <service> --no-pager | tail -40
+systemctl cat <service>                     # show the unit file
+systemctl show <service>                    # show all properties
+
+# Common NAS service failures on Debian:
+
+# 1. "Unit <service>.service not found"
+#    → Package not installed or service name wrong
+#    → Debian Samba: smbd.service, nmbd.service
+#    → Debian NFS: nfs-kernel-server.service
+#    → Debian Podman: podman.service (rootful), podman.socket (rootless user)
+
+# 2. "Failed at step EXEC"
+#    → Binary missing or permissions wrong
+#    → Check: ls -la $(which <binary>)
+
+# 3. "Start request repeated too quickly"
+#    → Service crashing in loop
+#    → systemctl reset-failed <service> && systemctl start <service>
+
+# 4. Timeout on start
+#    → Usually a network dependency not ready
+#    → Check: systemctl list-dependencies <service>
+
+# Override service settings (don't edit unit files directly):
+# systemctl edit <service>
+# [Service]
+# RestartSec=10
+# TimeoutStartSec=300
+
+# Mask a service (prevent any start, including dependencies):
+# systemctl mask <service>
+# To undo: systemctl unmask <service>
+```
+
+### 9.4 Debian Network Debugging
+
+```bash
+# Debian 11 (bullseye) uses ifupdown: /etc/network/interfaces
+# Debian 12 (bookworm+) uses netplan: /etc/netplan/*.yaml
+
+# Check which network system is active:
+ls -la /etc/netplan/*.yaml 2>/dev/null && echo "netplan" || echo "ifupdown"
+systemctl is-active systemd-networkd && echo "systemd-networkd active"
+
+# Netplan debug:
+sudo netplan get                             # current config
+sudo netplan apply                           # apply and test
+sudo netplan --debug apply                   # verbose
+
+# Ifupdown debug:
+cat /etc/network/interfaces
+sudo ifup --all --verbose                    # bring all interfaces up
+
+# DNS debugging — CRITICAL for container name resolution:
+resolvectl status                           # systemd-resolved status
+cat /etc/resolv.conf                        # actual resolver in use
+# If resolv.conf points to 127.0.0.53: systemd-resolved is managing it
+# If resolv.conf is empty: check /etc/network/interfaces dns-nameservers
+
+# Connectivity test through each layer:
+ping -c 3 8.8.8.8                           # raw IP
+ping -c 3 google.com                        # DNS resolution
+curl -I https://google.com                  # HTTP/HTTPS (proxy check)
+
+# Debian firewall (nftables — default on bookworm+):
+sudo nft list ruleset                       # full nftables ruleset
+sudo iptables -L -n                         # legacy iptables (if enabled)
+# Debian 12+ uses nftables backend even for iptables commands
+
+# If firewall is blocking Samba:
+# nft add rule inet filter input tcp dport {139,445} accept
+# nft add rule inet filter input udp dport {137,138} accept
+```
+
+### 9.5 Debian Kernel & Filesystem Debugging
+
+```bash
+# Kernel version — mergerfs and FUSE compatibility depend on this
+uname -r
+
+# Check if FUSE kernel module is loaded:
+lsmod | grep fuse
+# If not: sudo modprobe fuse
+# Persistent: echo "fuse" | sudo tee /etc/modules-load.d/fuse.conf
+
+# Check inotify limits (affects mergerfs, Jellyfin, Nextcloud watchers):
+cat /proc/sys/fs/inotify/max_user_watches
+cat /proc/sys/fs/inotify/max_user_instances
+# Debian defaults are low (8192). Increase for NAS:
+# /etc/sysctl.d/99-inotify.conf:
+# fs.inotify.max_user_watches=524288
+# fs.inotify.max_user_instances=256
+
+# Check for filesystem errors on underlying disks:
+sudo dmesg -T | grep -E '(EXT4|XFS|BTRFS|error|I/O error|remount)'
+
+# Debian I/O scheduler (affects HDD performance):
+cat /sys/block/sda/queue/scheduler
+# For HDDs: mq-deadline or bfq
+# Set via udev: /etc/udev/rules.d/60-iosched.rules
+
+# Check for OOM kills (out-of-memory):
+sudo journalctl -kb | grep -i "oom\|killed process"
+
+# Check SWAP usage — heavy swap = performance disaster for NAS:
+swapon --show
+vmstat 1 5                                 # si (swap in), so (swap out)
+```
+
+### 9.6 Debian + WSL2 Debugging
+
+If running on Windows via WSL2:
+
+```bash
+# Check if running under WSL:
+grep -qi microsoft /proc/version && echo "WSL detected" || echo "Native Linux"
+
+# WSL2-specific issues:
+
+# 1. Systemd not running (WSL2 disables it by default)
+#    Fix: /etc/wsl.conf on Windows side:
+#    [boot]
+#    systemd=true
+
+# 2. Network: WSL2 uses NAT, not bridge
+#    - Containers inside WSL2 need port forwarding from Windows
+#    - Samba on WSL2: Windows can reach via localhost (WSL2 port forwarding)
+#    - Other machines on LAN: need `netsh interface portproxy` on Windows
+#    Windows: netsh interface portproxy add v4tov4 listenport=445 listenaddress=0.0.0.0 connectport=445 connectaddress=<wsl2-ip>
+
+# 3. Filesystem performance:
+#    - /mnt/c (Windows drives) is slow via DrvFs — DON'T use for NAS pools
+#    - Keep all NAS data INSIDE WSL2 ext4: /pool, /mnt/disk*, etc.
+#    - Test: dd if=/dev/zero of=/pool/test bs=1M count=1024 (ext4)
+#         vs dd if=/dev/zero of=/mnt/c/test bs=1M count=1024 (DrvFs)
+
+# 4. WSL2 IP changes on every reboot
+#    Get current WSL2 IP: hostname -I
+#    Or set static IP via Windows: wsl -d <distro> -- ip addr | grep inet
+
+# 5. WSL2 memory limit (default: 50% of Windows RAM)
+#    .wslconfig on Windows:
+#    [wsl2]
+#    memory=16GB
+#    processors=8
+#    localhostForwarding=true
+```
+
+### 9.7 Debian Samba Package Management
+
+```bash
+# Debian Samba packages:
+dpkg -l | grep samba
+# Typical: samba, samba-common, samba-libs, smbclient, samba-vfs-modules
+
+# Check if Samba is from Debian repo or external:
+apt-cache policy samba
+
+# Samba config file: /etc/samba/smb.conf
+# Samba log dir:     /var/log/samba/
+# Samba run dir:     /var/run/samba/
+# Samba private dir: /var/lib/samba/private/
+
+# Debian-specific Samba paths:
+ls -la /etc/samba/                           # config
+ls -la /var/log/samba/                       # logs
+ls -la /var/lib/samba/                       # persistent data (tdb files)
+
+# Upgrading Samba on Debian — watch for breaking changes:
+# Debian 11 (bullseye): Samba 4.13
+# Debian 12 (bookworm): Samba 4.17
+# Debian 13 (trixie/testing): Samba 4.21+
+# Major version jumps can break tdbs and config format
+
+# Backup before upgrade:
+sudo smbtar -s <server> -x <share> -t /tmp/samba-backup.tar
+sudo cp -a /var/lib/samba /var/lib/samba.backup
+sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.backup
+```
+
+### 9.8 Debian Container Runtime (Podman)
+
+```bash
+# Podman on Debian:
+apt-cache policy podman
+
+# Debian-specific Podman quirks:
+# - Rootless Podman needs subuid/subgid mappings
+cat /etc/subuid                              # check your user's subordinate UIDs
+cat /etc/subgid                              # check your user's subordinate GIDs
+# Format: <username>:<start-uid>:<count>
+# Default for first user: <user>:100000:65536
+# If missing: sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 <user>
+
+# - Debian uses fuse-overlayfs by default for rootless
+podman info | grep overlay                   # check storage driver
+# If not using overlay: install fuse-overlayfs
+sudo apt install fuse-overlayfs
+
+# - Debian Podman networking: pasta (default) vs slirp4netns
+podman info | grep networkBackend
+
+# - Quadlet files: /etc/containers/systemd/ (system) or ~/.config/containers/systemd/ (user)
+# - Debian enables podman.socket for rootless by default
+systemctl --user status podman.socket
+
+# Podman + Debian AppArmor (Enforcing by default on Debian):
+sudo aa-status | grep podman
+# If containers fail with "permission denied" and AppArmor:
+# sudo aa-complain /etc/apparmor.d/usr.bin.podman
+# OR: --security-opt apparmor=unconfined (temporary test)
+```
+
+### 9.9 Debian System Recovery
+
+```bash
+# Boot into single-user / recovery mode:
+# From GRUB: press 'e' on boot entry, add "single" to linux line
+
+# Reinstall a package from scratch:
+sudo apt remove --purge <package>
+sudo apt install <package>
+
+# Roll back a specific package to Debian stable version:
+sudo apt install <package>/stable
+
+# Check for filesystem corruption:
+sudo touch /forcefsck                        # force fsck on next reboot
+# OR: sudo fsck -f /dev/sda1
+
+# System rescue via chroot from live USB:
+# sudo mount /dev/<root-partition> /mnt
+# sudo mount --bind /dev /mnt/dev
+# sudo mount --bind /proc /mnt/proc
+# sudo mount --bind /sys /mnt/sys
+# sudo chroot /mnt
+
+# Debian log archaeology:
+journalctl --list-boots                     # list all boots
+journalctl -b -1                             # previous boot logs
+journalctl -u smbd --since "1 day ago"       # specific service, time range
+
+# Reset systemd-resolved if DNS breaks:
+sudo systemctl restart systemd-resolved
+sudo resolvectl flush-caches
+```
+
+### 9.10 Debian Failure Signatures to Register
+
+| Error Pattern | Register As |
+|--------------|-------------|
+| `apt update fails with GPG NO_PUBKEY` | `anti_pattern: debian expired GPG key` |
+| `dpkg was interrupted` after power loss | `anti_pattern: debian half-installed package` |
+| `systemd service "not found" on Debian 12` | `anti_pattern: debian service name mismatch` |
+| `Podman rootless: "cannot find user namespace"` | `anti_pattern: debian missing subuid mappings` |
+| `Samba fails to start after dist-upgrade` | `anti_pattern: debian samba major version tdb break` |
+| `WSL2: service won't start` | `anti_pattern: wsl2 systemd not enabled` |
+
+---
+
+## 10. Quick-Start: 5-Minute Triage
 
 When a NAS user says "X isn't working," run this in order:
 
 ```bash
-# 1. Layer 0 — Storage
-df -h | grep -E '(mergerfs|disk|pool)'          # any full?
-mount | grep mergerfs && echo "mergerfs OK"      # FUSE up?
-cat /sys/fs/fuse/connections/*/waiting           # any stuck ops?
+# Layer -1 — Debian OS health (everything depends on this)
+cat /etc/debian_version
+systemctl --failed | head -5
+df -h /var /tmp /pool                       # critical paths not full?
+dmesg -T | grep -E '(error|I/O|OOM)' | tail -5
 
-# 2. Layer 1 — Shares
+# 0. Storage
+df -h | grep -E '(mergerfs|disk|pool)'      # any full?
+mount | grep mergerfs && echo "mergerfs OK"  # FUSE up?
+cat /sys/fs/fuse/connections/*/waiting       # any stuck ops?
+
+# 1. Shares
 systemctl is-active smbd && echo "smbd OK"
-smbstatus -S | head -10                          # active connections?
+smbstatus -S | head -10                      # active connections?
 
-# 3. Layer 2 — Containers
+# 2. Containers
 podman ps --format "table {{.Names}}\t{{.Status}}"
-podman healthcheck run <failing-container>       # if defined
+podman healthcheck run <failing-container>   # if defined
 
-# 4. Layer 3 — Applications
+# 3. Applications
 curl -so /dev/null -w "Jellyfin: %{http_code}\n" http://localhost:8096
 curl -so /dev/null -w "Nextcloud: %{http_code}\n" http://localhost
 
-# 5. Layer 4 — Logs
+# 4. Logs
 journalctl -u smbd -n 10 --no-pager | grep -i error
 podman logs --tail 10 <container> | grep -i error
 ```
