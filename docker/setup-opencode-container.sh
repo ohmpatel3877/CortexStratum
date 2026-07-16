@@ -37,8 +37,8 @@ fail()  { echo -e "${RED}✗${NC} $1"; exit 1; }
 # ─── Header ──────────────────────────────────────────────────────
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}        patelserver — 1-Click Setup             ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}  Portainer + ai-memory-core + mem0             ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}   opencode-container-server — 1-Click Setup     ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}        MCP Server + OpenCode CLI + mem0         ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -160,7 +160,7 @@ if [ -z "$ZEN_KEY" ]; then
 fi
 
 # ─── Deploy Stack via Compose ─────────────────────────────────────
-info "Deploying patelserver stack..."
+info "Deploying opencode-container-server stack..."
 cd "$PROJECT_DIR"
 export MEM0_API_KEY="${MEM0_KEY:-}"
 export OPENCODE_ZEN_API_KEY="${ZEN_KEY:-}"

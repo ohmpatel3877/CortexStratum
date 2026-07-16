@@ -4,7 +4,7 @@
 .DESCRIPTION
     Detects Docker, downloads official installer if missing, installs silently.
     Safe to run on systems that already have Docker.
-    Part of the patelserver stack.
+    Part of the opencode-container-server stack.
 .EXAMPLE
     .\install-docker.ps1
 #>
@@ -94,5 +94,5 @@ try {
 } catch {
     Write-Host "  ⚠ Docker installed but not yet running." -ForegroundColor Yellow
     Write-Host "  Launch Docker Desktop manually from the Start Menu," -ForegroundColor Yellow
-    Write-Host "  then run the patelserver setup again." -ForegroundColor Yellow
+    Write-Host "  then run ONE-CLICK.cmd again." -ForegroundColor Yellow
 }

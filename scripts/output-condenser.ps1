@@ -11,7 +11,7 @@
       CondenseMem0  - Condense mem0 search JSON results
 
     All modes save condensed output to the condenser log at
-    C:\Users\ohmpa\github\ai-memory-core\data\condensed\condenser-log.txt
+    $PSScriptRoot\..\data\condensed\condenser-log.txt
     with a UTC timestamp.
 
 .PARAMETER Command
