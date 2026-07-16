@@ -1,0 +1,14 @@
+{
+  "synonyms": {
+    "memory": ["recall", "remember", "retrieve", "store", "cache"],
+    "search": ["find", "locate", "lookup", "query", "discover"],
+    "synthesize": ["combine", "merge", "consolidate", "integrate", "unify"],
+    "extract": ["parse", "analyze", "interpret", "decode", "process"],
+    "consolidate": ["deduplicate", "merge", "unify", "compress", "summarize"],
+    "verify": ["validate", "check", "audit", "inspect", "review"],
+    "secure": ["protect", "harden", "encrypt", "safeguard", "shield"],
+    "debug": ["fix", "repair", "correct", "troubleshoot", "diagnose"],
+    "build": ["compile", "construct", "assemble", "generate", "create"],
+    "test": ["verify", "validate", "check", "prove", "assert"]
+  }
+}

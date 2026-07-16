@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Identity Profile",
+  "description": "Schema for consolidated AI agent identity/persona derived from mem0 memories",
+  "type": "object",
+  "required": [
+    "persona_name",
+    "version",
+    "traits",
+    "principles",
+    "behavioral_patterns",
+    "communication_style",
+    "knowledge_boundaries",
+    "last_consolidated"
+  ],
+  "properties": {
+    "persona_name": {
+      "type": "string",
+      "description": "Human-readable name for this identity profile"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this identity (e.g. 1.2.3)",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "traits": {
+      "type": "array",
+      "description": "Characteristic traits with measured strength and supporting evidence",
+      "items": {
+        "type": "object",
+        "required": ["trait", "strength", "evidence"],
+        "properties": {
+          "trait": {
+            "type": "string",
+            "description": "Name of the trait (e.g. thoroughness, conciseness, proactiveness)"
+          },
+          "strength": {
+            "type": "number",
+            "description": "Strength score from 0.0 to 1.0",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "evidence": {
+            "type": "array",
+            "description": "List of memory references supporting this trait",
+            "items": {
+              "type": "string",
+              "description": "Memory ID, file path, or citation reference"
+            }
+          }
+        }
+      }
+    },
+    "principles": {
+      "type": "array",
+      "description": "Core operating principles distilled from architecture decisions and conventions",
+      "items": {
+        "type": "object",
+        "required": ["principle", "priority", "rationale"],
+        "properties": {
+          "principle": {
+            "type": "string",
+            "description": "The principle statement"
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Priority rank (1 = highest)",
+            "minimum": 1
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this principle exists, with memory references"
+          }
+        }
+      }
+    },
+    "behavioral_patterns": {
+      "type": "array",
+      "description": "Observed behavioral patterns with frequency tracking",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "context", "frequency", "last_observed"],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Description of the behavioral pattern"
+          },
+          "context": {
+            "type": "string",
+            "description": "Context or trigger for this pattern"
+          },
+          "frequency": {
+            "type": "string",
+            "description": "How often this pattern occurs (always, often, sometimes, rarely)",
+            "enum": ["always", "often", "sometimes", "rarely"]
+          },
+          "last_observed": {
+            "type": "string",
+            "description": "ISO timestamp of last observation",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "communication_style": {
+      "type": "object",
+      "description": "Preferred communication parameters",
+      "required": ["verbosity", "formality", "technical_depth", "humor_tolerance"],
+      "properties": {
+        "verbosity": {
+          "type": "number",
+          "description": "0.0 (minimal) to 1.0 (verbose)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "formality": {
+          "type": "number",
+          "description": "0.0 (casual) to 1.0 (formal)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "technical_depth": {
+          "type": "number",
+          "description": "0.0 (shallow) to 1.0 (deep technical)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "humor_tolerance": {
+          "type": "number",
+          "description": "0.0 (none) to 1.0 (high)",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      }
+    },
+    "knowledge_boundaries": {
+      "type": "object",
+      "description": "Self-assessed knowledge boundaries",
+      "required": ["strong_areas", "weak_areas", "recent_learnings"],
+      "properties": {
+        "strong_areas": {
+          "type": "array",
+          "description": "Topics/conventions the agent handles well",
+          "items": {
+            "type": "string"
+          }
+        },
+        "weak_areas": {
+          "type": "array",
+          "description": "Topics/patterns the agent struggles with",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recent_learnings": {
+          "type": "array",
+          "description": "Recent learnings to carry forward",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": { "type": "string" },
+              "insight": { "type": "string" },
+              "added": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    "last_consolidated": {
+      "type": "string",
+      "description": "ISO timestamp of last consolidation",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "id": "1c1bf7b8-ef07-47c4-bc22-caf32a7091c4",
+    "text": "The agent learned to use BM25 for memory search.",
+    "source": "test",
+    "timestamp": "2026-07-16T02:32:42.898339+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "3e81bcd1-3031-4767-a016-c240de6cb5eb",
+    "text": "Synonyms improve recall in search queries.",
+    "source": "test",
+    "timestamp": "2026-07-16T02:32:42.900668+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "32e2f18e-78ff-4fe1-8bfe-7733f8674173",
+    "text": "Consolidation merges duplicate memory entries.",
+    "source": "test",
+    "timestamp": "2026-07-16T02:32:42.902767+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "65408463-00b9-4422-92b6-2bfa34fe8bb2",
+    "text": "BM25 is a ranking function used by search engines.",
+    "source": "test",
+    "timestamp": "2026-07-16T02:32:42.904682+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "19623b8e-eeb3-4762-be19-820468a0a4a8",
+    "text": "terminal-bench pipeline test at 2026-07-16 00:49:53.216267",
+    "source": "terminal-bench",
+    "timestamp": "2026-07-16T04:49:53.216344+00:00",
+    "metadata": {
+      "pipeline": "test"
+    }
+  },
+  {
+    "id": "9b0b6392-e045-43d7-8701-78a13923f1d5",
+    "text": "terminal-bench pipeline test at 2026-07-16 00:51:07.530958",
+    "source": "terminal-bench",
+    "timestamp": "2026-07-16T04:51:07.531008+00:00",
+    "metadata": {
+      "pipeline": "test"
+    }
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "dag_id": "multi-phase-refactor",
+  "phase": "completed",
+  "node_id": "test-inventory",
+  "input": {
+    "task": "Inventory all existing tests for the codebase. Target: {{input.task}}. Catalog: test files, coverage per module, test types (unit/integration/e2e), flaky tests, and missing test areas.",
+    "context": {},
+    "artifacts": []
+  },
+  "output": {
+    "summary": "Completed: Inventory all existing tests for the codebase. Target: {{input.task}}. Catalog: ",
+    "data": {
+      "test_catalog": "<test_catalog_result>",
+      "coverage_by_module": "<coverage_by_module_result>",
+      "flaky_tests": "<flaky_tests_result>",
+      "missing_tests": "<missing_tests_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:08:54.941149+00:00",
+    "updated_at": "2026-07-16T03:08:55.962024+00:00",
+    "completed_at": "2026-07-16T03:08:55.962001+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 1009.0618133544922,
+    "retry_count": 0,
+    "temperature": 0.3,
+    "node_version": "1.0.0"
+  }
+}

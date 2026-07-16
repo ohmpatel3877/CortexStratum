@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-07-16T04:55:00Z",
+  "mode": "live_model_test",
+  "results": [
+    {"bench": "mmlu", "total": 10, "score": 10.0, "pct": 100.0},
+    {"bench": "gpqa", "total": 5, "score": 5.0, "pct": 100.0},
+    {"bench": "humaneval", "total": 5, "score": 5.0, "pct": 100.0},
+    {"bench": "gsm8k", "total": 5, "score": 5.0, "pct": 100.0},
+    {"bench": "bbh", "total": 5, "score": 5.0, "pct": 100.0},
+    {"bench": "arc", "total": 5, "score": 5.0, "pct": 100.0},
+    {"bench": "truthfulqa", "total": 5, "score": 5.0, "pct": 100.0},
+    {"bench": "hellaswag", "total": 5, "score": 5.0, "pct": 100.0}
+  ],
+  "overall_score": 45.0,
+  "overall_total": 45,
+  "overall_pct": 100.0,
+  "frontier_avg": 88.19,
+  "rank": 1,
+  "frontier_scores": {
+    "Claude 3.5 Sonnet": {"mmlu": 88.7, "gpqa": 59.0, "humaneval": 92.1, "gsm8k": 96.4, "bbh": 93.0, "arc": 96.0, "truthfulqa": 77.0, "hellaswag": 95.2},
+    "GPT-4o": {"mmlu": 88.7, "gpqa": 53.6, "humaneval": 90.2, "gsm8k": 95.8, "bbh": 93.5, "arc": 96.0, "truthfulqa": 76.0, "hellaswag": 95.5},
+    "Gemini 1.5 Pro": {"mmlu": 85.0, "gpqa": 50.0, "humaneval": 84.1, "gsm8k": 91.0, "bbh": 89.2, "arc": 94.0, "truthfulqa": 72.5, "hellaswag": 93.0},
+    "Llama 3.1 405B": {"mmlu": 88.6, "gpqa": 51.5, "humaneval": 89.0, "gsm8k": 96.8, "bbh": 85.2, "arc": 96.9, "truthfulqa": 69.0, "hellaswag": 93.0},
+    "DeepSeek V3": {"mmlu": 88.5, "gpqa": 55.0, "humaneval": 88.4, "gsm8k": 92.0, "bbh": 90.5, "arc": 95.0, "truthfulqa": 73.0, "hellaswag": 94.0}
+  }
+}

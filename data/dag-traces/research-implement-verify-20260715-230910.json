@@ -1,0 +1,28 @@
+{
+  "dag_id": "research-implement-verify",
+  "name": "Research → Implement → Verify",
+  "started_at": "2026-07-16T03:09:07.047312+00:00",
+  "completed_at": "2026-07-16T03:09:10.247451+00:00",
+  "node_count": 3,
+  "edge_count": 2,
+  "levels": [
+    [
+      "research"
+    ],
+    [
+      "implement"
+    ],
+    [
+      "verify"
+    ]
+  ],
+  "status": "completed",
+  "summary": {
+    "total_nodes": 3,
+    "phases": {
+      "completed": 3
+    },
+    "failed_nodes": [],
+    "duration_seconds": 3.2
+  }
+}

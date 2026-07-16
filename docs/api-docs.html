@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ai-memory-core API Documentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 280px; background: #161b22; border-right: 1px solid #30363d; padding: 24px 16px; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; }
+  .sidebar h2 { font-size: 14px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 8px; }
+  .sidebar h2:first-child { margin-top: 0; }
+  .sidebar a { display: block; padding: 4px 8px; color: #c9d1d9; text-decoration: none; font-size: 13px; border-radius: 6px; }
+  .sidebar a:hover { background: #21262d; color: #58a6ff; }
+  .sidebar .mod-link { padding-left: 16px; font-size: 12px; }
+  .main { flex: 1; margin-left: 280px; padding: 32px 48px; max-width: 960px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: 20px; font-weight: 600; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; color: #f0f6fc; }
+  h3 { font-size: 16px; font-weight: 600; margin: 24px 0 12px; color: #f0f6fc; display: flex; align-items: center; gap: 12px; }
+  .subtitle { color: #8b949e; font-size: 14px; margin-bottom: 24px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+  .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-card .num { font-size: 28px; font-weight: 700; color: #58a6ff; }
+  .stat-card .label { font-size: 12px; color: #8b949e; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #21262d; }
+  th { background: #161b22; color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+  tr:hover td { background: #161b22; }
+  code { background: #21262d; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; color: #ffa657; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-py { background: #1a3a2b; color: #7ee787; }
+  .badge-ps { background: #1a2d4a; color: #79c0ff; }
+  .badge-config { background: #1a2d4a; color: #79c0ff; }
+  .badge-results { background: #2d1a3a; color: #d2a8ff; }
+  .badge-trace { background: #3a2a1a; color: #ffa657; }
+  .badge-registry { background: #1a3a2b; color: #7ee787; }
+  .tool-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin: 8px 0; overflow: hidden; }
+  .tool-header { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; gap: 12px; user-select: none; }
+  .tool-header:hover { background: #1c2128; }
+  .tool-name { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: #58a6ff; flex: 1; }
+  .tool-params { font-size: 11px; color: #8b949e; background: #21262d; padding: 2px 8px; border-radius: 8px; }
+  .expand-icon { color: #8b949e; font-size: 10px; transition: transform 0.2s; }
+  .tool-card.expanded .expand-icon { transform: rotate(90deg); }
+  .tool-body { display: none; padding: 0 16px 16px; }
+  .tool-card.expanded .tool-body { display: block; }
+  .tool-desc { color: #c9d1d9; margin-bottom: 8px; }
+  .param-table { font-size: 12px; }
+  .param-table th { background: #0d1117; }
+  .module-section { margin-bottom: 16px; }
+  .tool-count { font-size: 13px; font-weight: 400; color: #8b949e; }
+  .gen-info { font-size: 12px; color: #484f58; margin-top: 40px; text-align: center; padding: 16px; border-top: 1px solid #21262d; }
+  #search { width: 100%; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; margin-bottom: 16px; outline: none; }
+  #search:focus { border-color: #58a6ff; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0d1117; }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+  @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <h2>Overview</h2>
+    <a href="#overview">Project Stats</a>
+    <a href="#scripts">Scripts</a>
+    <h2>MCP Tools</h2>
+    <a href="#module-art" class="mod-link">Art</a>
+    <a href="#module-audio" class="mod-link">Audio</a>
+    <a href="#module-coder" class="mod-link">Coder</a>
+    <a href="#module-core" class="mod-link">Core</a>
+    <a href="#module-devops" class="mod-link">DevOps</a>
+    <a href="#module-game-dev" class="mod-link">Game Dev</a>
+    <a href="#module-literature" class="mod-link">Literature</a>
+    <a href="#module-memory-search" class="mod-link">Memory Search</a>
+    <a href="#module-sensory" class="mod-link">Sensory</a>
+    <a href="#module-verifier" class="mod-link">Verifier</a>
+    <h2>Data</h2>
+    <a href="#data-files">Data Files</a>
+  </nav>
+  <div class="main">
+    <h1>ai-memory-core</h1>
+    <p class="subtitle">API Documentation &mdash; 2026-07-16 03:13:18 UTC</p>
+
+    <section id="overview">
+      <h2>Project Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num">48</div><div class="label">Scripts</div></div>
+        <div class="stat-card"><div class="num">68</div><div class="label">MCP Tools</div></div>
+        <div class="stat-card"><div class="num">10</div><div class="label">Modules</div></div>
+        <div class="stat-card"><div class="num">286</div><div class="label">Functions</div></div>
+        <div class="stat-card"><div class="num">30</div><div class="label">Data Files</div></div>
+      </div>
+    </section>
+
+    <section id="scripts">
+      <h2>Script Index</h2>
+      <input type="text" id="search" placeholder="Filter scripts, tools, modules..." oninput="filterDocs(this.value)">
+      <table>
+        <thead><tr><th>Script</th><th>Lang</th><th>Purpose</th><th>Key Functions</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><code>art-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Art Module — SVG generation, color themes, design tools for OpenCode agents.</td>
+                <td><code>_hex_to_hsl, _hsl_to_hex, _relative_luminance</code></td>
+            </tr>
+            <tr>
+                <td><code>audio-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Audio Module — AI auditory analysis assistant.
+Analyzes WAV files, music theory, speech patterns, tone generation,
+frequ</td>
+                <td><code>_note_to_freq, _freq_to_note_name, _freq_to_midi</code></td>
+            </tr>
+            <tr>
+                <td><code>benchmark-harness.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Benchmark Harness: deepseek-v4-flash vs Frontier Models
+
+Runs curated sample questions from 8 standard benchmarks that m</td>
+                <td><code>safe_json_load, safe_json_save, score_mmlu</code></td>
+            </tr>
+            <tr>
+                <td><code>blind-benchmark.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Blind benchmark test for deepseek-v4-flash.
+Questions are generated fresh so the model hasn't seen them.
+Answers are sto</td>
+                <td><code>main</code></td>
+            </tr>
+            <tr>
+                <td><code>cheat-test.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Cheat test: compare my answers to the now-revealed answer key.</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>check-commitments.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code>Seed-DefaultRegistry, Read-Registry</code></td>
+            </tr>
+            <tr>
+                <td><code>check-status.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>coder-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Coder Module — AI senior developer assistant.
+Provides code analysis, framework generation, debugging, code review,
+expl</td>
+                <td><code>_score_to_grade, _estimate_complexity, _line_number</code></td>
+            </tr>
+            <tr>
+                <td><code>consultation-room.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+Multi-perspective decision analysis for the Consultation Room.
+.DESCRIPTION
+Analyzes a decision question from </td>
+                <td><code>Get-Timestamp, Get-FileTimestamp</code></td>
+            </tr>
+            <tr>
+                <td><code>dag-coordinator.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>DAG Coordinator — topological execution engine for multi-agent pipelines.
+
+Reads a DAG definition JSON, performs topolog</td>
+                <td><code>get_state_manager, now_iso, ensure_dirs</code></td>
+            </tr>
+            <tr>
+                <td><code>dashboard-mem0.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Mem0 query helper for dashboard.ps1 - fetches recent memories via API.</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>dashboard.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+ai-memory-core Dashboard — usage, memories, goals, commitments, errors, MCP status.
+.DESCRIPTION
+Full-session </td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>decision-trace.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code>Ensure-Registry, Load-Registry, Get-Timestamp</code></td>
+            </tr>
+            <tr>
+                <td><code>devops-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>DevOps/Container Module — AI DevOps expert for Podman, Docker, permissions,
+Samba, mergerfs, networking, and containeriz</td>
+                <td><code>dockerfile_analyze, network_troubleshoot, devops_handle_tool_call</code></td>
+            </tr>
+            <tr>
+                <td><code>error-trace.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code>Ensure-Registry, Load-Registry, Invoke-LogError</code></td>
+            </tr>
+            <tr>
+                <td><code>firefox-provider-signup.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Free AI Provider Signup Navigator
+Opens each free AI provider's signup/API-key page in Playwright Firefox.
+User signs up</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>game-dev-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Game Development Module — AI game development expert.
+Specializes in Unity, Unreal Engine, and Roblox development.
+Provi</td>
+                <td><code>_analyze_fun_factor, _generate_engagement_loops, _find_similar_games</code></td>
+            </tr>
+            <tr>
+                <td><code>generate-blind-test.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>BLIND TEST RUNNER — questions in, answers hidden, score computed at end.
+
+I (the model) read ONLY questions.json. 
+answe</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>generate-config.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>goal-registry.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code>Get-SessionId</code></td>
+            </tr>
+            <tr>
+                <td><code>identity-manager.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Identity Manager — Consolidate, store, and inject persona identity from mem0.
+
+Reads memory profiles and mem0 entries, d</td>
+                <td><code>ensure_dirs, now_iso, _load_json</code></td>
+            </tr>
+            <tr>
+                <td><code>inject-identity.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+Injects the current identity profile as a session prompt fragment.
+.DESCRIPTION
+Calls identity-manager.py --re</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>integration-status.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Integration Status Report Generator — Checks all 5 workstream outputs,
+validates schemas, runs the integration test suit</td>
+                <td><code>now_iso, check_file, check_dir</code></td>
+            </tr>
+            <tr>
+                <td><code>literature-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Literature Module — Text analysis, concept extraction, study guides for social sciences.</td>
+                <td><code>_count_syllables, _flesch_kincaid, _extract_key_phrases</code></td>
+            </tr>
+            <tr>
+                <td><code>load-skills.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+Matches a user message against skill-router.json triggers and outputs skill names to load.
+.DESCRIPTION
+Loads </td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>logic-verify.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code>Show-Usage, Test-ReasoningStructure, Get-LogicPrompt</code></td>
+            </tr>
+            <tr>
+                <td><code>memory_search.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td></td>
+                <td><code>_get_searcher, search, synthesize</code></td>
+            </tr>
+            <tr>
+                <td><code>ne-consolidation-daemon.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+NE-Memory auto-consolidation daemon — runs every N minutes to deduplicate
+memory entries, merge similar record</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>orchestrate-all.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+Unified Orchestration Entry Point — Full pipeline orchestrator for ai-memory-core.
+.DESCRIPTION
+Orchestrates t</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>output-condenser.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+Condenses verbose tool outputs to extract only signal (errors, key data, summaries),
+discarding noise to stret</td>
+                <td><code>Write-CondenserLog, Get-CosineSimilarity, Invoke-CondenseBash</code></td>
+            </tr>
+            <tr>
+                <td><code>preset-manager.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>run-blind-test.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Blind test runner — presents questions, collects answers, scores at end.
+Answer key is XOR-masked; I (the model) CANNOT </td>
+                <td><code>longest_palindromic, fizzbuzz</code></td>
+            </tr>
+            <tr>
+                <td><code>run-eval-harness.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Agent Tool Systems Evaluation Harness
+Tests all 6 performance-enhancing tools built for deepseek-v4-flash.
+
+Usage:
+    p</td>
+                <td><code>test, run_powershell, test_skill_router</code></td>
+            </tr>
+            <tr>
+                <td><code>sandbox-integration.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td>.SYNOPSIS
+Sandbox Integration Wrapper — calls sandbox-manager.py with structured output.
+.DESCRIPTION
+PowerShell wrapper</td>
+                <td><code></code></td>
+            </tr>
+            <tr>
+                <td><code>sandbox-manager.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Sandbox Manager — Lightweight code execution sandbox for running untrusted
+or isolated code snippets. Uses file-based is</td>
+                <td><code>_compute_code_hash, _now_iso, _load_log</code></td>
+            </tr>
+            <tr>
+                <td><code>score-blind-benchmark.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Score the blind benchmark by comparing my answers to the answer key.</td>
+                <td><code>is_anagram</code></td>
+            </tr>
+            <tr>
+                <td><code>security-scan.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Security Scanner — ai-memory-core toolchain security audit module.
+
+Scans a codebase for hardcoded secrets, vulnerable d</td>
+                <td><code>find_target_files, scan_secrets_in_file, scan_code_antipatterns_in_file</code></td>
+            </tr>
+            <tr>
+                <td><code>sensory-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Sensory Module — AI agent sensory input layer.
+Connects AI tools to: web browsing (Playwright), text extraction (PDF/ima</td>
+                <td><code>_get_requests, _get_bs4, _get_pdfplumber</code></td>
+            </tr>
+            <tr>
+                <td><code>side-by-side-comparison.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Side-by-Side Comparison: Agent WITH tools vs WITHOUT tools
+
+Tests the same task across two scenarios and measures:
+  - S</td>
+                <td><code>safe_json_load, seed_json, section</code></td>
+            </tr>
+            <tr>
+                <td><code>state_file_manager.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>DAG State File Manager — atomic file-based state passing between DAG nodes.
+
+Provides DAGStateManager for reading, writi</td>
+                <td><code>now_iso, _ensure_dir</code></td>
+            </tr>
+            <tr>
+                <td><code>task-analyzer.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Task Analyzer — Evaluates task complexity and recommends execution mode.
+Part of the auto-orchestration framework.
+
+Usag</td>
+                <td><code>analyze_task</code></td>
+            </tr>
+            <tr>
+                <td><code>task-orchestrator.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Task Orchestrator v2 — ACTIVE orchestrator that works WHILE subagents run.
+Usage:
+    python scripts/task-orchestrator.p</td>
+                <td><code>ensure_dirs, now_iso, _run_dag</code></td>
+            </tr>
+            <tr>
+                <td><code>team-mode.ps1</code></td>
+                <td><span class="badge badge-ps">ps1</span></td>
+                <td></td>
+                <td><code>Get-Timestamp, Get-FileTimestamp</code></td>
+            </tr>
+            <tr>
+                <td><code>test-integration-layer.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Integration Layer Test Suite — Verifies all 5 workstream outputs wire together correctly.
+
+Tests:
+  a) DAG coordinator i</td>
+                <td><code>test, skip, import_from_path</code></td>
+            </tr>
+            <tr>
+                <td><code>test-mcp-server.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Test harness for tools-mcp-server.py
+Validates the MCP stdio protocol and all 6 tool categories.
+Sends initialize, tools</td>
+                <td><code>send_mcp_message, main</code></td>
+            </tr>
+            <tr>
+                <td><code>test-sensory-module.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>Integration tests for sensory-module.py
+Run: python test-sensory-module.py</td>
+                <td><code>run, test_scrape_text, test_scrape_json</code></td>
+            </tr>
+            <tr>
+                <td><code>tools-mcp-server.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>MCP Server: ai-memory-core Toolchain
+Exposes xTrace, DTrace, Skill Router, Output Condenser, Goal Registry,
+and Commitme</td>
+                <td><code>_get_verifier, _get_memory_search, read_exact</code></td>
+            </tr>
+            <tr>
+                <td><code>verifier_middleware.py</code></td>
+                <td><span class="badge badge-py">py</span></td>
+                <td>verifier-middleware.py — Parallel verifier for ai-memory-core MCP pipeline.
+
+Cross-checks every tool call for security v</td>
+                <td><code>_demo</code></td>
+            </tr></tbody>
+      </table>
+    </section>
+
+    <section id="mcp-tools">
+      <h2>MCP Tools <span style="font-size:14px;color:#8b949e;font-weight:400;">(68 total)</span></h2>
+      
+            <div class="module-section" id="module-art">
+                <h3>Art <span class="tool-count">4 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">art_generate_svg</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate SVG diagrams, flowcharts, and illustrations from a text description</p>
+                        <p><strong>Required:</strong> <code>description</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>description</code></td><td><code>string</code></td><td></td></tr><tr><td><code>width</code></td><td><code>integer</code></td><td></td></tr><tr><td><code>height</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">art_generate_theme</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate a color theme with roles and WCAG contrast validation from a description</p>
+                        <p><strong>Required:</strong> <code>description</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>description</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">art_extract_palette</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Extract complementary, analogous, and triadic palettes from a base hex color</p>
+                        <p><strong>Required:</strong> <code>color</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>color</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">art_design_concept</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate a design concept with layout, typography, and spacing guidelines from requirements</p>
+                        <p><strong>Required:</strong> <code>requirements</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>requirements</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-audio">
+                <h3>Audio <span class="tool-count">7 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_analyze_file</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze WAV audio file: duration, channels, sample rate, amplitude stats</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>file_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>data_base64</code></td><td><code>string</code></td><td></td></tr><tr><td><code>format</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_waveform</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate ASCII waveform visualization from audio file</p>
+                        <p><strong>Required:</strong> <code>file_path</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>file_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>width</code></td><td><code>integer</code></td><td></td></tr><tr><td><code>height</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_frequency_analysis</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">DFT-based frequency analysis: band energy, dominant frequency, spectral centroid</p>
+                        <p><strong>Required:</strong> <code>file_path</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>file_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>num_bands</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_music_theory</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Music theory analysis: chord detection, scale matching, intervals from notes or frequencies</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>notes</code></td><td><code>array</code></td><td></td></tr><tr><td><code>frequencies</code></td><td><code>array</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_speech_analysis</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Speech transcript analysis: WPM, filler words, pace rating, readability</p>
+                        <p><strong>Required:</strong> <code>transcript</code>, <code>duration_seconds</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>transcript</code></td><td><code>string</code></td><td></td></tr><tr><td><code>duration_seconds</code></td><td><code>number</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_convert_guide</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Audio format conversion guide with ffmpeg commands and quality comparison</p>
+                        <p><strong>Required:</strong> <code>source_format</code>, <code>target_format</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>source_format</code></td><td><code>string</code></td><td></td></tr><tr><td><code>target_format</code></td><td><code>string</code></td><td></td></tr><tr><td><code>quality</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">audio_generate_tone</span>
+                        <span class="tool-params">5 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate sine/square/saw/triangle wave tone as base64 WAV</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>frequency</code></td><td><code>number</code></td><td></td></tr><tr><td><code>duration_seconds</code></td><td><code>number</code></td><td></td></tr><tr><td><code>sample_rate</code></td><td><code>integer</code></td><td></td></tr><tr><td><code>amplitude</code></td><td><code>number</code></td><td></td></tr><tr><td><code>waveform</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-coder">
+                <h3>Coder <span class="tool-count">7 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_analyze_code</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze code for quality, complexity, smells, and security issues across 12 languages</p>
+                        <p><strong>Required:</strong> <code>code</code>, <code>language</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>code</code></td><td><code>string</code></td><td></td></tr><tr><td><code>language</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_generate_framework</span>
+                        <span class="tool-params">4 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate complete project scaffold (web-api, cli-tool, library, desktop, microservice, data-pipeline, fullstack) for 12 languages</p>
+                        <p><strong>Required:</strong> <code>project_type</code>, <code>language</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>project_type</code></td><td><code>string</code></td><td></td></tr><tr><td><code>language</code></td><td><code>string</code></td><td></td></tr><tr><td><code>features</code></td><td><code>array</code></td><td></td></tr><tr><td><code>name</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_debug</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze error messages and stack traces, suggest fixes (50+ error patterns across languages)</p>
+                        <p><strong>Required:</strong> <code>error</code>, <code>language</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>error</code></td><td><code>string</code></td><td></td></tr><tr><td><code>code_context</code></td><td><code>string</code></td><td></td></tr><tr><td><code>language</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_review</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Code review with severity ratings (security, performance, readability, architecture, testing)</p>
+                        <p><strong>Required:</strong> <code>code</code>, <code>language</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>code</code></td><td><code>string</code></td><td></td></tr><tr><td><code>language</code></td><td><code>string</code></td><td></td></tr><tr><td><code>focus</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_explain</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Educational code explanation at beginner/intermediate/advanced level</p>
+                        <p><strong>Required:</strong> <code>code</code>, <code>language</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>code</code></td><td><code>string</code></td><td></td></tr><tr><td><code>language</code></td><td><code>string</code></td><td></td></tr><tr><td><code>level</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_convert</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)</p>
+                        <p><strong>Required:</strong> <code>code</code>, <code>from</code>, <code>to</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>code</code></td><td><code>string</code></td><td></td></tr><tr><td><code>from</code></td><td><code>string</code></td><td></td></tr><tr><td><code>to</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">coder_architecture</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Architecture pattern recommendation (MVC, Hexagonal, CQRS, Event-Driven, Microservices, etc.)</p>
+                        <p><strong>Required:</strong> <code>project_type</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>project_type</code></td><td><code>string</code></td><td></td></tr><tr><td><code>scale</code></td><td><code>string</code></td><td></td></tr><tr><td><code>requirements</code></td><td><code>array</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-core">
+                <h3>Core <span class="tool-count">13 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">xtrace_log_error</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Log an error occurrence with signature for xTrace error tracking</p>
+                        <p><strong>Required:</strong> <code>command</code>, <code>error_output</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>command</code></td><td><code>string</code></td><td></td></tr><tr><td><code>error_output</code></td><td><code>string</code></td><td></td></tr><tr><td><code>exit_code</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">xtrace_search</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Search xTrace error registry for a known error signature</p>
+                        <p><strong>Required:</strong> <code>keyword</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>keyword</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">xtrace_status</span>
+                        <span class="tool-params">0 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Get xTrace error tracking summary statistics</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <p><em>No parameters</em></p>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">dtrace_add</span>
+                        <span class="tool-params">6 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Log an architectural decision to DTrace</p>
+                        <p><strong>Required:</strong> <code>title</code>, <code>decision</code>, <code>rationale</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>title</code></td><td><code>string</code></td><td></td></tr><tr><td><code>context</code></td><td><code>string</code></td><td></td></tr><tr><td><code>decision</code></td><td><code>string</code></td><td></td></tr><tr><td><code>alternatives</code></td><td><code>string</code></td><td></td></tr><tr><td><code>rationale</code></td><td><code>string</code></td><td></td></tr><tr><td><code>category</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">dtrace_search</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Search DTrace decision registry</p>
+                        <p><strong>Required:</strong> <code>keyword</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>keyword</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">skill_router_match</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Match a task description to relevant skills using the Skill Router</p>
+                        <p><strong>Required:</strong> <code>task</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>task</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">output_condenser</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Condense command output to essential information</p>
+                        <p><strong>Required:</strong> <code>output_type</code>, <code>content</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>output_type</code></td><td><code>string</code></td><td></td></tr><tr><td><code>content</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">goal_registry_init</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Initialize a new goal in the Goal Registry</p>
+                        <p><strong>Required:</strong> <code>goal</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>goal</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">goal_registry_add_subgoal</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Add a sub-goal to the current goal stack</p>
+                        <p><strong>Required:</strong> <code>description</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>description</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">goal_registry_status</span>
+                        <span class="tool-params">0 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Get current goal registry status</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <p><em>No parameters</em></p>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">goal_registry_check_alignment</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Check if current action aligns with the original goal</p>
+                        <p><strong>Required:</strong> <code>current_action</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>current_action</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">commitment_checker_list</span>
+                        <span class="tool-params">0 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">List pending commitments for this session</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <p><em>No parameters</em></p>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">commitment_checker_verify</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Mark a commitment as verified for this session</p>
+                        <p><strong>Required:</strong> <code>id</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>id</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-devops">
+                <h3>DevOps <span class="tool-count">7 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_container_debug</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Diagnose container issues (Podman/Docker) from error logs</p>
+                        <p><strong>Required:</strong> <code>error_log</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>error_log</code></td><td><code>string</code></td><td></td></tr><tr><td><code>runtime</code></td><td><code>string</code></td><td></td></tr><tr><td><code>context</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_permissions_analyze</span>
+                        <span class="tool-params">4 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze permission/usernamespace issues in container environments</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>mount_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>container_user</code></td><td><code>string</code></td><td></td></tr><tr><td><code>host_user</code></td><td><code>string</code></td><td></td></tr><tr><td><code>error_symptom</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_compose_generator</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate Docker/Podman Compose files from service definitions</p>
+                        <p><strong>Required:</strong> <code>services</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>services</code></td><td><code>array</code></td><td></td></tr><tr><td><code>networks</code></td><td><code>array</code></td><td></td></tr><tr><td><code>runtime</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_samba_config</span>
+                        <span class="tool-params">4 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate Samba/SMB share configurations with OS-specific troubleshooting</p>
+                        <p><strong>Required:</strong> <code>share_name</code>, <code>path</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>share_name</code></td><td><code>string</code></td><td></td></tr><tr><td><code>path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>users</code></td><td><code>array</code></td><td></td></tr><tr><td><code>options</code></td><td><code>object</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_mergerfs_setup</span>
+                        <span class="tool-params">4 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Configure mergerfs for drive pooling with policy explanations and optimization tips</p>
+                        <p><strong>Required:</strong> <code>source_paths</code>, <code>mount_point</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>source_paths</code></td><td><code>array</code></td><td></td></tr><tr><td><code>mount_point</code></td><td><code>string</code></td><td></td></tr><tr><td><code>policy</code></td><td><code>string</code></td><td></td></tr><tr><td><code>options</code></td><td><code>object</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_dockerfile_analyze</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze and optimize Dockerfiles for security, caching, and size</p>
+                        <p><strong>Required:</strong> <code>dockerfile</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>dockerfile</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">devops_network_troubleshoot</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Diagnose container networking issues (DNS, ports, bridges, host networking)</p>
+                        <p><strong>Required:</strong> <code>symptom</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>symptom</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-game-dev">
+                <h3>Game Dev <span class="tool-count">7 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_design_analyze</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze game concept: fun factor, engagement loops, monetization fit, market position</p>
+                        <p><strong>Required:</strong> <code>concept</code>, <code>genre</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>concept</code></td><td><code>string</code></td><td></td></tr><tr><td><code>genre</code></td><td><code>string</code></td><td></td></tr><tr><td><code>platform</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_scaffold_project</span>
+                        <span class="tool-params">4 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate Unity/Unreal/Roblox project scaffold with real working boilerplate files</p>
+                        <p><strong>Required:</strong> <code>engine</code>, <code>genre</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>engine</code></td><td><code>string</code></td><td></td></tr><tr><td><code>genre</code></td><td><code>string</code></td><td></td></tr><tr><td><code>name</code></td><td><code>string</code></td><td></td></tr><tr><td><code>features</code></td><td><code>array</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_mechanics_guide</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Game mechanics design guide: core loops, progression systems, reward schedules by genre</p>
+                        <p><strong>Required:</strong> <code>genre</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>genre</code></td><td><code>string</code></td><td></td></tr><tr><td><code>complexity</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_monetization</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Monetization strategy recommendations with revenue estimates and ethical guidance</p>
+                        <p><strong>Required:</strong> <code>platform</code>, <code>genre</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>platform</code></td><td><code>string</code></td><td></td></tr><tr><td><code>genre</code></td><td><code>string</code></td><td></td></tr><tr><td><code>audience</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_optimization</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Engine-specific optimization advice (FPS, draw calls, memory, load times, network)</p>
+                        <p><strong>Required:</strong> <code>engine</code>, <code>issue</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>engine</code></td><td><code>string</code></td><td></td></tr><tr><td><code>issue</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_compare_engines</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Compare game engines (Unity/Unreal/Godot/Roblox) for specific project types</p>
+                        <p><strong>Required:</strong> <code>project_type</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>project_type</code></td><td><code>string</code></td><td></td></tr><tr><td><code>team_size</code></td><td><code>string</code></td><td></td></tr><tr><td><code>budget</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">gamedev_level_design</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Level design principles, flow diagrams, pacing guides, and playtesting checklists</p>
+                        <p><strong>Required:</strong> <code>genre</code>, <code>level_type</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>genre</code></td><td><code>string</code></td><td></td></tr><tr><td><code>level_type</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-literature">
+                <h3>Literature <span class="tool-count">4 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">lit_analyze_text</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze text for reading level (Flesch-Kincaid), key concepts, argument structure, and sentiment</p>
+                        <p><strong>Required:</strong> <code>text</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>text</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">lit_extract_concepts</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Extract key concepts, their definitions, context, and relationships from text</p>
+                        <p><strong>Required:</strong> <code>text</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>text</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">lit_generate_study_guide</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Generate a study guide from content with key terms, discussion questions, and section summaries</p>
+                        <p><strong>Required:</strong> <code>content</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>content</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">lit_analyze_philosophy</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Analyze philosophical arguments: premises, conclusions, reasoning type, detected philosophers, and schools</p>
+                        <p><strong>Required:</strong> <code>text</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>text</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-memory-search">
+                <h3>Memory Search <span class="tool-count">5 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">memory_search</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Local BM25 memory search with synonym expansion and fuzzy matching — zero LLM cost</p>
+                        <p><strong>Required:</strong> <code>query</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>query</code></td><td><code>string</code></td><td></td></tr><tr><td><code>limit</code></td><td><code>integer</code></td><td></td></tr><tr><td><code>fuzzy_threshold</code></td><td><code>number</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">memory_synthesize</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Search and synthesize memory results into a narrative with inline citations</p>
+                        <p><strong>Required:</strong> <code>query</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>query</code></td><td><code>string</code></td><td></td></tr><tr><td><code>max_sources</code></td><td><code>integer</code></td><td></td></tr><tr><td><code>min_confidence</code></td><td><code>number</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">memory_add</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Add a memory entry for future BM25 search and synthesis</p>
+                        <p><strong>Required:</strong> <code>text</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>text</code></td><td><code>string</code></td><td></td></tr><tr><td><code>source</code></td><td><code>string</code></td><td></td></tr><tr><td><code>metadata</code></td><td><code>object</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">memory_consolidate</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Merge duplicate/similar memory entries by Jaccard similarity threshold</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>threshold</code></td><td><code>number</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">memory_status</span>
+                        <span class="tool-params">0 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Get NE-Memory engine status: entry count, storage size, unique terms, last timestamp</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <p><em>No parameters</em></p>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-sensory">
+                <h3>Sensory <span class="tool-count">12 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_browse</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Navigate to a URL using Playwright (headless Firefox) and extract content. Modes: text, html, markdown, links, metadata</p>
+                        <p><strong>Required:</strong> <code>url</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>url</code></td><td><code>string</code></td><td></td></tr><tr><td><code>extract_mode</code></td><td><code>string</code></td><td></td></tr><tr><td><code>timeout_ms</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_screenshot</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Take a screenshot of a web page via Playwright</p>
+                        <p><strong>Required:</strong> <code>url</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>url</code></td><td><code>string</code></td><td></td></tr><tr><td><code>output_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>timeout_ms</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_interact</span>
+                        <span class="tool-params">5 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Navigate to URL and perform actions (click, type, press, wait)</p>
+                        <p><strong>Required:</strong> <code>url</code>, <code>actions</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>url</code></td><td><code>string</code></td><td></td></tr><tr><td><code>actions</code></td><td><code>array</code></td><td></td></tr><tr><td><code>selector</code></td><td><code>string</code></td><td></td></tr><tr><td><code>value</code></td><td><code>string</code></td><td></td></tr><tr><td><code>timeout_ms</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_extract_pdf</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Extract text from a PDF file</p>
+                        <p><strong>Required:</strong> <code>file_path</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>file_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>max_pages</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_extract_html</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Extract text from raw HTML content. Modes: clean (trafilatura), soup (BeautifulSoup), tables</p>
+                        <p><strong>Required:</strong> <code>html_content</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>html_content</code></td><td><code>string</code></td><td></td></tr><tr><td><code>mode</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_extract_image</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Extract text from an image via OCR (if pytesseract installed) or return image metadata</p>
+                        <p><strong>Required:</strong> <code>file_path</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>file_path</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_scrape</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Fetch a URL via HTTP (no JS) and extract content. Modes: text, html, links, tables, json</p>
+                        <p><strong>Required:</strong> <code>url</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>url</code></td><td><code>string</code></td><td></td></tr><tr><td><code>mode</code></td><td><code>string</code></td><td></td></tr><tr><td><code>headers</code></td><td><code>object</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_extract_article</span>
+                        <span class="tool-params">1 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Extract clean article content from a URL using trafilatura</p>
+                        <p><strong>Required:</strong> <code>url</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>url</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_api_request</span>
+                        <span class="tool-params">6 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Make an HTTP API request (GET/POST/PUT/DELETE/PATCH) with structured response</p>
+                        <p><strong>Required:</strong> <code>url</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>url</code></td><td><code>string</code></td><td></td></tr><tr><td><code>method</code></td><td><code>string</code></td><td></td></tr><tr><td><code>data</code></td><td><code>object</code></td><td></td></tr><tr><td><code>headers</code></td><td><code>object</code></td><td></td></tr><tr><td><code>params</code></td><td><code>object</code></td><td></td></tr><tr><td><code>timeout</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_fetch_rss</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Parse an RSS/Atom feed and return structured items</p>
+                        <p><strong>Required:</strong> <code>feed_url</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>feed_url</code></td><td><code>string</code></td><td></td></tr><tr><td><code>max_items</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_read_file</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Read a local text file and return its content</p>
+                        <p><strong>Required:</strong> <code>file_path</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>file_path</code></td><td><code>string</code></td><td></td></tr><tr><td><code>max_size_kb</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">sensory_search</span>
+                        <span class="tool-params">2 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Web search via DuckDuckGo (no API key needed). Returns title, URL, snippet.</p>
+                        <p><strong>Required:</strong> <code>query</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>query</code></td><td><code>string</code></td><td></td></tr><tr><td><code>num_results</code></td><td><code>integer</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="module-section" id="module-verifier">
+                <h3>Verifier <span class="tool-count">2 tools</span></h3>
+                
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">verifier_status</span>
+                        <span class="tool-params">0 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Get verifier middleware status: checks run, violations found, renudges sent, uptime</p>
+                        <p><strong>Required:</strong> <em>None</em></p>
+                        <p><em>No parameters</em></p>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
+                        <span class="tool-name">verifier_renudge</span>
+                        <span class="tool-params">3 params</span>
+                        <span class="expand-icon">&#9654;</span>
+                    </div>
+                    <div class="tool-body">
+                        <p class="tool-desc">Send a correction signal (renudge) to steer the agent back on track</p>
+                        <p><strong>Required:</strong> <code>target</code>, <code>correction</code></p>
+                        <table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>target</code></td><td><code>string</code></td><td></td></tr><tr><td><code>correction</code></td><td><code>object</code></td><td></td></tr><tr><td><code>strategy</code></td><td><code>string</code></td><td></td></tr></tbody></table>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <section id="data-files">
+      <h2>Data Files</h2>
+      <table>
+        <thead><tr><th>File</th><th>Category</th><th>Keys</th><th>Records</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><code>data\benchmark-results.json</code></td>
+                <td><span class="badge badge-results">results</span></td>
+                <td><code>frontier_scores.DeepSeek V3.mmlu, frontier_scores.GPT-4o.mmlu, frontier_scores.Gemini 1.5 Pro.bbh, frontier_scores.Claude 3.5 Sonnet.bbh</code></td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td><code>data\blind-answer-key.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>q5.explanation, q3.explanation, q7.tests[].expected, q6.type</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>data\blind-my-answers.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>q6.type, q4.type, q2.answer, q3</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>data\blind-questions.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code></code></td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <td><code>data\commitment-registry.json</code></td>
+                <td><span class="badge badge-registry">registry</span></td>
+                <td><code>version, commitments[].verified_sessions, commitments[].text, commitments[].stored_date</code></td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td><code>data\comparison-results.json</code></td>
+                <td><span class="badge badge-results">results</span></td>
+                <td><code>tests[].with_tools_score, tests, tests[].test, tests[].step_savings</code></td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td><code>data\consultation-cr-20260715-134730.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>date, log_decision, perspectives, category</code></td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-definitions\multi-phase-refactor.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>config.heartbeat_interval_seconds, nodes[].timeout_seconds, merge_rules[].field, config.error_mode</code></td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-definitions\research-implement-verify.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>config.heartbeat_interval_seconds, nodes[].timeout_seconds, config.log_level, config.global_timeout_seconds</code></td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-definitions\security-audit-pipeline.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>config.heartbeat_interval_seconds, nodes[].timeout_seconds, config.log_level, config.global_timeout_seconds</code></td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-definitions\seed-dag.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>nodes[].timeout_seconds, config.error_mode, config.max_concurrency, config.log_level</code></td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-schemas\dag-definition-v1.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>type, required, $schema, properties</code></td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-schemas\state-contract-v1.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>type, required, $schema, properties</code></td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-traces\multi-phase-refactor-20260715-230858.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>status, started_at, completed_at, edge_count</code></td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-traces\research-implement-verify-20260715-230849.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>status, started_at, completed_at, edge_count</code></td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-traces\research-implement-verify-20260715-230910.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>status, started_at, completed_at, edge_count</code></td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td><code>data\dag-traces\security-audit-pipeline-20260715-230856.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>status, started_at, completed_at, edge_count</code></td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td><code>data\decision-registry.json</code></td>
+                <td><span class="badge badge-registry">registry</span></td>
+                <td><code>decisions[].id, decisions[].updated_at, decisions[].title, decisions[].alternatives</code></td>
+                <td>7</td>
+            </tr>
+            <tr>
+                <td><code>data\doc-index.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>data_files[].category, data_files[].key_count, summary.total_python, mcp_tools[].description</code></td>
+                <td>48</td>
+            </tr>
+            <tr>
+                <td><code>data\error-registry.json</code></td>
+                <td><span class="badge badge-registry">registry</span></td>
+                <td><code>errors, version</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>data\flash-benchmark-results.json</code></td>
+                <td><span class="badge badge-results">results</span></td>
+                <td><code>date, code, model, mode</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>data\free-provider-template.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>provider, _guide, _comment, $schema</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>data\identity-evolution-log.json</code></td>
+                <td><span class="badge badge-trace">trace</span></td>
+                <td><code>versions, versions[].date, versions[].triggers, versions[].changes_made</code></td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td><code>data\identity-schema.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>additionalProperties, type, required, $schema</code></td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td><code>data\mcp-server-test-results.json</code></td>
+                <td><span class="badge badge-results">results</span></td>
+                <td><code>overall.all_passed, overall.passed, overall.total, tests[].name</code></td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <td><code>data\orchestration-research.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>recommended_pattern, frameworks[].name, frameworks[].communication, frameworks[].pattern</code></td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td><code>data\sandbox-log.json</code></td>
+                <td><span class="badge badge-trace">trace</span></td>
+                <td><code></code></td>
+                <td>27</td>
+            </tr>
+            <tr>
+                <td><code>data\security-scan-report.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>summary.findings_by_severity.medium, summary.total_findings, findings[].severity, target_dir</code></td>
+                <td>17</td>
+            </tr>
+            <tr>
+                <td><code>data\synonyms.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code>synonyms.extract, synonyms.build, synonyms, synonyms.debug</code></td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td><code>data\tool-inventory.json</code></td>
+                <td><span class="badge badge-config">config</span></td>
+                <td><code></code></td>
+                <td>68</td>
+            </tr></tbody>
+      </table>
+    </section>
+
+    <div class="gen-info">Generated by doc-generator.py &mdash; ai-memory-core</div>
+  </div>
+</div>
+<script>
+function filterDocs(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.tool-card').forEach(c => {
+    c.style.display = c.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('#scripts tbody tr').forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.module-section').forEach(s => {
+    const visible = Array.from(s.querySelectorAll('.tool-card')).some(c => c.style.display !== 'none');
+    s.style.display = visible || q === '' ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

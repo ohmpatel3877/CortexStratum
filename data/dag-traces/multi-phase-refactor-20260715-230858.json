@@ -1,0 +1,32 @@
+{
+  "dag_id": "multi-phase-refactor",
+  "name": "Multi-Phase Refactor Pipeline",
+  "started_at": "2026-07-16T03:08:53.982212+00:00",
+  "completed_at": "2026-07-16T03:08:58.954600+00:00",
+  "node_count": 5,
+  "edge_count": 4,
+  "levels": [
+    [
+      "code-analysis",
+      "test-inventory"
+    ],
+    [
+      "synthesis"
+    ],
+    [
+      "implementation"
+    ],
+    [
+      "verification"
+    ]
+  ],
+  "status": "completed",
+  "summary": {
+    "total_nodes": 5,
+    "phases": {
+      "completed": 5
+    },
+    "failed_nodes": [],
+    "duration_seconds": 4.9
+  }
+}

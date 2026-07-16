@@ -1,0 +1,1537 @@
+{
+  "generated_at": "2026-07-16T03:12:47.585746+00:00",
+  "project": "ai-memory-core",
+  "version": "1.0.0",
+  "scripts": [
+    {
+      "filename": "art-module.py",
+      "language": "python",
+      "docstring_preview": "Art Module — SVG generation, color themes, design tools for OpenCode agents.",
+      "function_count": 9,
+      "functions": [
+        "_hex_to_hsl",
+        "_hsl_to_hex",
+        "_relative_luminance",
+        "_contrast_ratio",
+        "_wcag_rating",
+        "generate_svg",
+        "generate_theme",
+        "extract_palette",
+        "design_concept"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "audio-module.py",
+      "language": "python",
+      "docstring_preview": "Audio Module — AI auditory analysis assistant.\nAnalyzes WAV files, music theory, speech patterns, tone generation,\nfrequency analysis, format conversion guides, and waveform visualization.\n\nRegistered",
+      "function_count": 19,
+      "functions": [
+        "_note_to_freq",
+        "_freq_to_note_name",
+        "_freq_to_midi",
+        "_match_chord_from_semitones",
+        "_match_scales",
+        "analyze_file",
+        "generate_waveform",
+        "frequency_analysis",
+        "music_theory",
+        "_namify_scale",
+        "_count_syllables",
+        "speech_analysis",
+        "convert_guide",
+        "_generate_sine",
+        "_generate_square",
+        "_generate_sawtooth",
+        "_generate_triangle",
+        "generate_tone",
+        "handle_tool_call"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "benchmark-harness.py",
+      "language": "python",
+      "docstring_preview": "Benchmark Harness: deepseek-v4-flash vs Frontier Models\n\nRuns curated sample questions from 8 standard benchmarks that mirror\nthe OpenRouter model comparison leaderboard. Supports interactive\ntesting,",
+      "function_count": 19,
+      "functions": [
+        "safe_json_load",
+        "safe_json_save",
+        "score_mmlu",
+        "score_gpqa",
+        "score_humaneval",
+        "score_gsm8k",
+        "score_bbh",
+        "score_arc",
+        "score_truthfulqa",
+        "score_hellaswag",
+        "horizontal_bar",
+        "section_header",
+        "subsection",
+        "run_interactive_benchmark",
+        "run_auto_benchmark",
+        "frontier_avg",
+        "show_stats",
+        "parse_args",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "blind-benchmark.py",
+      "language": "python",
+      "docstring_preview": "Blind benchmark test for deepseek-v4-flash.\nQuestions are generated fresh so the model hasn't seen them.\nAnswers are stored separately and only compared after answering.",
+      "function_count": 1,
+      "functions": [
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "cheat-test.py",
+      "language": "python",
+      "docstring_preview": "Cheat test: compare my answers to the now-revealed answer key.",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "check-commitments.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 2,
+      "functions": [
+        "Seed-DefaultRegistry",
+        "Read-Registry"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "check-status.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "coder-module.py",
+      "language": "python",
+      "docstring_preview": "Coder Module — AI senior developer assistant.\nProvides code analysis, framework generation, debugging, code review,\nexplanation, language conversion, and architecture recommendations.\nRegistered as MC",
+      "function_count": 16,
+      "functions": [
+        "_score_to_grade",
+        "_estimate_complexity",
+        "_line_number",
+        "_detect_long_functions",
+        "_get_nesting_depth",
+        "_count_functions",
+        "_count_classes",
+        "analyze_code",
+        "_init_templates",
+        "debug_error",
+        "review_code",
+        "explain_code",
+        "_init_conversion_maps",
+        "convert_code",
+        "gamedev_blueprint",
+        "coder_handle_tool_call"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "consultation-room.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nMulti-perspective decision analysis for the Consultation Room.\n.DESCRIPTION\nAnalyzes a decision question from multiple structured perspectives\n(architect, pragmatist, security, minimalist, p",
+      "function_count": 2,
+      "functions": [
+        "Get-Timestamp",
+        "Get-FileTimestamp"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "dag-coordinator.py",
+      "language": "python",
+      "docstring_preview": "DAG Coordinator — topological execution engine for multi-agent pipelines.\n\nReads a DAG definition JSON, performs topological sort (Kahn's algorithm),\ncreates state files per node, monitors heartbeat f",
+      "function_count": 15,
+      "functions": [
+        "get_state_manager",
+        "now_iso",
+        "ensure_dirs",
+        "load_json",
+        "write_json",
+        "load_dag_definition",
+        "topological_sort",
+        "get_dependents",
+        "_evaluate_condition",
+        "_build_node_input",
+        "_set_nested",
+        "_substitute_template",
+        "_simulate_node_execution",
+        "execute_pipeline",
+        "show_dag_info"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "dashboard-mem0.py",
+      "language": "python",
+      "docstring_preview": "Mem0 query helper for dashboard.ps1 - fetches recent memories via API.",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "dashboard.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nai-memory-core Dashboard — usage, memories, goals, commitments, errors, MCP status.\n.DESCRIPTION\nFull-session overview panel pulling from mem0, Goal Registry, Commitment Checker,\nxTrace erro",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "decision-trace.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 8,
+      "functions": [
+        "Ensure-Registry",
+        "Load-Registry",
+        "Get-Timestamp",
+        "Invoke-Add",
+        "Invoke-Update",
+        "Invoke-Search",
+        "Invoke-ByFile",
+        "Invoke-Status"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "devops-module.py",
+      "language": "python",
+      "docstring_preview": "DevOps/Container Module — AI DevOps expert for Podman, Docker, permissions,\nSamba, mergerfs, networking, and containerized development workflows.\n\nArchitecture:\n  Each function is a pure handler: dict",
+      "function_count": 3,
+      "functions": [
+        "dockerfile_analyze",
+        "network_troubleshoot",
+        "devops_handle_tool_call"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "error-trace.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 7,
+      "functions": [
+        "Ensure-Registry",
+        "Load-Registry",
+        "Invoke-LogError",
+        "Invoke-LogAttempt",
+        "Invoke-Resolve",
+        "Invoke-Search",
+        "Invoke-Status"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "firefox-provider-signup.py",
+      "language": "python",
+      "docstring_preview": "Free AI Provider Signup Navigator\nOpens each free AI provider's signup/API-key page in Playwright Firefox.\nUser signs up manually, then pastes API keys into a collected file.",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "game-dev-module.py",
+      "language": "python",
+      "docstring_preview": "Game Development Module — AI game development expert.\nSpecializes in Unity, Unreal Engine, and Roblox development.\nProvides tools for game design analysis, project scaffolding,\nmechanics design, monet",
+      "function_count": 11,
+      "functions": [
+        "_analyze_fun_factor",
+        "_generate_engagement_loops",
+        "_find_similar_games",
+        "gamedev_design_analyze",
+        "_unity_scaffold_fps",
+        "_unreal_scaffold_fps",
+        "_roblox_scaffold_fps",
+        "gamedev_mechanics_guide",
+        "gamedev_optimization",
+        "gamedev_level_design",
+        "gamedev_handle_tool_call"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "generate-blind-test.py",
+      "language": "python",
+      "docstring_preview": "BLIND TEST RUNNER — questions in, answers hidden, score computed at end.\n\nI (the model) read ONLY questions.json. \nanswers.json is created with answers encrypted/hidden from me.\nThe runner presents qu",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "generate-config.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "goal-registry.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 1,
+      "functions": [
+        "Get-SessionId"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "identity-manager.py",
+      "language": "python",
+      "docstring_preview": "Identity Manager — Consolidate, store, and inject persona identity from mem0.\n\nReads memory profiles and mem0 entries, distills a structured identity\n(persona, traits, principles, patterns), and gener",
+      "function_count": 8,
+      "functions": [
+        "ensure_dirs",
+        "now_iso",
+        "_load_json",
+        "_save_json",
+        "_list_profiles",
+        "_query_mem0_memories",
+        "_read_mem0_md_categories",
+        "print_status"
+      ],
+      "classes": [
+        "IdentityManager"
+      ]
+    },
+    {
+      "filename": "inject-identity.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nInjects the current identity profile as a session prompt fragment.\n.DESCRIPTION\nCalls identity-manager.py --render to generate a markdown session identity\nblock and outputs it to stdout. Des",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "integration-status.py",
+      "language": "python",
+      "docstring_preview": "Integration Status Report Generator — Checks all 5 workstream outputs,\nvalidates schemas, runs the integration test suite, and generates an HTML report.\n\nUsage:\n    python scripts/integration-status.p",
+      "function_count": 8,
+      "functions": [
+        "now_iso",
+        "check_file",
+        "check_dir",
+        "check_import",
+        "check_adr_completeness",
+        "run_test_suite",
+        "generate_report",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "literature-module.py",
+      "language": "python",
+      "docstring_preview": "Literature Module — Text analysis, concept extraction, study guides for social sciences.",
+      "function_count": 8,
+      "functions": [
+        "_count_syllables",
+        "_flesch_kincaid",
+        "_extract_key_phrases",
+        "_extract_claims_evidence",
+        "analyze_text",
+        "extract_concepts",
+        "generate_study_guide",
+        "analyze_philosophy"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "load-skills.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nMatches a user message against skill-router.json triggers and outputs skill names to load.\n.DESCRIPTION\nLoads skill-router.json, parses the user message for trigger keywords (case-insensitiv",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "logic-verify.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 4,
+      "functions": [
+        "Show-Usage",
+        "Test-ReasoningStructure",
+        "Get-LogicPrompt",
+        "Invoke-DCPPipeline"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "memory_search.py",
+      "language": "python",
+      "docstring_preview": "",
+      "function_count": 6,
+      "functions": [
+        "_get_searcher",
+        "search",
+        "synthesize",
+        "add_memory",
+        "consolidate",
+        "status"
+      ],
+      "classes": [
+        "NEMemorySearch"
+      ]
+    },
+    {
+      "filename": "ne-consolidation-daemon.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nNE-Memory auto-consolidation daemon — runs every N minutes to deduplicate\nmemory entries, merge similar records, and log results to DTrace.\n.DESCRIPTION\nLaunches the memory consolidation eng",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "orchestrate-all.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nUnified Orchestration Entry Point — Full pipeline orchestrator for ai-memory-core.\n.DESCRIPTION\nOrchestrates the complete pipeline: task analysis → complexity scoring →\nplan generation → dis",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "output-condenser.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nCondenses verbose tool outputs to extract only signal (errors, key data, summaries),\ndiscarding noise to stretch the agent's context window 3-5x.\n.DESCRIPTION\nSupports 4 condensation modes:\n",
+      "function_count": 6,
+      "functions": [
+        "Write-CondenserLog",
+        "Get-CosineSimilarity",
+        "Invoke-CondenseBash",
+        "Invoke-CondenseRead",
+        "Invoke-CondenseGrep",
+        "Invoke-CondenseMem0"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "preset-manager.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "run-blind-test.py",
+      "language": "python",
+      "docstring_preview": "Blind test runner — presents questions, collects answers, scores at end.\nAnswer key is XOR-masked; I (the model) CANNOT read answers from the file.",
+      "function_count": 2,
+      "functions": [
+        "longest_palindromic",
+        "fizzbuzz"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "run-eval-harness.py",
+      "language": "python",
+      "docstring_preview": "Agent Tool Systems Evaluation Harness\nTests all 6 performance-enhancing tools built for deepseek-v4-flash.\n\nUsage:\n    python scripts/run-eval-harness.py          # Run all tests\n    python scripts/ru",
+      "function_count": 11,
+      "functions": [
+        "test",
+        "run_powershell",
+        "test_skill_router",
+        "test_commitment_checker",
+        "test_goal_registry",
+        "test_error_trace",
+        "test_decision_trace",
+        "test_output_condenser",
+        "test_cross_tool_integration",
+        "test_performance",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "sandbox-integration.ps1",
+      "language": "powershell",
+      "docstring_preview": ".SYNOPSIS\nSandbox Integration Wrapper — calls sandbox-manager.py with structured output.\n.DESCRIPTION\nPowerShell wrapper for the sandbox-manager.py script. Accepts code, language,\ntimeout parameters a",
+      "function_count": 0,
+      "functions": [],
+      "classes": []
+    },
+    {
+      "filename": "sandbox-manager.py",
+      "language": "python",
+      "docstring_preview": "Sandbox Manager — Lightweight code execution sandbox for running untrusted\nor isolated code snippets. Uses file-based isolation with temp directories,\ntimeouts, and output capture. No Docker dependenc",
+      "function_count": 8,
+      "functions": [
+        "_compute_code_hash",
+        "_now_iso",
+        "_load_log",
+        "_append_log",
+        "format_result",
+        "format_safety",
+        "format_verify",
+        "main"
+      ],
+      "classes": [
+        "SandboxError",
+        "SafetyViolation",
+        "SandboxManager"
+      ]
+    },
+    {
+      "filename": "score-blind-benchmark.py",
+      "language": "python",
+      "docstring_preview": "Score the blind benchmark by comparing my answers to the answer key.",
+      "function_count": 1,
+      "functions": [
+        "is_anagram"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "security-scan.py",
+      "language": "python",
+      "docstring_preview": "Security Scanner — ai-memory-core toolchain security audit module.\n\nScans a codebase for hardcoded secrets, vulnerable dependencies, security\nanti-patterns, and configuration weaknesses. Integrates wi",
+      "function_count": 15,
+      "functions": [
+        "find_target_files",
+        "scan_secrets_in_file",
+        "scan_code_antipatterns_in_file",
+        "parse_version",
+        "scan_dependency_vulnerabilities",
+        "scan_config_security",
+        "run_powershell_script",
+        "log_to_xtrace",
+        "log_to_dtrace",
+        "generate_report_id",
+        "print_findings_table",
+        "print_summary",
+        "list_all_patterns",
+        "parse_args",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "sensory-module.py",
+      "language": "python",
+      "docstring_preview": "Sensory Module — AI agent sensory input layer.\nConnects AI tools to: web browsing (Playwright), text extraction (PDF/image/HTML),\nweb scraping, API calls, RSS feeds, and local file reading.\n\nRegistere",
+      "function_count": 19,
+      "functions": [
+        "_get_requests",
+        "_get_bs4",
+        "_get_pdfplumber",
+        "_get_trafilatura",
+        "_get_playwright",
+        "_ensure_playwright_browser",
+        "_close_playwright",
+        "browse_url",
+        "browse_screenshot",
+        "browse_interact",
+        "extract_from_pdf",
+        "extract_from_html",
+        "extract_from_image",
+        "scrape_url",
+        "scrape_extract_article",
+        "fetch_rss",
+        "read_file",
+        "web_search",
+        "handle_tool_call"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "side-by-side-comparison.py",
+      "language": "python",
+      "docstring_preview": "Side-by-Side Comparison: Agent WITH tools vs WITHOUT tools\n\nTests the same task across two scenarios and measures:\n  - Steps taken\n  - Signal/noise ratio (meaningful output vs total output)\n  - Error ",
+      "function_count": 12,
+      "functions": [
+        "safe_json_load",
+        "seed_json",
+        "section",
+        "report",
+        "test_skill_router",
+        "test_output_condenser",
+        "test_error_trace",
+        "test_decision_trace",
+        "test_goal_registry",
+        "test_commitment_checker",
+        "test_integration",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "state_file_manager.py",
+      "language": "python",
+      "docstring_preview": "DAG State File Manager — atomic file-based state passing between DAG nodes.\n\nProvides DAGStateManager for reading, writing, merging, and clearing per-node\nstate files stored in .memory/dag-states/{dag",
+      "function_count": 2,
+      "functions": [
+        "now_iso",
+        "_ensure_dir"
+      ],
+      "classes": [
+        "DAGStateManager"
+      ]
+    },
+    {
+      "filename": "task-analyzer.py",
+      "language": "python",
+      "docstring_preview": "Task Analyzer — Evaluates task complexity and recommends execution mode.\nPart of the auto-orchestration framework.\n\nUsage:\n    python scripts/task-analyzer.py --task \"Implement login with OAuth\"\n    p",
+      "function_count": 1,
+      "functions": [
+        "analyze_task"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "task-orchestrator.py",
+      "language": "python",
+      "docstring_preview": "Task Orchestrator v2 — ACTIVE orchestrator that works WHILE subagents run.\nUsage:\n    python scripts/task-orchestrator.py --task \"<task>\" --plan\n    python scripts/task-orchestrator.py --task \"<task>\"",
+      "function_count": 9,
+      "functions": [
+        "ensure_dirs",
+        "now_iso",
+        "_run_dag",
+        "print_box",
+        "call_temperature_mcp",
+        "_heuristic_temperature",
+        "analyze_task",
+        "generate_workstreams",
+        "show_plan"
+      ],
+      "classes": [
+        "WorkstreamStatus",
+        "ContextDigest",
+        "ConflictReport",
+        "BackgroundAnalyzer",
+        "HeartbeatMonitor"
+      ]
+    },
+    {
+      "filename": "team-mode.ps1",
+      "language": "powershell",
+      "docstring_preview": "",
+      "function_count": 2,
+      "functions": [
+        "Get-Timestamp",
+        "Get-FileTimestamp"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "test-integration-layer.py",
+      "language": "python",
+      "docstring_preview": "Integration Layer Test Suite — Verifies all 5 workstream outputs wire together correctly.\n\nTests:\n  a) DAG coordinator import\n  b) Identity manager import\n  c) Sandbox manager import\n  d) Doc generato",
+      "function_count": 15,
+      "functions": [
+        "test",
+        "skip",
+        "import_from_path",
+        "test_dag_coordinator_import",
+        "test_identity_manager_import",
+        "test_sandbox_manager_import",
+        "test_doc_generator_import",
+        "test_orchestrator_dag_flag",
+        "test_dag_json_valid",
+        "test_integration_pipeline",
+        "test_adr_exists",
+        "test_all_scripts_executable",
+        "test_dag_coordinator_plan",
+        "run_all",
+        "list_tests"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "test-mcp-server.py",
+      "language": "python",
+      "docstring_preview": "Test harness for tools-mcp-server.py\nValidates the MCP stdio protocol and all 6 tool categories.\nSends initialize, tools/list, and tools/call requests, then saves results.",
+      "function_count": 2,
+      "functions": [
+        "send_mcp_message",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "test-sensory-module.py",
+      "language": "python",
+      "docstring_preview": "Integration tests for sensory-module.py\nRun: python test-sensory-module.py",
+      "function_count": 13,
+      "functions": [
+        "run",
+        "test_scrape_text",
+        "test_scrape_json",
+        "test_scrape_links",
+        "test_extract_html_clean",
+        "test_extract_html_tables",
+        "test_api_get",
+        "test_fetch_rss",
+        "test_read_file",
+        "test_browse_url",
+        "test_browse_metadata",
+        "test_web_search",
+        "test_tool_dispatcher"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "tools-mcp-server.py",
+      "language": "python",
+      "docstring_preview": "MCP Server: ai-memory-core Toolchain\nExposes xTrace, DTrace, Skill Router, Output Condenser, Goal Registry,\nand Commitment Checker as MCP tools for use by OpenCode and benchmark runners.\n\nProtocol: JS",
+      "function_count": 20,
+      "functions": [
+        "_get_verifier",
+        "_get_memory_search",
+        "read_exact",
+        "_get_art_module",
+        "_get_lit_module",
+        "_get_sensory_module",
+        "_get_audio_module",
+        "_get_coder_module",
+        "_get_devops_module",
+        "_get_gamedev_module",
+        "run_powershell",
+        "execute_tool_async",
+        "handle_tool_call",
+        "send_message",
+        "_handle_ping",
+        "_handle_health",
+        "_process_message",
+        "_reader_loop",
+        "_drain_pending",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "filename": "verifier_middleware.py",
+      "language": "python",
+      "docstring_preview": "verifier-middleware.py — Parallel verifier for ai-memory-core MCP pipeline.\n\nCross-checks every tool call for security violations, oversight anomalies,\nstate drift, and generates renudge correction si",
+      "function_count": 1,
+      "functions": [
+        "_demo"
+      ],
+      "classes": [
+        "VerifierStats",
+        "VerifierMiddleware"
+      ]
+    }
+  ],
+  "mcp_tools": [
+    {
+      "name": "xtrace_log_error",
+      "module": "Core",
+      "description": "Log an error occurrence with signature for xTrace error tracking",
+      "param_count": 3,
+      "required": [
+        "command",
+        "error_output"
+      ]
+    },
+    {
+      "name": "xtrace_search",
+      "module": "Core",
+      "description": "Search xTrace error registry for a known error signature",
+      "param_count": 1,
+      "required": [
+        "keyword"
+      ]
+    },
+    {
+      "name": "xtrace_status",
+      "module": "Core",
+      "description": "Get xTrace error tracking summary statistics",
+      "param_count": 0,
+      "required": []
+    },
+    {
+      "name": "dtrace_add",
+      "module": "Core",
+      "description": "Log an architectural decision to DTrace",
+      "param_count": 6,
+      "required": [
+        "title",
+        "decision",
+        "rationale"
+      ]
+    },
+    {
+      "name": "dtrace_search",
+      "module": "Core",
+      "description": "Search DTrace decision registry",
+      "param_count": 1,
+      "required": [
+        "keyword"
+      ]
+    },
+    {
+      "name": "skill_router_match",
+      "module": "Core",
+      "description": "Match a task description to relevant skills using the Skill Router",
+      "param_count": 1,
+      "required": [
+        "task"
+      ]
+    },
+    {
+      "name": "output_condenser",
+      "module": "Core",
+      "description": "Condense command output to essential information",
+      "param_count": 2,
+      "required": [
+        "output_type",
+        "content"
+      ]
+    },
+    {
+      "name": "goal_registry_init",
+      "module": "Core",
+      "description": "Initialize a new goal in the Goal Registry",
+      "param_count": 1,
+      "required": [
+        "goal"
+      ]
+    },
+    {
+      "name": "goal_registry_add_subgoal",
+      "module": "Core",
+      "description": "Add a sub-goal to the current goal stack",
+      "param_count": 1,
+      "required": [
+        "description"
+      ]
+    },
+    {
+      "name": "goal_registry_status",
+      "module": "Core",
+      "description": "Get current goal registry status",
+      "param_count": 0,
+      "required": []
+    },
+    {
+      "name": "goal_registry_check_alignment",
+      "module": "Core",
+      "description": "Check if current action aligns with the original goal",
+      "param_count": 1,
+      "required": [
+        "current_action"
+      ]
+    },
+    {
+      "name": "commitment_checker_list",
+      "module": "Core",
+      "description": "List pending commitments for this session",
+      "param_count": 0,
+      "required": []
+    },
+    {
+      "name": "commitment_checker_verify",
+      "module": "Core",
+      "description": "Mark a commitment as verified for this session",
+      "param_count": 1,
+      "required": [
+        "id"
+      ]
+    },
+    {
+      "name": "art_generate_svg",
+      "module": "Art",
+      "description": "Generate SVG diagrams, flowcharts, and illustrations from a text description",
+      "param_count": 3,
+      "required": [
+        "description"
+      ]
+    },
+    {
+      "name": "art_generate_theme",
+      "module": "Art",
+      "description": "Generate a color theme with roles and WCAG contrast validation from a description",
+      "param_count": 1,
+      "required": [
+        "description"
+      ]
+    },
+    {
+      "name": "art_extract_palette",
+      "module": "Art",
+      "description": "Extract complementary, analogous, and triadic palettes from a base hex color",
+      "param_count": 1,
+      "required": [
+        "color"
+      ]
+    },
+    {
+      "name": "art_design_concept",
+      "module": "Art",
+      "description": "Generate a design concept with layout, typography, and spacing guidelines from requirements",
+      "param_count": 1,
+      "required": [
+        "requirements"
+      ]
+    },
+    {
+      "name": "lit_analyze_text",
+      "module": "Literature",
+      "description": "Analyze text for reading level (Flesch-Kincaid), key concepts, argument structure, and sentiment",
+      "param_count": 1,
+      "required": [
+        "text"
+      ]
+    },
+    {
+      "name": "lit_extract_concepts",
+      "module": "Literature",
+      "description": "Extract key concepts, their definitions, context, and relationships from text",
+      "param_count": 1,
+      "required": [
+        "text"
+      ]
+    },
+    {
+      "name": "lit_generate_study_guide",
+      "module": "Literature",
+      "description": "Generate a study guide from content with key terms, discussion questions, and section summaries",
+      "param_count": 1,
+      "required": [
+        "content"
+      ]
+    },
+    {
+      "name": "lit_analyze_philosophy",
+      "module": "Literature",
+      "description": "Analyze philosophical arguments: premises, conclusions, reasoning type, detected philosophers, and schools",
+      "param_count": 1,
+      "required": [
+        "text"
+      ]
+    },
+    {
+      "name": "sensory_browse",
+      "module": "Sensory",
+      "description": "Navigate to a URL using Playwright (headless Firefox) and extract content. Modes: text, html, markdown, links, metadata",
+      "param_count": 3,
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "name": "sensory_screenshot",
+      "module": "Sensory",
+      "description": "Take a screenshot of a web page via Playwright",
+      "param_count": 3,
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "name": "sensory_interact",
+      "module": "Sensory",
+      "description": "Navigate to URL and perform actions (click, type, press, wait)",
+      "param_count": 5,
+      "required": [
+        "url",
+        "actions"
+      ]
+    },
+    {
+      "name": "sensory_extract_pdf",
+      "module": "Sensory",
+      "description": "Extract text from a PDF file",
+      "param_count": 2,
+      "required": [
+        "file_path"
+      ]
+    },
+    {
+      "name": "sensory_extract_html",
+      "module": "Sensory",
+      "description": "Extract text from raw HTML content. Modes: clean (trafilatura), soup (BeautifulSoup), tables",
+      "param_count": 2,
+      "required": [
+        "html_content"
+      ]
+    },
+    {
+      "name": "sensory_extract_image",
+      "module": "Sensory",
+      "description": "Extract text from an image via OCR (if pytesseract installed) or return image metadata",
+      "param_count": 1,
+      "required": [
+        "file_path"
+      ]
+    },
+    {
+      "name": "sensory_scrape",
+      "module": "Sensory",
+      "description": "Fetch a URL via HTTP (no JS) and extract content. Modes: text, html, links, tables, json",
+      "param_count": 3,
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "name": "sensory_extract_article",
+      "module": "Sensory",
+      "description": "Extract clean article content from a URL using trafilatura",
+      "param_count": 1,
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "name": "sensory_api_request",
+      "module": "Sensory",
+      "description": "Make an HTTP API request (GET/POST/PUT/DELETE/PATCH) with structured response",
+      "param_count": 6,
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "name": "sensory_fetch_rss",
+      "module": "Sensory",
+      "description": "Parse an RSS/Atom feed and return structured items",
+      "param_count": 2,
+      "required": [
+        "feed_url"
+      ]
+    },
+    {
+      "name": "sensory_read_file",
+      "module": "Sensory",
+      "description": "Read a local text file and return its content",
+      "param_count": 2,
+      "required": [
+        "file_path"
+      ]
+    },
+    {
+      "name": "sensory_search",
+      "module": "Sensory",
+      "description": "Web search via DuckDuckGo (no API key needed). Returns title, URL, snippet.",
+      "param_count": 2,
+      "required": [
+        "query"
+      ]
+    },
+    {
+      "name": "audio_analyze_file",
+      "module": "Audio",
+      "description": "Analyze WAV audio file: duration, channels, sample rate, amplitude stats",
+      "param_count": 3,
+      "required": []
+    },
+    {
+      "name": "audio_waveform",
+      "module": "Audio",
+      "description": "Generate ASCII waveform visualization from audio file",
+      "param_count": 3,
+      "required": [
+        "file_path"
+      ]
+    },
+    {
+      "name": "audio_frequency_analysis",
+      "module": "Audio",
+      "description": "DFT-based frequency analysis: band energy, dominant frequency, spectral centroid",
+      "param_count": 2,
+      "required": [
+        "file_path"
+      ]
+    },
+    {
+      "name": "audio_music_theory",
+      "module": "Audio",
+      "description": "Music theory analysis: chord detection, scale matching, intervals from notes or frequencies",
+      "param_count": 2,
+      "required": []
+    },
+    {
+      "name": "audio_speech_analysis",
+      "module": "Audio",
+      "description": "Speech transcript analysis: WPM, filler words, pace rating, readability",
+      "param_count": 2,
+      "required": [
+        "transcript",
+        "duration_seconds"
+      ]
+    },
+    {
+      "name": "audio_convert_guide",
+      "module": "Audio",
+      "description": "Audio format conversion guide with ffmpeg commands and quality comparison",
+      "param_count": 3,
+      "required": [
+        "source_format",
+        "target_format"
+      ]
+    },
+    {
+      "name": "audio_generate_tone",
+      "module": "Audio",
+      "description": "Generate sine/square/saw/triangle wave tone as base64 WAV",
+      "param_count": 5,
+      "required": []
+    },
+    {
+      "name": "coder_analyze_code",
+      "module": "Coder",
+      "description": "Analyze code for quality, complexity, smells, and security issues across 12 languages",
+      "param_count": 2,
+      "required": [
+        "code",
+        "language"
+      ]
+    },
+    {
+      "name": "coder_generate_framework",
+      "module": "Coder",
+      "description": "Generate complete project scaffold (web-api, cli-tool, library, desktop, microservice, data-pipeline, fullstack) for 12 languages",
+      "param_count": 4,
+      "required": [
+        "project_type",
+        "language"
+      ]
+    },
+    {
+      "name": "coder_debug",
+      "module": "Coder",
+      "description": "Analyze error messages and stack traces, suggest fixes (50+ error patterns across languages)",
+      "param_count": 3,
+      "required": [
+        "error",
+        "language"
+      ]
+    },
+    {
+      "name": "coder_review",
+      "module": "Coder",
+      "description": "Code review with severity ratings (security, performance, readability, architecture, testing)",
+      "param_count": 3,
+      "required": [
+        "code",
+        "language"
+      ]
+    },
+    {
+      "name": "coder_explain",
+      "module": "Coder",
+      "description": "Educational code explanation at beginner/intermediate/advanced level",
+      "param_count": 3,
+      "required": [
+        "code",
+        "language"
+      ]
+    },
+    {
+      "name": "coder_convert",
+      "module": "Coder",
+      "description": "Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)",
+      "param_count": 3,
+      "required": [
+        "code",
+        "from",
+        "to"
+      ]
+    },
+    {
+      "name": "coder_architecture",
+      "module": "Coder",
+      "description": "Architecture pattern recommendation (MVC, Hexagonal, CQRS, Event-Driven, Microservices, etc.)",
+      "param_count": 3,
+      "required": [
+        "project_type"
+      ]
+    },
+    {
+      "name": "devops_container_debug",
+      "module": "DevOps",
+      "description": "Diagnose container issues (Podman/Docker) from error logs",
+      "param_count": 3,
+      "required": [
+        "error_log"
+      ]
+    },
+    {
+      "name": "devops_permissions_analyze",
+      "module": "DevOps",
+      "description": "Analyze permission/usernamespace issues in container environments",
+      "param_count": 4,
+      "required": []
+    },
+    {
+      "name": "devops_compose_generator",
+      "module": "DevOps",
+      "description": "Generate Docker/Podman Compose files from service definitions",
+      "param_count": 3,
+      "required": [
+        "services"
+      ]
+    },
+    {
+      "name": "devops_samba_config",
+      "module": "DevOps",
+      "description": "Generate Samba/SMB share configurations with OS-specific troubleshooting",
+      "param_count": 4,
+      "required": [
+        "share_name",
+        "path"
+      ]
+    },
+    {
+      "name": "devops_mergerfs_setup",
+      "module": "DevOps",
+      "description": "Configure mergerfs for drive pooling with policy explanations and optimization tips",
+      "param_count": 4,
+      "required": [
+        "source_paths",
+        "mount_point"
+      ]
+    },
+    {
+      "name": "devops_dockerfile_analyze",
+      "module": "DevOps",
+      "description": "Analyze and optimize Dockerfiles for security, caching, and size",
+      "param_count": 1,
+      "required": [
+        "dockerfile"
+      ]
+    },
+    {
+      "name": "devops_network_troubleshoot",
+      "module": "DevOps",
+      "description": "Diagnose container networking issues (DNS, ports, bridges, host networking)",
+      "param_count": 1,
+      "required": [
+        "symptom"
+      ]
+    },
+    {
+      "name": "gamedev_design_analyze",
+      "module": "Game Dev",
+      "description": "Analyze game concept: fun factor, engagement loops, monetization fit, market position",
+      "param_count": 3,
+      "required": [
+        "concept",
+        "genre"
+      ]
+    },
+    {
+      "name": "gamedev_scaffold_project",
+      "module": "Game Dev",
+      "description": "Generate Unity/Unreal/Roblox project scaffold with real working boilerplate files",
+      "param_count": 4,
+      "required": [
+        "engine",
+        "genre"
+      ]
+    },
+    {
+      "name": "gamedev_mechanics_guide",
+      "module": "Game Dev",
+      "description": "Game mechanics design guide: core loops, progression systems, reward schedules by genre",
+      "param_count": 2,
+      "required": [
+        "genre"
+      ]
+    },
+    {
+      "name": "gamedev_monetization",
+      "module": "Game Dev",
+      "description": "Monetization strategy recommendations with revenue estimates and ethical guidance",
+      "param_count": 3,
+      "required": [
+        "platform",
+        "genre"
+      ]
+    },
+    {
+      "name": "gamedev_optimization",
+      "module": "Game Dev",
+      "description": "Engine-specific optimization advice (FPS, draw calls, memory, load times, network)",
+      "param_count": 2,
+      "required": [
+        "engine",
+        "issue"
+      ]
+    },
+    {
+      "name": "gamedev_compare_engines",
+      "module": "Game Dev",
+      "description": "Compare game engines (Unity/Unreal/Godot/Roblox) for specific project types",
+      "param_count": 3,
+      "required": [
+        "project_type"
+      ]
+    },
+    {
+      "name": "gamedev_level_design",
+      "module": "Game Dev",
+      "description": "Level design principles, flow diagrams, pacing guides, and playtesting checklists",
+      "param_count": 2,
+      "required": [
+        "genre",
+        "level_type"
+      ]
+    },
+    {
+      "name": "memory_search",
+      "module": "Memory Search",
+      "description": "Local BM25 memory search with synonym expansion and fuzzy matching — zero LLM cost",
+      "param_count": 3,
+      "required": [
+        "query"
+      ]
+    },
+    {
+      "name": "memory_synthesize",
+      "module": "Memory Search",
+      "description": "Search and synthesize memory results into a narrative with inline citations",
+      "param_count": 3,
+      "required": [
+        "query"
+      ]
+    },
+    {
+      "name": "memory_add",
+      "module": "Memory Search",
+      "description": "Add a memory entry for future BM25 search and synthesis",
+      "param_count": 3,
+      "required": [
+        "text"
+      ]
+    },
+    {
+      "name": "memory_consolidate",
+      "module": "Memory Search",
+      "description": "Merge duplicate/similar memory entries by Jaccard similarity threshold",
+      "param_count": 1,
+      "required": []
+    },
+    {
+      "name": "memory_status",
+      "module": "Memory Search",
+      "description": "Get NE-Memory engine status: entry count, storage size, unique terms, last timestamp",
+      "param_count": 0,
+      "required": []
+    },
+    {
+      "name": "verifier_status",
+      "module": "Verifier",
+      "description": "Get verifier middleware status: checks run, violations found, renudges sent, uptime",
+      "param_count": 0,
+      "required": []
+    },
+    {
+      "name": "verifier_renudge",
+      "module": "Verifier",
+      "description": "Send a correction signal (renudge) to steer the agent back on track",
+      "param_count": 3,
+      "required": [
+        "target",
+        "correction"
+      ]
+    }
+  ],
+  "data_files": [
+    {
+      "filename": "data\\benchmark-results.json",
+      "category": "results",
+      "record_count": 2,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\blind-answer-key.json",
+      "category": "config",
+      "record_count": 0,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\blind-my-answers.json",
+      "category": "config",
+      "record_count": 0,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\blind-questions.json",
+      "category": "config",
+      "record_count": 10,
+      "key_count": 0
+    },
+    {
+      "filename": "data\\commitment-registry.json",
+      "category": "registry",
+      "record_count": 5,
+      "key_count": 8
+    },
+    {
+      "filename": "data\\comparison-results.json",
+      "category": "results",
+      "record_count": 6,
+      "key_count": 12
+    },
+    {
+      "filename": "data\\consultation-cr-20260715-134730.json",
+      "category": "config",
+      "record_count": 2,
+      "key_count": 18
+    },
+    {
+      "filename": "data\\dag-definitions\\multi-phase-refactor.json",
+      "category": "config",
+      "record_count": 6,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\dag-definitions\\research-implement-verify.json",
+      "category": "config",
+      "record_count": 5,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\dag-definitions\\security-audit-pipeline.json",
+      "category": "config",
+      "record_count": 5,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\dag-definitions\\seed-dag.json",
+      "category": "config",
+      "record_count": 3,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\dag-schemas\\dag-definition-v1.json",
+      "category": "config",
+      "record_count": 5,
+      "key_count": 6
+    },
+    {
+      "filename": "data\\dag-schemas\\state-contract-v1.json",
+      "category": "config",
+      "record_count": 6,
+      "key_count": 6
+    },
+    {
+      "filename": "data\\dag-traces\\multi-phase-refactor-20260715-230858.json",
+      "category": "config",
+      "record_count": 4,
+      "key_count": 14
+    },
+    {
+      "filename": "data\\dag-traces\\research-implement-verify-20260715-230849.json",
+      "category": "config",
+      "record_count": 3,
+      "key_count": 14
+    },
+    {
+      "filename": "data\\dag-traces\\research-implement-verify-20260715-230910.json",
+      "category": "config",
+      "record_count": 3,
+      "key_count": 14
+    },
+    {
+      "filename": "data\\dag-traces\\security-audit-pipeline-20260715-230856.json",
+      "category": "config",
+      "record_count": 3,
+      "key_count": 15
+    },
+    {
+      "filename": "data\\decision-registry.json",
+      "category": "registry",
+      "record_count": 7,
+      "key_count": 16
+    },
+    {
+      "filename": "data\\doc-index.json",
+      "category": "config",
+      "record_count": 48,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\error-registry.json",
+      "category": "registry",
+      "record_count": 0,
+      "key_count": 2
+    },
+    {
+      "filename": "data\\flash-benchmark-results.json",
+      "category": "results",
+      "record_count": 0,
+      "key_count": 9
+    },
+    {
+      "filename": "data\\free-provider-template.json",
+      "category": "config",
+      "record_count": 0,
+      "key_count": 4
+    },
+    {
+      "filename": "data\\identity-evolution-log.json",
+      "category": "trace",
+      "record_count": 2,
+      "key_count": 6
+    },
+    {
+      "filename": "data\\identity-schema.json",
+      "category": "config",
+      "record_count": 8,
+      "key_count": 7
+    },
+    {
+      "filename": "data\\mcp-server-test-results.json",
+      "category": "results",
+      "record_count": 10,
+      "key_count": 12
+    },
+    {
+      "filename": "data\\orchestration-research.json",
+      "category": "config",
+      "record_count": 5,
+      "key_count": 12
+    },
+    {
+      "filename": "data\\sandbox-log.json",
+      "category": "trace",
+      "record_count": 27,
+      "key_count": 0
+    },
+    {
+      "filename": "data\\security-scan-report.json",
+      "category": "config",
+      "record_count": 17,
+      "key_count": 20
+    },
+    {
+      "filename": "data\\synonyms.json",
+      "category": "config",
+      "record_count": 0,
+      "key_count": 11
+    },
+    {
+      "filename": "data\\tool-inventory.json",
+      "category": "config",
+      "record_count": 68,
+      "key_count": 0
+    }
+  ],
+  "summary": {
+    "total_scripts": 48,
+    "total_python": 31,
+    "total_powershell": 17,
+    "total_mcp_tools": 68,
+    "total_mcp_modules": 10,
+    "total_data_files": 30
+  }
+}

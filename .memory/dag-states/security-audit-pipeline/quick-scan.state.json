@@ -1,0 +1,32 @@
+{
+  "dag_id": "security-audit-pipeline",
+  "phase": "completed",
+  "node_id": "quick-scan",
+  "input": {
+    "task": "Perform a quick security scan of the codebase for: hardcoded secrets, SQL injection vectors, XSS vulnerabilities, insecure deserialization, and common misconfigurations. Focus areas: {{input.task}}",
+    "context": {},
+    "artifacts": []
+  },
+  "output": {
+    "summary": "Completed: Perform a quick security scan of the codebase for: hardcoded secrets, SQL inject",
+    "data": {
+      "vulnerabilities": "<vulnerabilities_result>",
+      "severity_counts": "<severity_counts_result>",
+      "scan_coverage": "<scan_coverage_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:08:55.463995+00:00",
+    "updated_at": "2026-07-16T03:08:55.996206+00:00",
+    "completed_at": "2026-07-16T03:08:55.996172+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 518.120527267456,
+    "retry_count": 0,
+    "temperature": 0.3,
+    "node_version": "1.0.0"
+  }
+}

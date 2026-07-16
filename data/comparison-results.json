@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-07-15T12:51:25Z",
+  "tests": [
+    {
+      "test": "Task-to-Skill Matching",
+      "with_tools_score": 95,
+      "without_tools_score": 50,
+      "step_savings": 3,
+      "noise_reduction": 120,
+      "signal_improvement": "60%"
+    },
+    {
+      "test": "Output Signal/Noise Filtering",
+      "with_tools_score": 85,
+      "without_tools_score": 25,
+      "step_savings": 0,
+      "noise_reduction": 11,
+      "signal_improvement": "53%"
+    },
+    {
+      "test": "Error Recovery Persistence",
+      "with_tools_score": 90,
+      "without_tools_score": 20,
+      "step_savings": 13,
+      "noise_reduction": 200,
+      "signal_improvement": "60%"
+    },
+    {
+      "test": "Architectural Decision Persistence",
+      "with_tools_score": 95,
+      "without_tools_score": 10,
+      "step_savings": 4,
+      "noise_reduction": 300,
+      "signal_improvement": "85%"
+    },
+    {
+      "test": "Goal Drift Detection",
+      "with_tools_score": 80,
+      "without_tools_score": 15,
+      "step_savings": 9,
+      "noise_reduction": 150,
+      "signal_improvement": "65%"
+    },
+    {
+      "test": "Behavioral Fix Enforcement",
+      "with_tools_score": 85,
+      "without_tools_score": 10,
+      "step_savings": -1,
+      "noise_reduction": 0,
+      "signal_improvement": "90%"
+    }
+  ],
+  "average_with_tools": 88.33333333333333,
+  "average_without": 21.666666666666668,
+  "improvement_pct": 307.6923076923076,
+  "compound_multiplier": 2.0
+}

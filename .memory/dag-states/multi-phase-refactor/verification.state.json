@@ -1,0 +1,50 @@
+{
+  "dag_id": "multi-phase-refactor",
+  "phase": "completed",
+  "node_id": "verification",
+  "input": {
+    "task": "Run full verification on the refactored codebase. Changes: <changed_files_result>. Refactoring log: <refactoring_log_result>. Test updates: <test_updates_result>. Run: lint, typecheck, all tests, integration tests. Report any regressions.",
+    "context": {},
+    "artifacts": [],
+    "parent": {
+      "implementation": {
+        "output": {
+          "summary": "Completed: Execute the refactoring plan. Plan: <refactoring_plan_result>. Risk matrix: <ris",
+          "data": {
+            "changed_files": "<changed_files_result>",
+            "refactoring_log": "<refactoring_log_result>",
+            "backward_compat_notes": "<backward_compat_notes_result>",
+            "test_updates": "<test_updates_result>"
+          },
+          "artifacts": [],
+          "files_changed": [],
+          "decisions": []
+        }
+      }
+    }
+  },
+  "output": {
+    "summary": "Completed: Run full verification on the refactored codebase. Changes: <changed_files_result",
+    "data": {
+      "lint_results": "<lint_results_result>",
+      "typecheck_results": "<typecheck_results_result>",
+      "test_results": "<test_results_result>",
+      "regression_report": "<regression_report_result>",
+      "completion_summary": "<completion_summary_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:08:58.053668+00:00",
+    "updated_at": "2026-07-16T03:08:58.928676+00:00",
+    "completed_at": "2026-07-16T03:08:58.928638+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 843.9838886260986,
+    "retry_count": 0,
+    "temperature": 0.2,
+    "node_version": "1.0.0"
+  }
+}

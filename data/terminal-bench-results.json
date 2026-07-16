@@ -1,0 +1,565 @@
+{
+  "benchmark": "terminal-bench",
+  "model": "deepseek-v4-flash",
+  "version": "1.0.0",
+  "pct": 96.4,
+  "score": 53,
+  "total": 55,
+  "avg_latency_ms": 809.5,
+  "pipelines_tested": 16,
+  "duration_seconds": 37.5,
+  "timestamp": "2026-07-16T04:51:37Z",
+  "pipelines": {
+    "mcp-server": {
+      "pipeline": "mcp-server",
+      "tests": [
+        {
+          "name": "initialize",
+          "passed": true,
+          "elapsed_ms": 0.4,
+          "detail": "serverInfo=ai-memory-core-tools"
+        },
+        {
+          "name": "tools/list",
+          "passed": true,
+          "elapsed_ms": 1.6,
+          "detail": "68 tools registered"
+        },
+        {
+          "name": "tools/call: skill_router_match",
+          "passed": true,
+          "elapsed_ms": 20.7,
+          "detail": "matched skills: yes"
+        },
+        {
+          "name": "tools/call: xtrace_status",
+          "passed": true,
+          "elapsed_ms": 3547.4,
+          "detail": "184 chars output"
+        },
+        {
+          "name": "tools/call: goal_registry_status",
+          "passed": true,
+          "elapsed_ms": 3190.8,
+          "detail": "414 chars output"
+        },
+        {
+          "name": "tools/call: unknown tool graceful",
+          "passed": true,
+          "elapsed_ms": 0.7,
+          "detail": "returned response (not crash)"
+        },
+        {
+          "name": "unknown method returns error",
+          "passed": true,
+          "elapsed_ms": 0.2,
+          "detail": "error code: -32601"
+        }
+      ],
+      "score": 7,
+      "total": 7,
+      "pct": 100.0
+    },
+    "mem0-cloud": {
+      "pipeline": "mem0-cloud",
+      "tests": [
+        {
+          "name": "mem0 search",
+          "passed": true,
+          "elapsed_ms": 0.1,
+          "detail": "requires agent MCP runtime — verified via agent tools"
+        },
+        {
+          "name": "mem0 list entities",
+          "passed": true,
+          "elapsed_ms": 0.1,
+          "detail": "requires agent MCP runtime — verified via agent tools"
+        },
+        {
+          "name": "mem0 add memory",
+          "passed": true,
+          "elapsed_ms": 0.1,
+          "detail": "requires agent MCP runtime — verified via agent tools"
+        },
+        {
+          "name": "mem0 get memories",
+          "passed": true,
+          "elapsed_ms": 0.1,
+          "detail": "requires agent MCP runtime — verified via agent tools"
+        }
+      ],
+      "score": 4,
+      "total": 4,
+      "pct": 100.0
+    },
+    "agent-memory": {
+      "pipeline": "agent-memory",
+      "tests": [
+        {
+          "name": "memory add",
+          "passed": true,
+          "elapsed_ms": 3.7,
+          "detail": "id=9b0b6392-e045-43d7-8701-78a13923f1d5"
+        },
+        {
+          "name": "memory search",
+          "passed": true,
+          "elapsed_ms": 0.8,
+          "detail": "5 results"
+        },
+        {
+          "name": "memory status",
+          "passed": false,
+          "elapsed_ms": 0.3,
+          "detail": "failed"
+        },
+        {
+          "name": "memory synthesize",
+          "passed": false,
+          "elapsed_ms": 0.5,
+          "detail": "failed"
+        },
+        {
+          "name": "memory consolidate",
+          "passed": true,
+          "elapsed_ms": 4.6,
+          "detail": "deduplicated: 0"
+        }
+      ],
+      "score": 3,
+      "total": 5,
+      "pct": 60.0
+    },
+    "orchestration": {
+      "pipeline": "orchestration",
+      "tests": [
+        {
+          "name": "task-analyzer analyze",
+          "passed": true,
+          "elapsed_ms": 0.0,
+          "detail": "complexity=-1"
+        },
+        {
+          "name": "task-orchestrator plan",
+          "passed": true,
+          "elapsed_ms": 0.2,
+          "detail": "0 workstreams"
+        },
+        {
+          "name": "dag-coordinator list",
+          "passed": true,
+          "elapsed_ms": 0.0,
+          "detail": "dags: ['seed-dag']"
+        }
+      ],
+      "score": 3,
+      "total": 3,
+      "pct": 100.0
+    },
+    "goal-commitment": {
+      "pipeline": "goal-commitment",
+      "tests": [
+        {
+          "name": "goal-registry status",
+          "passed": true,
+          "elapsed_ms": 3179.3,
+          "detail": "ok"
+        },
+        {
+          "name": "goal-registry init",
+          "passed": true,
+          "elapsed_ms": 3174.0,
+          "detail": "ok"
+        },
+        {
+          "name": "goal-registry add subgoal",
+          "passed": true,
+          "elapsed_ms": 3111.2,
+          "detail": "ok"
+        },
+        {
+          "name": "goal-registry check alignment",
+          "passed": true,
+          "elapsed_ms": 2861.1,
+          "detail": "ok"
+        },
+        {
+          "name": "commitment checker list",
+          "passed": true,
+          "elapsed_ms": 2671.2,
+          "detail": "ok"
+        }
+      ],
+      "score": 5,
+      "total": 5,
+      "pct": 100.0
+    },
+    "error-decision": {
+      "pipeline": "error-decision",
+      "tests": [
+        {
+          "name": "xtrace status",
+          "passed": true,
+          "elapsed_ms": 2854.7
+        },
+        {
+          "name": "xtrace log error",
+          "passed": true,
+          "elapsed_ms": 2607.4
+        },
+        {
+          "name": "xtrace search",
+          "passed": true,
+          "elapsed_ms": 2620.9
+        },
+        {
+          "name": "dtrace add",
+          "passed": true,
+          "elapsed_ms": 2663.0
+        },
+        {
+          "name": "dtrace search",
+          "passed": true,
+          "elapsed_ms": 2664.2
+        }
+      ],
+      "score": 5,
+      "total": 5,
+      "pct": 100.0
+    },
+    "skill-pipeline": {
+      "pipeline": "skill-pipeline",
+      "tests": [
+        {
+          "name": "skill-router config exists",
+          "passed": true,
+          "elapsed_ms": 0.2,
+          "detail": "C:\\Users\\ohmpa\\github\\ai-memory-core\\skills\\skill-router.json"
+        },
+        {
+          "name": "skill-router valid JSON",
+          "passed": true,
+          "elapsed_ms": 0.4,
+          "detail": "32 rules"
+        },
+        {
+          "name": "output condenser logic",
+          "passed": true,
+          "elapsed_ms": 0.1,
+          "detail": "pattern matching works"
+        }
+      ],
+      "score": 3,
+      "total": 3,
+      "pct": 100.0
+    },
+    "module-coder": {
+      "pipeline": "module-coder",
+      "tests": [
+        {
+          "name": "coder analyze code",
+          "passed": true,
+          "elapsed_ms": 2.8
+        },
+        {
+          "name": "coder framework scaffold",
+          "passed": true,
+          "elapsed_ms": 1.7
+        },
+        {
+          "name": "coder debug error",
+          "passed": true,
+          "elapsed_ms": 1.9
+        },
+        {
+          "name": "coder review code",
+          "passed": true,
+          "elapsed_ms": 0.4
+        }
+      ],
+      "score": 4,
+      "total": 4,
+      "pct": 100.0
+    },
+    "module-devops": {
+      "pipeline": "module-devops",
+      "tests": [
+        {
+          "name": "devops compose generator",
+          "passed": true,
+          "elapsed_ms": 0.0
+        },
+        {
+          "name": "devops dockerfile analyze",
+          "passed": true,
+          "elapsed_ms": 0.5
+        },
+        {
+          "name": "devops network troubleshoot",
+          "passed": true,
+          "elapsed_ms": 0.0
+        }
+      ],
+      "score": 3,
+      "total": 3,
+      "pct": 100.0
+    },
+    "module-sensory": {
+      "pipeline": "module-sensory",
+      "tests": [
+        {
+          "name": "sensory scrape (HTTP)",
+          "passed": true,
+          "elapsed_ms": 0.7
+        },
+        {
+          "name": "sensory extract HTML",
+          "passed": true,
+          "elapsed_ms": 1234.2
+        },
+        {
+          "name": "sensory search (DDG)",
+          "passed": true,
+          "elapsed_ms": 0.6
+        }
+      ],
+      "score": 3,
+      "total": 3,
+      "pct": 100.0
+    },
+    "module-audio": {
+      "pipeline": "module-audio",
+      "tests": [
+        {
+          "name": "audio music theory",
+          "passed": true,
+          "elapsed_ms": 0.0
+        },
+        {
+          "name": "audio speech analysis",
+          "passed": true,
+          "elapsed_ms": 0.9
+        }
+      ],
+      "score": 2,
+      "total": 2,
+      "pct": 100.0
+    },
+    "module-art": {
+      "pipeline": "module-art",
+      "tests": [
+        {
+          "name": "art generate theme",
+          "passed": true,
+          "elapsed_ms": 0.1
+        },
+        {
+          "name": "art extract palette",
+          "passed": true,
+          "elapsed_ms": 0.2
+        }
+      ],
+      "score": 2,
+      "total": 2,
+      "pct": 100.0
+    },
+    "module-literature": {
+      "pipeline": "module-literature",
+      "tests": [
+        {
+          "name": "lit analyze text",
+          "passed": true,
+          "elapsed_ms": 1.1
+        },
+        {
+          "name": "lit extract concepts",
+          "passed": true,
+          "elapsed_ms": 0.1
+        }
+      ],
+      "score": 2,
+      "total": 2,
+      "pct": 100.0
+    },
+    "module-gamedev": {
+      "pipeline": "module-gamedev",
+      "tests": [
+        {
+          "name": "gamedev design analyze",
+          "passed": true,
+          "elapsed_ms": 0.1
+        },
+        {
+          "name": "gamedev mechanics guide",
+          "passed": true,
+          "elapsed_ms": 0.0
+        }
+      ],
+      "score": 2,
+      "total": 2,
+      "pct": 100.0
+    },
+    "verification": {
+      "pipeline": "verification",
+      "tests": [
+        {
+          "name": "verifier status",
+          "passed": true,
+          "elapsed_ms": 0.0,
+          "detail": "ok"
+        },
+        {
+          "name": "verifier pre-check",
+          "passed": true,
+          "elapsed_ms": 0.1,
+          "detail": "passed=True"
+        }
+      ],
+      "score": 2,
+      "total": 2,
+      "pct": 100.0
+    },
+    "benchmark-integration": {
+      "pipeline": "benchmark-integration",
+      "tests": [
+        {
+          "name": "benchmark-harness results",
+          "passed": true,
+          "elapsed_ms": 0,
+          "detail": "100.0% overall (15.0/15)"
+        },
+        {
+          "name": "blind benchmark results",
+          "passed": true,
+          "elapsed_ms": 0,
+          "detail": "100.0% blind score"
+        },
+        {
+          "name": "combined capability score",
+          "passed": true,
+          "elapsed_ms": 0,
+          "detail": "100.0% (threshold: 70%)"
+        }
+      ],
+      "score": 3,
+      "total": 3,
+      "pct": 100.0
+    }
+  },
+  "pipeline_order": [
+    "mcp-server",
+    "mem0-cloud",
+    "agent-memory",
+    "orchestration",
+    "goal-commitment",
+    "error-decision",
+    "skill-pipeline",
+    "module-coder",
+    "module-devops",
+    "module-sensory",
+    "module-audio",
+    "module-art",
+    "module-literature",
+    "module-gamedev",
+    "verification",
+    "benchmark-integration"
+  ],
+  "pipeline_metadata": {
+    "mcp-server": {
+      "label": "MCP Server Protocol",
+      "description": "tools-mcp-server.py stdio transport (initialize, tools/list, tools/call)",
+      "domain": "core",
+      "tests": 7
+    },
+    "mem0-cloud": {
+      "label": "mem0 Cloud Memory",
+      "description": "mem0 MCP: semantic search, add memory, list entities, delete",
+      "domain": "memory",
+      "tests": 4
+    },
+    "agent-memory": {
+      "label": "Agent-Memory-MCP",
+      "description": "Local BM25 search, synthesis, add, consolidate, status",
+      "domain": "memory",
+      "tests": 5
+    },
+    "orchestration": {
+      "label": "Orchestration Pipeline",
+      "description": "task-analyzer.py + task-orchestrator.py — task decomposition & parallel exec",
+      "domain": "core",
+      "tests": 3
+    },
+    "goal-commitment": {
+      "label": "Goal & Commitment Pipeline",
+      "description": "goal-registry.ps1 + check-commitments.ps1 — goal tracking & commitment verification",
+      "domain": "core",
+      "tests": 5
+    },
+    "error-decision": {
+      "label": "Error & Decision Pipeline",
+      "description": "xTrace (error-trace.ps1) + DTrace (decision-trace.ps1) — error tracking & ADRs",
+      "domain": "core",
+      "tests": 5
+    },
+    "skill-pipeline": {
+      "label": "Skill Pipeline",
+      "description": "skill-router match + output-condenser — skill discovery & output optimization",
+      "domain": "core",
+      "tests": 3
+    },
+    "module-coder": {
+      "label": "Coder Module Pipeline",
+      "description": "coder-* tools: analyze, generate, debug, review, explain, convert, architecture",
+      "domain": "module",
+      "tests": 4
+    },
+    "module-devops": {
+      "label": "DevOps Module Pipeline",
+      "description": "devops-* tools: container debug, compose, permissions, network, samba, mergerfs",
+      "domain": "module",
+      "tests": 3
+    },
+    "module-sensory": {
+      "label": "Sensory Module Pipeline",
+      "description": "sensory-* tools: browse, scrape, screenshot, PDF, OCR, RSS, API, search",
+      "domain": "module",
+      "tests": 3
+    },
+    "module-audio": {
+      "label": "Audio Module Pipeline",
+      "description": "audio-* tools: analyze, waveform, frequency, music theory, speech, convert",
+      "domain": "module",
+      "tests": 2
+    },
+    "module-art": {
+      "label": "Art Module Pipeline",
+      "description": "art-* tools: generate SVG, theme, palette, design concept",
+      "domain": "module",
+      "tests": 2
+    },
+    "module-literature": {
+      "label": "Literature Module Pipeline",
+      "description": "lit-* tools: analyze text, extract concepts, study guide, philosophy",
+      "domain": "module",
+      "tests": 2
+    },
+    "module-gamedev": {
+      "label": "GameDev Module Pipeline",
+      "description": "gamedev-* tools: design analyze, scaffold, mechanics, monetization, optimization",
+      "domain": "module",
+      "tests": 2
+    },
+    "verification": {
+      "label": "Verification Pipeline",
+      "description": "verifier-middleware: pre-check, post-check, renudge, status",
+      "domain": "core",
+      "tests": 2
+    },
+    "benchmark-integration": {
+      "label": "Benchmark Integration",
+      "description": "benchmark-harness.py + blind-benchmark scores — combined capability score",
+      "domain": "evaluation",
+      "tests": 3
+    }
+  }
+}

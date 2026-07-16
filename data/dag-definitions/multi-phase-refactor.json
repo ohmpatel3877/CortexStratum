@@ -1,0 +1,90 @@
+{
+  "dag_id": "multi-phase-refactor",
+  "name": "Multi-Phase Refactor Pipeline",
+  "description": "Five-node pipeline with parallel analysis phases that fan-in to a synthesis phase, followed by implementation, testing, and documentation. Demonstrates parallel execution with fan-in merge.",
+  "version": "1.0.0",
+  "tags": ["refactor", "parallel", "fan-in", "testing", "documentation", "complex"],
+  "nodes": [
+    {
+      "id": "code-analysis",
+      "description": "Analyze the codebase for structure, dependencies, code quality, coupling, and hotspots. Produce a structural analysis report.",
+      "prompt_template": "Analyze the codebase structure for the refactoring task: {{input.task}}. Identify: module boundaries, dependency graph, tight coupling, code hotspots, test coverage gaps, and architectural violations.",
+      "temperature": 0.3,
+      "timeout_seconds": 300,
+      "retry_count": 1,
+      "expected_outputs": ["module_map", "dependency_graph", "hotspots", "coupling_report", "test_coverage_gaps"],
+      "input_mapping": {}
+    },
+    {
+      "id": "test-inventory",
+      "description": "Inventory existing tests: unit tests, integration tests, E2E tests. Identify test gaps and flaky tests. Run in parallel with code-analysis.",
+      "prompt_template": "Inventory all existing tests for the codebase. Target: {{input.task}}. Catalog: test files, coverage per module, test types (unit/integration/e2e), flaky tests, and missing test areas.",
+      "temperature": 0.3,
+      "timeout_seconds": 300,
+      "retry_count": 1,
+      "expected_outputs": ["test_catalog", "coverage_by_module", "flaky_tests", "missing_tests"],
+      "input_mapping": {}
+    },
+    {
+      "id": "synthesis",
+      "description": "Synthesize findings from code-analysis and test-inventory into a unified refactoring plan. Runs after both analysis phases complete (fan-in).",
+      "prompt_template": "Synthesize findings into a unified refactoring plan. Code analysis: {{parent.code-analysis.output.data.module_map}}. Hotspots: {{parent.code-analysis.output.data.hotspots}}. Test gaps: {{parent.test-inventory.output.data.missing_tests}}. Create a phased refactoring plan with: targets, order, risk assessment, and testing strategy.",
+      "temperature": 0.5,
+      "timeout_seconds": 600,
+      "retry_count": 1,
+      "expected_outputs": ["refactoring_plan", "phase_order", "risk_matrix", "testing_strategy"],
+      "input_mapping": {
+        "context.module_map": "code-analysis.output.data.module_map",
+        "context.hotspots": "code-analysis.output.data.hotspots",
+        "context.test_catalog": "test-inventory.output.data.test_catalog",
+        "context.missing_tests": "test-inventory.output.data.missing_tests"
+      }
+    },
+    {
+      "id": "implementation",
+      "description": "Execute the refactoring plan. Implement changes phase by phase, ensuring backward compatibility where required.",
+      "prompt_template": "Execute the refactoring plan. Plan: {{parent.synthesis.output.data.refactoring_plan}}. Risk matrix: {{parent.synthesis.output.data.risk_matrix}}. Testing strategy: {{parent.synthesis.output.data.testing_strategy}}. Implement changes phase by phase, maintain backward compatibility, and update tests as needed.",
+      "temperature": 0.3,
+      "timeout_seconds": 900,
+      "retry_count": 1,
+      "expected_outputs": ["changed_files", "refactoring_log", "backward_compat_notes", "test_updates"],
+      "input_mapping": {
+        "context.refactoring_plan": "synthesis.output.data.refactoring_plan",
+        "context.risk_matrix": "synthesis.output.data.risk_matrix",
+        "context.testing_strategy": "synthesis.output.data.testing_strategy"
+      }
+    },
+    {
+      "id": "verification",
+      "description": "Run full verification: lint, typecheck, test suite, and manual validation. Produce a completion report.",
+      "prompt_template": "Run full verification on the refactored codebase. Changes: {{parent.implementation.output.data.changed_files}}. Refactoring log: {{parent.implementation.output.data.refactoring_log}}. Test updates: {{parent.implementation.output.data.test_updates}}. Run: lint, typecheck, all tests, integration tests. Report any regressions.",
+      "temperature": 0.2,
+      "timeout_seconds": 600,
+      "retry_count": 1,
+      "expected_outputs": ["lint_results", "typecheck_results", "test_results", "regression_report", "completion_summary"],
+      "input_mapping": {
+        "context.changed_files": "implementation.output.data.changed_files",
+        "context.refactoring_log": "implementation.output.data.refactoring_log",
+        "context.test_updates": "implementation.output.data.test_updates"
+      }
+    }
+  ],
+  "edges": [
+    { "from": "code-analysis", "to": "synthesis" },
+    { "from": "test-inventory", "to": "synthesis" },
+    { "from": "synthesis", "to": "implementation" },
+    { "from": "implementation", "to": "verification" }
+  ],
+  "merge_rules": [
+    { "strategy": "deep_merge", "field": "output.data" },
+    { "strategy": "concat", "field": "output.artifacts" },
+    { "strategy": "union", "field": "output.data.files_changed" }
+  ],
+  "config": {
+    "max_concurrency": 2,
+    "global_timeout_seconds": 3600,
+    "heartbeat_interval_seconds": 3,
+    "error_mode": "abort",
+    "log_level": "info"
+  }
+}

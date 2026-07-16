@@ -1,0 +1,30 @@
+{
+  "dag_id": "security-audit-pipeline",
+  "name": "Security Audit Pipeline",
+  "started_at": "2026-07-16T03:08:55.429489+00:00",
+  "completed_at": "2026-07-16T03:08:56.630818+00:00",
+  "node_count": 4,
+  "edge_count": 4,
+  "levels": [
+    [
+      "quick-scan"
+    ],
+    [
+      "deep-dive",
+      "remediation-plan"
+    ],
+    [
+      "generate-report"
+    ]
+  ],
+  "status": "completed",
+  "summary": {
+    "total_nodes": 4,
+    "phases": {
+      "skipped": 2,
+      "completed": 2
+    },
+    "failed_nodes": [],
+    "duration_seconds": 1.2
+  }
+}

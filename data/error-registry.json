@@ -1,0 +1,20 @@
+{
+    "version":  1,
+    "errors":  [
+                   {
+                       "id":  "err-001",
+                       "resolution":  "",
+                       "root_cause":  "",
+                       "first_seen":  "2026-07-16T00:50:03Z",
+                       "command":  "terminal-bench",
+                       "last_seen":  "2026-07-16T00:51:27Z",
+                       "occurrence_count":  2,
+                       "status":  "unresolved",
+                       "attempts":  [
+
+                                    ],
+                       "exit_code":  1,
+                       "error_signature":  "test error logging"
+                   }
+               ]
+}

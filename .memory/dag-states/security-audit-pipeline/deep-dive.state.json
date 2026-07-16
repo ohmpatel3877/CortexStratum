@@ -1,0 +1,23 @@
+{
+  "dag_id": "security-audit-pipeline",
+  "phase": "skipped",
+  "node_id": "deep-dive",
+  "input": {
+    "task": "Perform a detailed deep-dive security analysis on the vulnerabilities found. Vulnerabilities: {{parent.quick-scan.output.data.vulnerabilities}}. Severity breakdown: {{parent.quick-scan.output.data.severity_counts}}. Conduct manual code review, trace attack paths, and assess business impact.",
+    "context": {}
+  },
+  "output": {},
+  "metadata": {
+    "started_at": null,
+    "updated_at": "2026-07-16T03:08:56.020088+00:00",
+    "completed_at": null,
+    "errors": [],
+    "warnings": [
+      "Condition $.output.data.severity_counts.critical > 0 not met"
+    ],
+    "duration_ms": null,
+    "retry_count": 0,
+    "temperature": 0.4,
+    "node_version": "1.0.0"
+  }
+}

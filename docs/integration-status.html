@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ai-memory-core — Integration Status</title>
+<style>
+    {font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #0d1117; color: #c9d1d9;}
+    h1, h2 {color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem;}
+    h1 span {font-size: 0.6em; color: #8b949e;}
+    table {border-collapse: collapse; width: 100%; margin: 1rem 0;}
+    th, td {text-align: left; padding: 0.5rem; border-bottom: 1px solid #30363d;}
+    th {background: #161b22; color: #58a6ff;}
+    tr:hover {background: #1c2128;}
+    .pass {color: #3fb950;} .fail {color: #f85149;} .skip {color: #d29922;}
+    .summary {display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;}
+    .card {background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem;}
+    .card h3 {margin: 0 0 0.5rem; font-size: 0.9em; color: #8b949e;}
+    .card .value {font-size: 2em; font-weight: bold;}
+    .test-output {background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; overflow-x: auto;}
+    .test-output pre {margin: 0; font-size: 0.85em; color: #c9d1d9; white-space: pre-wrap;}
+    code {background: #1c2128; padding: 0.15em 0.3em; border-radius: 3px; font-size: 0.9em;}
+</style>
+</head>
+<body>
+    <h1>ai-memory-core — Integration Status <span>2026-07-16T03:14:56</span></h1>
+
+    <div class="summary">
+        <div class="card">
+            <h3>Total Checks</h3>
+            <div class="value">23</div>
+        </div>
+        <div class="card">
+            <h3>Passed</h3>
+            <div class="value" style="color:#3fb950">23</div>
+        </div>
+        <div class="card">
+            <h3>Failed</h3>
+            <div class="value" style="color:#f85149">0</div>
+        </div>
+        <div class="card">
+            <h3>Test Pass Rate</h3>
+            <div class="value">10/10</div>
+        </div>
+    </div>
+
+    <h2>Workstream Checks</h2>
+    <table>
+        <thead>
+            <tr><th></th><th>Status</th><th>Check</th><th>Path</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+            
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG Coordinator script</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\dag-coordinator.py</code></td>
+            <td>Size: 17881 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG definitions directory</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-definitions</code></td>
+            <td>Files: 4</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG schema directory</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-schemas</code></td>
+            <td>Files: 2</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG traces directory</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-traces</code></td>
+            <td>Files: 4</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG definition schema</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-schemas\dag-definition-v1.json</code></td>
+            <td>Size: 6061 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG def: multi-phase-refactor.json</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-definitions\multi-phase-refactor.json</code></td>
+            <td>Size: 5301 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG def: research-implement-verify.json</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-definitions\research-implement-verify.json</code></td>
+            <td>Size: 2929 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG def: security-audit-pipeline.json</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-definitions\security-audit-pipeline.json</code></td>
+            <td>Size: 4516 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>DAG def: seed-dag.json</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\dag-definitions\seed-dag.json</code></td>
+            <td>Size: 1596 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Identity Manager script</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\identity-manager.py</code></td>
+            <td>Size: 27268 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Import identity_manager</code></td>
+            <td><code></code></td>
+            <td>Class: IdentityManager</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Sandbox Manager script</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\sandbox-manager.py</code></td>
+            <td>Size: 26685 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Import sandbox_manager</code></td>
+            <td><code></code></td>
+            <td>Class: SandboxManager</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Doc Generator script</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\doc-generator.py</code></td>
+            <td>Size: 37914 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Import doc_generator</code></td>
+            <td><code></code></td>
+            <td>Class: DocGenerator</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Unified Orchestrator</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\orchestrate-all.ps1</code></td>
+            <td>Size: 7488 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Integration test suite</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\test-integration-layer.py</code></td>
+            <td>Size: 13902 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Status report generator</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\scripts\integration-status.py</code></td>
+            <td>Size: 11836 bytes</td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>ADR: adr-001-hybrid-triage-dag.md</code></td>
+            <td><code></code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>ADR: adr-002-identity-persistence.md</code></td>
+            <td><code></code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>ADR: adr-003-sandbox-isolation.md</code></td>
+            <td><code></code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>ADR: adr-004-documentation-generation.md</code></td>
+            <td><code></code></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>✅</td>
+            <td>PASS</td>
+            <td><code>Decision registry</code></td>
+            <td><code>C:\Users\ohmpa\github\ai-memory-core\data\decision-registry.json</code></td>
+            <td>Size: 10347 bytes</td>
+        </tr>
+        </tbody>
+    </table>
+
+    
+        <h2>Test Suite Results</h2>
+        <div class="test-output">
+            <p>Return code: 0 | Passed: 10 | Failed: 0 | Skipped: 0</p>
+                    <pre>[94m============================================================[0m</pre>
+        <pre>[94m[1m  INTEGRATION LAYER TEST SUITE[0m</pre>
+        <pre>[94m============================================================[0m</pre>
+        <pre>  Base:    C:\Users\ohmpa\github\ai-memory-core</pre>
+        <pre>  Scripts: C:\Users\ohmpa\github\ai-memory-core\scripts</pre>
+        <pre>  Data:    C:\Users\ohmpa\github\ai-memory-core\data</pre>
+        <pre>  [96mRunning 10 tests...[0m</pre>
+        <pre>  [92mâœ“ PASS[0m a) DAG Coordinator Import</pre>
+        <pre>  [92mâœ“ PASS[0m b) Identity Manager Import</pre>
+        <pre>  [92mâœ“ PASS[0m c) Sandbox Manager Import</pre>
+        <pre>  [92mâœ“ PASS[0m d) Doc Generator Import</pre>
+        <pre>  [92mâœ“ PASS[0m e) Orchestrator DAG Flag</pre>
+        <pre>  [92mâœ“ PASS[0m f) DAG JSON Schema Validity</pre>
+        <pre>  [92mâœ“ PASS[0m g) Integration Pipeline</pre>
+        <pre>  [92mâœ“ PASS[0m h) ADR File Existence</pre>
+        <pre>  [92mâœ“ PASS[0m i) All Scripts Executable</pre>
+        <pre>  [92mâœ“ PASS[0m j) DAG Coordinator Plan</pre>
+        <pre>============================================================</pre>
+        <pre>  [1mResults:[0m</pre>
+        <pre>  [92mPassed:  10/10[0m</pre>
+        <pre>============================================================</pre>
+        </div>
+
+    <hr style="border-color: #30363d; margin: 2rem 0;">
+    <p style="text-align: center; color: #8b949e;">Generated by scripts/integration-status.py at 2026-07-16T03:14:56</p>
+</body>
+</html>

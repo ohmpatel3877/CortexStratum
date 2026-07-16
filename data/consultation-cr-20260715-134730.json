@@ -1,0 +1,67 @@
+{
+    "id":  "cr-20260715-134730",
+    "category":  "architecture",
+    "question":  "Should we add Redis caching?",
+    "analyses":  [
+                     {
+                         "perspective":  "architect",
+                         "label":  "Architect",
+                         "considerations":  [
+                                                {
+                                                    "question":  "How does this affect system architecture?",
+                                                    "notes":  ""
+                                                },
+                                                {
+                                                    "question":  "What is the scalability impact?",
+                                                    "notes":  ""
+                                                },
+                                                {
+                                                    "question":  "What are the integration points?",
+                                                    "notes":  ""
+                                                },
+                                                {
+                                                    "question":  "How does it affect component coupling?",
+                                                    "notes":  ""
+                                                }
+                                            ],
+                         "recommendation":  ""
+                     },
+                     {
+                         "perspective":  "pragmatist",
+                         "label":  "Pragmatist",
+                         "considerations":  [
+                                                {
+                                                    "question":  "What is the simplest working solution?",
+                                                    "notes":  ""
+                                                },
+                                                {
+                                                    "question":  "What is the effort vs. value ratio?",
+                                                    "notes":  ""
+                                                },
+                                                {
+                                                    "question":  "What are the risks of over-engineering?",
+                                                    "notes":  ""
+                                                },
+                                                {
+                                                    "question":  "Can we deliver this incrementally?",
+                                                    "notes":  ""
+                                                }
+                                            ],
+                         "recommendation":  ""
+                     }
+                 ],
+    "log_decision":  false,
+    "date":  "2026-07-15T13:47:30Z",
+    "synthesis":  {
+                      "summary":  "Synthesis pending human review of 2 perspectives",
+                      "recommended_action":  "",
+                      "conflicts":  [
+
+                                    ]
+                  },
+    "title":  "Decision: Should we add Redis caching?",
+    "perspectives":  [
+                         "architect",
+                         "pragmatist"
+                     ]
+}

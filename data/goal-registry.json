@@ -1,0 +1,14 @@
+{
+    "session_id":  "ses_987095343_lQUkzg",
+    "start_time":  "2026-07-16T04:51:13.3708002Z",
+    "sub_goals":  [
+                      {
+                          "created_at":  "2026-07-16T04:51:16.7617959Z",
+                          "status":  "pending",
+                          "description":  "Run MCP server tests",
+                          "id":  0,
+                          "completed_at":  null
+                      }
+                  ],
+    "original_goal":  "Test pipeline benchmark"
+}

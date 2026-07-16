@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "description": "Maps user intent keywords to OpenCode skill names for proactive loading",
+  "rules": [
+    {
+      "triggers": ["debug", "error", "fix", "broken", "bug", "crash", "fail", "troubleshoot"],
+      "skills": ["troubleshooting-master", "error-triage"],
+      "priority": 10
+    },
+    {
+      "triggers": ["test", "tdd", "spec", "unit test", "integration test", "coverage"],
+      "skills": ["test-driven-development", "test-patterns"],
+      "priority": 10
+    },
+    {
+      "triggers": ["audit", "review", "security review", "architecture review"],
+      "skills": ["pr-review"],
+      "priority": 10
+    },
+    {
+      "triggers": ["learn", "study", "research", "understand", "explain", "what is"],
+      "skills": ["educate", "wikipedia-ghost"],
+      "priority": 8
+    },
+    {
+      "triggers": ["electron", "browserwindow", "ipc", "preload", "contextbridge"],
+      "skills": ["electron-desktop-architecture"],
+      "priority": 10
+    },
+    {
+      "triggers": ["brainstorm", "design", "architecture", "plan", "approach", "strategy"],
+      "skills": ["brainstorm", "adr-write"],
+      "priority": 9
+    },
+    {
+      "triggers": ["behavior", "weakness", "improve", "learning session", "self-diagnosis"],
+      "skills": ["model-psychologist", "anti-ai-pattern", "concise-filter"],
+      "priority": 10
+    },
+    {
+      "triggers": ["ui", "component", "frontend", "react", "tailwind", "css"],
+      "skills": ["openui"],
+      "priority": 7
+    },
+    {
+      "triggers": ["browser", "scrape", "crawl", "web page", "puppeteer", "playwright"],
+      "skills": ["browser-automation", "playwright-automation", "web-scraping"],
+      "priority": 9
+    },
+    {
+      "triggers": ["tauri", "rust", "command", "tauri command"],
+      "skills": ["electron-desktop-architecture"],
+      "priority": 8
+    },
+    {
+      "triggers": ["api", "endpoint", "openapi", "asyncapi", "contract"],
+      "skills": ["api-contract"],
+      "priority": 8
+    },
+    {
+      "triggers": ["changelog", "release", "version", "git release"],
+      "skills": ["changelog-generate", "git-release"],
+      "priority": 7
+    },
+    {
+      "triggers": ["migrate", "migration", "upgrade", "port", "convert"],
+      "skills": ["migration"],
+      "priority": 9
+    },
+    {
+      "triggers": ["dependency", "package", "cve", "vulnerability", "outdated"],
+      "skills": ["dependency-audit"],
+      "priority": 8
+    },
+    {
+      "triggers": ["opencode", "config", "skill", "mcp", "agent", "subagent"],
+      "skills": ["customize-opencode", "skill-ideator"],
+      "priority": 10
+    },
+    {
+      "triggers": ["obsidian", "note", "zettelkasten", "vault", "knowledge graph"],
+      "skills": ["obsidian-zettelkasten"],
+      "priority": 8
+    },
+    {
+      "triggers": ["session", "artifact", "report", "summary"],
+      "skills": ["session-artifact"],
+      "priority": 7
+    },
+    {
+      "triggers": ["postmortem", "incident", "outage"],
+      "skills": ["incident-postmortem"],
+      "priority": 9
+    },
+    {
+      "triggers": ["env", "setup", "environment", "prerequisite", "install"],
+      "skills": ["env-setup"],
+      "priority": 7
+    },
+    {
+      "triggers": ["tutoring", "teach", "socratic", "quiz", "exam", "flashcard"],
+      "skills": ["tutoring"],
+      "priority": 8
+    },
+    {
+      "triggers": ["security", "vulnerability", "cve", "harden", "encrypt", "authentication", "authorization", "csp", "xss", "sql injection", "owasp", "pen test", "audit security"],
+      "skills": ["security-hardening"],
+      "priority": 10
+    },
+    {
+      "triggers": ["parallel", "multitask", "concurrent", "worktree", "independent"],
+      "skills": ["parallel-worktree"],
+      "priority": 9
+    },
+    {
+      "triggers": ["verify", "validate", "check", "quality", "gate"],
+      "skills": ["verification-before-completion"],
+      "priority": 10
+    },
+    {
+      "triggers": ["memory", "mem0", "remember", "forget", "recall", "memories"],
+      "skills": ["mem0-search", "mem0-remember", "mem0-status"],
+      "priority": 10
+    },
+    {
+      "triggers": ["image", "screenshot", "pdf", "media", "photo", "picture", "video", "audio"],
+      "skills": ["context-extractor"],
+      "priority": 9
+    },
+    {
+      "triggers": ["security", "vulnerability", "cve", "harden", "encrypt", "authentication", "authorization", "csp", "xss", "sql injection", "owasp", "pen test", "audit security"],
+      "skills": ["security-hardening"],
+      "priority": 10
+    },
+    {
+      "triggers": ["art", "svg", "draw", "design", "theme", "color", "palette", "illustration", "gradient", "visual"],
+      "skills": ["art-module"],
+      "priority": 8
+    },
+    {
+      "triggers": ["literature", "philosophy", "textbook", "social science", "study guide", "concept", "analysis", "argument", "essay"],
+      "skills": ["literature-module"],
+      "priority": 8
+    },
+    {
+      "triggers": ["synthesize", "summarize", "consolidate", "merge", "unify", "compress"],
+      "skills": ["memory-search"],
+      "priority": 10
+    },
+    {
+      "triggers": ["search memory", "find memory", "lookup memory", "remember", "recall"],
+      "skills": ["memory-search"],
+      "priority": 10
+    },
+    {
+      "triggers": ["verify", "validate", "audit", "inspect", "cross-check", "renudge"],
+      "skills": ["verifier-middleware"],
+      "priority": 10
+    },
+    {
+      "triggers": ["memory add", "store memory", "save memory", "record", "log memory"],
+      "skills": ["memory-search"],
+      "priority": 9
+    }
+  ],
+  "default_skills": ["concise-filter", "task-orchestrator", "memory-search"],
+  "conflict_resolution": "priority_highest_wins"
+}

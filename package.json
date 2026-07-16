@@ -1,0 +1,42 @@
+{
+  "name": "ai-memory-core",
+  "version": "1.0.0",
+  "description": "Central mem0 memory architecture for AI agent persistence",
+  "main": "index.js",
+  "scripts": {
+    "mem0:seed": "node scripts/seed-memories.js",
+    "mem0:dream": "node scripts/consolidate.js",
+    "mem0:status": "node scripts/check-status.js",
+    "mem0:categories": "node scripts/set-categories.js"
+  },
+  "keywords": [
+    "mem0",
+    "memory",
+    "ai-agent",
+    "persistence"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Ohm Patel",
+    "url": "https://github.com/ohmpatel3877"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "opencode-mem": "^2.19.4"
+  },
+  "install": {
+    "harnesses": ["opencode", "claude-code", "cursor"],
+    "windows": "pwsh plugin-tools/install-ai-memory-core.ps1",
+    "unix": "bash plugin-tools/install-ai-memory-core.sh",
+    "docker": "docker compose up -d"
+  },
+  "mcpServers": {
+    "ai-memory-core": {
+      "name": "ai-memory-core",
+      "description": "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
+      "command": "python",
+      "args": ["scripts/tools-mcp-server.py"],
+      "env": {}
+    }
+  }
+}

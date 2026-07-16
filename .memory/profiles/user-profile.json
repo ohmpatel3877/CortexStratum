@@ -1,0 +1,16 @@
+{
+  "source": "consolidated_profile",
+  "preferences": {
+    "verbosity": "concise",
+    "formality": "professional",
+    "directness": "preferred"
+  },
+  "conventions": [
+    "Prefer absolute imports over relative paths",
+    "Zero external dependencies for core scripts",
+    "Use os.path.join for all path construction",
+    "Comprehensive docstrings and type hints on all public methods"
+  ],
+  "traits": ["thoroughness", "conciseness", "proactiveness", "directness"],
+  "tags": ["user_preferences", "coding_conventions"]
+}

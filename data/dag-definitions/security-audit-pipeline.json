@@ -1,0 +1,76 @@
+{
+  "dag_id": "security-audit-pipeline",
+  "name": "Security Audit Pipeline",
+  "description": "Four-node pipeline that scans for vulnerabilities, analyzes findings, performs deep dive if issues found (otherwise skips), and generates a report. Demonstrates conditional branching.",
+  "version": "1.0.0",
+  "tags": ["security", "audit", "conditional", "branching", "scan"],
+  "nodes": [
+    {
+      "id": "quick-scan",
+      "description": "Run a quick automated security scan across the codebase. Look for common vulnerabilities: hardcoded secrets, SQL injection, XSS, insecure deserialization, misconfigurations.",
+      "prompt_template": "Perform a quick security scan of the codebase for: hardcoded secrets, SQL injection vectors, XSS vulnerabilities, insecure deserialization, and common misconfigurations. Focus areas: {{input.task}}",
+      "temperature": 0.3,
+      "timeout_seconds": 300,
+      "retry_count": 1,
+      "expected_outputs": ["vulnerabilities", "severity_counts", "scan_coverage"],
+      "input_mapping": {}
+    },
+    {
+      "id": "deep-dive",
+      "description": "Perform a deep-dive security analysis on vulnerabilities found in the quick scan. Only runs if critical or high-severity issues were detected.",
+      "prompt_template": "Perform a detailed deep-dive security analysis on the vulnerabilities found. Vulnerabilities: {{parent.quick-scan.output.data.vulnerabilities}}. Severity breakdown: {{parent.quick-scan.output.data.severity_counts}}. Conduct manual code review, trace attack paths, and assess business impact.",
+      "temperature": 0.4,
+      "timeout_seconds": 600,
+      "retry_count": 1,
+      "expected_outputs": ["detailed_findings", "attack_paths", "business_impact", "cvss_scores"],
+      "input_mapping": {
+        "context.vulnerabilities": "quick-scan.output.data.vulnerabilities",
+        "context.severity_counts": "quick-scan.output.data.severity_counts"
+      }
+    },
+    {
+      "id": "remediation-plan",
+      "description": "Create a prioritized remediation plan for all confirmed vulnerabilities. Runs regardless of scan outcome.",
+      "prompt_template": "Create a prioritized remediation plan for the security findings. {{#if parent.quick-scan.output.data.severity_counts.critical}}Critical issues found: {{parent.quick-scan.output.data.severity_counts.critical}}{{/if}}. Deep-dive findings: {{parent.deep-dive.output.data.detailed_findings}}. Prioritize by severity, exploitability, and business impact.",
+      "temperature": 0.3,
+      "timeout_seconds": 300,
+      "retry_count": 1,
+      "expected_outputs": ["remediation_steps", "priority_order", "effort_estimates", "quick_wins"],
+      "input_mapping": {
+        "context.vulnerabilities": "quick-scan.output.data.vulnerabilities",
+        "context.detailed_findings": "deep-dive.output.data.detailed_findings"
+      }
+    },
+    {
+      "id": "generate-report",
+      "description": "Generate a comprehensive security audit report. Contains executive summary, findings, and remediation plan.",
+      "prompt_template": "Generate a comprehensive security audit report. Executive summary: Based on scan of {{input.task}}. Key findings: {{parent.quick-scan.output.data.vulnerabilities}}. Remediation: {{parent.remediation-plan.output.data.remediation_steps}}. Include: executive summary, methodology, findings by severity, detailed analysis, remediation roadmap, and appendix.",
+      "temperature": 0.5,
+      "timeout_seconds": 300,
+      "retry_count": 0,
+      "expected_outputs": ["executive_summary", "full_report", "risk_ratings"],
+      "input_mapping": {
+        "context.vulnerabilities": "quick-scan.output.data.vulnerabilities",
+        "context.remediation_steps": "remediation-plan.output.data.remediation_steps",
+        "context.severity_counts": "quick-scan.output.data.severity_counts"
+      }
+    }
+  ],
+  "edges": [
+    { "from": "quick-scan", "to": "deep-dive", "condition": "$.output.data.severity_counts.critical > 0" },
+    { "from": "quick-scan", "to": "remediation-plan" },
+    { "from": "deep-dive", "to": "generate-report", "condition": "$.output.data.detailed_findings != []" },
+    { "from": "remediation-plan", "to": "generate-report" }
+  ],
+  "merge_rules": [
+    { "strategy": "deep_merge", "field": "output.data" },
+    { "strategy": "concat", "field": "output.artifacts" }
+  ],
+  "config": {
+    "max_concurrency": 1,
+    "global_timeout_seconds": 3600,
+    "heartbeat_interval_seconds": 5,
+    "error_mode": "skip_downstream",
+    "log_level": "info"
+  }
+}

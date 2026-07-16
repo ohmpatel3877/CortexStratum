@@ -1,0 +1,34 @@
+{
+  "dag_id": "multi-phase-refactor",
+  "phase": "completed",
+  "node_id": "code-analysis",
+  "input": {
+    "task": "Analyze the codebase structure for the refactoring task: {{input.task}}. Identify: module boundaries, dependency graph, tight coupling, code hotspots, test coverage gaps, and architectural violations.",
+    "context": {},
+    "artifacts": []
+  },
+  "output": {
+    "summary": "Completed: Analyze the codebase structure for the refactoring task: {{input.task}}. Identif",
+    "data": {
+      "module_map": "<module_map_result>",
+      "dependency_graph": "<dependency_graph_result>",
+      "hotspots": "<hotspots_result>",
+      "coupling_report": "<coupling_report_result>",
+      "test_coverage_gaps": "<test_coverage_gaps_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:08:54.020740+00:00",
+    "updated_at": "2026-07-16T03:08:54.912570+00:00",
+    "completed_at": "2026-07-16T03:08:54.912551+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 877.6612281799316,
+    "retry_count": 0,
+    "temperature": 0.3,
+    "node_version": "1.0.0"
+  }
+}

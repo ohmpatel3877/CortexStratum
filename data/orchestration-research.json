@@ -1,0 +1,143 @@
+{
+  "frameworks": [
+    {
+      "name": "OpenAI Swarm (→ Agents SDK)",
+      "pattern": "Handoff-based Swarm",
+      "decomposition": "Agents encapsulate instructions + functions. Functions can return another Agent, triggering a handoff. No explicit task decomposition—agents self-decide when to hand off via tool calls. Triage agent pattern routes to specialist agents.",
+      "communication": "Agents share conversation history (messages array) and context_variables dict. Only the active agent's system prompt is present. Handoffs pass the full message history to the next agent.",
+      "merge": "No explicit merge primitive. Final agent's response is the output. Context variables accumulate across handoffs. Results from multiple agents remain in the messages array.",
+      "strengths": [
+        "Extremely lightweight—two primitives: Agent and handoff",
+        "Stateless between calls, easy to test",
+        "Function-as-handoff is elegant and composable",
+        "Context variables provide cross-agent state without coupling",
+        "Educational simplicity—easy to reason about"
+      ],
+      "weaknesses": [
+        "Now deprecated in favor of OpenAI Agents SDK",
+        "No built-in parallel execution of agents",
+        "No DAG or branching—strictly sequential handoffs",
+        "Requires OpenAI API (not applicable to our environment)",
+        "No built-in memory or persistence layer",
+        "Error recovery is purely LLM-driven"
+      ]
+    },
+    {
+      "name": "LangGraph",
+      "pattern": "Graph-based State Machine (DAG)",
+      "decomposition": "Tasks are nodes in a directed graph. Each node is a function or agent step. Edges define control flow (conditional, parallel, or fixed). State object flows through the graph, accumulating results.",
+      "communication": "Shared state object (TypedDict) passes between nodes. Each node reads from and writes to shared state. Conditional edges inspect state to determine next node. Subgraphs enable hierarchical decomposition.",
+      "merge": "State accumulation is the merge mechanism. Each node adds to the shared state. Fan-in nodes collect results from parallel branches. Reducers handle conflicting updates to the same state key.",
+      "strengths": [
+        "Explicit DAG control flow—easy to reason about and debug",
+        "Durable execution with checkpoint/resume across failures",
+        "Built-in human-in-the-loop via state inspection/interrupts",
+        "Short-term + long-term memory (working + persistent)",
+        "Parallel branching natively supported",
+        "Subgraphs enable hierarchical composition"
+      ],
+      "weaknesses": [
+        "Heavier dependency footprint (LangChain ecosystem)",
+        "Steeper learning curve for state management",
+        "Designed for Python with specific SDK—hard to replicate without it",
+        "State schema requires typing discipline",
+        "Overkill for simple linear workflows"
+      ]
+    },
+    {
+      "name": "CrewAI",
+      "pattern": "Role-based Crews + Event-driven Flows",
+      "decomposition": "Agents have roles, goals, and backstories. Tasks are assigned to specific agents with descriptions and expected outputs. Crews run tasks sequentially or hierarchically (manager agent delegates). Flows provide event-driven orchestration with @start/@listen/@router decorators.",
+      "communication": "Agents communicate through task outputs passed as context. Crews share no direct channel—outputs flow through task dependencies. Flows use structured state (Pydantic models) with event listeners. Logical operators (or_, and_) combine trigger conditions.",
+      "merge": "Crew output is the final task result. Flow state accumulates across listeners. Router decorators branch execution based on state values. Human-in-the-loop at task level for review/input.",
+      "strengths": [
+        "Clean role-based mental model—intuitive for team metaphor",
+        "YAML configuration separates agent/task definitions from code",
+        "Flows add precise control beyond autonomous crews",
+        "Pydantic state models provide type safety",
+        "Growing community and ecosystem of examples",
+        "Supports local models via Ollama/LMStudio"
+      ],
+      "weaknesses": [
+        "Python-only, significant dependency chain",
+        "Crew autonomy can be unpredictable—hard to debug",
+        "YAML configs become unwieldy at scale",
+        "No built-in parallel execution within a crew",
+        "Telemetry by default (privacy concern)",
+        "Over-engineered for small numbers of agents"
+      ]
+    },
+    {
+      "name": "AutoGen (→ Microsoft Agent Framework)",
+      "pattern": "Conversation-based Multi-Agent + Agent-as-Tool",
+      "decomposition": "Core API uses message-passing and event-driven agents. AgentChat API provides higher-level patterns: two-agent chat, group chat, and agent-as-tool (one agent delegates to another via tool call). Layered design: Core → AgentChat → Extensions.",
+      "communication": "Agents communicate via messages through a runtime. GroupChat uses a round-robin or speaker-selection strategy. Agent-as-tool wraps a sub-agent as a callable tool the parent agent invokes. MCP server integration for tool connectivity.",
+      "merge": "Group chat manager collects responses. Agent-as-tool returns sub-agent's response as tool output. No built-in state merging—relies on conversation history. Extensions provide code execution and file handling.",
+      "strengths": [
+        "Layered architecture allows multiple abstraction levels",
+        "Agent-as-tool is a clean composition pattern",
+        "MCP support for external tool integration",
+        "Cross-language (.NET and Python)",
+        "AutoGen Studio provides no-code GUI prototyping",
+        "Magentic-One shows SOTA multi-agent team capability"
+      ],
+      "weaknesses": [
+        "Now in maintenance mode—no new features",
+        "Complex API surface with multiple packages",
+        "GroupChat can have coordination overhead",
+        "Requires OpenAI/Azure by default for full capability",
+        "Migration needed to Microsoft Agent Framework",
+        "Documentation fragmentation between versions"
+      ]
+    },
+    {
+      "name": "Semantic Kernel (→ Microsoft Agent Framework)",
+      "pattern": "Kernel-based Plugin Orchestration + Process Framework",
+      "decomposition": "Kernel acts as central orchestrator. Agents use plugins (native functions, prompt templates, OpenAPI specs, MCP). Process Framework models complex business processes as steps with inputs/outputs. Multi-agent via agent-as-plugin pattern.",
+      "communication": "Kernel passes function outputs between components. Plugin chaining: output of one kernel function feeds into next. Agents can be added as plugins to other agents. Thread-based conversation history for multi-turn chat.",
+      "merge": "Kernel function pipeline handles sequential merging. Process Framework steps have explicit input/output contracts. Structured output via Pydantic schemas. No built-in fan-in/merge for parallel branches.",
+      "strengths": [
+        "Model-agnostic—any LLM provider",
+        "Plugin ecosystem is rich and extensible",
+        "Process Framework suits enterprise workflows",
+        "Multi-language (Python, .NET, Java)",
+        "Built-in vector DB integration for RAG",
+        "Enterprise-grade observability and security"
+      ],
+      "weaknesses": [
+        "Heavy framework—significant dependency cost",
+        "Complexity is high for simple use cases",
+        "Now being folded into Microsoft Agent Framework",
+        ".NET-centric design pattern feels foreign in Python",
+        "Plugin model adds indirection that can obscure flow",
+        "Process Framework is rigid for exploratory AI work"
+      ]
+    }
+  ],
+  "key_insights": [
+    "ALL five frameworks converge on the same primitive: agents are functions with tools/instructions, and orchestration is about routing data between them. The differences are in HOW routing happens (handoff vs graph vs event).",
+
+    "Three reusable patterns emerge from cross-framework analysis: (1) Triage Router—a single entry agent that delegates to specialists (Swarm, CrewAI, AutoGen), (2) DAG Pipeline—explicit directed graph with shared state (LangGraph, SK Process Framework), (3) Agent-as-Tool—wrap sub-agents as tools the parent can invoke (AutoGen, SK).",
+
+    "State management is the hardest problem in multi-agent systems. LangGraph's shared-state approach is most robust; Swarm's context_variables is simplest but error-prone. Our JSON-based state passing between scripts is closer to the DAG pattern.",
+
+    "No framework supports our zero-external-dependency constraint. All require at minimum an LLM API key. Our OpenCode environment must implement patterns using: (a) task tool for subagents, (b) JSON files for state, (c) PowerShell/Python for coordination logic.",
+
+    "The Agent-as-Tool pattern maps directly to OpenCode's task tool: a parent agent dispatches work to subagents and awaits results. This is already our native pattern and should be the foundation.",
+
+    "Parallel execution is poorly supported by all frameworks at the orchestration level. LangGraph has parallel branches, but most require explicit fan-in logic. Our parallel-worktree skill and concurrent task tool calls already exceed what most frameworks offer for parallel dispatch.",
+
+    "Human-in-the-loop is an afterthought in most frameworks (only LangGraph has it built-in). Our verify subagent and verification-before-completion gate are a stronger pattern than any framework provides natively.",
+
+    "Memory and persistence is the biggest gap across all frameworks. LangGraph has checkpointing; others rely on external stores. Our mem0 integration plus xTrace/error-registry provide a more comprehensive memory layer than any single framework."
+  ],
+  "recommended_pattern": "Hybrid Triage-DAG for OpenCode",
+  "hybrid_pattern_description": "Combine the Triage Router pattern (from Swarm/CrewAI) with DAG-based state passing (from LangGraph), using our existing task tool as the Agent-as-Tool primitive. A triage subagent or routing script parses the input, builds a JSON state object, and dispatches to specialist subagents via task tool calls. Each specialist reads from state, performs work, writes results back to state, and returns. A merge/reduce step collects all results. The coordinator script (PowerShell or Python) maintains the state file and controls the DAG execution, with no external dependencies beyond the LLM accessed through OpenCode's built-in model.",
+  "implementation_notes": [
+    "Phase 1: State-as-JSON—each subagent receives a JSON state file path, reads its input slice, writes its output slice, and exits.",
+    "Phase 2: Routing script—PowerShell/Python script parses task intent, constructs initial state, launches subagents in sequence or parallel per DAG definition.",
+    "Phase 3: DAG definition file—JSON config with nodes (subagent specs), edges (dependencies), and merge rules. Coordinator reads DAG, executes in topological order.",
+    "Phase 4: Feedback loop—after execution, verification gate runs; results and error signatures flow to xTrace and mem0 for continuous improvement.",
+    "This pattern requires zero external packages (no pip install), uses our existing PowerShell and Python infrastructure, and composes naturally with OpenCode's task tool and skill system."
+  ]
+}

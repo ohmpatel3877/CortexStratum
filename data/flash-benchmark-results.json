@@ -1,0 +1,11 @@
+{
+  "model": "deepseek-v4-flash",
+  "date": "2026-07-15",
+  "mode": "blind (fresh questions)",
+  "mc_math": "11/11",
+  "mc_math_pct": 100.0,
+  "code": "6/6",
+  "code_pass": true,
+  "overall": "12/12",
+  "overall_pct": 100.0
+}

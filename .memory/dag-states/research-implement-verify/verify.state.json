@@ -1,0 +1,47 @@
+{
+  "dag_id": "research-implement-verify",
+  "phase": "completed",
+  "node_id": "verify",
+  "input": {
+    "task": "Verify the implementation produced in the previous step. Implementation summary: <changes_summary_result>. Files changed: <implementation_files_result>. Verify against: {{input.task}}",
+    "context": {},
+    "artifacts": [],
+    "parent": {
+      "implement": {
+        "output": {
+          "summary": "Completed: Implement the solution based on the research findings. Research summary: <resear",
+          "data": {
+            "implementation_files": "<implementation_files_result>",
+            "changes_summary": "<changes_summary_result>",
+            "new_dependencies": "<new_dependencies_result>"
+          },
+          "artifacts": [],
+          "files_changed": [],
+          "decisions": []
+        }
+      }
+    }
+  },
+  "output": {
+    "summary": "Completed: Verify the implementation produced in the previous step. Implementation summary:",
+    "data": {
+      "verification_report": "<verification_report_result>",
+      "test_results": "<test_results_result>",
+      "issues_found": "<issues_found_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:09:09.045267+00:00",
+    "updated_at": "2026-07-16T03:09:10.230050+00:00",
+    "completed_at": "2026-07-16T03:09:10.229897+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 1146.888017654419,
+    "retry_count": 0,
+    "temperature": 0.2,
+    "node_version": "1.0.0"
+  }
+}

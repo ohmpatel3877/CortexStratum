@@ -1,0 +1,37 @@
+{
+  // ===========================================================================
+  // MCP Module Integration Config
+  // Installed: 2026-07-15
+  // Integration doc: docs/MCP-MODULE-INTEGRATION.md
+  // ===========================================================================
+  //
+  // To activate, copy the desired entries into opencode.jsonc > "mcp" section.
+  //
+  // Usage with skill router (opencode.jsonc > "mcp"):
+  //   "zen":    { see below }  // Cognitive & decision support
+  //   "fetch":  { see below }  // Web & data intelligence
+  //   "reddit": { see below }  // Reddit access (no auth)
+
+  "mcpServers": {
+    "zen": {
+      "command": "npx",
+      "args": ["-y", "zen-mcp-server-199bio"],
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "ZEN_MODEL": "deepseek-v4-flash-free"
+      }
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "mcp-fetch-server"],
+      "env": {
+        "FETCH_USER_AGENT": "opencode-ai-memory-core/1.0",
+        "FETCH_TIMEOUT": "30000"
+      }
+    },
+    "reddit": {
+      "command": "C:\\Users\\ohmpa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "args": ["-m", "server"]
+    }
+  }
+}

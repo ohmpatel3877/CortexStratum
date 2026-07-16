@@ -1,0 +1,7 @@
+{
+  "memory": ["recall", "remember", "retrieve", "store", "cache"],
+  "search": ["find", "locate", "lookup", "query", "discover"],
+  "synthesize": ["combine", "merge", "consolidate", "integrate", "unify"],
+  "extract": ["parse", "analyze", "interpret", "decode", "process"],
+  "consolidate": ["deduplicate", "merge", "unify", "compress", "summarize"]
+}

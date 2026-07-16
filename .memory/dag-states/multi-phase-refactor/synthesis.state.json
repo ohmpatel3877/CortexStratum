@@ -1,0 +1,64 @@
+{
+  "dag_id": "multi-phase-refactor",
+  "phase": "completed",
+  "node_id": "synthesis",
+  "input": {
+    "task": "Synthesize findings into a unified refactoring plan. Code analysis: <module_map_result>. Hotspots: <hotspots_result>. Test gaps: <missing_tests_result>. Create a phased refactoring plan with: targets, order, risk assessment, and testing strategy.",
+    "context": {},
+    "artifacts": [],
+    "parent": {
+      "code-analysis": {
+        "output": {
+          "summary": "Completed: Analyze the codebase structure for the refactoring task: {{input.task}}. Identif",
+          "data": {
+            "module_map": "<module_map_result>",
+            "dependency_graph": "<dependency_graph_result>",
+            "hotspots": "<hotspots_result>",
+            "coupling_report": "<coupling_report_result>",
+            "test_coverage_gaps": "<test_coverage_gaps_result>"
+          },
+          "artifacts": [],
+          "files_changed": [],
+          "decisions": []
+        }
+      },
+      "test-inventory": {
+        "output": {
+          "summary": "Completed: Inventory all existing tests for the codebase. Target: {{input.task}}. Catalog: ",
+          "data": {
+            "test_catalog": "<test_catalog_result>",
+            "coverage_by_module": "<coverage_by_module_result>",
+            "flaky_tests": "<flaky_tests_result>",
+            "missing_tests": "<missing_tests_result>"
+          },
+          "artifacts": [],
+          "files_changed": [],
+          "decisions": []
+        }
+      }
+    }
+  },
+  "output": {
+    "summary": "Completed: Synthesize findings into a unified refactoring plan. Code analysis: <module_map_",
+    "data": {
+      "refactoring_plan": "<refactoring_plan_result>",
+      "phase_order": "<phase_order_result>",
+      "risk_matrix": "<risk_matrix_result>",
+      "testing_strategy": "<testing_strategy_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:08:56.007888+00:00",
+    "updated_at": "2026-07-16T03:08:56.764896+00:00",
+    "completed_at": "2026-07-16T03:08:56.764874+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 741.1582469940186,
+    "retry_count": 0,
+    "temperature": 0.5,
+    "node_version": "1.0.0"
+  }
+}

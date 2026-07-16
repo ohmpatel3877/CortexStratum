@@ -1,0 +1,20 @@
+{
+  "q1": {"type": "mc", "answer": "C"},
+  "q2": {"type": "mc", "answer": "A"},
+  "q3": {"type": "mc", "answer": "B"},
+  "q4": {"type": "mc", "answer": "A"},
+  "q5": {"type": "mc", "answer": "B"},
+  "q6": {"type": "mc", "answer": "B"},
+  "q7": {
+    "type": "code",
+    "function_name": "length_of_lis",
+    "code": "def length_of_lis(nums):\n    import bisect\n    tails = []\n    for x in nums:\n        i = bisect.bisect_left(tails, x)\n        if i == len(tails):\n            tails.append(x)\n        else:\n            tails[i] = x\n    return len(tails)"
+  },
+  "q8": {
+    "type": "code",
+    "function_name": "move_zeroes",
+    "code": "def move_zeroes(nums):\n    pos = 0\n    for i in range(len(nums)):\n        if nums[i] != 0:\n            nums[pos], nums[i] = nums[i], nums[pos]\n            pos += 1\n    return nums"
+  },
+  "q9": {"type": "mc", "answer": "C"},
+  "q10": {"type": "mc", "answer": "A"}
+}

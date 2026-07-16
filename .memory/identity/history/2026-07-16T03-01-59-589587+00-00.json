@@ -1,0 +1,19 @@
+{
+  "persona_name": "default",
+  "version": "0.0.1",
+  "traits": [],
+  "principles": [],
+  "behavioral_patterns": [],
+  "communication_style": {
+    "verbosity": 0.3,
+    "formality": 0.4,
+    "technical_depth": 0.6,
+    "humor_tolerance": 0.5
+  },
+  "knowledge_boundaries": {
+    "strong_areas": [],
+    "weak_areas": [],
+    "recent_learnings": []
+  },
+  "last_consolidated": "2026-07-16T03:01:59.522598+00:00"
+}

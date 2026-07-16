@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "State Contract v1",
+  "description": "Schema for per-node state files passed between DAG nodes. Each node receives an input state, writes an output state, and may produce artifacts.",
+  "type": "object",
+  "required": ["dag_id", "phase", "node_id", "input", "output", "metadata"],
+  "properties": {
+    "dag_id": {
+      "type": "string",
+      "description": "Unique identifier for the DAG execution instance",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "phase": {
+      "type": "string",
+      "description": "Execution phase — one of: pending, running, completed, failed, skipped",
+      "enum": ["pending", "running", "completed", "failed", "skipped"]
+    },
+    "node_id": {
+      "type": "string",
+      "description": "Identifier for this DAG node (must match a node in the DAG definition)",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "input": {
+      "type": "object",
+      "description": "Input data passed to this node from upstream nodes or the initial trigger",
+      "properties": {
+        "task": { "type": "string", "description": "The task or prompt for this node to execute" },
+        "context": { "type": "object", "description": "Additional context data (files, references, prior results)" },
+        "artifacts": {
+          "type": "array",
+          "description": "Paths to input artifacts from upstream nodes",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "output": {
+      "type": "object",
+      "description": "Output data produced by this node for downstream consumers",
+      "properties": {
+        "summary": { "type": "string", "description": "Natural language summary of what this node produced" },
+        "data": { "type": "object", "description": "Structured data output" },
+        "artifacts": {
+          "type": "array",
+          "description": "Paths to artifacts produced by this node",
+          "items": { "type": "string" }
+        },
+        "files_changed": {
+          "type": "array",
+          "description": "File paths modified by this node's execution",
+          "items": { "type": "string" }
+        },
+        "decisions": {
+          "type": "array",
+          "description": "Key decisions made during this node's execution",
+          "items": {
+            "type": "object",
+            "properties": {
+              "what": { "type": "string" },
+              "why": { "type": "string" },
+              "alternatives": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Execution metadata for observability and debugging",
+      "required": ["started_at", "updated_at", "errors", "warnings"],
+      "properties": {
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "errors": {
+          "type": "array",
+          "description": "Errors encountered during execution",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "message": { "type": "string" },
+              "source": { "type": "string" }
+            }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "description": "Warnings (non-fatal issues)",
+          "items": { "type": "string" }
+        },
+        "duration_ms": { "type": "number", "description": "Execution duration in milliseconds" },
+        "retry_count": { "type": "integer", "minimum": 0, "description": "Number of retries attempted" },
+        "temperature": { "type": "number", "description": "Temperature setting used for this node" },
+        "node_version": { "type": "string", "description": "Version of the node logic that processed this state" }
+      }
+    }
+  }
+}

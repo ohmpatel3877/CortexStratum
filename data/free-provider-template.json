@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "_comment": "Free AI provider template for OpenCode. Copy relevant provider blocks into your opencode.jsonc 'provider' section. Set API keys via env vars or /connect.",
+  "_guide": "~/github/ai-memory-core/data/provider-signup-guide.md",
+
+  "provider": {
+
+    "groq": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Groq (Free Tier)",
+      "options": {
+        "baseURL": "https://api.groq.com/openai/v1",
+        "apiKey": "{env:GROQ_API_KEY}"
+      },
+      "models": {
+        "llama-3.3-70b-versatile": {
+          "name": "Llama 3.3 70B Versatile",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "qwen3-32b": {
+          "name": "Qwen 3 32B",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "gpt-oss-120b": {
+          "name": "GPT-OSS 120B",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "llama-3.1-8b-instant": {
+          "name": "Llama 3.1 8B Instant (fastest)",
+          "limit": { "context": 131072, "output": 8192 }
+        },
+        "mixtral-8x7b-32768": {
+          "name": "Mixtral 8x7B",
+          "limit": { "context": 32768, "output": 32768 }
+        }
+      }
+    },
+
+    "gemini": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Google Gemini (Free Tier)",
+      "options": {
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai",
+        "apiKey": "{env:GEMINI_API_KEY}"
+      },
+      "models": {
+        "gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash",
+          "limit": { "context": 1048576, "output": 65536 }
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro",
+          "limit": { "context": 1048576, "output": 65536 }
+        },
+        "gemini-2.0-flash": {
+          "name": "Gemini 2.0 Flash",
+          "limit": { "context": 1048576, "output": 8192 }
+        }
+      }
+    },
+
+    "mistral": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Mistral AI (Free Tier)",
+      "options": {
+        "baseURL": "https://api.mistral.ai/v1",
+        "apiKey": "{env:MISTRAL_API_KEY}"
+      },
+      "models": {
+        "mistral-medium-latest": {
+          "name": "Mistral Medium",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "codestral-latest": {
+          "name": "Codestral (code specialist)",
+          "limit": { "context": 256000, "output": 32768 }
+        },
+        "mistral-small-latest": {
+          "name": "Mistral Small",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "open-mistral-nemo": {
+          "name": "Open Mistral Nemo (open-weight)",
+          "limit": { "context": 131072, "output": 32768 }
+        }
+      }
+    },
+
+    "sambanova": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "SambaNova (Free Tier)",
+      "options": {
+        "baseURL": "https://api.sambanova.ai/v1",
+        "apiKey": "{env:SAMBANOVA_API_KEY}"
+      },
+      "models": {
+        "DeepSeek-V3.1": {
+          "name": "DeepSeek V3.1",
+          "limit": { "context": 131072, "output": 16384 }
+        },
+        "Llama-3.3-70B": {
+          "name": "Llama 3.3 70B",
+          "limit": { "context": 131072, "output": 16384 }
+        },
+        "DeepSeek-R1": {
+          "name": "DeepSeek R1 (reasoning)",
+          "limit": { "context": 131072, "output": 16384 }
+        }
+      }
+    },
+
+    "github-models": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "GitHub Models (Free Tier)",
+      "options": {
+        "baseURL": "https://models.inference.ai.azure.com",
+        "apiKey": "{env:GITHUB_TOKEN}"
+      },
+      "models": {
+        "gpt-5": {
+          "name": "GPT-5",
+          "limit": { "context": 1048576, "output": 32768 }
+        },
+        "gpt-4.1": {
+          "name": "GPT-4.1",
+          "limit": { "context": 1048576, "output": 32768 }
+        },
+        "o4-mini": {
+          "name": "o4-mini (reasoning)",
+          "limit": { "context": 200000, "output": 100000 }
+        },
+        "Phi-4": {
+          "name": "Phi-4 (small, fast)",
+          "limit": { "context": 16384, "output": 4096 }
+        },
+        "DeepSeek-R1": {
+          "name": "DeepSeek R1",
+          "limit": { "context": 131072, "output": 16384 }
+        }
+      }
+    },
+
+    "cerebras": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Cerebras (Free Tier)",
+      "options": {
+        "baseURL": "https://api.cerebras.ai/v1",
+        "apiKey": "{env:CEREBRAS_API_KEY}"
+      },
+      "models": {
+        "llama-3.3-70b": {
+          "name": "Llama 3.3 70B (fastest inference)",
+          "limit": { "context": 131072, "output": 8192 }
+        },
+        "qwen-2.5-32b": {
+          "name": "Qwen 2.5 32B",
+          "limit": { "context": 131072, "output": 8192 }
+        },
+        "llama-3.1-8b": {
+          "name": "Llama 3.1 8B (ultra-fast)",
+          "limit": { "context": 8192, "output": 8192 }
+        }
+      }
+    },
+
+    "nvidia-nim": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "NVIDIA NIM (Free Tier)",
+      "options": {
+        "baseURL": "https://integrate.api.nvidia.com/v1",
+        "apiKey": "{env:NVIDIA_API_KEY}"
+      },
+      "models": {
+        "deepseek-r1": {
+          "name": "DeepSeek R1",
+          "limit": { "context": 131072, "output": 16384 }
+        },
+        "nemotron-3-super": {
+          "name": "Nemotron 3 Super",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "llama-3.3-70b-instruct": {
+          "name": "Llama 3.3 70B Instruct",
+          "limit": { "context": 131072, "output": 32768 }
+        },
+        "qwen2.5-coder-32b-instruct": {
+          "name": "Qwen 2.5 Coder 32B",
+          "limit": { "context": 32768, "output": 8192 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "dag_id": "research-implement-verify",
+  "name": "Research → Implement → Verify",
+  "description": "Three-node sequential pipeline: research the problem, implement the solution, verify correctness. Classic science/engineering workflow.",
+  "version": "1.0.0",
+  "tags": ["research", "implement", "verify", "sequential", "general-purpose"],
+  "nodes": [
+    {
+      "id": "research",
+      "description": "Research the problem domain, existing solutions, and best practices. Produce a summary of findings and a recommended approach.",
+      "prompt_template": "Research the following problem and provide a concise summary of findings, existing solutions, and a recommended approach. Problem: {{input.task}}",
+      "temperature": 0.6,
+      "timeout_seconds": 300,
+      "retry_count": 1,
+      "retry_delay_seconds": 5,
+      "input_mapping": {},
+      "expected_outputs": ["research_summary", "recommended_approach", "references"]
+    },
+    {
+      "id": "implement",
+      "description": "Implement the solution based on research findings. Write production-quality code following project conventions.",
+      "prompt_template": "Implement the solution based on the research findings. Research summary: {{parent.research.output.data.research_summary}}. Recommended approach: {{parent.research.output.data.recommended_approach}}. Task: {{input.task}}",
+      "temperature": 0.4,
+      "timeout_seconds": 600,
+      "retry_count": 1,
+      "retry_delay_seconds": 5,
+      "input_mapping": {
+        "context.research_summary": "research.output.data.research_summary",
+        "context.recommended_approach": "research.output.data.recommended_approach"
+      },
+      "expected_outputs": ["implementation_files", "changes_summary", "new_dependencies"]
+    },
+    {
+      "id": "verify",
+      "description": "Verify the implementation: run tests, check for regressions, validate against requirements. Produce a verification report.",
+      "prompt_template": "Verify the implementation produced in the previous step. Implementation summary: {{parent.implement.output.data.changes_summary}}. Files changed: {{parent.implement.output.data.implementation_files}}. Verify against: {{input.task}}",
+      "temperature": 0.2,
+      "timeout_seconds": 300,
+      "retry_count": 0,
+      "input_mapping": {
+        "context.changes_summary": "implement.output.data.changes_summary",
+        "context.implementation_files": "implement.output.data.implementation_files"
+      },
+      "expected_outputs": ["verification_report", "test_results", "issues_found"]
+    }
+  ],
+  "edges": [
+    { "from": "research", "to": "implement" },
+    { "from": "implement", "to": "verify" }
+  ],
+  "merge_rules": [
+    { "strategy": "deep_merge", "field": "output.data" }
+  ],
+  "config": {
+    "max_concurrency": 1,
+    "global_timeout_seconds": 1800,
+    "heartbeat_interval_seconds": 5,
+    "error_mode": "abort",
+    "log_level": "info"
+  }
+}

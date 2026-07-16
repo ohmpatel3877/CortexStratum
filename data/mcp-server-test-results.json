@@ -1,0 +1,63 @@
+{
+  "test_timestamp": "2026-07-15T19:23:33Z",
+  "server_script": "tools-mcp-server.py",
+  "tests": [
+    {
+      "name": "initialize",
+      "passed": true,
+      "detail": "serverInfo={'name': 'ai-memory-core-tools', 'version': '1.0.0'}"
+    },
+    {
+      "name": "tools/list",
+      "passed": true,
+      "detail": "61 tools: xtrace_log_error, xtrace_search, xtrace_status, dtrace_add, dtrace_search, skill_router_match, output_condenser, goal_registry_init, goal_registry_add_subgoal, goal_registry_status, goal_registry_check_alignment, commitment_checker_list, commitment_checker_verify, art_generate_svg, art_generate_theme, art_extract_palette, art_design_concept, lit_analyze_text, lit_extract_concepts, lit_generate_study_guide, lit_analyze_philosophy, sensory_browse, sensory_screenshot, sensory_interact, sensory_extract_pdf, sensory_extract_html, sensory_extract_image, sensory_scrape, sensory_extract_article, sensory_api_request, sensory_fetch_rss, sensory_read_file, sensory_search, audio_analyze_file, audio_waveform, audio_frequency_analysis, audio_music_theory, audio_speech_analysis, audio_convert_guide, audio_generate_tone, coder_analyze_code, coder_generate_framework, coder_debug, coder_review, coder_explain, coder_convert, coder_architecture, devops_container_debug, devops_permissions_analyze, devops_compose_generator, devops_samba_config, devops_mergerfs_setup, devops_dockerfile_analyze, devops_network_troubleshoot, gamedev_design_analyze, gamedev_scaffold_project, gamedev_mechanics_guide, gamedev_monetization, gamedev_optimization, gamedev_compare_engines, gamedev_level_design"
+    },
+    {
+      "name": "tools/call (skill_router_match)",
+      "passed": true,
+      "detail": "result has matched_skills: True"
+    },
+    {
+      "name": "tools/call (xtrace_status)",
+      "passed": true,
+      "detail": "got 104 chars of output"
+    },
+    {
+      "name": "tools/call (goal_registry_status)",
+      "passed": true,
+      "detail": "got 72 chars of output"
+    },
+    {
+      "name": "tools/call (commitment_checker_list)",
+      "passed": true,
+      "detail": "got 133 chars of output"
+    },
+    {
+      "name": "tools/call (output_condenser)",
+      "passed": true,
+      "detail": "got: Build completed successfully\nerror: something failed"
+    },
+    {
+      "name": "tools/call (dtrace_search)",
+      "passed": true,
+      "detail": "got 32 chars"
+    },
+    {
+      "name": "unknown tool handled gracefully",
+      "passed": true,
+      "detail": "returned a response (not crash)"
+    },
+    {
+      "name": "unknown method returns error",
+      "passed": true,
+      "detail": "error code: -32601"
+    }
+  ],
+  "overall": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "pass_rate": 100.0,
+    "all_passed": true
+  }
+}

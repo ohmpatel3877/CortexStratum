@@ -1,0 +1,48 @@
+{
+  "dag_id": "security-audit-pipeline",
+  "phase": "completed",
+  "node_id": "remediation-plan",
+  "input": {
+    "task": "Create a prioritized remediation plan for the security findings. {{#if parent.quick-scan.output.data.severity_counts.critical}}Critical issues found: {{parent.quick-scan.output.data.severity_counts.critical}}{{/if}}. Deep-dive findings: {{parent.deep-dive.output.data.detailed_findings}}. Prioritize by severity, exploitability, and business impact.",
+    "context": {},
+    "artifacts": [],
+    "parent": {
+      "quick-scan": {
+        "output": {
+          "summary": "Completed: Perform a quick security scan of the codebase for: hardcoded secrets, SQL inject",
+          "data": {
+            "vulnerabilities": "<vulnerabilities_result>",
+            "severity_counts": "<severity_counts_result>",
+            "scan_coverage": "<scan_coverage_result>"
+          },
+          "artifacts": [],
+          "files_changed": [],
+          "decisions": []
+        }
+      }
+    }
+  },
+  "output": {
+    "summary": "Completed: Create a prioritized remediation plan for the security findings. {{#if parent.qu",
+    "data": {
+      "remediation_steps": "<remediation_steps_result>",
+      "priority_order": "<priority_order_result>",
+      "effort_estimates": "<effort_estimates_result>",
+      "quick_wins": "<quick_wins_result>"
+    },
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-16T03:08:56.045067+00:00",
+    "updated_at": "2026-07-16T03:08:56.564699+00:00",
+    "completed_at": "2026-07-16T03:08:56.564676+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 503.9935111999512,
+    "retry_count": 0,
+    "temperature": 0.3,
+    "node_version": "1.0.0"
+  }
+}

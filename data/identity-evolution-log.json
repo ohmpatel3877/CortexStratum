@@ -1,0 +1,29 @@
+{
+  "description": "Tracks identity changes across consolidations",
+  "versions": [
+    {
+      "version": "0.0.1",
+      "date": "2026-07-16T03:01:59.523752+00:00",
+      "changes_made": [
+        "Minor metadata refresh"
+      ],
+      "triggers": [
+        "consolidation"
+      ]
+    },
+    {
+      "version": "0.0.2",
+      "date": "2026-07-16T03:02:49.962417+00:00",
+      "changes_made": [
+        "Trait 'conciseness' strengthened from 0.00 to 0.25",
+        "Trait 'thoroughness' strengthened from 0.00 to 0.25",
+        "Trait 'proactiveness' strengthened from 0.00 to 0.25",
+        "Trait 'formality' strengthened from 0.00 to 0.25",
+        "Trait 'directness' strengthened from 0.00 to 0.25"
+      ],
+      "triggers": [
+        "consolidation"
+      ]
+    }
+  ]
+}

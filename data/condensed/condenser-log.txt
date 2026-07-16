@@ -1,0 +1,313 @@
+﻿[2026-07-15 14:34:41] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 3
+Status: FAILED (exit 1) | 340 tests -> 337 passed, 3 failed
+------------------------------------------------------------
+
+[2026-07-15 14:34:51] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 3
+Status: FAILED (exit 1) | 340 tests -> 337 passed, 3 failed
+Summary:
+  10 files, 340 tests: 337 passed, 3 failed.
+------------------------------------------------------------
+
+[2026-07-15 14:35:01] Command=CondenseRead Type=generic File=src/App.tsx
+------------------------------------------------------------
+[CONDENSED] File: src/App.tsx (9 lines | useful: 122%)
+Imports: React from \ react\, { invoke } from \@tauri-apps/api/core\
+Signatures (1): function App() {
+TODOs (1):
+  line 5 - // TODO: add error boundary
+Full body suppressed. Use Read offset=50 limit=100 for specific section.
+------------------------------------------------------------
+
+[2026-07-15 14:35:03] Command=CondenseGrep Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Grep: "<search>" -> 3 matches in 2 files
+  src/main/index.ts (2 matches)
+  src/main/preload.ts (1 matches)
+------------------------------------------------------------
+
+[2026-07-15 14:35:05] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: Input is not valid JSON - treating as raw text
+Raw lines: 1
+  [{\ id\:\mem1\,\text\:\User prefers Tailwind CSS\,\type\:\preference\,\score\:0.95},{\id\:\mem2\,\text\:\User prefers Tailwind CSS\,\type\:\preference\,\score\:0.92}]
+------------------------------------------------------------
+
+[2026-07-15 14:35:15] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: 2 total results
+By type: preference=2
+By category: none=2
+Top 3 most relevant:
+  [0.95] [mem1] User prefers Tailwind CSS
+  [0.92] [mem2] User prefers Tailwind CSS
+  [DUPE 0<->1 sim=1] "User prefers Tailwind CSS..." == "User prefers Tailwind CSS..."
+------------------------------------------------------------
+
+[2026-07-15 14:38:05] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 12
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 14:38:08] Command=CondenseBash Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Type: generic | Lines: 11
+Total lines: 11 | Reduced to: 10 | Signal lines: 6
+Signal lines:
+  [SIGNAL] Error: Cannot find module 'better-sqlite3'
+  [SIGNAL]     at Function.Module._resolveFilename (node:internal/modules/cjs/loader:933:15)
+  [SIGNAL]     at Function.Module._load (node:internal/modules/cjs/loader:778:27)
+  [SIGNAL]     at Module.require (node:internal/modules/cjs/loader:1005:19)
+  [SIGNAL]     at require (node:internal/modules/cjs/helpers:102:18)
+  [SIGNAL]     at Object.<anonymous> (C:\project\src\main\database.ts:1:1)
+(4 lines of body suppressed)
+------------------------------------------------------------
+
+[2026-07-15 14:38:12] Command=CondenseRead Type=generic File=src/main/index.ts
+------------------------------------------------------------
+[CONDENSED] File: src/main/index.ts (17 lines | useful: 88%)
+TODOs (2):
+  line 5 - // TODO: add retry logic for database operations
+  line 6 - // FIXME: this is a workaround for issue #42
+Full body suppressed. Use Read offset=50 limit=100 for specific section.
+------------------------------------------------------------
+
+[2026-07-15 14:38:16] Command=CondenseGrep Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Grep: "<search>" -> 5 matches in 2 files
+  src/main/index.ts (3 matches)
+  src/preload/index.ts (2 matches)
+------------------------------------------------------------
+
+[2026-07-15 14:38:20] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: 3 total results
+By type: bug_fixes=1 architecture_decisions=1 task_learning=1
+By category: none=3
+Top 3 most relevant:
+  [0.85] [<no id>] <no text>
+  [0.72] [<no id>] <no text>
+  [0.31] [<no id>] <no text>
+No duplicates detected (cosine > 0.8)
+------------------------------------------------------------
+
+[2026-07-15 14:38:54] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 1
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 14:41:32] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 12
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 14:41:35] Command=CondenseBash Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Type: generic | Lines: 11
+Total lines: 11 | Reduced to: 10 | Signal lines: 6
+Signal lines:
+  [SIGNAL] Error: Cannot find module 'better-sqlite3'
+  [SIGNAL]     at Function.Module._resolveFilename (node:internal/modules/cjs/loader:933:15)
+  [SIGNAL]     at Function.Module._load (node:internal/modules/cjs/loader:778:27)
+  [SIGNAL]     at Module.require (node:internal/modules/cjs/loader:1005:19)
+  [SIGNAL]     at require (node:internal/modules/cjs/helpers:102:18)
+  [SIGNAL]     at Object.<anonymous> (C:\project\src\main\database.ts:1:1)
+(4 lines of body suppressed)
+------------------------------------------------------------
+
+[2026-07-15 14:41:39] Command=CondenseRead Type=generic File=src/main/index.ts
+------------------------------------------------------------
+[CONDENSED] File: src/main/index.ts (17 lines | useful: 88%)
+TODOs (2):
+  line 5 - // TODO: add retry logic for database operations
+  line 6 - // FIXME: this is a workaround for issue #42
+Full body suppressed. Use Read offset=50 limit=100 for specific section.
+------------------------------------------------------------
+
+[2026-07-15 14:41:42] Command=CondenseGrep Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Grep: "<search>" -> 5 matches in 2 files
+  src/main/index.ts (3 matches)
+  src/preload/index.ts (2 matches)
+------------------------------------------------------------
+
+[2026-07-15 14:41:46] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: 3 total results
+By type: bug_fixes=1 architecture_decisions=1 task_learning=1
+By category: none=3
+Top 3 most relevant:
+  [0.85] [<no id>] <no text>
+  [0.72] [<no id>] <no text>
+  [0.31] [<no id>] <no text>
+No duplicates detected (cosine > 0.8)
+------------------------------------------------------------
+
+[2026-07-15 14:42:18] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 1
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 15:01:14] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 12
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 15:01:19] Command=CondenseBash Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Type: generic | Lines: 11
+Total lines: 11 | Reduced to: 10 | Signal lines: 6
+Signal lines:
+  [SIGNAL] Error: Cannot find module 'better-sqlite3'
+  [SIGNAL]     at Function.Module._resolveFilename (node:internal/modules/cjs/loader:933:15)
+  [SIGNAL]     at Function.Module._load (node:internal/modules/cjs/loader:778:27)
+  [SIGNAL]     at Module.require (node:internal/modules/cjs/loader:1005:19)
+  [SIGNAL]     at require (node:internal/modules/cjs/helpers:102:18)
+  [SIGNAL]     at Object.<anonymous> (C:\project\src\main\database.ts:1:1)
+(4 lines of body suppressed)
+------------------------------------------------------------
+
+[2026-07-15 15:01:23] Command=CondenseRead Type=generic File=src/main/index.ts
+------------------------------------------------------------
+[CONDENSED] File: src/main/index.ts (17 lines | useful: 88%)
+TODOs (2):
+  line 5 - // TODO: add retry logic for database operations
+  line 6 - // FIXME: this is a workaround for issue #42
+Full body suppressed. Use Read offset=50 limit=100 for specific section.
+------------------------------------------------------------
+
+[2026-07-15 15:01:28] Command=CondenseGrep Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Grep: "<search>" -> 5 matches in 2 files
+  src/main/index.ts (3 matches)
+  src/preload/index.ts (2 matches)
+------------------------------------------------------------
+
+[2026-07-15 15:01:32] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: 3 total results
+By type: bug_fixes=1 architecture_decisions=1 task_learning=1
+By category: none=3
+Top 3 most relevant:
+  [0.85] [<no id>] <no text>
+  [0.72] [<no id>] <no text>
+  [0.31] [<no id>] <no text>
+No duplicates detected (cosine > 0.8)
+------------------------------------------------------------
+
+[2026-07-15 15:36:48] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 12
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 15:36:51] Command=CondenseBash Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Type: generic | Lines: 11
+Total lines: 11 | Reduced to: 10 | Signal lines: 6
+Signal lines:
+  [SIGNAL] Error: Cannot find module 'better-sqlite3'
+  [SIGNAL]     at Function.Module._resolveFilename (node:internal/modules/cjs/loader:933:15)
+  [SIGNAL]     at Function.Module._load (node:internal/modules/cjs/loader:778:27)
+  [SIGNAL]     at Module.require (node:internal/modules/cjs/loader:1005:19)
+  [SIGNAL]     at require (node:internal/modules/cjs/helpers:102:18)
+  [SIGNAL]     at Object.<anonymous> (C:\project\src\main\database.ts:1:1)
+(4 lines of body suppressed)
+------------------------------------------------------------
+
+[2026-07-15 15:36:54] Command=CondenseRead Type=generic File=src/main/index.ts
+------------------------------------------------------------
+[CONDENSED] File: src/main/index.ts (17 lines | useful: 88%)
+TODOs (2):
+  line 5 - // TODO: add retry logic for database operations
+  line 6 - // FIXME: this is a workaround for issue #42
+Full body suppressed. Use Read offset=50 limit=100 for specific section.
+------------------------------------------------------------
+
+[2026-07-15 15:36:56] Command=CondenseGrep Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Grep: "<search>" -> 5 matches in 2 files
+  src/main/index.ts (3 matches)
+  src/preload/index.ts (2 matches)
+------------------------------------------------------------
+
+[2026-07-15 15:36:59] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: 3 total results
+By type: bug_fixes=1 architecture_decisions=1 task_learning=1
+By category: none=3
+Top 3 most relevant:
+  [0.85] [<no id>] <no text>
+  [0.72] [<no id>] <no text>
+  [0.31] [<no id>] <no text>
+No duplicates detected (cosine > 0.8)
+------------------------------------------------------------
+
+[2026-07-15 15:37:26] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 1
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 15:38:51] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 12
+Status: UNKNOWN
+------------------------------------------------------------
+
+[2026-07-15 15:38:54] Command=CondenseBash Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Type: generic | Lines: 11
+Total lines: 11 | Reduced to: 10 | Signal lines: 6
+Signal lines:
+  [SIGNAL] Error: Cannot find module 'better-sqlite3'
+  [SIGNAL]     at Function.Module._resolveFilename (node:internal/modules/cjs/loader:933:15)
+  [SIGNAL]     at Function.Module._load (node:internal/modules/cjs/loader:778:27)
+  [SIGNAL]     at Module.require (node:internal/modules/cjs/loader:1005:19)
+  [SIGNAL]     at require (node:internal/modules/cjs/helpers:102:18)
+  [SIGNAL]     at Object.<anonymous> (C:\project\src\main\database.ts:1:1)
+(4 lines of body suppressed)
+------------------------------------------------------------
+
+[2026-07-15 15:38:56] Command=CondenseRead Type=generic File=src/main/index.ts
+------------------------------------------------------------
+[CONDENSED] File: src/main/index.ts (17 lines | useful: 88%)
+TODOs (2):
+  line 5 - // TODO: add retry logic for database operations
+  line 6 - // FIXME: this is a workaround for issue #42
+Full body suppressed. Use Read offset=50 limit=100 for specific section.
+------------------------------------------------------------
+
+[2026-07-15 15:38:59] Command=CondenseGrep Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Grep: "<search>" -> 5 matches in 2 files
+  src/main/index.ts (3 matches)
+  src/preload/index.ts (2 matches)
+------------------------------------------------------------
+
+[2026-07-15 15:39:01] Command=CondenseMem0 Type=generic File=
+------------------------------------------------------------
+[CONDENSED] Mem0: 3 total results
+By type: bug_fixes=1 architecture_decisions=1 task_learning=1
+By category: none=3
+Top 3 most relevant:
+  [0.85] [<no id>] <no text>
+  [0.72] [<no id>] <no text>
+  [0.31] [<no id>] <no text>
+No duplicates detected (cosine > 0.8)
+------------------------------------------------------------
+
+[2026-07-15 15:39:28] Command=CondenseBash Type=build File=
+------------------------------------------------------------
+[CONDENSED] Type: build | Lines: 1
+Status: UNKNOWN
+------------------------------------------------------------
+

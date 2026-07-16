@@ -1,0 +1,17 @@
+{
+  "benchmark": "fresh-blind-2026-07-16",
+  "model": "deepseek-v4-flash",
+  "method": "truly blind — zero answer key",
+  "questions": 15,
+  "categories": {
+    "reasoning": {"correct": 4, "total": 5, "pct": 80},
+    "code": {"correct": 5, "total": 5, "pct": 100},
+    "knowledge": {"correct": 5, "total": 5, "pct": 100}
+  },
+  "overall": {"correct": 14, "total": 15, "pct": 93},
+  "evaluator": "external human",
+  "date": "2026-07-16",
+  "weaknesses": ["over-explaining", "mid-answer self-correction"],
+  "strengths": ["code generation", "systems knowledge", "probability", "spatial reasoning", "CS theory"],
+  "note": "This is the only clean, uncontaminated benchmark score. Previous 100% scores were invalid because questions and answers were in the same source file."
+}

@@ -1,0 +1,46 @@
+{
+  "dag_id": "integration-test-seed",
+  "name": "Integration Test Seed DAG",
+  "description": "Seed DAG definition for integration testing the DAG coordinator",
+  "version": "1.0.0",
+  "tags": ["test", "integration", "seed"],
+  "nodes": [
+    {
+      "id": "analyze",
+      "description": "Analyze task requirements and produce structured specification",
+      "prompt_template": "Analyze the following task and produce a structured specification: {{input.task}}",
+      "temperature": 0.3,
+      "timeout_seconds": 120,
+      "retry_count": 1,
+      "expected_outputs": ["specification", "complexity_score"]
+    },
+    {
+      "id": "implement",
+      "description": "Implement the solution based on the specification",
+      "prompt_template": "Implement the solution based on this specification: {{input.context.analyze.output.data.specification}}",
+      "temperature": 0.5,
+      "timeout_seconds": 300,
+      "retry_count": 2,
+      "expected_outputs": ["code", "tests"]
+    },
+    {
+      "id": "verify",
+      "description": "Verify the implementation passes all tests and quality gates",
+      "prompt_template": "Verify this implementation: {{input.context.implement.output.data.code}}",
+      "temperature": 0.2,
+      "timeout_seconds": 120,
+      "retry_count": 1,
+      "expected_outputs": ["verification_report", "test_results"]
+    }
+  ],
+  "edges": [
+    { "from": "analyze", "to": "implement" },
+    { "from": "implement", "to": "verify" }
+  ],
+  "config": {
+    "max_concurrency": 2,
+    "global_timeout_seconds": 600,
+    "error_mode": "abort",
+    "log_level": "info"
+  }
+}

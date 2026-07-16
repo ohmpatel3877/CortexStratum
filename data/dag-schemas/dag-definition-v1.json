@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DAG Definition v1",
+  "description": "Schema defining a Directed Acyclic Graph of work nodes for multi-agent pipeline execution. Defines nodes, edges, merge rules, and execution configuration.",
+  "type": "object",
+  "required": ["dag_id", "name", "description", "nodes", "edges"],
+  "properties": {
+    "dag_id": {
+      "type": "string",
+      "description": "Unique identifier for this DAG definition",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name for this pipeline"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of what this pipeline does"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this DAG definition",
+      "default": "1.0.0"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags for categorization and discovery",
+      "items": { "type": "string" }
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Ordered list of work nodes in the DAG (order-independent; edges determine topology)",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique node identifier within this DAG",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this node does"
+          },
+          "prompt_template": {
+            "type": "string",
+            "description": "Template for the subagent prompt. Use {{input.task}}, {{input.context.*}}, {{parent.output.*}} for variable substitution."
+          },
+          "temperature": {
+            "type": "number",
+            "description": "Temperature for this node's subagent (0.0-1.0)",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "default": 0.7
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Max execution time before the node is marked stalled",
+            "minimum": 10,
+            "default": 300
+          },
+          "retry_count": {
+            "type": "integer",
+            "description": "Number of retries on failure",
+            "minimum": 0,
+            "default": 1
+          },
+          "retry_delay_seconds": {
+            "type": "integer",
+            "description": "Seconds to wait before retry",
+            "minimum": 1,
+            "default": 5
+          },
+          "input_mapping": {
+            "type": "object",
+            "description": "Maps upstream node output fields to this node's input fields. Format: {'this.input.field': 'upstream_node_id.output.field'}",
+            "additionalProperties": { "type": "string" }
+          },
+          "expected_outputs": {
+            "type": "array",
+            "description": "List of expected output keys this node should produce",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Directed edges defining the dependency graph. If empty, nodes run in parallel.",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID (depends on source)"
+          },
+          "condition": {
+            "type": "string",
+            "description": "Optional JSONPath-style condition. Edge is only followed if the condition evaluates to true against the source node's output. Example: '$.output.data.security_issues > 0'"
+          },
+          "data_map": {
+            "type": "object",
+            "description": "Optional mapping of fields to pass from source output to target input",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      }
+    },
+    "merge_rules": {
+      "type": "array",
+      "description": "Rules for merging outputs from multiple fan-in nodes. Evaluated when a node has multiple parents.",
+      "items": {
+        "type": "object",
+        "required": ["strategy", "field"],
+        "properties": {
+          "strategy": {
+            "type": "string",
+            "description": "Merge strategy to apply",
+            "enum": ["concat", "deep_merge", "pick_first", "pick_last", "sum", "average", "union", "intersection"]
+          },
+          "field": {
+            "type": "string",
+            "description": "Dot-notation field path to apply the merge on (e.g., 'output.data.results')"
+          },
+          "deduplicate": {
+            "type": "boolean",
+            "description": "Remove duplicates after merge",
+            "default": false
+          }
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "description": "Global execution configuration",
+      "properties": {
+        "max_concurrency": {
+          "type": "integer",
+          "description": "Maximum number of nodes to run in parallel",
+          "minimum": 1,
+          "default": 4
+        },
+        "global_timeout_seconds": {
+          "type": "integer",
+          "description": "Maximum total DAG execution time",
+          "minimum": 30,
+          "default": 3600
+        },
+        "heartbeat_interval_seconds": {
+          "type": "integer",
+          "description": "How often nodes should write heartbeat",
+          "minimum": 1,
+          "default": 5
+        },
+        "error_mode": {
+          "type": "string",
+          "description": "Behavior when a node fails",
+          "enum": ["abort", "skip_downstream", "continue", "retry"],
+          "default": "abort"
+        },
+        "log_level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"],
+          "default": "info"
+        }
+      }
+    }
+  }
+}
