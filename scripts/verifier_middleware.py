@@ -15,11 +15,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import sqlite3
 import threading
 import time
 import uuid
 from typing import Any
+
+from guardrails import SafetyPipeline
 
 
 # ---------------------------------------------------------------------------
@@ -52,6 +56,20 @@ SECURITY_PATTERNS: list[dict[str, Any]] = [
 ]
 
 DURATION_WARN_MS: float = 30_000.0
+
+LIMBIC_DB_PATH: str = os.path.join(
+    os.path.dirname(__file__),  # fallback: adjacent to this script
+    "..", "..", "agent-memory-mcp", "data", "knowledge-graph", "knowledge.db",
+)
+# Resolve relative to known absolute path
+_known_agent_mcp = r"C:\Users\ohmpa\github\agent-memory-mcp\data\knowledge-graph\knowledge.db"
+if os.path.exists(_known_agent_mcp):
+    LIMBIC_DB_PATH = _known_agent_mcp
+elif not os.path.exists(LIMBIC_DB_PATH):
+    # Try resolving relative to project root
+    LIMBIC_DB_PATH = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "agent-memory-mcp", "data", "knowledge-graph", "knowledge.db",
+    ))
 
 OVERSIGHT_EMPTY_RESULT_TOOLS: set[str] = {
     "search_memories", "get_memories", "list_mcp_resources", "list_mcp_resource_templates",
@@ -144,11 +162,41 @@ class VerifierMiddleware:
 
         violations: list[dict] = []
 
+        # 0. Limbic inhibition check — before all other checks
+        if self.check_limbic_inhibition(tool_name):
+            violations.append({
+                "type": "limbic_inhibition",
+                "severity": "high",
+                "match": f"Tool {tool_name!r} blocked by Limbic behavioral rule",
+            })
+
         # 1. Security scan on serialized args
         serialized = json.dumps(tool_args, default=str)
         violations.extend(self.check_security(serialized))
 
-        # 2. Argument validation — detect unexpected types / missing critical fields
+        # 2. Prompt injection detection on text args
+        for key, value in tool_args.items():
+            if isinstance(value, str) and len(value) > 20:
+                inj_result = SafetyPipeline.detect_prompt_injection(value)
+                if inj_result["injection_detected"]:
+                    violations.append({
+                        "type": "prompt_injection",
+                        "severity": "high" if inj_result["risk_score"] >= 0.8 else "medium",
+                        "match": f"Argument {key!r}: {inj_result['pattern']} (risk={inj_result['risk_score']})",
+                    })
+
+        # 3. PII redaction pass — log but don't modify
+        for key, value in tool_args.items():
+            if isinstance(value, str):
+                _, redacted_types = SafetyPipeline.redact_pii(value)
+                if redacted_types:
+                    violations.append({
+                        "type": "pii_in_args",
+                        "severity": "medium",
+                        "match": f"Argument {key!r} contains PII types: {redacted_types}",
+                    })
+
+        # 4. Argument validation — detect unexpected types / missing critical fields
         violations.extend(self._validate_args(tool_name, tool_args))
 
         severity = self._compute_severity(violations)
@@ -410,6 +458,38 @@ class VerifierMiddleware:
                 "strategies_available": list(self._renudge_strategies),
             }
 
+    def check_limbic_inhibition(self, tool_name: str) -> bool:
+        """
+        Query the Limbic behavior rules from the knowledge-graph SQLite DB.
+
+        If a rule with type='behavioral_rule' and metadata containing
+        '"inhibition":true' has a pattern matching *tool_name*, returns
+        True (the call should be inhibited / blocked).
+
+        Falls back to False (allow) if the DB is missing, unreadable,
+        or no matching rule is found.
+        """
+        try:
+            if not os.path.exists(LIMBIC_DB_PATH):
+                return False
+            conn = sqlite3.connect(LIMBIC_DB_PATH, timeout=2.0)
+            cursor = conn.execute(
+                "SELECT name, metadata FROM entities WHERE type = ?",
+                ("behavioral_rule",),
+            )
+            for name, metadata_json in cursor.fetchall():
+                meta = json.loads(metadata_json)
+                if not meta.get("inhibition", False):
+                    continue
+                pattern = meta.get("pattern", name)
+                if re.search(pattern, tool_name):
+                    conn.close()
+                    return True
+            conn.close()
+        except (sqlite3.Error, json.JSONDecodeError, OSError):
+            pass
+        return False
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
@@ -567,6 +647,21 @@ def _demo() -> None:
     status2 = v.get_status()
     assert status2["checks_run"] >= 200 + 3  # previous checks + parallel
     print(f"[PASS] thread safety — {status2['checks_run']} total checks (expected >= 203)")
+
+    # Limbic inhibition — tool blocked by behavioral rule
+    r_limbic = v.pre_verify("bash", {"command": "echo hello"})
+    assert any(v["type"] == "limbic_inhibition" for v in r_limbic["violations"]), (
+        f"Expected limbic_inhibition violation for 'bash', got {r_limbic['violations']}"
+    )
+    print("[PASS] check_limbic_inhibition — 'bash' blocked")
+
+    # Limbic inhibition — non-blocked tool
+    r_allow = v.pre_verify("search_memories", {"query": "test"})
+    limbic_violations = [v for v in r_allow["violations"] if v["type"] == "limbic_inhibition"]
+    assert len(limbic_violations) == 0, (
+        f"Expected no limbic_inhibition for 'search_memories', got {limbic_violations}"
+    )
+    print("[PASS] check_limbic_inhibition — non-blocked tool allowed")
 
     # Renudge — unknown strategy
     try:
