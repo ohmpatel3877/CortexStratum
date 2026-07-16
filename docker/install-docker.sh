@@ -22,7 +22,7 @@ fail()  { echo -e "${RED}✗${NC} $1"; exit 1; }
 
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}         Docker Installer — patelserver          ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}   Docker Installer — opencode-container-server ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 

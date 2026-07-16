@@ -1,13 +1,13 @@
 @echo off
-title patelserver — 1-Click Setup
+title opencode-container-server — 1-Click Setup
 cd /d "%~dp0"
 
 echo ============================================
-echo   patelserver — 1-Click Setup
-echo   Portainer + AI Memory + Media Stack
+echo   opencode-container-server
+echo   MCP Server + OpenCode CLI + mem0
 echo ============================================
 echo.
-echo  You only need Docker. This script installs it if missing.
+echo  This installs Docker + the MCP container.
 echo  Close this window to cancel.
 echo.
 
@@ -22,76 +22,71 @@ if %errorlevel% neq 0 (
 cd /d "%~dp0"
 
 REM ─── Step 1: Install Docker (if missing) ───────────────────────
-echo [1/4] Checking for Docker...
+echo.
+echo Step 1 of 3 — Checking for Docker...
 where docker >nul 2>&1
 if %errorlevel% neq 0 (
-    echo   Docker not found. Running installer...
-    if exist "docker\install-docker.ps1" (
-        powershell -ExecutionPolicy Bypass -File "docker\install-docker.ps1"
-    ) else (
-        powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.ps1' -OutFile '%TEMP%\install-docker.ps1'}"
-        powershell -ExecutionPolicy Bypass -File "%TEMP%\install-docker.ps1"
-    )
-    echo   Waiting for Docker to initialize...
-    timeout /t 10 /nobreak >nul
+    echo   Docker not found. Installing Docker Desktop...
+    echo   (This downloads ~500MB and runs the installer silently.)
+    powershell -Command "& {Invoke-WebRequest -Uri 'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe' -OutFile '%TEMP%\DockerDesktopInstaller.exe'}"
+    echo   Running installer...
+    start /wait "" "%TEMP%\DockerDesktopInstaller.exe" install --quiet
+    echo   Starting Docker...
+    "C:\Program Files\Docker\Docker\Docker Desktop.exe" 2>nul
+    echo   Waiting 30 seconds for Docker to initialize...
+    timeout /t 30 /nobreak >nul
 ) else (
-    echo   Docker found!
+    echo   Docker already installed!
 )
 
-REM ─── Step 2: Clone / Pull Repo ─────────────────────────────────
-echo [2/4] Getting ai-memory-core...
-if not exist "scripts\tools-mcp-server.py" (
-    if exist "C:\ProgramData\patelserver" rmdir /s /q "C:\ProgramData\patelserver"
-    mkdir "C:\ProgramData\patelserver" 2>nul
-    cd /d "C:\ProgramData\patelserver"
-    echo   Downloading...
-    powershell -Command "& {Invoke-WebRequest -Uri 'https://github.com/ohmpatel3877/ai-memory-core/archive/refs/heads/main.zip' -OutFile '%TEMP%\ai-memory-core.zip'}"
-    powershell -Command "& {Expand-Archive -Path '%TEMP%\ai-memory-core.zip' -DestinationPath 'C:\ProgramData\patelserver' -Force}"
-    xcopy /e /i /y "C:\ProgramData\patelserver\ai-memory-core-main\*" "C:\ProgramData\patelserver\" >nul
-    rmdir /s /q "C:\ProgramData\patelserver\ai-memory-core-main" 2>nul
+REM ─── Step 2: Download and Deploy Container ─────────────────────
+echo.
+echo Step 2 of 3 — Downloading and deploying container...
+if not exist "%USERPROFILE%\opencode-container\docker-compose.yml" (
+    mkdir "%USERPROFILE%\opencode-container" 2>nul
+    cd /d "%USERPROFILE%\opencode-container"
+    powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml' -OutFile 'docker-compose.yml'}"
+    powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile' -OutFile 'Dockerfile'}"
 ) else (
-    echo   Already have ai-memory-core!
+    cd /d "%USERPROFILE%\opencode-container"
 )
-cd /d "C:\ProgramData\patelserver"
-
-REM ─── Step 3: Configure API Keys ────────────────────────────────
-echo [3/4] Configuring...
-if not exist ".env" (
-    echo   No .env found. Creating template...
-    (
-        echo MEM0_API_KEY=
-        echo OPENCODE_ZEN_API_KEY=
-        echo OPENCODE_ZEN_BASE_URL=https://api.opencode.ai
-        echo OPENCODE_HOST=patelserver
-        echo LOG_LEVEL=info
-    ) > .env
-    echo   Edit .env to add your API keys, or leave blank for later.
-    notepad .env
+docker compose up -d --build
+if %errorlevel% neq 0 (
+    echo.
+    echo ! Build failed. Common fixes:
+    echo   1. Make sure Docker Desktop is running
+    echo   2. Restart Docker and try again
+    echo   3. Run: docker compose logs
+    pause
+    exit /b 1
 )
 
-REM ─── Step 4: Deploy Stack ──────────────────────────────────────
-echo [4/4] Deploying containers...
-docker compose -f docker\docker-compose.yml pull 2>nul
-docker compose -f docker\docker-compose.yml up -d --build
-
-timeout /t 5 /nobreak >nul
-
-REM ─── Done ──────────────────────────────────────────────────────
-cls
-echo ============================================
-echo   patelserver is LIVE!
-echo ============================================
+REM ─── Step 3: Test ──────────────────────────────────────────────
 echo.
-echo   Portainer: http://localhost:9000
-echo   First login: set your admin password.
+echo Step 3 of 3 — Testing connection...
+timeout /t 3 /nobreak >nul
+docker exec opencode-server python3 -c "import json; t=json.load(open('/app/data/tool-inventory.json')); print(f'Server OK - {len(t)} tools ready')" 2>nul
+if %errorlevel% equ 0 (
+    echo.
+    echo ============================================
+    echo   SUCCESS — Server is running!
+    echo ============================================
+    echo.
+    echo   Add this to your OpenCode config:
+    echo   {
+    echo     "mcpServers": {
+    echo       "opencode-container-server": {
+    echo         "command": "docker",
+    echo         "args": ["exec", "-i", "opencode-server",
+    echo                  "python3", "/app/scripts/tools-mcp-server.py"]
+    echo       }
+    echo     }
+    echo   }
+) else (
+    echo.
+    echo   Container deployed but not responding yet.
+    echo   Run: docker logs opencode-server
+)
 echo.
-echo  Press any key to open Portainer now...
+echo   Press any key to exit.
 pause >nul
-start http://localhost:9000
-echo.
-echo ============================================
-echo   Manage:  http://localhost:9000
-echo   Stop:    docker compose -f "C:\ProgramData\patelserver\docker\docker-compose.yml" down
-echo   Update:  Run this file again
-echo ============================================
-pause

@@ -1,25 +1,24 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-# patelserver — 1-Click Setup
+# opencode-container-server — 1-Click Setup
 # ═══════════════════════════════════════════════════════════════
 #
 #  ⚡ You only need Docker (or Podman). That's it.
 #  ⚡ No Node.js. No Python. No npm. No pip.
-#  ⚡ Everything runs inside containers.
+#  ⚡ Everything runs inside the container.
 #
-# Detects your OS, installs Docker/Podman if needed, deploys
-# Portainer + ai-memory-core stack, configures mem0 + OpenCode Zen.
+# Deploys the opencode-container-server: ai-memory-core MCP
+# server + OpenCode CLI + mem0 + OpenCode Zen config.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-patelserver.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
 #   # or locally:
-#   bash docker/setup-patelserver.sh
+#   bash docker/setup-opencode-container.sh
 #
 # Options:
-#   MEM0_API_KEY=xxx bash setup-patelserver.sh   # pass mem0 key inline
-#   OPENCODE_ZEN_API_KEY=xxx bash ...            # pass OpenCode Zen key inline
-#   bash setup-patelserver.sh --port 9000         # custom Portainer port
-#   bash setup-patelserver.sh --engine podman     # force Podman over Docker
+#   MEM0_API_KEY=xxx bash setup-opencode-container.sh     # pass mem0 key inline
+#   OPENCODE_ZEN_API_KEY=xxx bash ...                     # pass OpenCode Zen key inline
+#   bash setup-opencode-container.sh --engine podman      # force Podman over Docker
 # ═══════════════════════════════════════════════════════════════
 
 set -Eeuo pipefail
@@ -187,16 +186,14 @@ info "Verifying deployment..."
 sleep 2
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}  patelserver is live!                         ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  opencode-container-server is live!           ${CYAN}║${NC}"
 echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
-echo -e "${CYAN}║${NC}  Portainer: http://patelserver:${PORTAINER_PORT}       ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}  MCP Server:  ai-memory-core:3100             ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}  MCP Server:  opencode-server:3100            ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}  Engine:      ${ENGINE}                           ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}  OS:          ${OS}                             ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Open Portainer → set admin password → explore containers"
-echo "  2. Configure mem0 in Portainer's Environment variables"
-echo "  3. Connect your OpenCode to the MCP server"
-echo "  4. Add more services via Portainer's Stacks"
+echo "  1. Connect your local OpenCode to the MCP server at opencode-server:3100"
+echo "  2. Or run: docker exec -it opencode-server opencode"
+echo "  3. Configure mem0 via docker compose -f docker/docker-compose.yml config"

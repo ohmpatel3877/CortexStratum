@@ -1,29 +1,24 @@
 # opencode-container-server
-# One-command deploy: docker compose up -d
-# Spins up the ai-memory-core MCP server + OpenCode CLI environment.
-# You only need Docker. Everything else runs in the container.
+# Standalone compose file — download this + Dockerfile, run anywhere.
+# curl -o docker-compose.yml https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml
+# curl -o Dockerfile https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile
+# docker compose up -d --build
 
 services:
-
   opencode-server:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    build: .
     image: ohmpatel3877/opencode-container-server:latest
     container_name: opencode-server
     restart: unless-stopped
     ports:
-      - "3100:3100"    # MCP HTTP endpoint (for external tools)
+      - "3100:3100"
     environment:
-      # ── mem0 cloud memory ──
       MEM0_API_KEY: "${MEM0_API_KEY:-}"
       MEM0_PROJECT: "opencode-container-server"
-      # ── OpenCode Zen API (optional) ──
       OPENCODE_ZEN_API_KEY: "${OPENCODE_ZEN_API_KEY:-}"
       OPENCODE_ZEN_BASE_URL: "${OPENCODE_ZEN_BASE_URL:-https://api.opencode.ai}"
       OPENCODE_HOST: "${OPENCODE_HOST:-opencode-container}"
       OPENCODE_DEPLOYMENT_ID: "${OPENCODE_DEPLOYMENT_ID:-opencode-container-server}"
-      # ── Logging ──
       LOG_LEVEL: "${LOG_LEVEL:-info}"
     volumes:
       - opencode_data:/app/data

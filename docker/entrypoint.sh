@@ -16,12 +16,12 @@ if [ -n "${OPENCODE_ZEN_API_KEY:-}" ]; then
   "zen": {
     "apiKey": "${OPENCODE_ZEN_API_KEY}",
     "baseUrl": "${OPENCODE_ZEN_BASE_URL:-https://api.opencode.ai}",
-    "host": "${OPENCODE_HOST:-patelserver}",
-    "deploymentId": "${OPENCODE_DEPLOYMENT_ID:-patelserver-docker}"
+    "host": "${OPENCODE_HOST:-opencode-container}",
+    "deploymentId": "${OPENCODE_DEPLOYMENT_ID:-opencode-container-server}"
   },
   "mcpServers": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
+    "opencode-container-server": {
+      "name": "opencode-container-server",
       "description": "68-tool MCP memory & orchestration server",
       "command": "python3",
       "args": ["/app/scripts/tools-mcp-server.py"]

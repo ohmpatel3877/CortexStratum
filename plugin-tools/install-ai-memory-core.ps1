@@ -43,11 +43,11 @@ param(
 # ─── One-Click Containerized Mode ─────────────────────────────────
 if ($OneClick -or $Containerized) {
     Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║   patelserver — 1-Click Containerized Setup     ║" -ForegroundColor Cyan
+    Write-Host "║   opencode-container-server — 1-Click Setup     ║" -ForegroundColor Cyan
     Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "This will deploy Portainer + ai-memory-core in Docker containers."
-    Write-Host "Your non-technical friend just needs Docker Desktop."
+    Write-Host "This deploys the opencode-container-server (MCP + OpenCode CLI)."
+    Write-Host "You only need Docker Desktop."
     Write-Host ""
 
     # Check for Docker
@@ -73,15 +73,15 @@ if ($OneClick -or $Containerized) {
     }
 
     # Get ai-memory-core
-    $targetDir = "C:\ProgramData\patelserver"
+    $targetDir = "$env:USERPROFILE\opencode-container"
     if (-not (Test-Path "$targetDir\docker\docker-compose.yml")) {
-        Write-Host "Downloading ai-memory-core..." -ForegroundColor Yellow
+        Write-Host "Downloading opencode-container-server..." -ForegroundColor Yellow
         $zip = "$env:TEMP\ai-memory-core.zip"
         Invoke-WebRequest -Uri "https://github.com/ohmpatel3877/ai-memory-core/archive/refs/heads/main.zip" -OutFile $zip
         Remove-Item -Path $targetDir -Recurse -Force -ErrorAction SilentlyContinue
-        Expand-Archive -Path $zip -DestinationPath "C:\ProgramData" -Force
-        Move-Item "C:\ProgramData\ai-memory-core-main\*" $targetDir -Force
-        Remove-Item "C:\ProgramData\ai-memory-core-main" -Recurse -Force
+        Expand-Archive -Path $zip -DestinationPath "$env:USERPROFILE" -Force
+        Move-Item "$env:USERPROFILE\ai-memory-core-main\*" $targetDir -Force
+        Remove-Item "$env:USERPROFILE\ai-memory-core-main" -Recurse -Force
     }
 
     # Prompt for mem0 key if needed

@@ -47,32 +47,35 @@ Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent
 
 ---
 
-## 🚀 For Non-Technical Users — patelserver in One Click
+## 🚀 For Non-Technical Users
 
-**You only need Docker. Nothing else. No Node.js, no Python, no npm, no pip.** Everything runs inside containers.
-
-Want the whole thing running? Give your friend one of these:
+**You only need Docker. Nothing else. No Node.js, no Python, no npm, no pip.**
 
 ### Windows
-Download and **double-click** `ONE-CLICK.cmd`:
+Send your friend this link. They click it, then double-click the downloaded file:
 ```
-curl -o ONE-CLICK.cmd https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/ONE-CLICK.cmd
+https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/ONE-CLICK.cmd
 ```
-It auto-installs Docker Desktop (if missing), pulls the stack, deploys Portainer + ai-memory-core, opens the browser. No terminal needed.
+It auto-installs Docker Desktop (if missing), builds the container, and tests it.
 
 ### Mac / Linux
-Copy-paste this one line into terminal:
+Open Terminal, paste this one line, press Enter:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-patelserver.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
 ```
 
 ### What they get
+A running container with the 68-tool MCP server. Connect it to OpenCode by adding to `opencode.json`:
+```json
+{
+  "mcpServers": {
+    "opencode-container-server": {
+      "command": "docker",
+      "args": ["exec", "-i", "opencode-server", "python3", "/app/scripts/tools-mcp-server.py"]
+    }
+  }
+}
 ```
-http://localhost:9000  →  Portainer (manage everything visually)
-http://localhost:3100  →  MCP Server (for OpenCode to connect)
-```
-
-No CLI skills needed. Portainer's web UI handles container management.
 
 ---
 

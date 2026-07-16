@@ -10,10 +10,10 @@
 #>
 
 $ErrorActionPreference = "Stop"
-$Host.UI.RawUI.WindowTitle = "Docker Installer — patelserver"
+$Host.UI.RawUI.WindowTitle = "Docker Installer — opencode-container-server"
 
 Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║    Docker Installer — patelserver              ║" -ForegroundColor Cyan
+Write-Host "║    Docker Installer — opencode-container-server ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 

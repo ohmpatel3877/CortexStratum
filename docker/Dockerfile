@@ -4,9 +4,10 @@
 
 FROM node:22-bookworm-slim
 
-LABEL description="ai-memory-core — 68-tool MCP server, skill router, task orchestrator"
+LABEL description="opencode-container-server — 68-tool MCP server + OpenCode CLI"
 LABEL maintainer="Ohm Patel"
 LABEL org.opencontainers.image.source="https://github.com/ohmpatel3877/ai-memory-core"
+LABEL org.opencontainers.image.title="opencode-container-server"
 
 # ─── System Dependencies ─────────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
