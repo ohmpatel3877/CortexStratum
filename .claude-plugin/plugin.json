@@ -1,6 +1,6 @@
 {
   "name": "ai-memory-core",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "Central NE-Memory architecture for AI agent persistence — 68-tool MCP server, skill router, task orchestrator, verifier middleware, and cross-session memory continuity for OpenCode and Claude Code.",
   "author": {
     "name": "Ohm Patel",

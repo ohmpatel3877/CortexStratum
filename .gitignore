@@ -6,3 +6,8 @@ data/blind-answers.enc
 test_stderr.log
 
 *.exe
+
+# Auto-generated test artifacts
+data/mcp-server-test-results.json
+data/skill-pipeline-test-results.json
+data/commitments.json

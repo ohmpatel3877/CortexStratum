@@ -246,11 +246,61 @@ class NEMemorySearch:
         self._save_memories()
         return mem_id
 
-    def consolidate(self, threshold: float = 0.85) -> dict:
+    def _get_confidence(self, entry: dict) -> float:
+        """Extract confidence score from metadata, defaulting to 0.5."""
+        meta = entry.get("metadata", {}) or {}
+        return float(meta.get("confidence", 0.5))
+
+    def _source_priority(self, source: str) -> int:
+        """Rank source types for merge conflicts. Higher = more authoritative.
+
+        Priority order (highest to lowest):
+          1. 'code_preference' — user/agent behavioral rules (most actionable)
+          2. 'user_preference' — user-stated preferences
+          3. 'system' — auto-generated system observations
+          4. 'task_learning' — agent-learned facts
+          5. 'manual' — manually entered
+          6. 'test' — test harness data (least authoritative)
+        """
+        ranking = {
+            "code_preference": 5,
+            "user_preference": 4,
+            "system": 3,
+            "task_learning": 2,
+            "manual": 1,
+            "test": 0,
+        }
+        return ranking.get(source.split(", ")[0].strip(), 1)
+
+    def consolidate(self, threshold: float = 0.85, dry_run: bool = False) -> dict:
+        """Merge duplicate/similar memory entries by Jaccard similarity threshold.
+
+        Edge case handling:
+        - **Confidence merging**: When two entries merge, keeps the text from the
+          entry with higher confidence score (stored in metadata.confidence).
+        - **Source awareness**: When sources differ (e.g. user_preference vs
+          task_learning), the higher-priority source label wins. Source priority:
+          code_preference > user_preference > system > task_learning > manual > test.
+        - **Dry run**: Pass dry_run=True to see what would be merged without
+          modifying the data.
+
+        Parameters
+        ----------
+        threshold : float
+            Jaccard similarity threshold (0-1). Default 0.85.
+        dry_run : bool
+            If True, report merges without modifying data. Default False.
+
+        Returns
+        -------
+        dict with keys: removed, merged, remaining, threshold, dry_run, details
+        """
         removed = 0
         merged = 0
         keep = []
         handled = set()
+        details = []
+
         for i, a in enumerate(self.memories):
             if i in handled:
                 continue
@@ -270,10 +320,24 @@ class NEMemorySearch:
                 b = self.memories[pair_idx]
                 a_sources = set(a.get("source", "").split(", "))
                 b_sources = set(b.get("source", "").split(", "))
-                merged_text = (
-                    b["text"] if len(b["text"]) >= len(a["text"]) else a["text"]
-                )
                 combined_sources = ", ".join(sorted(set(a_sources | b_sources)))
+
+                # Confidence-based text selection: keep text from higher-confidence entry
+                a_conf = self._get_confidence(a)
+                b_conf = self._get_confidence(b)
+                if a_conf >= b_conf:
+                    merged_text = a["text"]
+                    dominant_source = a.get("source", "unknown")
+                else:
+                    merged_text = b["text"]
+                    dominant_source = b.get("source", "unknown")
+
+                # Source priority: use higher-ranked source label
+                a_prio = self._source_priority(a.get("source", ""))
+                b_prio = self._source_priority(b.get("source", ""))
+                if b_prio > a_prio:
+                    combined_sources = b.get("source", combined_sources)
+
                 a_ts = a.get("timestamp", "")
                 b_ts = b.get("timestamp", "")
                 merged_entry = {
@@ -281,8 +345,21 @@ class NEMemorySearch:
                     "text": merged_text,
                     "source": combined_sources,
                     "timestamp": min(a_ts, b_ts) if a_ts and b_ts else (a_ts or b_ts),
-                    "metadata": {**a.get("metadata", {}), **b.get("metadata", {})},
+                    "metadata": {
+                        **a.get("metadata", {}),
+                        **b.get("metadata", {}),
+                        "confidence": max(a_conf, b_conf),  # keep highest confidence
+                        "merged_from": [a.get("id", ""), b.get("id", "")],
+                        "merged_at": datetime.now(timezone.utc).isoformat(),
+                    },
                 }
+                details.append({
+                    "merged": [a.get("id", ""), b.get("id", "")],
+                    "text": merged_text[:100] + ("..." if len(merged_text) > 100 else ""),
+                    "confidence": max(a_conf, b_conf),
+                    "source": combined_sources,
+                    "similarity": round(sim, 4),
+                })
                 keep.append(merged_entry)
                 handled.add(i)
                 handled.add(pair_idx)
@@ -291,14 +368,19 @@ class NEMemorySearch:
             else:
                 keep.append(a)
                 handled.add(i)
-        self.memories = keep
-        self._rebuild_index()
-        self._save_memories()
+
+        if not dry_run:
+            self.memories = keep
+            self._rebuild_index()
+            self._save_memories()
+
         return {
+            "dry_run": dry_run,
             "removed": removed,
             "merged": merged,
-            "remaining": len(self.memories),
+            "remaining": len(keep) if dry_run else len(self.memories),
             "threshold": threshold,
+            "details": details,
         }
 
     def status(self) -> dict:

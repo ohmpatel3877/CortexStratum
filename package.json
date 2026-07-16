@@ -1,6 +1,6 @@
 {
   "name": "ai-memory-core",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "67-tool MCP server — local-only persistent memory, skill routing, task orchestration, and multi-modal AI generation",
   "main": "index.js",
   "scripts": {

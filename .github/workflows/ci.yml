@@ -1,0 +1,177 @@
+# ai-memory-core CI Pipeline
+# Runs on every push and PR to main: syntax check, all 5 test suites, installer build
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  # ─── Stage 1: Syntax Check ───────────────────────────────────────────
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Python syntax (all scripts)
+        run: |
+          failed=0
+          for f in scripts/*.py; do
+            python -m py_compile "$f" || { echo "SYNTAX ERROR: $f"; failed=1; }
+          done
+          [ "$failed" -eq 0 ] || exit 1
+      - name: Validate JSON files
+        run: |
+          python -c "
+import json, sys
+files = ['skills/skill-router.json', 'package.json', '.opencode/active-skills.json', 'opencode.json']
+for f in files:
+    try:
+        with open(f) as fh: json.load(fh)
+        print(f'OK: {f}')
+    except Exception as e:
+        print(f'FAIL: {f} — {e}')
+        sys.exit(1)
+          "
+
+  # ─── Stage 2: Core Tests ────────────────────────────────────────────
+  core-tests:
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run MCP server protocol test
+        run: python scripts/test-mcp-server.py
+      - name: Run verifier middleware tests
+        run: python scripts/verifier_middleware.py
+      - name: Run skill pipeline tests
+        run: python scripts/test-skill-pipeline.py
+      - name: Check CLI flags
+        run: |
+          python scripts/tools-mcp-server.py --version
+          python scripts/tools-mcp-server.py --help | head -5
+          python scripts/tools-mcp-server.py --list-tools | python -c "import sys,json; t=json.load(sys.stdin); print(f'{len(t)} tools OK')"
+
+  # ─── Stage 3: Memory Engine Tests ───────────────────────────────────
+  memory-tests:
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run memory search smoke test
+        run: python scripts/memory_search.py
+      - name: Verify consolidate + dry-run
+        run: |
+          python -c "
+from scripts.memory_search import NEMemorySearch
+import tempfile, os
+tmpdir = tempfile.mkdtemp()
+m = NEMemorySearch(storage_path=tmpdir)
+m.add_memory('Test memory one for BM25 search', source='test', metadata={'confidence': 0.9})
+m.add_memory('Test memory two for BM25 retrieval', source='test', metadata={'confidence': 0.7})
+m.add_memory('Test memory one for BM25 search', source='manual', metadata={'confidence': 0.5})
+# Dry run
+r = m.consolidate(threshold=0.5, dry_run=True)
+assert r['dry_run'] == True, 'dry_run flag not returned'
+assert r['removed'] > 0 or r['merged'] > 0, 'should find duplicates'
+print(f'DRY-RUN OK: {r[\"removed\"]} removed, {r[\"merged\"]} merged')
+# Real run
+r2 = m.consolidate(threshold=0.5, dry_run=False)
+assert r2['dry_run'] == False
+print(f'CONSOLIDATE OK: {r2[\"remaining\"]} remaining')
+# Permission model test
+from scripts.tools_mcp_server import can_call_tool
+ok, _ = can_call_tool('write_memory_add', {'mode': 'auto'})
+assert not ok, 'auto mode should block write_memory_add'
+ok, _ = can_call_tool('write_memory_add', {'mode': 'interactive'})
+assert ok, 'interactive mode should allow write_memory_add'
+print('PERMISSION MODEL OK')
+print('ALL MEMORY ENGINE TESTS PASSED')
+"
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-test-results
+          path: data/*.json
+
+  # ─── Stage 4: Skill Router Validation ──────────────────────────────
+  skill-router-validation:
+    runs-on: ubuntu-latest
+    needs: syntax-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate all SKILL.md files exist
+        run: |
+          for dir in skills/*/; do
+            name=$(basename "$dir")
+            if [ -f "$dir/SKILL.md" ]; then
+              size=$(wc -c < "$dir/SKILL.md")
+              echo "OK: $name ($size bytes)"
+            else
+              echo "MISSING: $name/SKILL.md"
+              exit 1
+            fi
+          done
+      - name: Check router references all local skills
+        run: |
+          python -c "
+import json
+with open('skills/skill-router.json') as f:
+    router = json.load(f)
+local_skills = {d.name for d in __import__('pathlib').Path('skills').iterdir() if d.is_dir()}
+referenced = set()
+for rule in router['rules']:
+    referenced.update(rule.get('skills', []))
+referenced.update(router.get('default_skills', []))
+missing_local = local_skills - referenced
+if missing_local:
+    print(f'WARNING: Local skills not referenced in router: {missing_local}')
+print(f'Router rules: {len(router[\"rules\"])}')
+print(f'SKILL.md files: {len(local_skills)}')
+print(f'Unique skill refs: {len(referenced)}')
+print('SKILL ROUTER VALIDATION PASSED')
+          "
+
+  # ─── Stage 5: Installer Build (Windows only) ───────────────────────
+  build-installer:
+    if: github.ref_type == 'tag'
+    runs-on: windows-latest
+    needs: [core-tests, memory-tests, skill-router-validation]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress
+        shell: pwsh
+      - name: Compile installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" opencode-container-server.iss /Qp
+        shell: pwsh
+      - name: Verify artifact
+        run: |
+          $artifact = Get-ChildItem -Path . -Filter "*.exe" -Recurse | Select-Object -First 1
+          if (-not $artifact) { throw "No installer .exe found" }
+          $size = [math]::Round($artifact.Length / 1MB, 1)
+          Write-Host "Installer: $($artifact.Name) ($size MB)"
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: opencode-container-server-setup.exe

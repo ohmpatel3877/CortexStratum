@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Wiki
+    url: https://github.com/ohmpatel3877/ai-memory-core/wiki
+    about: Check the wiki for documentation and guides
+  - name: Discussion
+    url: https://github.com/ohmpatel3877/ai-memory-core/discussions
+    about: Ask questions and discuss ideas

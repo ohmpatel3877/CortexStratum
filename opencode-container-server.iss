@@ -13,7 +13,7 @@
 ; - Speed optimizer
 
 #define MyAppName "opencode-container-server"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "0.3.0"
 #define MyAppPublisher "Ohm Patel"
 #define MyAppURL "https://github.com/ohmpatel3877/ai-memory-core"
 
@@ -44,7 +44,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 ; ─── Components (selectable pathway modules) ──────────────────────
 [Components]
-Name: "core"; Description: "Core MCP Server (68 tools, mem0, OpenCode)"; Types: full custom; Flags: fixed checkablealone; ExtraDiskSpaceRequired: 1
+Name: "core"; Description: "Core MCP Server (68 tools, local BM25 memory, OpenCode)"; Types: full custom; Flags: fixed checkablealone; ExtraDiskSpaceRequired: 1
 Name: "virtualization"; Description: "VM Test Engine (Hyper-V, Vagrant, QEMU provisioning)"; Types: full custom; ExtraDiskSpaceRequired: 1
 Name: "samba"; Description: "Samba/NAS Debugging (mergerfs, Podman, Jellyfin, Nextcloud)"; Types: full custom; ExtraDiskSpaceRequired: 1
 Name: "framework"; Description: "Framework Builder (Rust workspaces, FFI, Tauri, MCP servers)"; Types: full custom; ExtraDiskSpaceRequired: 1
@@ -87,6 +87,9 @@ Name: "{group}\Speed Optimizer\Run Analysis"; Filename: "cmd.exe"; Parameters: "
 
 [Run]
 Filename: "{app}\README.txt"; Description: "View setup instructions"; Flags: postinstall shellexec skipifsilent; Components: core
+Filename: "cmd.exe"; Parameters: "/C start http://localhost:3100"; Description: "Launch OpenCode and connect MCP server"; Flags: postinstall nowait skipifsilent unchecked; Components: core
+Filename: "cmd.exe"; Parameters: "/K echo opencode-container-server v{#MyAppVersion} installed. Run: docker exec -it opencode-server python3 /app/scripts/tools-mcp-server.py --help"; Description: "Open verification terminal (check installation)"; Flags: postinstall nowait skipifsilent unchecked shellexec; Components: core
+
 
 [UninstallRun]
 Filename: "{cmd}"; Parameters: "/C docker stop opencode-server && docker rm opencode-server"; Flags: runhidden runascurrentuser

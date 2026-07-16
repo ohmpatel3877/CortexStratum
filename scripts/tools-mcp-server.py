@@ -20,13 +20,38 @@ PERMISSION_READ = "read"
 PERMISSION_WRITE = "write"
 PERMISSION_MUTATE = "mutate"
 
-# Auto-mode: only read_* tools allowed without human review
+# Global flags (set via CLI)
+PERMISSIVE_MODE = False  # --permissive: bypass all permission checks
+DEBUG_MODE = False       # --debug: verbose debug logging
+
+# Version
+VERSION = "0.3.0"
+
+
+def _log(level: str, msg: str):
+    """Conditional logger — respects --debug flag."""
+    if DEBUG_MODE or level in ("ERROR", "WARN"):
+        print(f"[mcp-server] [{level}] {msg}", file=sys.stderr, flush=True)
+
+
 def can_call_tool(tool_name: str, context: dict | None = None) -> tuple[bool, str]:
     """Check if a tool call is permitted based on its permission level.
 
-    Returns (allowed, reason). In 'auto' mode, only read_ tools pass.
-    In 'interactive' mode, all tools pass but write_/mutate_ return a warning.
+    Permission hierarchy (strictest first):
+      1. PERMISSIVE_MODE (--permissive flag): all tools allowed, no warnings
+      2. 'auto' mode: only read_ tools pass; write_/mutate_ blocked
+      3. 'interactive' mode (default): all tools pass, write_/mutate_ get a warning
+      4. Unknown tool: always blocked
+
+    Returns
+    -------
+    tuple[bool, str]:
+        (allowed, reason) — allowed=False means the call is blocked.
     """
+    # Permissive mode bypasses all checks
+    if PERMISSIVE_MODE:
+        return (True, "permissive mode — all tools allowed")
+
     permission = None
     for t in TOOLS:
         if t["name"] == tool_name:
@@ -39,10 +64,15 @@ def can_call_tool(tool_name: str, context: dict | None = None) -> tuple[bool, st
     mode = (context or {}).get("mode", "interactive")
 
     if mode == "auto" and permission != PERMISSION_READ:
-        return (False, f"Tool '{tool_name}' requires {permission} permission — blocked in auto mode. Only read_ tools allowed without human review.")
+        msg = (
+            f"Tool '{tool_name}' requires {permission} permission — "
+            f"blocked in auto mode. Only read_ tools allowed without human review. "
+            f"Use --permissive flag or interactive mode to bypass."
+        )
+        return (False, msg)
 
     if permission in (PERMISSION_WRITE, PERMISSION_MUTATE):
-        return (True, f"⚠️  Tool '{tool_name}' has {permission} permission — confirm this action is intended.")
+        return (True, f"Tool '{tool_name}' has {permission} permission — confirm this action is intended.")
 
     return (True, "ok")
 
@@ -53,13 +83,44 @@ _MODULE_CACHE = {}
 
 
 def _get_module(name, filename):
-    """Factory: lazy-load a module from scripts/ by name, caching it."""
+    """Factory: lazy-load a module from scripts/ by name, caching it.
+
+    Uses importlib.util to load Python files from the SCRIPTS_DIR directory.
+    Modules are cached in _MODULE_CACHE to avoid repeated disk I/O.
+
+    Parameters
+    ----------
+    name : str
+        Module cache key (e.g. 'art_module', 'literature_module').
+    filename : str
+        Relative path from SCRIPTS_DIR (e.g. 'art-module.py').
+
+    Returns
+    -------
+    module
+        The loaded Python module object.
+
+    Raises
+    ------
+    ImportError
+        If the module file doesn't exist or has syntax errors.
+    FileNotFoundError
+        If the filename doesn't exist in SCRIPTS_DIR.
+    """
     if name not in _MODULE_CACHE:
-        import importlib.util as _util
-        spec = _util.spec_from_file_location(name, str(SCRIPTS_DIR / filename))
-        mod = _util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        _MODULE_CACHE[name] = mod
+        try:
+            import importlib.util as _util
+            file_path = SCRIPTS_DIR / filename
+            if not file_path.exists():
+                raise FileNotFoundError(f"Module file not found: {file_path}")
+            spec = _util.spec_from_file_location(name, str(file_path))
+            if spec is None:
+                raise ImportError(f"Could not create spec for {filename}")
+            mod = _util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            _MODULE_CACHE[name] = mod
+        except Exception as e:
+            raise ImportError(f"Failed to load module '{name}' from '{filename}': {e}")
     return _MODULE_CACHE[name]
 
 
@@ -90,7 +151,27 @@ def _get_trace():
 
 
 def read_exact(n: int) -> bytes:
-    """Read exactly n bytes from stdin, looping until complete."""
+    """Read exactly n bytes from stdin, looping until complete.
+
+    Used by the MCP stdio transport to read the JSON-RPC body after
+    the Content-Length header has been parsed. Blocks until all n bytes
+    are received or stdin closes.
+
+    Parameters
+    ----------
+    n : int
+        Number of bytes to read.
+
+    Returns
+    -------
+    bytes
+        The read content.
+
+    Raises
+    ------
+    EOFError
+        If stdin closes before n bytes are read.
+    """
     buffer = b""
     while len(buffer) < n:
         chunk = sys.stdin.buffer.read(n - len(buffer))
@@ -613,11 +694,12 @@ TOOLS = [
     {
         "name": "mutate_memory_consolidate",
         "permission": "mutate",
-        "description": "Merge duplicate/similar memory entries by Jaccard similarity threshold",
+        "description": "Merge duplicate/similar memory entries by Jaccard similarity threshold. Handles confidence-based text selection, source-priority merging, and dry-run mode.",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "threshold": {"type": "number", "default": 0.85, "description": "Similarity threshold (0-1)"}
+                "threshold": {"type": "number", "default": 0.85, "description": "Jaccard similarity threshold (0-1). Higher = fewer merges."},
+                "dry_run": {"type": "boolean", "default": False, "description": "If true, report what would be merged without modifying data. Useful for debugging."}
             }
         }
     },
@@ -664,7 +746,17 @@ TOOLS = [
 ]
 
 def handle_tool_call(name: str, args: dict) -> dict:
-    """Execute a tool and return result."""
+    """Execute a tool and return result.
+
+    Execution flow:
+      1. Permission check (can_call_tool) — enforces auto/permissive/interactive modes
+      2. Verifier pre-check — security scan, arg validation, renudge signals
+      3. Route to handler — inline logic, NE-Memory, trace system, or module dispatcher
+      4. Verifier post-check — anomaly detection, duration warnings, suggestions
+
+    Returns dict with MCP-compatible "content" list.
+    """
+    _log("DEBUG", f"handle_tool_call: {name} args={json.dumps({k: str(v)[:80] for k, v in args.items()})}")
 
     # --- Permission check (before verifier — enforce access control) ---
     allowed, reason = can_call_tool(name, {})
@@ -704,7 +796,10 @@ def handle_tool_call(name: str, args: dict) -> dict:
 
     if name == "mutate_memory_consolidate":
         mem = _get_memory_search()
-        result = mem.consolidate(args.get("threshold", 0.85))
+        result = mem.consolidate(
+            threshold=args.get("threshold", 0.85),
+            dry_run=args.get("dry_run", False),
+        )
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
 
     if name == "read_memory_status":
@@ -730,14 +825,56 @@ def handle_tool_call(name: str, args: dict) -> dict:
         if router.exists():
             config = json.loads(router.read_text(encoding="utf-8"))
             matched = []
+            matched_rules = []
             task_lower = args.get("task", "").lower()
             for rule in config.get("rules", []):
                 for t in rule.get("triggers", []):
                     if t.lower() in task_lower:
                         matched.extend(rule.get("skills", []))
+                        matched_rules.append({"trigger": t, "priority": rule.get("priority", 0)})
                         break
             matched = list(dict.fromkeys(matched))  # deduplicate
-            return {"content": [{"type": "text", "text": json.dumps({"matched_skills": matched, "count": len(matched)}, indent=2)}]}
+
+            # --- Fallback mechanism when no rules match ---
+            if not matched:
+                fallback_config = config.get("fallback", {})
+                for level in fallback_config.get("levels", []):
+                    # Level 1: Environment variable override
+                    if "check_env" in level:
+                        env_val = os.environ.get(level["check_env"], "")
+                        if env_val:
+                            matched = [s.strip() for s in env_val.split(",") if s.strip()]
+                            _log("INFO", f"Skill router: loaded fallback from env ${level['check_env']}: {matched}")
+                            break
+
+                    # Level 2: User config file override
+                    if level.get("check_user_config"):
+                        user_path = config.get("user_config_path", "~/.opencode/skill-router-overrides.json")
+                        user_path = os.path.expanduser(user_path)
+                        if os.path.exists(user_path):
+                            try:
+                                user_config = json.loads(open(user_path, encoding="utf-8").read())
+                                if "fallback_skills" in user_config:
+                                    matched = user_config["fallback_skills"]
+                                    _log("INFO", f"Skill router: loaded fallback from user config: {matched}")
+                                    break
+                            except (json.JSONDecodeError, OSError) as e:
+                                _log("WARN", f"Skill router: failed to load user config {user_path}: {e}")
+
+                    # Level 3: Built-in default skills
+                    if level.get("use_defaults"):
+                        defaults = config.get("default_skills", [])
+                        # Fall back to the level's own skills if specified, else global defaults
+                        matched = level.get("skills", defaults)
+                        _log("DEBUG", f"Skill router: using built-in defaults: {matched}")
+                        break
+
+            return {"content": [{"type": "text", "text": json.dumps({
+                "matched_skills": matched,
+                "count": len(matched),
+                "matched_rules": matched_rules if matched_rules else "fallback_applied",
+                "router_version": config.get("version", 1),
+            }, indent=2)}]}
         return {"content": [{"type": "text", "text": "Skill router not found"}]}
 
     # Forward to unified trace system (xTrace, DTrace, Goal Registry, Commitment Checker)
@@ -984,7 +1121,11 @@ def _drain_pending():
 
 def main():
     """Main MCP server loop — pulls messages from the reader thread's queue."""
-    print("[mcp-server] ai-memory-core-tools starting...", file=sys.stderr, flush=True)
+    _log("INFO", f"ai-memory-core-tools v{VERSION} starting...")
+    _log("INFO", f"Mode: {'permissive' if PERMISSIVE_MODE else 'interactive/auto'}")
+    _log("INFO", f"Tools registered: {len(TOOLS)}")
+    _log("INFO", f"Data directory: {DATA_DIR}")
+    _log("INFO", f"Skills directory: {SKILLS_DIR}")
 
     reader = threading.Thread(target=_reader_loop, daemon=True)
     reader.start()
@@ -1001,5 +1142,81 @@ def main():
     _reader_shutdown.set()
     print("[mcp-server] Shutting down", file=sys.stderr, flush=True)
 
+def _print_help():
+    """Print CLI usage information and exit."""
+    print(f"""
+ai-memory-core MCP Server v{VERSION}
+====================================
+68-tool MCP server with permission-gated access — local BM25 memory,
+cross-session trace system, and 7 multi-modal modules.
+
+USAGE:
+  python tools-mcp-server.py                     Start MCP server (stdio transport)
+  python tools-mcp-server.py --help               Show this help
+  python tools-mcp-server.py --version            Show version
+  python tools-mcp-server.py --list-tools         List all registered tools as JSON
+  python tools-mcp-server.py --permissive         Start server in permissive mode (skips auto-mode guard)
+  python tools-mcp-server.py --debug              Enable verbose debug logging
+
+MODES:
+  interactive (default)  All tools allowed, write_/mutate_ show warnings
+  auto                   Only read_ tools pass; write_/mutate_ blocked without human review
+  permissive             All tools allowed, no permission warnings
+
+CONNECT TO OPENCODE:
+  Add to opencode.json:
+    {{
+      "mcpServers": {{
+        "ai-memory-core": {{
+          "command": "python",
+          "args": ["scripts/tools-mcp-server.py"]
+        }}
+      }}
+    }}
+
+DOCS: https://github.com/ohmpatel3877/ai-memory-core
+""")
+
+
+def _print_version():
+    """Print version string."""
+    print(f"ai-memory-core v{VERSION}")
+
+
+def _list_tools():
+    """Print all registered tools as formatted JSON and exit."""
+    print(json.dumps(TOOLS, indent=2))
+
+
 if __name__ == "__main__":
+    import sys as _sys
+
+    # Parse CLI flags before starting server
+    _cli_args = [a.lower() for a in _sys.argv[1:]]
+    
+    if any(a in _cli_args for a in ("--help", "-h", "/?")):
+        _print_help()
+        _sys.exit(0)
+    
+    if "--version" in _cli_args:
+        _print_version()
+        _sys.exit(0)
+    
+    if "--list-tools" in _cli_args:
+        _list_tools()
+        _sys.exit(0)
+
+    if "--permissive" in _cli_args:
+        # PERMISSIVE_MODE is a module-level mutable — reassign directly
+        import sys as _sys_mod
+        _mod = _sys_mod.modules[__name__]
+        _mod.PERMISSIVE_MODE = True
+        print("[mcp-server] PERMISSIVE MODE — all tools allowed without permission checks", file=_sys.stderr, flush=True)
+
+    if "--debug" in _cli_args:
+        import sys as _sys_mod2
+        _mod = _sys_mod2.modules[__name__]
+        _mod.DEBUG_MODE = True
+        print("[mcp-server] DEBUG MODE — verbose logging enabled", file=_sys.stderr, flush=True)
+
     main()

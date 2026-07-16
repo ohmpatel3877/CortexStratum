@@ -98,12 +98,12 @@ def main():
         tool_names = [t["name"] for t in tools]
         tool_count = len(tool_names)
         expected_tools = [
-            "xtrace_log_error", "xtrace_search", "xtrace_status",
-            "dtrace_add", "dtrace_search",
-            "skill_router_match", "output_condenser",
-            "goal_registry_init", "goal_registry_add_subgoal",
-            "goal_registry_status", "goal_registry_check_alignment",
-            "commitment_checker_list", "commitment_checker_verify",
+            "write_xtrace_log_error", "read_xtrace_search", "read_xtrace_status",
+            "write_dtrace_add", "read_dtrace_search",
+            "read_skill_router_match",
+            "write_goal_registry_init", "write_goal_registry_add_subgoal",
+            "read_goal_registry_status", "read_goal_registry_check_alignment",
+            "read_commitment_checker_list", "mutate_commitment_checker_verify",
         ]
         missing = [t for t in expected_tools if t not in tool_names]
         record("tools/list",
@@ -111,10 +111,10 @@ def main():
                f"{tool_count} tools registered, missing: {missing}" if missing else f"{tool_count} tools: {', '.join(tool_names)}")
 
         # ---- Test 3: tools/call - skill_router_match ----
-        print("\n--- Test 3: tools/call (skill_router_match) ---")
+        print("\n--- Test 3: tools/call (read_skill_router_match) ---")
         send_mcp_message(proc.stdin, {
             "jsonrpc": "2.0", "id": 3, "method": "tools/call",
-            "params": {"name": "skill_router_match", "arguments": {"task": "debug error fix"}}
+            "params": {"name": "read_skill_router_match", "arguments": {"task": "debug error fix"}}
         })
         resp = read_mcp_response(proc.stdout)
         result_text = resp.get("result", {}).get("content", [{}])[0].get("text", "") if resp else ""
@@ -123,11 +123,11 @@ def main():
                resp is not None and "result" in resp and has_skills,
                f"result has matched_skills: {has_skills}")
 
-        # ---- Test 4: tools/call - xtrace_status ----
-        print("\n--- Test 4: tools/call (xtrace_status) ---")
+        # ---- Test 4: tools/call - read_xtrace_status ----
+        print("\n--- Test 4: tools/call (read_xtrace_status) ---")
         send_mcp_message(proc.stdin, {
             "jsonrpc": "2.0", "id": 4, "method": "tools/call",
-            "params": {"name": "xtrace_status", "arguments": {}}
+            "params": {"name": "read_xtrace_status", "arguments": {}}
         })
         resp = read_mcp_response(proc.stdout)
         result_text = resp.get("result", {}).get("content", [{}])[0].get("text", "") if resp else ""
@@ -135,11 +135,11 @@ def main():
                resp is not None and "result" in resp and len(result_text) > 0,
                f"got {len(result_text)} chars of output")
 
-        # ---- Test 5: tools/call - goal_registry_status ----
-        print("\n--- Test 5: tools/call (goal_registry_status) ---")
+        # ---- Test 5: tools/call - read_goal_registry_status ----
+        print("\n--- Test 5: tools/call (read_goal_registry_status) ---")
         send_mcp_message(proc.stdin, {
             "jsonrpc": "2.0", "id": 5, "method": "tools/call",
-            "params": {"name": "goal_registry_status", "arguments": {}}
+            "params": {"name": "read_goal_registry_status", "arguments": {}}
         })
         resp = read_mcp_response(proc.stdout)
         result_text = resp.get("result", {}).get("content", [{}])[0].get("text", "") if resp else ""
@@ -147,11 +147,11 @@ def main():
                resp is not None and "result" in resp and len(result_text) > 0,
                f"got {len(result_text)} chars of output")
 
-        # ---- Test 6: tools/call - commitment_checker_list ----
-        print("\n--- Test 6: tools/call (commitment_checker_list) ---")
+        # ---- Test 6: tools/call - read_commitment_checker_list ----
+        print("\n--- Test 6: tools/call (read_commitment_checker_list) ---")
         send_mcp_message(proc.stdin, {
             "jsonrpc": "2.0", "id": 6, "method": "tools/call",
-            "params": {"name": "commitment_checker_list", "arguments": {}}
+            "params": {"name": "read_commitment_checker_list", "arguments": {}}
         })
         resp = read_mcp_response(proc.stdout)
         result_text = resp.get("result", {}).get("content", [{}])[0].get("text", "") if resp else ""
@@ -159,27 +159,24 @@ def main():
                resp is not None and "result" in resp and len(result_text) > 0,
                f"got {len(result_text)} chars of output")
 
-        # ---- Test 7: tools/call - output_condenser ----
-        print("\n--- Test 7: tools/call (output_condenser) ---")
+        # ---- Test 7: tools/call - read_memory_status ----
+        print("\n--- Test 7: tools/call (read_memory_status) ---")
         send_mcp_message(proc.stdin, {
             "jsonrpc": "2.0", "id": 7, "method": "tools/call",
-            "params": {
-                "name": "output_condenser",
-                "arguments": {"output_type": "bash", "content": "line1\nBuild completed successfully\nline3\nerror: something failed\nline5"}
-            }
+            "params": {"name": "read_memory_status", "arguments": {}}
         })
         resp = read_mcp_response(proc.stdout)
         result_text = resp.get("result", {}).get("content", [{}])[0].get("text", "") if resp else ""
-        has_key = "Build" in result_text or "error" in result_text or "completed" in result_text
-        record("tools/call (output_condenser)",
+        has_key = "memory_count" in result_text or "entries" in result_text or "status" in result_text
+        record("tools/call (read_memory_status)",
                resp is not None and "result" in resp and has_key,
-               f"got: {result_text[:80]}")
+               f"got: {result_text[:100]}")
 
-        # ---- Test 8: tools/call - dtrace_search ----
-        print("\n--- Test 8: tools/call (dtrace_search) ---")
+        # ---- Test 8: tools/call - read_dtrace_search ----
+        print("\n--- Test 8: tools/call (read_dtrace_search) ---")
         send_mcp_message(proc.stdin, {
             "jsonrpc": "2.0", "id": 8, "method": "tools/call",
-            "params": {"name": "dtrace_search", "arguments": {"keyword": "test"}}
+            "params": {"name": "read_dtrace_search", "arguments": {"keyword": "test"}}
         })
         resp = read_mcp_response(proc.stdout)
         result_text = resp.get("result", {}).get("content", [{}])[0].get("text", "") if resp else ""

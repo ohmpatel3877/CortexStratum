@@ -1,0 +1,39 @@
+{
+  // ai-memory-core — OpenCode Integration Configuration
+  // This file tells OpenCode how to connect and use the MCP server.
+  // Copy to your project root or ~/.config/opencode/ for global use.
+
+  "mcpServers": {
+    "ai-memory-core": {
+      "name": "ai-memory-core",
+      "description": "68-tool MCP server: local BM25 memory, trace system, skill routing, multi-modal AI generation",
+      "command": "python",
+      "args": ["scripts/tools-mcp-server.py"],
+      "env": {}
+    },
+    "ai-memory-core-permissive": {
+      "name": "ai-memory-core (permissive mode)",
+      "description": "Same as ai-memory-core but with all permission checks bypassed",
+      "command": "python",
+      "args": ["scripts/tools-mcp-server.py", "--permissive"],
+      "env": {}
+    },
+    "ai-memory-core-debug": {
+      "name": "ai-memory-core (debug mode)",
+      "description": "Same as ai-memory-core with verbose debug logging",
+      "command": "python",
+      "args": ["scripts/tools-mcp-server.py", "--debug"],
+      "env": {}
+    }
+  },
+
+  // Agent routing: which tools to load automatically at session start
+  "tools": {
+    "autoLoad": [
+      "read_skill_router_match",
+      "read_memory_status",
+      "read_verifier_status",
+      "read_xtrace_status"
+    ]
+  }
+}

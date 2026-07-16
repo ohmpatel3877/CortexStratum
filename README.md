@@ -81,24 +81,60 @@ ai-memory-core fixes that. It gives your agent:
 
 ## Permission Model
 
-This is the core safety architecture. Every tool has a `permission` field. The `can_call_tool()` guard enforces it:
+This is the core safety architecture. Every tool has a `permission` field. The `can_call_tool()` guard enforces it at three levels:
 
 ```python
 def can_call_tool(tool_name, context):
+    # 1. PERMISSIVE MODE: all tools allowed, no warnings
+    if PERMISSIVE_MODE:
+        return (True, "permissive mode — all tools allowed")
+
+    permission = tool.permission
+
+    # 2. AUTO MODE: only read_ tools pass
     if mode == "auto" and permission != "read":
         return (False, f"Blocked — {permission} requires human review")
+
+    # 3. INTERACTIVE MODE (default): all pass, write_/mutate_ get warning
     if permission in ("write", "mutate"):
         return (True, f"⚠️ {tool_name} has {permission} permission")
     return (True, "ok")
 ```
 
-| Prefix | Permission | Count | Auto Mode | Interactive Mode |
-|--------|-----------|-------|-----------|-----------------|
-| `read_*` | read | 58 | ✅ Allowed | ✅ Allowed |
-| `write_*` | write | 6 | ❌ Blocked | ⚠️ Allowed + warning |
-| `mutate_*` | mutate | 3 | ❌ Blocked | ⚠️ Allowed + warning |
+| Prefix | Permission | Count | Auto Mode | Interactive Mode | Permissive Mode |
+|--------|-----------|-------|-----------|-----------------|-----------------|
+| `read_*` | read | 58 | ✅ Allowed | ✅ Allowed | ✅ Allowed |
+| `write_*` | write | 6 | ❌ Blocked | ⚠️ Allowed + warning | ✅ Allowed |
+| `mutate_*` | mutate | 3 | ❌ Blocked | ⚠️ Allowed + warning | ✅ Allowed |
 
-**What this means in practice:** An agent running in auto mode can browse the web, analyze code, generate SVGs, search memory, and read the trace registry — but it cannot write to memory, log errors, add decisions, or interact with web page forms without a human saying yes.
+### Modes
+
+#### Auto Mode (`mode="auto"`)
+The default for automated agents. Only `read_` tools pass — the agent can browse the web, analyze code, generate SVGs, search memory, and read the trace registry. Any attempt to call `write_*` or `mutate_*` tools returns a `permission_denied` error and the tool is not executed. This prevents AI agents from performing destructive or state-changing operations without human oversight.
+
+#### Interactive Mode (`mode="interactive"`, default)
+All tools pass. `write_*` and `mutate_*` tools return a warning flag in addition to their normal result. The response includes `⚠️ Tool has write/mutate permission — confirm this action is intended.` This is suitable for interactive sessions where a human can review the warning.
+
+#### Permissive Mode (`--permissive` flag)
+Start the server with `--permissive` to bypass all permission checks. Every tool is allowed silently with no warnings. **Use with caution** — this mode is intended for trusted environments, testing, or when the server is behind a secure gateway.
+
+```
+python scripts/tools-mcp-server.py --permissive
+```
+
+### Testing Permission Enforcement
+
+The permission model can be tested by calling `write_memory_add` in auto mode:
+
+```python
+# In auto mode:
+can_call_tool("write_memory_add", {"mode": "auto"})
+# → (False, "Tool 'write_memory_add' requires write permission — blocked in auto mode. ...")
+
+# In interactive mode:
+can_call_tool("write_memory_add", {"mode": "interactive"})
+# → (True, "⚠️ Tool 'write_memory_add' has write permission — confirm this action is intended.")
+```
 
 ---
 
