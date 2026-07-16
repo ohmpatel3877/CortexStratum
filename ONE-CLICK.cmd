@@ -6,15 +6,14 @@ echo ============================================
 echo   opencode-container-server — 1-Click Setup
 echo ============================================
 echo.
-echo  This window will NOT close until you press a key.
-echo  If something fails, you'll see the error here.
+echo  This window stays open. Close it when you're done.
 echo.
 
 REM ─── Elevate to Admin ───────────────────────────────────────────
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [1] Requesting admin privileges...
-    powershell Start-Process cmd -ArgumentList "/c `"%~f0`" && pause" -Verb RunAs
+    echo Requesting admin privileges...
+    powershell Start-Process cmd -ArgumentList "/c `"%~f0`" & pause" -Verb RunAs
     exit /b
 )
 
@@ -32,8 +31,7 @@ if %errorlevel% neq 0 (
     if %errorlevel% neq 0 (
         echo   FAILED to download Docker.
         echo   Check your internet connection and try again.
-        pause
-        exit /b 1
+        goto :done
     )
     echo   Running Docker Desktop installer...
     start /wait "" "%TEMP%\DockerDesktopInstaller.exe" install --quiet
@@ -58,25 +56,21 @@ echo   Downloading compose file...
 powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml' -OutFile 'docker-compose.yml'}"
 if %errorlevel% neq 0 (
     echo   FAILED to download compose file.
-    pause
-    exit /b 1
+    goto :done
 )
 
 echo   Downloading Dockerfile...
 powershell -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile' -OutFile 'Dockerfile'}"
 if %errorlevel% neq 0 (
     echo   FAILED to download Dockerfile.
-    pause
-    exit /b 1
+    goto :done
 )
 
 REM ─── Step 3: Build container ───────────────────────────────────
 echo.
 echo [3/3] Building and starting container...
 echo   First build downloads packages — this takes 1-3 minutes.
-echo   Subsequent runs are instant.
 echo.
-
 docker compose up -d --build
 if %errorlevel% neq 0 (
     echo.
@@ -84,8 +78,7 @@ if %errorlevel% neq 0 (
     echo   - Make sure Docker Desktop is running (look for the whale icon)
     echo   - Restart your computer and try again
     echo   - Run this manually: docker compose logs
-    pause
-    exit /b 1
+    goto :done
 )
 
 REM ─── Verify ─────────────────────────────────────────────────────
@@ -113,13 +106,12 @@ if %errorlevel% equ 0 (
     echo.
     echo   To check status later: docker ps
     echo   To view logs:         docker logs opencode-server
-    echo   To stop:              docker stop opencode-server
-    echo   To restart:           docker start opencode-server
 ) else (
     echo   Container built but not responding yet.
     echo   Check logs: docker logs opencode-server
 )
 
+:done
 echo.
 echo  Press any key to close this window.
-pause
+pause >nul
