@@ -51,6 +51,11 @@
       "name": "study-tutor",
       "description": "Evidence-based collegiate study techniques — active recall, spaced repetition, interleaving, dual coding",
       "path": "skills/study-tutor/SKILL.md"
+    },
+    {
+      "name": "inno-setup-pipeline",
+      "description": "Build Inno Setup installers in GitHub Actions, sign them, and publish to GitHub Releases",
+      "path": "skills/inno-setup-pipeline/SKILL.md"
     }
   ],
   "install": {

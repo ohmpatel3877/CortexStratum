@@ -166,6 +166,11 @@
       "triggers": ["memory add", "store memory", "save memory", "record", "log memory"],
       "skills": ["memory-search"],
       "priority": 9
+    },
+    {
+      "triggers": ["inno setup", "innosetup", "iscc", "installer", "setup.exe", "windows installer", "build exe", "compile installer", "code signing", "signtool"],
+      "skills": ["inno-setup-pipeline"],
+      "priority": 8
     }
   ],
   "default_skills": ["concise-filter", "task-orchestrator", "memory-search"],
