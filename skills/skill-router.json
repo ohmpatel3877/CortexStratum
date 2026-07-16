@@ -272,6 +272,11 @@
       "triggers": ["computer vision", "cv", "opencv", "image processing", "object detection", "ocr", "face detection", "ml vision"],
       "skills": ["context-extractor"],
       "priority": 7
+    },
+    {
+      "triggers": ["github", "repository", "repo setup", "project board", "milestone", "issue template", "github actions", "workflow", "ci/cd pipeline", "release pipeline", "wiki", "readme badge", "gh issue", "gh pr", "github project", "git init", "gitignore", "opencode config", "opencode integration", "mcp server registration", "github automation", "version bump", "changelog", "semver"],
+      "skills": ["github-repo-setup"],
+      "priority": 9
     }
   ]
 }

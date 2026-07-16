@@ -43,5 +43,6 @@
     "accessibility-compliance",
     "stripe-integration",
     "grafana-dashboards",
-    "prometheus-configuration"
+    "prometheus-configuration",
+    "github-repo-setup"
 ]
