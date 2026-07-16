@@ -824,16 +824,32 @@ def handle_tool_call(name: str, args: dict) -> dict:
         router = SKILLS_DIR / "skill-router.json"
         if router.exists():
             config = json.loads(router.read_text(encoding="utf-8"))
-            matched = []
-            matched_rules = []
             task_lower = args.get("task", "").lower()
+
+            # Priority-based deduplication: when the same trigger keyword
+            # matches multiple rules, only include skills from the
+            # highest-priority rule for that trigger.
+            # Different trigger keywords can still contribute from
+            # different rules at their respective priority levels.
+            trigger_matches = {}  # trigger_keyword -> (priority, [skills])
             for rule in config.get("rules", []):
+                priority = rule.get("priority", 0)
                 for t in rule.get("triggers", []):
                     if t.lower() in task_lower:
-                        matched.extend(rule.get("skills", []))
-                        matched_rules.append({"trigger": t, "priority": rule.get("priority", 0)})
+                        key = t.lower()
+                        if key not in trigger_matches or priority > trigger_matches[key][0]:
+                            trigger_matches[key] = (priority, rule.get("skills", []))
                         break
-            matched = list(dict.fromkeys(matched))  # deduplicate
+
+            # Collect skills from best-priority match per trigger
+            matched = []
+            matched_rules = []
+            for key, (priority, skills) in trigger_matches.items():
+                for s in skills:
+                    if s not in matched:
+                        matched.append(s)
+                matched_rules.append({"trigger": key, "priority": priority})
+            matched = list(dict.fromkeys(matched))  # final deduplicate
 
             # --- Fallback mechanism when no rules match ---
             if not matched:
