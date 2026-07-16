@@ -80,6 +80,8 @@ tr.priority-open td:first-child{border-left:3px solid #fb923c}
 .filters select:focus{outline:none;border-color:#38bdf8}
 
 /* ── Decision cards ── */
+code{background:#1a1a2e;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:.78rem;color:#a78bfa}
+pre{background:transparent !important;padding:0 !important;margin:0 !important}
 .d-card{padding:12px;border:1px solid #1e293b;border-radius:8px;margin-bottom:8px;font-size:.8rem}
 .d-card:last-child{margin-bottom:0}
 .d-card h4{color:#e2e8f0;margin-bottom:3px;font-size:.82rem}
@@ -137,6 +139,7 @@ tr.priority-open td:first-child{border-left:3px solid #fb923c}
   <div class="stat"><div class="num teal" id="decisionCount">—</div><div class="lbl">Decisions</div><div class="sub" id="decisionSub"></div></div>
   <div class="stat"><div class="num rose" id="commitmentCount">—</div><div class="lbl">Commitments</div><div class="sub" id="commitmentSub"></div></div>
   <div class="stat"><div class="num green" id="goalPct">—</div><div class="lbl">Goal</div><div class="sub" id="goalSub"></div></div>
+  <div class="stat"><div class="num" id="openCodeStatus" style="color:#a78bfa">—</div><div class="lbl">OpenCode</div><div class="sub" id="openCodeSub"></div></div>
 </div>
 
 <div class="tabs" id="tabBar">
@@ -145,6 +148,7 @@ tr.priority-open td:first-child{border-left:3px solid #fb923c}
   <div class="tab" data-tab="decisions" onclick="switchTab('decisions')">📐 Decisions</div>
   <div class="tab" data-tab="goals" onclick="switchTab('goals')">🎯 Goals</div>
   <div class="tab" data-tab="commitments" onclick="switchTab('commitments')">✅ Commitments</div>
+  <div class="tab" data-tab="opencode" onclick="switchTab('opencode')">🔌 OpenCode</div>
 </div>
 
 <div id="toolsTab" class="tab-content active"></div>
@@ -152,6 +156,7 @@ tr.priority-open td:first-child{border-left:3px solid #fb923c}
 <div id="decisionsTab" class="tab-content"></div>
 <div id="goalsTab" class="tab-content"></div>
 <div id="commitmentsTab" class="tab-content"></div>
+<div id="opencodeTab" class="tab-content"></div>
 
 <script>
 // ── Data ──
@@ -196,6 +201,8 @@ async function loadAll() {
   DATA.decisions = await loadJSON('./data/decision-registry.json');
   DATA.commitments = await loadJSON('./data/commitments.json');
   DATA.goal = await loadJSON('./data/goal-registry.json');
+  DATA.router = await loadJSON('./skills/skill-router.json');
+  DATA.activeSkills = await loadJSON('./.opencode/active-skills.json');
 
   // Try memory store
   let memCount = 0;
@@ -241,11 +248,21 @@ document.getElementById('errorSub').textContent = resolved + ' resolved' + (recu
     document.getElementById('goalSub').textContent = 'no active goal';
   }
 
+  // OpenCode stat
+  if (DATA.router) {
+    document.getElementById('openCodeStatus').textContent = DATA.router.rules.length + 'R';
+    document.getElementById('openCodeSub').textContent = (DATA.activeSkills || []).length + ' skills';
+  } else {
+    document.getElementById('openCodeStatus').textContent = '-';
+    document.getElementById('openCodeSub').textContent = 'no router';
+  }
+
   renderTools();
   renderTrace();
   renderDecisions();
   renderGoals();
   renderCommitments();
+  renderOpenCode();
 
   document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
   document.getElementById('statusDot').className = 'status-dot ok';
@@ -413,6 +430,110 @@ function renderCommitments() {
   });
   html += '</div></div>';
   document.getElementById('commitmentsTab').innerHTML = html;
+}
+
+// ── Render: OpenCode Integration ──
+function renderOpenCode() {
+  const router = DATA.router;
+  const skills = DATA.activeSkills || [];
+  const tools = DATA.tools || [];
+
+  const rCount = tools.filter(t => t.permission === 'read').length;
+  const wCount = tools.filter(t => t.permission === 'write').length;
+  const mCount = tools.filter(t => t.permission === 'mutate').length;
+  const totalTools = tools.length;
+
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+
+  // Card 1: MCP Server Connection
+  html += '<div class="card"><div class="card-hdr">🔌 MCP Server</div><div class="card-body">';
+  html += '<table><tbody>';
+  html += '<tr><td style="color:#64748b">Protocol</td><td style="color:#e2e8f0">JSON-RPC 2.0 over stdio</td></tr>';
+  html += '<tr><td style="color:#64748b">Tools</td><td style="color:#e2e8f0">' + totalTools + ' <span style="color:#64748b;font-size:.72rem">(' + rCount + 'r / ' + wCount + 'w / ' + mCount + 'm)</span></td></tr>';
+  html += '<tr><td style="color:#64748b">Modes</td><td style="color:#e2e8f0"><span class="perm perm-read">interactive</span> <span class="perm perm-write">auto</span> <span class="perm perm-mutate">permissive</span></td></tr>';
+  html += '<tr><td style="color:#64748b">Config</td><td style="color:#38bdf8;font-family:monospace;font-size:.72rem">opencode.json</td></tr>';
+  html += '</tbody></table>';
+  html += '<div style="margin-top:10px;padding:8px;background:#0f172a;border-radius:6px;font-family:monospace;font-size:.72rem;color:#64748b">' +
+    'python scripts/tools-mcp-server.py <span style="color:#475569">--permissive | --debug | --list-tools</span>' +
+    '</div></div></div>';
+
+  // Card 2: Permission Model
+  const totalP = rCount + wCount + mCount;
+  const rPct = totalP > 0 ? Math.round(rCount/totalP*100) : 0;
+  const wPct = totalP > 0 ? Math.round(wCount/totalP*100) : 0;
+  const mPct = totalP > 0 ? Math.round(mCount/totalP*100) : 0;
+  html += '<div class="card"><div class="card-hdr">🛡️ Permission Model</div><div class="card-body">';
+  html += '<div style="margin-bottom:10px"><div class="bar" style="height:20px;display:flex;gap:2px">';
+  html += '<div class="bar-fill" style="width:'+rPct+'%;background:#4ade80;border-radius:3px 0 0 3px" title="read: '+rCount+' tools"></div>';
+  html += '<div class="bar-fill" style="width:'+wPct+'%;background:#fbbf24" title="write: '+wCount+' tools"></div>';
+  html += '<div class="bar-fill" style="width:'+mPct+'%;background:#f87171;border-radius:0 3px 3px 0" title="mutate: '+mCount+' tools"></div>';
+  html += '</div></div>';
+  html += '<table><tbody>';
+  html += '<tr><td><span class="perm perm-read">read</span></td><td style="color:#4ade80">' + rCount + ' tools</td><td style="color:#64748b;font-size:.72rem">auto + interactive + permissive</td></tr>';
+  html += '<tr><td><span class="perm perm-write">write</span></td><td style="color:#fbbf24">' + wCount + ' tools</td><td style="color:#64748b;font-size:.72rem">blocked in auto, warned in interactive</td></tr>';
+  html += '<tr><td><span class="perm perm-mutate">mutate</span></td><td style="color:#f87171">' + mCount + ' tools</td><td style="color:#64748b;font-size:.72rem">blocked in auto, warned in interactive</td></tr>';
+  html += '</tbody></table>';
+  html += '<div style="margin-top:8px;padding:6px 10px;background:#1a1a2e;border-radius:6px;font-size:.72rem">';
+  html += '<span style="color:#94a3b8">Permissive mode:</span> <code style="color:#a78bfa">python tools-mcp-server.py --permissive</code>';
+  html += '</div></div></div>';
+
+  // Card 3: Skill Router
+  const rules = router ? router.rules || [] : [];
+  const fallback = router ? router.fallback || {} : {};
+  const fallbackLevels = fallback.levels ? fallback.levels.length : 0;
+  const defaults = router ? router.default_skills || [] : [];
+  html += '<div class="card"><div class="card-hdr">🧠 Skill Router <span>v' + (router?.version || '?') + '</span></div><div class="card-body">';
+  html += '<table><tbody>';
+  html += '<tr><td style="color:#64748b">Rules</td><td style="color:#e2e8f0">' + rules.length + ' trigger rules</td></tr>';
+  html += '<tr><td style="color:#64748b">Fallback</td><td style="color:#e2e8f0">' + fallbackLevels + ' levels <span style="color:#475569;font-size:.72rem">(env → config → defaults)</span></td></tr>';
+  html += '<tr><td style="color:#64748b">Defaults</td><td style="color:#e2e8f0">' + defaults.join(', ') + '</td></tr>';
+  html += '<tr><td style="color:#64748b">Resolved</td><td style="color:#4ade80">0 dud skills</td></tr>';
+  html += '</tbody></table>';
+  // Top domains
+  const domains = {};
+  rules.forEach(r => { const t = r.triggers?.[0] || 'other'; domains[t] = (domains[t]||0) + 1; });
+  const topDoms = Object.entries(domains).sort((a,b) => b[1]-a[1]).slice(0,6);
+  html += '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">';
+  topDoms.forEach(([k,v]) => { html += '<span class="tag tag-arch">' + k + '</span>'; });
+  html += '</div></div></div>';
+
+  // Card 4: Active Skills
+  html += '<div class="card"><div class="card-hdr">⚡ Active Skills <span>' + skills.length + '</span></div><div class="card-body">';
+  if (skills.length > 0) {
+    const cols = Math.ceil(skills.length / 2);
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.75rem">';
+    skills.forEach((s, i) => {
+      const col = i < cols ? '0' : '1';
+      html += '<div style="color:#94a3b8;padding:3px 6px;background:#0f172a;border-radius:4px">' + s + '</div>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="empty" style="padding:20px">No skills configured in .opencode/active-skills.json</div>';
+  }
+  html += '</div></div>';
+
+  // Card 5: Integration Code Snippets
+  html += '<div class="card" style="grid-column:1/-1"><div class="card-hdr">📋 Quick Integration</div><div class="card-body">';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.75rem">';
+
+  // opencode.json snippet
+  html += '<div style="background:#0f172a;border-radius:6px;padding:10px">';
+  html += '<div style="color:#64748b;margin-bottom:4px">opencode.json</div>';
+  html += '<pre style="margin:0;color:#38bdf8;font-family:monospace;line-height:1.5">' +
+    '{\n  "mcpServers": {\n    "ai-memory-core": {\n      "command": "python",\n      "args": ["scripts/tools-mcp-server.py"]\n    }\n  }\n}' +
+    '</pre></div>';
+
+  // Commands
+  html += '<div style="background:#0f172a;border-radius:6px;padding:10px">';
+  html += '<div style="color:#64748b;margin-bottom:4px">CLI Commands</div>';
+  html += '<pre style="margin:0;color:#4ade80;font-family:monospace;line-height:1.5">' +
+    '--version     v0.3.0\n--list-tools  ' + totalTools + ' tools\n--permissive  bypass guard\n--debug       verbose logs' +
+    '</pre></div>';
+
+  html += '</div></div></div>';
+  html += '</div></div>';
+
+  document.getElementById('opencodeTab').innerHTML = html;
 }
 
 // ── Init ──
