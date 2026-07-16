@@ -56,6 +56,31 @@
       "name": "inno-setup-pipeline",
       "description": "Build Inno Setup installers in GitHub Actions, sign them, and publish to GitHub Releases",
       "path": "skills/inno-setup-pipeline/SKILL.md"
+    },
+    {
+      "name": "vm-test-engine",
+      "description": "Provision VMs, deploy OSes, run installer/destructive tests across Hyper-V, Vagrant, QEMU",
+      "path": "skills/vm-test-engine/SKILL.md"
+    },
+    {
+      "name": "framework-builder",
+      "description": "Rust workspace architecture, cross-language FFI, Tauri 2 apps, MCP servers, state machines, actor models",
+      "path": "skills/framework-builder/SKILL.md"
+    },
+    {
+      "name": "parameter-virtualizer",
+      "description": "Makes smaller models perform like larger ones via cognitive scaffolding, self-consistency, and personas",
+      "path": "skills/parameter-virtualizer/SKILL.md"
+    },
+    {
+      "name": "pattern-flipper",
+      "description": "Routes reasoning through CoT, Tree of Thoughts, Reflexion, Constitutional AI, Mixture of Agents, Self-Rewarding",
+      "path": "skills/pattern-flipper/SKILL.md"
+    },
+    {
+      "name": "speed-optimizer",
+      "description": "Monitors slowdowns in memory, analyzes bottlenecks, generates persistent workaround strategies",
+      "path": "skills/speed-optimizer/SKILL.md"
     }
   ],
   "install": {

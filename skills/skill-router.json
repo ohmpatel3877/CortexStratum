@@ -171,6 +171,31 @@
       "triggers": ["inno setup", "innosetup", "iscc", "installer", "setup.exe", "windows installer", "build exe", "compile installer", "code signing", "signtool"],
       "skills": ["inno-setup-pipeline"],
       "priority": 8
+    },
+    {
+      "triggers": ["vm", "virtual machine", "hyper-v", "hyperv", "qemu", "kvm", "virtualbox", "vagrant", "test environment", "clean os", "snapshot", "vm test", "provision vm", "os deployment", "destructive test", "installer test"],
+      "skills": ["vm-test-engine"],
+      "priority": 8
+    },
+    {
+      "triggers": ["rust", "framework", "cargo", "workspace", "tauri", "ffi", "pyo3", "napi", "wasm", "mcp server", "app architecture", "cross platform", "state machine", "actor model", "application flow", "project scaffold", "crate", "bindings"],
+      "skills": ["framework-builder"],
+      "priority": 9
+    },
+    {
+      "triggers": ["parameter virtualizer", "virtual parameters", "model enhancement", "boost model", "small model", "free model", "better output", "cognitive scaffolding", "reasoning depth", "self consistency"],
+      "skills": ["parameter-virtualizer"],
+      "priority": 8
+    },
+    {
+      "triggers": ["reasoning strategy", "chain of thought", "tree of thoughts", "reflexion", "constitutional ai", "mixture of agents", "self rewarding", "reasoning pattern", "thought protocol", "strategy switch", "compare strategies", "reasoning approach"],
+      "skills": ["pattern-flipper"],
+      "priority": 8
+    },
+    {
+      "triggers": ["speed", "slowdown", "slow", "bottleneck", "performance", "optimize speed", "latency", "slow build", "slow install", "slow compile", "slow inference", "timeout", "slow operation", "profiling", "slow tool"],
+      "skills": ["speed-optimizer"],
+      "priority": 8
     }
   ],
   "default_skills": ["concise-filter", "task-orchestrator", "memory-search"],
