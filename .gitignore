@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 data/blind-answers.enc
 test_stderr.log
+
+*.exe
