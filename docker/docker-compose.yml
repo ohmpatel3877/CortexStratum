@@ -1,0 +1,99 @@
+# ai-memory-core + Portainer Stack
+# One-command deploy: docker compose up -d
+# Then open http://patelserver:9000 for Portainer
+
+version: "3.9"
+
+networks:
+  ai-net:
+    driver: bridge
+    name: patelserver
+
+volumes:
+  portainer_data:
+  mem0_data:
+  ai_memory_data:
+
+services:
+
+  # ─── Portainer — Container Management UI ───────────────────────
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - ai-net
+    ports:
+      - "9000:9000"    # Web UI
+      - "9443:9443"    # Web UI (HTTPS)
+      - "8000:8000"    # Edge agent tunnel
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      - "patelserver.service=portainer"
+      - "patelserver.description=Container Management UI"
+      - "patelserver.icon=portainer"
+
+  # ─── ai-memory-core MCP Server ────────────────────────────────
+  ai-memory-core:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ohmpatel3877/ai-memory-core:latest
+    container_name: ai-memory-core
+    restart: unless-stopped
+    networks:
+      - ai-net
+    ports:
+      - "3100:3100"    # MCP HTTP endpoint (if enabled)
+    environment:
+      MEM0_API_KEY: "${MEM0_API_KEY:-}"
+      MEM0_PROJECT: "ai-memory-core"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    volumes:
+      - ai_memory_data:/app/data
+      - ai_memory_data:/app/.memory
+      - /var/run/docker.sock:/var/run/docker.sock:ro   # For OpenCode container mgmt
+    labels:
+      - "patelserver.service=ai-memory-core"
+      - "patelserver.description=68-tool MCP memory & orchestration server"
+      - "patelserver.icon=ai"
+    command: server
+
+  # ─── mem0 (optional — for self-hosted mem0) ───────────────────
+  # By default ai-memory-core uses mem0 cloud. Uncomment this if
+  # you want to self-host the mem0 API instead.
+  #
+  # mem0:
+  #   image: mem0ai/mem0:latest
+  #   container_name: mem0
+  #   restart: unless-stopped
+  #   networks:
+  #     - ai-net
+  #   ports:
+  #     - "8088:8088"
+  #   volumes:
+  #     - mem0_data:/data
+  #   environment:
+  #     MEM0_API_KEY: "${MEM0_API_KEY}"
+
+  # ─── OpenCode Agent (optional sidecar) ────────────────────────
+  # Runs an OpenCode agent that connects to the ai-memory-core MCP server.
+  # Uncomment and configure as needed.
+  #
+  # opencode:
+  #   image: ohmpatel3877/ai-memory-core:latest
+  #   container_name: opencode-agent
+  #   restart: unless-stopped
+  #   networks:
+  #     - ai-net
+  #   depends_on:
+  #     - ai-memory-core
+  #   environment:
+  #     OPENCODE_MCP_SERVER: "ai-memory-core:3100"
+  #     MEM0_API_KEY: "${MEM0_API_KEY}"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ${HOST_PROJECTS:-./projects}:/projects
+  #   command: shell

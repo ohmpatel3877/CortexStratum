@@ -34,8 +34,63 @@ param(
     [string]$Harness = "opencode",
     [string]$ProjectDir = "",
     [string]$Mem0ApiKey = "",
-    [switch]$Force
+    [switch]$Force,
+    [switch]$Containerized,
+    [switch]$OneClick
 )
+
+# ─── One-Click Containerized Mode ─────────────────────────────────
+if ($OneClick -or $Containerized) {
+    Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "║   patelserver — 1-Click Containerized Setup     ║" -ForegroundColor Cyan
+    Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "This will deploy Portainer + ai-memory-core in Docker containers."
+    Write-Host "Your non-technical friend just needs Docker Desktop."
+    Write-Host ""
+
+    # Check for Docker
+    $hasDocker = $false
+    try { docker --version | Out-Null; $hasDocker = $true } catch {}
+
+    if (-not $hasDocker) {
+        Write-Host "Docker not found. Downloading Docker Desktop..." -ForegroundColor Yellow
+        $installer = "$env:TEMP\DockerDesktopInstaller.exe"
+        Invoke-WebRequest -Uri "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe" -OutFile $installer
+        Write-Host "Installing Docker Desktop (run the installer that opened)..." -ForegroundColor Yellow
+        Start-Process $installer -Wait
+        Write-Host "After install completes, restart this script." -ForegroundColor Green
+        exit
+    }
+
+    # Get ai-memory-core
+    $targetDir = "C:\ProgramData\patelserver"
+    if (-not (Test-Path "$targetDir\docker\docker-compose.yml")) {
+        Write-Host "Downloading ai-memory-core..." -ForegroundColor Yellow
+        $zip = "$env:TEMP\ai-memory-core.zip"
+        Invoke-WebRequest -Uri "https://github.com/ohmpatel3877/ai-memory-core/archive/refs/heads/main.zip" -OutFile $zip
+        Remove-Item -Path $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+        Expand-Archive -Path $zip -DestinationPath "C:\ProgramData" -Force
+        Move-Item "C:\ProgramData\ai-memory-core-main\*" $targetDir -Force
+        Remove-Item "C:\ProgramData\ai-memory-core-main" -Recurse -Force
+    }
+
+    # Deploy
+    cd $targetDir
+    docker compose -f docker\docker-compose.yml pull
+    docker compose -f docker\docker-compose.yml up -d --build
+
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Green
+    Write-Host "║  patelserver is LIVE!                           ║" -ForegroundColor Green
+    Write-Host "╠══════════════════════════════════════════════════╣" -ForegroundColor Green
+    Write-Host "║  Portainer: http://localhost:9000               ║" -ForegroundColor White
+    Write-Host "║  First login: set your admin password           ║" -ForegroundColor White
+    Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Green
+
+    start "http://localhost:9000"
+    return
+}
 
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "🧠 ai-memory-core Installer"
