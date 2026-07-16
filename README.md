@@ -47,6 +47,7 @@ ai-memory-core fixes that. It gives your agent:
 │  │  can_call_tool(name, {mode})                       │   │
 │  │  auto mode     → blocks write_/mutate_             │   │
 │  │  interactive   → allows all, warns on write/mutate │   │
+│  │  permissive    → all tools allowed, no warnings    │   │
 │  └────────────────────────────────────────────────────┘   │
 │                                                           │
 │  ┌──────────┐ ┌──────┐ ┌──────┐ ┌────────┐ ┌──────────┐ │
@@ -60,7 +61,7 @@ ai-memory-core fixes that. It gives your agent:
 │                                                           │
 │  ┌──────────── Module Factory ───────────────────────┐    │
 │  │  _get_module(name, filename) — lazy-loaded, cached │    │
-│  │  One function replaces 7 individual loaders       │    │
+│  │  Error handling: try/except with user-friendly msgs│    │
 │  └───────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────┘
          │                                      │
@@ -71,11 +72,14 @@ ai-memory-core fixes that. It gives your agent:
 │  decision-registry│              │  identity/           │
 │  goal-registry    │              │  ne/                 │
 │  commitments      │              │  (BM25 index)        │
-│  memory_store     │              └──────────────────────┘
+│  tool-inventory   │              └──────────────────────┘
 │  synonyms         │
-│  tool-inventory   │
 └───────────────────┘
 ```
+
+> **Full architecture documentation**: [ARCHITECTURE.md](ARCHITECTURE.md) — permission model, data flow, module dependencies, versioning.
+> 
+> **Dependency reference**: [DEPENDENCIES.md](DEPENDENCIES.md) — required vs optional packages per module.
 
 ---
 
