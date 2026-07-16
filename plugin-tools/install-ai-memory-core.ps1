@@ -34,6 +34,7 @@ param(
     [string]$Harness = "opencode",
     [string]$ProjectDir = "",
     [string]$Mem0ApiKey = "",
+    [string]$OpenCodeZenApiKey = "",
     [switch]$Force,
     [switch]$Containerized,
     [switch]$OneClick
@@ -74,6 +75,25 @@ if ($OneClick -or $Containerized) {
         Move-Item "C:\ProgramData\ai-memory-core-main\*" $targetDir -Force
         Remove-Item "C:\ProgramData\ai-memory-core-main" -Recurse -Force
     }
+
+    # Prompt for mem0 key if needed
+    if ([string]::IsNullOrEmpty($Mem0ApiKey)) {
+        $Mem0ApiKey = Read-Host "`nEnter your mem0 API key (get one free at https://app.mem0.ai) or press Enter to skip"
+    }
+
+    # Prompt for OpenCode Zen key if needed
+    if ([string]::IsNullOrEmpty($OpenCodeZenApiKey)) {
+        $OpenCodeZenApiKey = Read-Host "`nEnter your OpenCode Zen API key (get one at https://opencode.ai) or press Enter to skip"
+    }
+
+    # Write .env
+    @"
+MEM0_API_KEY=$Mem0ApiKey
+OPENCODE_ZEN_API_KEY=$OpenCodeZenApiKey
+OPENCODE_ZEN_BASE_URL=https://api.opencode.ai
+OPENCODE_HOST=patelserver
+LOG_LEVEL=info
+"@ | Out-File -FilePath "$targetDir\.env" -Encoding UTF8
 
     # Deploy
     cd $targetDir

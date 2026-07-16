@@ -2,8 +2,13 @@
 # ═══════════════════════════════════════════════════════════════
 # patelserver — 1-Click Setup
 # ═══════════════════════════════════════════════════════════════
+#
+#  ⚡ You only need Docker (or Podman). That's it.
+#  ⚡ No Node.js. No Python. No npm. No pip.
+#  ⚡ Everything runs inside containers.
+#
 # Detects your OS, installs Docker/Podman if needed, deploys
-# Portainer + ai-memory-core stack, configures mem0.
+# Portainer + ai-memory-core stack, configures mem0 + OpenCode Zen.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-patelserver.sh | bash
@@ -11,7 +16,8 @@
 #   bash docker/setup-patelserver.sh
 #
 # Options:
-#   MEM0_API_KEY=xxx bash setup-patelserver.sh   # pass API key inline
+#   MEM0_API_KEY=xxx bash setup-patelserver.sh   # pass mem0 key inline
+#   OPENCODE_ZEN_API_KEY=xxx bash ...            # pass OpenCode Zen key inline
 #   bash setup-patelserver.sh --port 9000         # custom Portainer port
 #   bash setup-patelserver.sh --engine podman     # force Podman over Docker
 # ═══════════════════════════════════════════════════════════════
@@ -132,10 +138,31 @@ if [ -z "$MEM0_KEY" ]; then
   fi
 fi
 
+# ─── OpenCode Zen API Key ─────────────────────────────────────────
+ZEN_KEY="${OPENCODE_ZEN_API_KEY:-}"
+if [ -z "$ZEN_KEY" ] && [ -f "$PROJECT_DIR/.env" ]; then
+  ZEN_KEY=$(grep OPENCODE_ZEN_API_KEY "$PROJECT_DIR/.env" | cut -d= -f2 | tr -d ' ')
+fi
+if [ -z "$ZEN_KEY" ]; then
+  echo ""
+  warn "No OPENCODE_ZEN_API_KEY found (optional)."
+  echo "  Get one free at https://opencode.ai"
+  echo -n "  Paste your key (or press Enter to skip): "
+  read -r input_zen
+  if [ -n "$input_zen" ]; then
+    ZEN_KEY="$input_zen"
+    echo "OPENCODE_ZEN_API_KEY=$ZEN_KEY" >> "$PROJECT_DIR/.env"
+    ok "Zen key saved"
+  else
+    warn "Skipping OpenCode Zen config"
+  fi
+fi
+
 # ─── Deploy Stack via Compose ─────────────────────────────────────
 info "Deploying patelserver stack..."
 cd "$PROJECT_DIR"
 export MEM0_API_KEY="${MEM0_KEY:-}"
+export OPENCODE_ZEN_API_KEY="${ZEN_KEY:-}"
 export HOST_PROJECTS="${HOME}/projects"
 
 if [ -f docker/docker-compose.yml ]; then

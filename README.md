@@ -49,14 +49,16 @@ Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent
 
 ## 🚀 For Non-Technical Users — patelserver in One Click
 
-Want the whole thing running without touching a terminal? Give your friend one of these:
+**You only need Docker. Nothing else. No Node.js, no Python, no npm, no pip.** Everything runs inside containers.
+
+Want the whole thing running? Give your friend one of these:
 
 ### Windows
 Download and **double-click** `ONE-CLICK.cmd`:
 ```
 curl -o ONE-CLICK.cmd https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/ONE-CLICK.cmd
 ```
-It auto-installs Docker Desktop, pulls the stack, deploys Portainer + ai-memory-core, opens the browser.
+It auto-installs Docker Desktop (if missing), pulls the stack, deploys Portainer + ai-memory-core, opens the browser. No terminal needed.
 
 ### Mac / Linux
 Copy-paste this one line into terminal:

@@ -48,8 +48,15 @@ services:
     ports:
       - "3100:3100"    # MCP HTTP endpoint (if enabled)
     environment:
+      # ── mem0 cloud memory ──
       MEM0_API_KEY: "${MEM0_API_KEY:-}"
       MEM0_PROJECT: "ai-memory-core"
+      # ── OpenCode Zen API ──
+      OPENCODE_ZEN_API_KEY: "${OPENCODE_ZEN_API_KEY:-}"
+      OPENCODE_ZEN_BASE_URL: "${OPENCODE_ZEN_BASE_URL:-https://api.opencode.ai}"
+      OPENCODE_HOST: "${OPENCODE_HOST:-patelserver}"
+      OPENCODE_DEPLOYMENT_ID: "${OPENCODE_DEPLOYMENT_ID:-patelserver-docker}"
+      # ── Logging ──
       LOG_LEVEL: "${LOG_LEVEL:-info}"
     volumes:
       - ai_memory_data:/app/data
