@@ -13,8 +13,7 @@ services:
     ports:
       - "3100:3100"
     environment:
-      MEM0_API_KEY: "${MEM0_API_KEY:-}"
-      MEM0_PROJECT: "opencode-container-server"
+      MEMORY_BACKEND: "local"
       OPENCODE_ZEN_API_KEY: "${OPENCODE_ZEN_API_KEY:-}"
       OPENCODE_ZEN_BASE_URL: "${OPENCODE_ZEN_BASE_URL:-https://api.opencode.ai}"
       OPENCODE_HOST: "${OPENCODE_HOST:-opencode-container}"

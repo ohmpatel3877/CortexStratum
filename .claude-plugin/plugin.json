@@ -87,7 +87,7 @@
     "requirements": ["node >= 18", "python >= 3.10"],
     "steps": [
       "npm install",
-      "cp .env.example .env (or set MEM0_API_KEY)",
+      "cp .env.example .env",
       "node scripts/seed-memories.js"
     ]
   }

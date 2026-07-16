@@ -8,7 +8,8 @@
 #  ⚡ Everything runs inside the container.
 #
 # Deploys the opencode-container-server: ai-memory-core MCP
-# server + OpenCode CLI + mem0 + OpenCode Zen config.
+# server + OpenCode CLI + local memory + OpenCode Zen config.
+# Fully local — no cloud services required.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
@@ -16,7 +17,6 @@
 #   bash docker/setup-opencode-container.sh
 #
 # Options:
-#   MEM0_API_KEY=xxx bash setup-opencode-container.sh     # pass mem0 key inline
 #   OPENCODE_ZEN_API_KEY=xxx bash ...                     # pass OpenCode Zen key inline
 #   bash setup-opencode-container.sh --engine podman      # force Podman over Docker
 # ═══════════════════════════════════════════════════════════════
@@ -38,7 +38,7 @@ fail()  { echo -e "${RED}✗${NC} $1"; exit 1; }
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║${NC}   opencode-container-server — 1-Click Setup     ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}        MCP Server + OpenCode CLI + mem0         ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}   MCP Server + OpenCode CLI + Local Memory      ${CYAN}║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -119,25 +119,8 @@ else
   ok "Cloned ai-memory-core"
 fi
 
-# ─── mem0 API Key ─────────────────────────────────────────────────
-MEM0_KEY="${MEM0_API_KEY:-}"
-if [ -z "$MEM0_KEY" ] && [ -f "$PROJECT_DIR/.env" ]; then
-  MEM0_KEY=$(grep MEM0_API_KEY "$PROJECT_DIR/.env" | cut -d= -f2 | tr -d ' ')
-fi
-if [ -z "$MEM0_KEY" ]; then
-  echo ""
-  warn "No MEM0_API_KEY found."
-  echo "  Get one free at https://app.mem0.ai"
-  echo -n "  Paste your key (or press Enter to skip): "
-  read -r input_key
-  if [ -n "$input_key" ]; then
-    MEM0_KEY="$input_key"
-    echo "MEM0_API_KEY=$MEM0_KEY" > "$PROJECT_DIR/.env"
-    ok "Key saved"
-  else
-    warn "Skipping mem0 config. Set MEM0_API_KEY later in .env"
-  fi
-fi
+# ─── Local Memory (fully local, no API key needed) ────────────────
+info "Using local memory (no cloud services required)"
 
 # ─── OpenCode Zen API Key ─────────────────────────────────────────
 ZEN_KEY="${OPENCODE_ZEN_API_KEY:-}"
@@ -162,7 +145,6 @@ fi
 # ─── Deploy Stack via Compose ─────────────────────────────────────
 info "Deploying opencode-container-server stack..."
 cd "$PROJECT_DIR"
-export MEM0_API_KEY="${MEM0_KEY:-}"
 export OPENCODE_ZEN_API_KEY="${ZEN_KEY:-}"
 export HOST_PROJECTS="${HOME}/projects"
 
@@ -176,7 +158,7 @@ else
     --restart unless-stopped \
     -p 3100:3100 \
     -v ai_memory_data:/app/data \
-    -e MEM0_API_KEY="${MEM0_KEY:-}" \
+    -e MEMORY_BACKEND=local \
     -w /app \
     node:22 npm start 2>&1 || warn "Direct run failed"
 fi
@@ -196,4 +178,4 @@ echo ""
 echo "Next steps:"
 echo "  1. Connect your local OpenCode to the MCP server at opencode-server:3100"
 echo "  2. Or run: docker exec -it opencode-server opencode"
-echo "  3. Configure mem0 via docker compose -f docker/docker-compose.yml config"
+echo "  3. All memory is local — no cloud config needed"

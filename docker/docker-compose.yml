@@ -1,7 +1,6 @@
-# opencode-container-server
+# opencode-container-server — with local agent-memory-mcp backend
 # One-command deploy: docker compose up -d
-# Spins up the ai-memory-core MCP server + OpenCode CLI environment.
-# You only need Docker. Everything else runs in the container.
+# Agent-memory-mcp runs as a sidecar for fully local memory.
 
 services:
 
@@ -13,23 +12,36 @@ services:
     container_name: opencode-server
     restart: unless-stopped
     ports:
-      - "3100:3100"    # MCP HTTP endpoint (for external tools)
+      - "3100:3100"
     environment:
-      # ── mem0 cloud memory ──
-      MEM0_API_KEY: "${MEM0_API_KEY:-}"
-      MEM0_PROJECT: "opencode-container-server"
-      # ── OpenCode Zen API (optional) ──
-      OPENCODE_ZEN_API_KEY: "${OPENCODE_ZEN_API_KEY:-}"
-      OPENCODE_ZEN_BASE_URL: "${OPENCODE_ZEN_BASE_URL:-https://api.opencode.ai}"
-      OPENCODE_HOST: "${OPENCODE_HOST:-opencode-container}"
-      OPENCODE_DEPLOYMENT_ID: "${OPENCODE_DEPLOYMENT_ID:-opencode-container-server}"
-      # ── Logging ──
+      MEMORY_BACKEND: "agent-memory-mcp"
+      AGENT_MEMORY_MCP_URL: "http://memory-sidecar:3101"
       LOG_LEVEL: "${LOG_LEVEL:-info}"
     volumes:
       - opencode_data:/app/data
-      - opencode_data:/app/.memory
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - memory_store:/app/.memory
+    depends_on:
+      - memory-sidecar
     command: server
+
+  memory-sidecar:
+    build:
+      context: ../../agent-memory-mcp
+      dockerfile: Dockerfile
+    image: ohmpatel3877/agent-memory-mcp:latest
+    container_name: agent-memory-mcp
+    restart: unless-stopped
+    ports:
+      - "3101:3101"
+    environment:
+      KG_DB_PATH: /data/knowledge-graph
+      DECAY_DB_PATH: /data/decay
+      SQLITE_DB_PATH: /data/memory.db
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    volumes:
+      - memory_store:/data
+    command: ["node", "dist/index.js"]
 
 volumes:
   opencode_data:
+  memory_store:

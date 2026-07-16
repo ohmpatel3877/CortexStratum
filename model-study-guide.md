@@ -14,7 +14,7 @@
 | Tier | Flash (speed-optimized, lighter reasoning depth) |
 | Known constraint | Limited context window vs pro tier |
 | Available skills | 50+ (awesome-curated + custom) |
-| Mem0 integration | Cloud MCP at mcp.mem0.ai |
+| Mem0 integration | Local BM25 memory (no cloud) |
 
 ## 2. Diagnosed Weak Points
 

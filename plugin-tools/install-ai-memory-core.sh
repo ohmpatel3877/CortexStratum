@@ -30,18 +30,12 @@ echo "▶ Step 2/5: Installing npm dependencies..."
 cd "$PROJECT_DIR"
 npm install --silent 2>&1 && echo "  ✓ npm dependencies installed" || echo "  ⚠ npm install had warnings"
 
-# ─── Step 3: mem0 API key ─────────────────────────────────────
+# ─── Step 3: Local memory config (no API key needed) ──────────
 echo ""
-echo "▶ Step 3/5: Configuring mem0 API key..."
+echo "▶ Step 3/5: Configuring local memory..."
 if [ ! -f .env ]; then
-  if [ -n "${MEM0_API_KEY:-}" ]; then
-    echo "MEM0_API_KEY=$MEM0_API_KEY" > .env
-    echo "MEM0_PROJECT=ai-memory-core" >> .env
-    echo "  ✓ API key set from environment"
-  else
-    echo "  ○ No MEM0_API_KEY set. Get one at https://app.mem0.ai"
-    echo "    Then: echo 'MEM0_API_KEY=your-key' > .env"
-  fi
+  echo "MEM0_PROJECT=ai-memory-core" > .env
+  echo "  ✓ Local memory configured (no API key required)"
 else
   echo "  ✓ .env exists"
 fi

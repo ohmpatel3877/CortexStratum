@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/MCP%20Server-68%20tools-blue?style=for-the-badge" alt="68 MCP Tools"/>
-  <img src="https://img.shields.io/badge/mem0-Cloud%20Memory-purple?style=for-the-badge" alt="mem0 Cloud"/>
+  <img src="https://img.shields.io/badge/Memory-Local%20BM25-brightgreen?style=for-the-badge" alt="Local Memory"/>
   <img src="https://img.shields.io/badge/OpenCode-Ready-4ade80?style=for-the-badge" alt="OpenCode Ready"/>
   <img src="https://img.shields.io/badge/Claude%20Code-Ready-4ade80?style=for-the-badge" alt="Claude Code Ready"/>
 </p>
@@ -9,7 +9,7 @@
 
 **Persistent memory infrastructure for AI coding agents.** A 68-tool MCP server that gives OpenCode, Claude Code, and Cursor agents memory that persists across sessions — error tracking, decision logging, skill routing, task orchestration, multi-modal AI generation, and behavioral verification.
 
-Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent-memory-mcp for local project-specific conventions.
+Fully local — no cloud services required. Memory stays on your machine.
 
 ---
 
@@ -84,7 +84,7 @@ A running container with the 68-tool MCP server. Connect it to OpenCode by addin
 ### Prerequisites
 - **Node.js** 18+
 - **Python** 3.10+
-- A [mem0 API key](https://app.mem0.ai) (free tier available)
+- No API keys needed — fully local
 
 ### Windows (PowerShell 7+)
 ```powershell
@@ -108,7 +108,7 @@ docker compose up -d
 The installer will:
 1. ✅ Validate Node.js + Python versions
 2. ✅ Install npm dependencies
-3. ✅ Prompt for MEM0_API_KEY (or read from `.env`)
+3. ✅ Configure local memory backend
 4. ✅ Register the MCP server in `opencode.json`
 5. ✅ Link skills to `~/.config/opencode/skills/`
 6. ✅ Run verification checks
@@ -198,7 +198,7 @@ The router auto-loads skills based on keywords in your task description:
 | `design`, `architecture`, `plan`, `strategy` | `brainstorm`, `adr-write` |
 | `electron`, `ipc`, `preload`, `contextbridge` | `electron-desktop-architecture` |
 | `security`, `cve`, `harden`, `encrypt`, `xss` | `security-hardening` |
-| `memory`, `mem0`, `remember`, `recall` | `mem0-search`, `mem0-remember` |
+| `memory`, `remember`, `recall` | `memory-search`, `memory-synthesize` |
 | `art`, `svg`, `theme`, `palette`, `design` | `art-module` |
 | `literature`, `philosophy`, `textbook`, `essay` | `literature-module` |
 | `browser`, `scrape`, `crawl`, `playwright` | `browser-automation`, `playwright-automation` |
@@ -224,7 +224,7 @@ The router auto-loads skills based on keywords in your task description:
 │  │ 7 tls│ │ 7 tls  │ │4 tls │ │Search  │ │2 tls │  │
 │  └──────┘ └────────┘ └──────┘ └──┬─────┘ └──────┘  │
 ├───────────────────────────────────┼─────────────────┤
-│        mem0 (Cloud-Backed)        │  Agent-Memory-MCP│
+│      Local Memory (BM25)          │  Agent-Memory-MCP│
 │   ┌─────────────────────────┐     │  ┌─────────────┐ │
 │   │ Cross-session memory    │     │  │ Project-local│ │
 │   │ User preferences        │     │  │ Conventions  │ │

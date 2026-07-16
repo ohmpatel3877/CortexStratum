@@ -23,7 +23,6 @@ RUN git clone --depth 1 https://github.com/ohmpatel3877/ai-memory-core.git /tmp/
     cp -r /tmp/repo/scripts /app/scripts && \
     cp -r /tmp/repo/skills /app/skills && \
     cp -r /tmp/repo/data /app/data && \
-    cp -r /tmp/repo/.mem0.md /app/ && \
     rm -rf /tmp/repo
 RUN pip install --break-system-packages pydantic httpx 2>/dev/null || \
     python3 -m pip install --no-cache-dir pydantic httpx
@@ -38,7 +37,7 @@ case "$MODE" in
     ;;
   health)
     python3 -c "import json; t=json.load(open('\''/app/data/tool-inventory.json'\'')); print(f'\''{len(t)} tools ready'\'')"
-    echo "MEM0_API_KEY: ${MEM0_API_KEY:+yes}${MEM0_API_KEY:-no}"
+    echo "Memory: local BM25 search"
     echo "OK"
     ;;
   shell)

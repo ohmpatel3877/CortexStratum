@@ -23,7 +23,7 @@
     Path to ai-memory-core. Defaults to the repo root (parent of this script's directory).
 
 .PARAMETER Mem0ApiKey
-    Your Mem0 API key (get one at https://app.mem0.ai). If omitted, prompts interactively.
+    Mem0 API key (deprecated — project is fully local now).
 
 .PARAMETER Force
     Overwrite existing configurations without prompting.
@@ -84,19 +84,14 @@ if ($OneClick -or $Containerized) {
         Remove-Item "$env:USERPROFILE\ai-memory-core-main" -Recurse -Force
     }
 
-    # Prompt for mem0 key if needed
-    if ([string]::IsNullOrEmpty($Mem0ApiKey)) {
-        $Mem0ApiKey = Read-Host "`nEnter your mem0 API key (get one free at https://app.mem0.ai) or press Enter to skip"
-    }
-
     # Prompt for OpenCode Zen key if needed
     if ([string]::IsNullOrEmpty($OpenCodeZenApiKey)) {
         $OpenCodeZenApiKey = Read-Host "`nEnter your OpenCode Zen API key (get one at https://opencode.ai) or press Enter to skip"
     }
 
-    # Write .env
+    # Write .env (fully local — no MEM0_API_KEY needed)
     @"
-MEM0_API_KEY=$Mem0ApiKey
+MEM0_PROJECT=ai-memory-core
 OPENCODE_ZEN_API_KEY=$OpenCodeZenApiKey
 OPENCODE_ZEN_BASE_URL=https://api.opencode.ai
 OPENCODE_HOST=opencode-container
@@ -177,30 +172,16 @@ try {
 }
 Pop-Location
 
-# ─── Step 3: Configure mem0 API Key ─────────────────────────────
+# ─── Step 3: Configure local memory (no API key needed) ────────
 Write-Host ""
-Write-Host "▶ Step 3/6: Configuring mem0 API key..." -ForegroundColor Yellow
+Write-Host "▶ Step 3/6: Configuring local memory..." -ForegroundColor Yellow
 
 $envFile = Join-Path $ProjectDir ".env"
-$hasKey = $false
-
-if ($Mem0ApiKey) {
-    $envContent = "MEM0_API_KEY=$Mem0ApiKey`nMEM0_PROJECT=ai-memory-core`n"
-    Set-Content -Path $envFile -Value $envContent -Force
-    $hasKey = $true
-    Write-Host "  ✓ API key saved to .env" -ForegroundColor Green
-} elseif (Test-Path $envFile) {
-    $existing = Get-Content $envFile | Select-String "MEM0_API_KEY"
-    if ($existing) {
-        Write-Host "  ✓ Existing .env found" -ForegroundColor Green
-        $hasKey = $true
-    } elseif ($Force) {
-        Write-Host "  ⚠ .env exists but no MEM0_API_KEY found" -ForegroundColor DarkYellow
-    }
-} elseif ($Force -eq $false) {
-    Write-Host "  ? No MEM0_API_KEY set." -ForegroundColor DarkYellow
-    Write-Host "  To use mem0 cloud features, get a free key at: https://app.mem0.ai" -ForegroundColor DarkYellow
-    Write-Host "  Then: set-content $envFile 'MEM0_API_KEY=your-key-here'" -ForegroundColor DarkYellow
+if (-not (Test-Path $envFile)) {
+    "MEM0_PROJECT=ai-memory-core`n# Fully local — no API keys required" | Set-Content -Path $envFile -Force
+    Write-Host "  ✓ Local memory configured (no API key required)" -ForegroundColor Green
+} else {
+    Write-Host "  ✓ .env already exists" -ForegroundColor Green
 }
 
 # ─── Step 4: Register MCP Server ────────────────────────────────
@@ -215,7 +196,6 @@ function Register-McpForOpenCode {
         "command" = "python"
         "args" = @("scripts/tools-mcp-server.py")
         "env" = @{
-            "MEM0_API_KEY" = $Mem0ApiKey
         }
     }
     
@@ -341,7 +321,7 @@ if ($fail -gt 0) {
     Write-Host "Some checks failed. Review above for details." -ForegroundColor Yellow
     Write-Host "Common fixes:" -ForegroundColor Yellow
     Write-Host "  1. npm install  (in $ProjectDir)" -ForegroundColor DarkYellow
-    Write-Host "  2. Set MEM0_API_KEY in .env" -ForegroundColor DarkYellow
+    Write-Host "  2. No API keys needed — fully local" -ForegroundColor DarkYellow
     Write-Host "  3. Ensure Python 3.10+ is on PATH" -ForegroundColor DarkYellow
 } else {
     Write-Host ""
