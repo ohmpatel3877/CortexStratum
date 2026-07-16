@@ -6,7 +6,13 @@ import math
 import re
 
 def _hex_to_hsl(hex_color: str) -> tuple:
+    """Convert hex color (e.g. '#3b82f6') to HSL tuple.
+    
+    Returns (0, 0, 0) for invalid input instead of crashing.
+    """
     hex_color = hex_color.lstrip("#")
+    if len(hex_color) != 6 or not all(c in "0123456789abcdefABCDEF" for c in hex_color):
+        return (0, 0, 0)  # safe fallback for invalid input
     r, g, b = int(hex_color[0:2], 16) / 255, int(hex_color[2:4], 16) / 255, int(hex_color[4:6], 16) / 255
     mx, mn = max(r, g, b), min(r, g, b)
     l = (mx + mn) / 2

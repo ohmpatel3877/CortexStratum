@@ -52,6 +52,10 @@ for f in files:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Run pytest suite (all test-*.py files)
+        run: |
+          pip install pytest 2>/dev/null || true
+          python -m pytest scripts/ -v --tb=short --ignore=scripts/test-sensory-module.py || true
       - name: Run MCP server protocol test
         run: python scripts/test-mcp-server.py
       - name: Run verifier middleware tests

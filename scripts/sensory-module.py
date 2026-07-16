@@ -109,6 +109,11 @@ def browse_url(url: str, extract_mode: str = "text", timeout_ms: int = 30000) ->
                   "links" (all hyperlinks), "metadata" (title, description, og tags)
     Returns: {url, title, content, extracted_at, content_length}
     """
+    # SSRF protection
+    safe_url = _validate_url(url)
+    if safe_url is None:
+        return {"status": "error", "error": f"URL blocked by security policy: {url[:80]}", "url": url}
+    url = safe_url
     try:
         browser = _ensure_playwright_browser()
         page = browser.new_page()
@@ -177,6 +182,10 @@ def browse_url(url: str, extract_mode: str = "text", timeout_ms: int = 30000) ->
 
 def browse_screenshot(url: str, output_path: str = "", timeout_ms: int = 30000) -> dict:
     """Navigate to URL and capture a screenshot. Returns path to screenshot file."""
+    safe_url = _validate_url(url)
+    if safe_url is None:
+        return {"status": "error", "error": f"URL blocked by security policy: {url[:80]}", "url": url}
+    url = safe_url
     try:
         browser = _ensure_playwright_browser()
         page = browser.new_page(viewport={"width": 1280, "height": 900})
@@ -208,6 +217,10 @@ def browse_interact(url: str, actions: list, timeout_ms: int = 30000) -> dict:
     Each action: {"type": "click"|"type"|"wait", "selector": "...", "value": "..."}
     Returns: final page state.
     """
+    safe_url = _validate_url(url)
+    if safe_url is None:
+        return {"status": "error", "error": f"URL blocked by security policy: {url[:80]}", "url": url}
+    url = safe_url
     try:
         browser = _ensure_playwright_browser()
         page = browser.new_page()
@@ -255,6 +268,10 @@ def browse_interact(url: str, actions: list, timeout_ms: int = 30000) -> dict:
 
 def extract_from_pdf(file_path: str, max_pages: int = 50) -> dict:
     """Extract text from a PDF file. Returns pages as list of text strings."""
+    safe_path = _sanitize_path(file_path)
+    if safe_path is None:
+        return {"status": "error", "error": f"Path blocked by security policy (outside project root): {file_path[:120]}"}
+    file_path = safe_path
     try:
         pdf = _get_pdfplumber()
         pages = []
@@ -318,6 +335,10 @@ def extract_from_image(file_path: str) -> dict:
     Extract text from image using OCR (pytesseract) if available,
     otherwise return image metadata.
     """
+    safe_path = _sanitize_path(file_path)
+    if safe_path is None:
+        return {"status": "error", "error": f"Path blocked by security policy (outside project root): {file_path[:120]}"}
+    file_path = safe_path
     try:
         from PIL import Image
         img = Image.open(file_path)
@@ -362,6 +383,10 @@ def scrape_url(url: str, mode: str = "text", headers: Optional[dict] = None) -> 
     Fetch URL via requests (no JS) and extract content.
     mode: "text", "html", "links", "tables", "json"
     """
+    safe_url = _validate_url(url)
+    if safe_url is None:
+        return {"status": "error", "error": f"URL blocked by security policy: {url[:80]}", "url": url}
+    url = safe_url
     try:
         req = _get_requests()
         h = {"User-Agent": "Mozilla/5.0 (compatible; SensoryModule/1.0)"}
@@ -420,6 +445,10 @@ def scrape_url(url: str, mode: str = "text", headers: Optional[dict] = None) -> 
 
 def scrape_extract_article(url: str) -> dict:
     """Use trafilatura to extract clean article content from a URL."""
+    safe_url = _validate_url(url)
+    if safe_url is None:
+        return {"status": "error", "error": f"URL blocked by security policy: {url[:80]}", "url": url}
+    url = safe_url
     try:
         req = _get_requests()
         resp = req.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
@@ -453,6 +482,10 @@ def api_request(url: str, method: str = "GET", data: Optional[dict] = None,
     General-purpose HTTP request. Returns structured response.
     method: GET, POST, PUT, DELETE, PATCH
     """
+    safe_url = _validate_url(url)
+    if safe_url is None:
+        return {"status": "error", "error": f"URL blocked by security policy: {url[:80]}", "url": url}
+    url = safe_url
     try:
         req = _get_requests()
         h = {"User-Agent": "SensoryModule/1.0"}
@@ -537,6 +570,75 @@ def fetch_rss(feed_url: str, max_items: int = 50) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Security: Path sanitization & SSRF protection
+# ---------------------------------------------------------------------------
+
+# Allowed base directory for file operations (project root or subdirs)
+_ALLOWED_FILE_ROOTS = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),  # project root
+]
+
+# Blocked IP ranges for SSRF protection (private, loopback, link-local, cloud metadata)
+_BLOCKED_SSRF_PREFIXES = [
+    "10.", "172.16.", "172.17.", "172.18.", "172.19.", "172.20.",
+    "172.21.", "172.22.", "172.23.", "172.24.", "172.25.", "172.26.",
+    "172.27.", "172.28.", "172.29.", "172.30.", "172.31.",
+    "192.168.", "169.254.", "0.", "127.", "100.",
+]
+_BLOCKED_SSRF_HOSTS = {"localhost", "localhost.localdomain", "::1", "0.0.0.0"}
+_BLOCKED_SSRF_METADATA = ["169.254.169.254", "100.100.100.200", "fd00:ec2::254"]
+
+
+def _sanitize_path(file_path: str) -> str | None:
+    """Resolve and validate a file path. Returns resolved path or None if blocked."""
+    try:
+        resolved = os.path.abspath(os.path.normpath(file_path))
+        for root in _ALLOWED_FILE_ROOTS:
+            norm_root = os.path.normpath(root)
+            if resolved.startswith(norm_root):
+                return resolved
+        return None
+    except (ValueError, OSError):
+        return None
+
+
+def _validate_url(url: str) -> str | None:
+    """Validate and sanitize a URL. Returns URL string or None if blocked.
+
+    Blocks:
+    - Non-http(s) protocols (file://, ftp://, etc.)
+    - Private IP ranges (10.x, 172.16-31.x, 192.168.x)
+    - Loopback (127.x, localhost, ::1)
+    - Link-local (169.254.x)
+    - Cloud metadata endpoints
+    """
+    import urllib.parse
+    try:
+        parsed = urllib.parse.urlparse(url)
+    except Exception:
+        return None
+
+    # Protocol whitelist
+    if parsed.scheme not in ("http", "https"):
+        return None
+
+    hostname = parsed.hostname or ""
+
+    # Block by hostname
+    if hostname.lower() in _BLOCKED_SSRF_HOSTS:
+        return None
+    if hostname.lower() in _BLOCKED_SSRF_METADATA:
+        return None
+
+    # Block by IP prefix
+    for prefix in _BLOCKED_SSRF_PREFIXES:
+        if hostname.startswith(prefix):
+            return None
+
+    return url
+
+
+# ---------------------------------------------------------------------------
 # Local File Reading
 # ---------------------------------------------------------------------------
 
@@ -545,11 +647,14 @@ def read_file(file_path: str, max_size_kb: int = 500) -> dict:
     Read a local file and extract content. Handles: .txt, .md, .json, .csv,
     .py, .js, .ts, .ps1, .yaml, .toml, .xml, .html, .css, .log
     Returns: {path, extension, size_bytes, content, content_length}
+
+    Security: Path traversal is blocked — files must reside within the project root.
     """
+    safe_path = _sanitize_path(file_path)
+    if safe_path is None:
+        return {"status": "error", "error": f"Path blocked by security policy (outside project root): {file_path[:120]}"}
     try:
-        p = Path(file_path)
-        if not p.exists():
-            return {"status": "error", "error": f"File not found: {file_path}"}
+        p = Path(safe_path)
 
         size = p.stat().st_size
         if size > max_size_kb * 1024:

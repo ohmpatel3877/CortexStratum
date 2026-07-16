@@ -1,0 +1,24 @@
+# ai-memory-core — Full dependency installation
+# Install with: pip install -r requirements-full.txt
+# For core-only functionality, no packages are needed (stdlib only).
+
+# Sensory Module — Web browsing
+playwright>=1.40
+beautifulsoup4>=4.12
+trafilatura>=1.6
+pdfplumber>=0.10
+
+# Sensory Module — Image/OCR
+Pillow>=10.0
+pytesseract>=0.3.10
+
+# Sensory Module — HTTP
+requests>=2.31
+
+# Audio Module
+numpy>=1.24
+
+# NOTE: Some packages require system dependencies:
+#   playwright: playwright install firefox
+#   pytesseract: install Tesseract OCR engine
+#     https://github.com/UB-Mannheim/tesseract/wiki

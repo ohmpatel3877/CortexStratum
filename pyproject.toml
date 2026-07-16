@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["scripts"]
+python_files = ["test-*.py"]
+addopts = "-v --tb=short"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests that require network access",
+]

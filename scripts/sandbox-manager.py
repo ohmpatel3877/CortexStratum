@@ -361,10 +361,45 @@ class SandboxManager:
                 "killed": False,
             }
 
+    # Tokenized blocklist of dangerous commands — rejected before execution
+    _SHELL_BLOCKLIST = {
+        "rm -rf /", "rm -rf /home", "mkfs.", "dd if=", ":(){ :|:& };:", "eval ",
+        "wget ", "curl ", "chmod 777", "chown ", "> /dev/sda", "| bash",
+        "| sh", "| pwsh", "| powershell", "iex ", "Invoke-Expression",
+    }
+
+    @staticmethod
+    def _tokenize_command(command: str) -> list:
+        """Split a command string into a list arg safely (shlex mock for stdlib-only)."""
+        args = []
+        current = []
+        in_quote = None
+        for ch in command:
+            if in_quote:
+                if ch == in_quote:
+                    in_quote = None
+                else:
+                    current.append(ch)
+            elif ch in ('"', "'"):
+                in_quote = ch
+            elif ch.isspace():
+                if current:
+                    args.append("".join(current))
+                    current = []
+            else:
+                current.append(ch)
+        if current:
+            args.append("".join(current))
+        return args
+
     def execute_shell(self, command: str, timeout: int = 30) -> Dict[str, Any]:
         """Execute a shell command in an isolated sandbox directory.
 
-        WARNING: shell=True is used. Only call with trusted commands.
+        Security:
+        - Input is parsed into list args (shell=False)
+        - Blocklisted commands are rejected before execution
+        - Sandbox directory is cleaned up after execution
+        - Timeout kills runaway processes
 
         Args:
             command: Shell command string.
@@ -373,13 +408,28 @@ class SandboxManager:
         Returns:
             Dict with success, stdout, stderr, returncode, duration, sandbox_path.
         """
+        # Blocklist check
+        cmd_lower = command.lower().strip()
+        for pattern in self._SHELL_BLOCKLIST:
+            if pattern in cmd_lower:
+                return {
+                    "success": False,
+                    "stdout": "",
+                    "stderr": f"Command blocked by security policy (matched: {pattern})",
+                    "returncode": -1,
+                    "duration": 0.0,
+                    "sandbox_path": "",
+                    "killed": False,
+                }
+
         sandbox_path = self._create_sandbox_dir()
 
         try:
             start = time.monotonic()
+            args = self._tokenize_command(command)
             process = subprocess.Popen(
-                command,
-                shell=True,
+                args,
+                shell=False,
                 cwd=str(sandbox_path),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

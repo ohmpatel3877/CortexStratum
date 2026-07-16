@@ -12,3 +12,26 @@ data/mcp-server-test-results.json
 data/skill-pipeline-test-results.json
 data/commitments.json
 .memory/ne/memories.json
+
+# Runtime data (local state, profiles, logs)
+.memory/
+data/sandbox-log.json
+data/security-scan-report.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

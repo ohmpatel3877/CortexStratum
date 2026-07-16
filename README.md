@@ -517,8 +517,16 @@ The NE-Memory system uses pure BM25 ranking with:
 ```bash
 git clone https://github.com/ohmpatel3877/ai-memory-core.git
 cd ai-memory-core
-python -m pip install -r requirements.txt   # if requirements.txt exists
-python scripts/tools-mcp-server.py          # starts MCP server on stdio
+python scripts/tools-mcp-server.py --version   # verify (no pip needed)
+python scripts/tools-mcp-server.py             # start MCP server
+```
+
+> **Full quick start guide**: [QUICKSTART.md](QUICKSTART.md) — 5 steps, under 2 minutes.
+
+### Full Installation (Optional Features)
+```bash
+pip install -r requirements-full.txt
+playwright install firefox   # for web browsing tools
 ```
 
 ### Docker

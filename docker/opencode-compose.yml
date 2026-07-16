@@ -1,8 +1,11 @@
-# opencode-container-server
+# opencode-container-server — Standalone Compose
 # Standalone compose file — download this + Dockerfile, run anywhere.
-# curl -o docker-compose.yml https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml
-# curl -o Dockerfile https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile
-# docker compose up -d --build
+# Security: runs as non-root user, no Docker socket mount.
+#
+# Usage:
+#   curl -o docker-compose.yml https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml
+#   curl -o Dockerfile https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile
+#   docker compose up -d --build
 
 services:
   opencode-server:
@@ -22,7 +25,6 @@ services:
     volumes:
       - opencode_data:/app/data
       - opencode_data:/app/.memory
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: server
 
 volumes:

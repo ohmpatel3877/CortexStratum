@@ -2,19 +2,75 @@
   "$schema": "https://opencode.ai/config.json",
   "name": "ai-memory-core",
   "version": "0.3.0",
-  "description": "67-tool MCP server with persistent memory, skill router, task orchestrator, and multi-modal AI generation",
+  "description": "68-tool MCP server: BM25 memory, trace system, skill routing, 7 multi-modal modules. Zero cloud LLM dependencies.",
   "icon": "🧠",
 
   "mcpServers": {
     "ai-memory-core": {
       "name": "ai-memory-core",
-      "description": "67-tool MCP server: xTrace error tracking, DTrace ADRs, Skill Router, Goal Registry, Verifier, Coder/Sensory/Audio/Art/DevOps/GameDev/Literature modules",
+      "description": "68-tool MCP server: BM25 memory, trace, skill router, multi-modal AI generation",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {},
       "disabled": false
+    },
+    "ai-memory-core-permissive": {
+      "name": "ai-memory-core (permissive)",
+      "description": "Same server with all permission checks bypassed",
+      "command": "python",
+      "args": ["scripts/tools-mcp-server.py", "--permissive"],
+      "env": {},
+      "disabled": false
     }
   },
+
+  "skillGroups": [
+    {
+      "title": "Core Infrastructure",
+      "description": "Task orchestration, skill routing, and memory management.",
+      "skills": ["task-orchestrator", "memory-search", "skill-router"]
+    },
+    {
+      "title": "Testing & Verification",
+      "description": "Test-driven development, verification gates, and code review.",
+      "skills": ["test-driven-development", "verification-before-completion", "pr-review"]
+    },
+    {
+      "title": "Debugging & Troubleshooting",
+      "description": "Error triage, Samba/NAS debugging, and troubleshooting workflows.",
+      "skills": ["troubleshooting-master", "error-triage", "debug-samba"]
+    },
+    {
+      "title": "Build & Package",
+      "description": "Inno Setup installers, VM testing, and environment setup.",
+      "skills": ["inno-setup-pipeline", "vm-test-engine", "env-setup"]
+    },
+    {
+      "title": "Framework & Architecture",
+      "description": "Rust/Tauri framework building and architecture decision records.",
+      "skills": ["framework-builder", "brainstorm", "adr-write"]
+    },
+    {
+      "title": "Performance",
+      "description": "Speed optimization, bottleneck detection, and reasoning strategies.",
+      "skills": ["speed-optimizer", "pattern-flipper", "parameter-virtualizer"]
+    },
+    {
+      "title": "Learning & Research",
+      "description": "Study techniques, deep research, and concept extraction.",
+      "skills": ["study-tutor", "educate", "wikipedia-ghost"]
+    },
+    {
+      "title": "Security & Compliance",
+      "description": "Security hardening, dependency auditing, and auth patterns.",
+      "skills": ["security-hardening", "dependency-audit", "auth-implementation-patterns"]
+    },
+    {
+      "title": "GitHub & DevOps",
+      "description": "GitHub Actions, deployment pipelines, and repo setup.",
+      "skills": ["github-actions-templates", "deployment-pipeline-design", "github-repo-setup"]
+    }
+  ],
 
   "skills": {
     "task-orchestrator": {
@@ -27,6 +83,12 @@
       "name": "debug-samba",
       "description": "Debug Samba, mergerfs, Podman, Jellyfin, Nextcloud NAS stacks",
       "path": "skills/debug-samba/SKILL.md",
+      "enabled": true
+    },
+    "github-repo-setup": {
+      "name": "github-repo-setup",
+      "description": "Configure, document, and populate GitHub repos with CI, issues, wiki, milestones",
+      "path": "skills/github-repo-setup/SKILL.md",
       "enabled": true
     },
     "study-tutor": {
@@ -79,6 +141,14 @@
       "root": ".",
       "icon": "🧠",
       "color": "#6C5CE7"
+    }
+  },
+
+  "references": {
+    "ai-memory-core": {
+      "path": "~/github/ai-memory-core",
+      "repository": "ohmpatel3877/ai-memory-core",
+      "description": "68-tool MCP server: local BM25 memory, trace system, skill router, multi-modal AI. v0.3.0."
     }
   }
 }

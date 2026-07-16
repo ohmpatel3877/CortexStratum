@@ -11,10 +11,13 @@
 # server + OpenCode CLI + local memory + OpenCode Zen config.
 # Fully local — no cloud services required.
 #
-# Usage:
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
-#   # or locally:
+# Usage (recommended — clone first):
+#   git clone https://github.com/ohmpatel3877/ai-memory-core.git
+#   cd ai-memory-core
 #   bash docker/setup-opencode-container.sh
+#
+# Usage (pipe-to-shell — not recommended, but available):
+#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
 #
 # Options:
 #   OPENCODE_ZEN_API_KEY=xxx bash ...                     # pass OpenCode Zen key inline
@@ -71,40 +74,10 @@ elif command -v podman &>/dev/null && podman info &>/dev/null 2>&1; then
 elif [ "${1:-}" = "--engine" ] && [ "${2:-}" = "podman" ]; then
   fail "Podman specified but not found at: https://podman.io/getting-started/installation"
 else
-  warn "No container engine found. Running Docker installer..."
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  if [ -f "$SCRIPT_DIR/install-docker.sh" ]; then
-    bash "$SCRIPT_DIR/install-docker.sh"
-  else
-    curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.sh | bash
-  fi
-  # Re-check
-  if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
-    ENGINE="docker"
-    ENGINE_COMPOSE="docker compose"
-    ok "Docker ready: $(docker --version)"
-  else
-    fail "Docker installation did not complete. Please install Docker manually: https://docs.docker.com/engine/install/"
-  fi
-fi
-
-# ─── Portainer Setup ──────────────────────────────────────────────
-PORTAINER_PORT="${2:-9000}"
-info "Setting up Portainer on port ${PORTAINER_PORT}..."
-
-if $ENGINE ps --format '{{.Names}}' 2>/dev/null | grep -q "portainer"; then
-  ok "Portainer already running"
-else
-  $ENGINE run -d \
-    --name portainer \
-    --restart unless-stopped \
-    -p "${PORTAINER_PORT}:9000" \
-    -p "9443:9443" \
-    -p "8000:8000" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v portainer_data:/data \
-    portainer/portainer-ce:latest 2>&1 || warn "Portainer start failed — may need sudo"
-  ok "Portainer started → http://$(hostname -I 2>/dev/null | awk '{print $1}'):${PORTAINER_PORT}"
+  info "Please install Docker first, then re-run this script."
+  info "  https://docs.docker.com/engine/install/"
+  info "  Windows: https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe"
+  fail "Docker required. Install it and re-run this script."
 fi
 
 # ─── Clone / Update ai-memory-core ────────────────────────────────

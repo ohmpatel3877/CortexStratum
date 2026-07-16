@@ -1,94 +1,18 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ai-memory-core",
+  "description": "Local memory infrastructure for AI coding agents. 68-tool MCP server with permission-gated BM25 memory, cross-session trace system, skill routing, and 7 multi-modal modules (sensory, coder, audio, art, devops, game dev, literature). Zero cloud LLM dependencies for memory operations.",
   "version": "0.3.0",
-  "description": "Central NE-Memory architecture for AI agent persistence — 68-tool MCP server, skill router, task orchestrator, verifier middleware, and cross-session memory continuity for OpenCode and Claude Code.",
   "author": {
-    "name": "Ohm Patel",
-    "url": "https://github.com/ohmpatel3877"
+    "name": "Ohm Patel"
   },
+  "homepage": "https://github.com/ohmpatel3877/ai-memory-core",
+  "repository": "https://github.com/ohmpatel3877/ai-memory-core",
   "license": "MIT",
   "keywords": [
-    "ne-memory",
-    "memory",
-    "mcp",
-    "agent-memory",
-    "skill-router",
-    "task-orchestrator",
-    "verifier",
-    "opencode",
-    "persistence"
-  ],
-  "harnesses": ["opencode", "claude-code", "cursor"],
-  "tools": {
-    "mcp_servers": [
-      {
-        "name": "ai-memory-core",
-        "description": "68-tool MCP server exposing xTrace error tracking, DTrace architecture decisions, Skill Router, Output Condenser, Goal Registry, Commitment Checker, Verifier Middleware, and multi-module AI generation (art, literature, coder, devops, audio, sensory, game-dev)",
-        "command": "python",
-        "args": ["scripts/tools-mcp-server.py"],
-        "working_dir": "${PROJECT_ROOT}"
-      }
-    ],
-    "scripts": {
-      "seed": "node scripts/seed-memories.js",
-      "dream": "node scripts/consolidate.js",
-      "status": "node scripts/check-status.js",
-      "analyze": "python scripts/task-analyzer.py"
-    }
-  },
-  "skills": [
-    {
-      "name": "task-orchestrator",
-      "description": "Auto-decompose complex tasks into parallel subagent workstreams",
-      "path": "skills/task-orchestrator/SKILL.md"
-    },
-    {
-      "name": "debug-samba",
-      "description": "Debug Samba, mergerfs, Podman, Jellyfin, Nextcloud NAS stacks with layer-isolation methodology",
-      "path": "skills/debug-samba/SKILL.md"
-    },
-    {
-      "name": "study-tutor",
-      "description": "Evidence-based collegiate study techniques — active recall, spaced repetition, interleaving, dual coding",
-      "path": "skills/study-tutor/SKILL.md"
-    },
-    {
-      "name": "inno-setup-pipeline",
-      "description": "Build Inno Setup installers in GitHub Actions, sign them, and publish to GitHub Releases",
-      "path": "skills/inno-setup-pipeline/SKILL.md"
-    },
-    {
-      "name": "vm-test-engine",
-      "description": "Provision VMs, deploy OSes, run installer/destructive tests across Hyper-V, Vagrant, QEMU",
-      "path": "skills/vm-test-engine/SKILL.md"
-    },
-    {
-      "name": "framework-builder",
-      "description": "Rust workspace architecture, cross-language FFI, Tauri 2 apps, MCP servers, state machines, actor models",
-      "path": "skills/framework-builder/SKILL.md"
-    },
-    {
-      "name": "parameter-virtualizer",
-      "description": "Makes smaller models perform like larger ones via cognitive scaffolding, self-consistency, and personas",
-      "path": "skills/parameter-virtualizer/SKILL.md"
-    },
-    {
-      "name": "pattern-flipper",
-      "description": "Routes reasoning through CoT, Tree of Thoughts, Reflexion, Constitutional AI, Mixture of Agents, Self-Rewarding",
-      "path": "skills/pattern-flipper/SKILL.md"
-    },
-    {
-      "name": "speed-optimizer",
-      "description": "Monitors slowdowns in memory, analyzes bottlenecks, generates persistent workaround strategies",
-      "path": "skills/speed-optimizer/SKILL.md"
-    }
-  ],
-  "install": {
-    "requirements": ["node >= 18", "python >= 3.10"],
-    "steps": [
-      "npm install",
-      "cp .env.example .env",
-      "node scripts/seed-memories.js"
-    ]
-  }
+    "ai-memory-core", "mcp-server", "memory", "bm25", "local-memory",
+    "agent-memory", "trace-system", "skill-router", "persistence",
+    "opencode", "open-code", "ai-agent", "local-first",
+    "error-tracking", "decision-registry", "goal-tracking"
+  ]
 }
