@@ -3,12 +3,19 @@
 ;   iscc .\opencode-container-server.iss
 ;
 ; Output: opencode-container-server-setup.exe
+;
+; Features:
+; - Core MCP server (required)
+; - Virtualization (VM test engine)
+; - Samba/NAS debugging
+; - Framework builder (Rust/FFI)
+; - Study tools
+; - Speed optimizer
 
 #define MyAppName "opencode-container-server"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Ohm Patel"
 #define MyAppURL "https://github.com/ohmpatel3877/ai-memory-core"
-#define MyAppExeName "opencode-container-server.lnk"
 
 [Setup]
 AppId={{F8A7B3C2-5D4E-4F6A-8B1C-9D2E3F4A5B6C}
@@ -28,41 +35,67 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
 CloseApplications=no
-DisableProgramGroupPage=yes
+DisableProgramGroupPage=no
 DisableReadyPage=no
 UninstallDisplayIcon={app}\opencode-container-server.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+; ─── Components (selectable pathway modules) ──────────────────────
+[Components]
+Name: "core"; Description: "Core MCP Server (68 tools, mem0, OpenCode)"; Types: full custom; Flags: fixed checkablealone; ExtraDiskSpaceRequired: 1
+Name: "virtualization"; Description: "VM Test Engine (Hyper-V, Vagrant, QEMU provisioning)"; Types: full custom; ExtraDiskSpaceRequired: 1
+Name: "samba"; Description: "Samba/NAS Debugging (mergerfs, Podman, Jellyfin, Nextcloud)"; Types: full custom; ExtraDiskSpaceRequired: 1
+Name: "framework"; Description: "Framework Builder (Rust workspaces, FFI, Tauri, MCP servers)"; Types: full custom; ExtraDiskSpaceRequired: 1
+Name: "studytools"; Description: "Study Tutor (active recall, spaced repetition, learning techniques)"; Types: full custom; ExtraDiskSpaceRequired: 1
+Name: "speedopt"; Description: "Speed Optimizer (bottleneck detection, performance strategies)"; Types: full custom; ExtraDiskSpaceRequired: 1
+
+[Types]
+Name: "full"; Description: "Complete installation (all modules)"
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
+
 [Tasks]
-Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Flags: checkedonce
+Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Flags: checkablealone
 
-[Files]
-; We don't ship any files — everything is downloaded at runtime.
-; This empty section is required for Inno Setup to compile.
-
+; ─── Icons per component ──────────────────────────────────────────
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "cmd.exe"; Parameters: "/C ""docker exec -it opencode-server python3 /app/scripts/tools-mcp-server.py"""; WorkingDir: "{app}"; Comment: "Connect OpenCode to container MCP server"
-Name: "{group}\View Logs"; Filename: "cmd.exe"; Parameters: "/C ""docker logs opencode-server"""; WorkingDir: "{app}"
+; Core
+Name: "{group}\MCP Server (connect OpenCode)"; Filename: "cmd.exe"; Parameters: "/C docker exec -it opencode-server python3 /app/scripts/tools-mcp-server.py"; WorkingDir: "{app}"; Components: core
+Name: "{group}\View MCP Server Logs"; Filename: "cmd.exe"; Parameters: "/C docker logs opencode-server"; WorkingDir: "{app}"; Components: core
+Name: "{autodesktop}\opencode-container-server"; Filename: "cmd.exe"; Parameters: "/C docker exec -it opencode-server python3 /app/scripts/tools-mcp-server.py"; WorkingDir: "{app}"; Tasks: desktopicon; Components: core
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "cmd.exe"; Parameters: "/C ""docker exec -it opencode-server python3 /app/scripts/tools-mcp-server.py"""; WorkingDir: "{app}"; Tasks: desktopicon
+
+; Virtualization
+Name: "{group}\VM Test Engine\Create Test VM (Hyper-V)"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\skills\vm-test-engine\scripts\vm-test.ps1"" -Provider hyperv -OS windows11 -Name ""installer-test"""; WorkingDir: "{app}"; Components: virtualization
+Name: "{group}\VM Test Engine\Create Test VM (Vagrant)"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\skills\vm-test-engine\scripts\vm-test.ps1"" -Provider vagrant -OS ubuntu -Name ""vagrant-test"""; WorkingDir: "{app}"; Components: virtualization
+Name: "{group}\VM Test Engine\List VM Templates"; Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\skills\vm-test-engine\scripts\vm-test.ps1"" -ListTemplates"; WorkingDir: "{app}"; Components: virtualization
+
+; Samba/NAS
+Name: "{group}\NAS Debugging\Run NAS Health Check"; Filename: "{app}\skills\debug-samba\scripts\nas-health-check.sh"; WorkingDir: "{app}"; Components: samba
+Name: "{group}\NAS Debugging\Run Permission Trace"; Filename: "{app}\skills\debug-samba\scripts\perm-trace.sh"; WorkingDir: "{app}"; Components: samba
+
+; Framework Builder
+Name: "{group}\Framework Builder\Build All (Rust + FFI + WASM)"; Filename: "cmd.exe"; Parameters: "/C cd /d ""{app}"" && cargo build --release --workspace"; WorkingDir: "{app}"; Components: framework
+Name: "{group}\Framework Builder\Documentation"; Filename: "{app}\skills\framework-builder\SKILL.md"; WorkingDir: "{app}"; Components: framework
+
+; Study Tools
+Name: "{group}\Study Tools\Study Tutor Guide"; Filename: "{app}\skills\study-tutor\SKILL.md"; WorkingDir: "{app}"; Components: studytools
+
+; Speed Optimizer
+Name: "{group}\Speed Optimizer\Run Analysis"; Filename: "cmd.exe"; Parameters: "/C cd /d ""{app}"" && python scripts\speed_optimizer.py --summary"; WorkingDir: "{app}"; Components: speedopt
 
 [Run]
-; After install, open the docs
-Filename: "{app}\README.txt"; Description: "View setup instructions"; Flags: postinstall shellexec skipifsilent
+Filename: "{app}\README.txt"; Description: "View setup instructions"; Flags: postinstall shellexec skipifsilent; Components: core
 
 [UninstallRun]
-; Stop and remove the container on uninstall
 Filename: "{cmd}"; Parameters: "/C docker stop opencode-server && docker rm opencode-server"; Flags: runhidden runascurrentuser
 Filename: "{cmd}"; Parameters: "/C docker rmi ohmpatel3877/opencode-container-server:latest"; Flags: runhidden runascurrentuser
 
 [Code]
 
-// ─── Constants ──────────────────────────────────────────────────────
 const
-  COMPOSE_URL = 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml';
-  DOCKERFILE_URL = 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile';
+  GITHUB_RAW = 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main';
   DOCKER_INSTALLER_URL = 'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe';
 
 // ─── Helper: Run PowerShell and capture output ──────────────────────
@@ -71,7 +104,7 @@ var
   ResultCode: Integer;
   TempFile, Command: string;
 begin
-  TempFile := ExpandConstant('{tmp}\ps_output.txt');
+  TempFile := ExpandConstant('{tmp}\ps_out.txt');
   Command := Format('powershell -NoProfile -ExecutionPolicy Bypass -Command "%s" > "%s" 2>&1', [Cmd, TempFile]);
   if not Exec('cmd.exe', '/C ' + Command, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
     ExitCode := -1
@@ -91,25 +124,16 @@ var
   ExitCode: Integer;
 begin
   PSCommand := Format(
+    '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ' +
     '$wc = New-Object System.Net.WebClient; ' +
     '$wc.Headers.Add("User-Agent", "opencode-installer/1.0"); ' +
-    'try { $wc.DownloadFile("%s", "%s"); exit 0 } catch { write-host $_.Exception.Message; exit 1 }',
+    'try { $wc.DownloadFile("%s", "%s"); exit 0 } catch { write-host $_; exit 1 }',
     [URL, DestFile]
   );
   RunPowerShell(PSCommand, ExitCode);
-  if ExitCode <> 0 then
-  begin
-    // Try Invoke-WebRequest as fallback
-    PSCommand := Format(
-      '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; ' +
-      'Invoke-WebRequest -Uri "%s" -OutFile "%s" -UseBasicParsing',
-      [URL, DestFile]
-    );
-    RunPowerShell(PSCommand, ExitCode);
-  end;
   Result := (ExitCode = 0) and FileExists(DestFile);
   if not Result then
-    ErrorMsg := Format('Download failed (exit code %d): %s', [ExitCode, URL]);
+    ErrorMsg := Format('Download failed: %s', [URL]);
 end;
 
 // ─── Check if Docker is installed ──────────────────────────────────
@@ -124,213 +148,267 @@ end;
 // ─── Install Docker Desktop ─────────────────────────────────────────
 function InstallDocker(var ErrorMsg: string): Boolean;
 var
-  InstallerPath, PSCommand: string;
+  InstallerPath: string;
   ExitCode: Integer;
   Page: TOutputProgressWizardPage;
 begin
   Result := False;
-
   Page := CreateOutputProgressPage('Installing Docker Desktop', 'Downloading Docker Desktop (~500MB)...');
   Page.Show;
-
   try
-    // Download Docker installer
-    Page.SetText('Downloading Docker Desktop installer...', '');
-    Page.SetProgress(0, 100);
-
     InstallerPath := ExpandConstant('{tmp}\DockerDesktopInstaller.exe');
-    if not DownloadFile(DOCKER_INSTALLER_URL, InstallerPath, ErrorMsg) then
-    begin
-      Page.Hide;
-      Exit;
-    end;
+    Page.SetText('Downloading Docker Desktop installer...', '');
+    Page.SetProgress(10, 100);
+    if not DownloadFile(DOCKER_INSTALLER_URL, InstallerPath, ErrorMsg) then begin Page.Hide; Exit; end;
 
-    // Run installer silently
-    Page.SetText('Installing Docker Desktop (this takes a few minutes)...', '');
+    Page.SetText('Installing Docker Desktop...', '');
     Page.SetProgress(50, 100);
-    
-    if not Exec(InstallerPath, 'install --quiet', '', SW_HIDE, ewWaitUntilTerminated, ExitCode) then
-    begin
-      ErrorMsg := 'Failed to launch Docker installer';
-      Page.Hide;
-      Exit;
+    if not Exec(InstallerPath, 'install --quiet', '', SW_HIDE, ewWaitUntilTerminated, ExitCode) then begin
+      ErrorMsg := 'Docker installer failed to launch'; Page.Hide; Exit;
     end;
 
-    // Start Docker
     Page.SetText('Starting Docker Desktop...', '');
     Page.SetProgress(80, 100);
     RunPowerShell('Start-Process "$env:ProgramFiles\Docker\Docker\Docker Desktop.exe"', ExitCode);
 
-    // Wait for Docker
-    Page.SetText('Waiting for Docker to initialize (30 seconds)...', '');
+    Page.SetText('Waiting for Docker to initialize...', '');
     Page.SetProgress(90, 100);
-
-    PSCommand := 
-      'for ($i = 0; $i -lt 30; $i++) { ' +
-      '  try { docker info | Out-Null; exit 0 } catch {} ' +
-      '  Start-Sleep -Seconds 1 ' +
-      '}; exit 1';
-    RunPowerShell(PSCommand, ExitCode);
-    
-    if ExitCode = 0 then
-      Result := True
-    else
-      ErrorMsg := 'Docker installed but not responding. Launch Docker Desktop manually.';
+    RunPowerShell('for ($i=0;$i -lt 30;$i++) { try { docker info | Out-Null; exit 0 } catch {} Start-Sleep 1 }; exit 1', ExitCode);
+    if ExitCode = 0 then Result := True else ErrorMsg := 'Docker installed but not responding';
   finally
     Page.Hide;
   end;
 end;
 
-// ─── Build container ────────────────────────────────────────────────
-function BuildContainer(var ErrorMsg: string): Boolean;
+// ─── Download skill files for selected components ───────────────────
+procedure DownloadSkills(AppDir: string; Page: TOutputProgressWizardPage; var ErrorMsg: string);
 var
-  WorkDir, PSCommand: string;
+  SkillDir, ScriptDir: string;
+begin
+  // Core skills (always installed)
+  SkillDir := AddBackslash(AppDir) + 'skills\task-orchestrator';
+  CreateDir(SkillDir);
+  DownloadFile(GITHUB_RAW + '/skills/task-orchestrator/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+
+  // Component: Security hardening (always installed with core)
+  SkillDir := AddBackslash(AppDir) + 'skills\security-hardening';
+  CreateDir(SkillDir);
+  DownloadFile(GITHUB_RAW + '/skills/security-hardening/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+
+  // Component: Virtualization
+  if IsComponentSelected('virtualization') then
+  begin
+    SkillDir := AddBackslash(AppDir) + 'skills\vm-test-engine';
+    CreateDir(SkillDir);
+    DownloadFile(GITHUB_RAW + '/skills/vm-test-engine/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+    ScriptDir := SkillDir + '\scripts';
+    CreateDir(ScriptDir);
+    DownloadFile(GITHUB_RAW + '/skills/vm-test-engine/scripts/vm-test.ps1', ScriptDir + '\vm-test.ps1', ErrorMsg);
+    DownloadFile(GITHUB_RAW + '/skills/vm-test-engine/scripts/vm-test.sh', ScriptDir + '\vm-test.sh', ErrorMsg);
+    Page.SetProgress(30, 100);
+  end;
+
+  // Component: Samba/NAS
+  if IsComponentSelected('samba') then
+  begin
+    SkillDir := AddBackslash(AppDir) + 'skills\debug-samba';
+    CreateDir(SkillDir);
+    DownloadFile(GITHUB_RAW + '/skills/debug-samba/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+    ScriptDir := SkillDir + '\scripts';
+    CreateDir(ScriptDir);
+    DownloadFile(GITHUB_RAW + '/skills/debug-samba/scripts/nas-health-check.sh', ScriptDir + '\nas-health-check.sh', ErrorMsg);
+    DownloadFile(GITHUB_RAW + '/skills/debug-samba/scripts/fuse-podman-check.sh', ScriptDir + '\fuse-podman-check.sh', ErrorMsg);
+    DownloadFile(GITHUB_RAW + '/skills/debug-samba/scripts/perm-trace.sh', ScriptDir + '\perm-trace.sh', ErrorMsg);
+    Page.SetProgress(50, 100);
+  end;
+
+  // Component: Framework Builder
+  if IsComponentSelected('framework') then
+  begin
+    SkillDir := AddBackslash(AppDir) + 'skills\framework-builder';
+    CreateDir(SkillDir);
+    DownloadFile(GITHUB_RAW + '/skills/framework-builder/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+    Page.SetProgress(65, 100);
+  end;
+
+  // Component: Study Tools
+  if IsComponentSelected('studytools') then
+  begin
+    SkillDir := AddBackslash(AppDir) + 'skills\study-tutor';
+    CreateDir(SkillDir);
+    DownloadFile(GITHUB_RAW + '/skills/study-tutor/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+    Page.SetProgress(80, 100);
+  end;
+
+  // Component: Speed Optimizer
+  if IsComponentSelected('speedopt') then
+  begin
+    SkillDir := AddBackslash(AppDir) + 'skills\speed-optimizer';
+    CreateDir(SkillDir);
+    DownloadFile(GITHUB_RAW + '/skills/speed-optimizer/SKILL.md', SkillDir + '\SKILL.md', ErrorMsg);
+    Page.SetProgress(90, 100);
+  end;
+end;
+
+// ─── Build Container ────────────────────────────────────────────────
+function BuildContainer(AppDir: string; var ErrorMsg: string): Boolean;
+var
+  PSCommand, WorkDir: string;
   ExitCode: Integer;
   Page: TOutputProgressWizardPage;
 begin
   Result := False;
-
-  WorkDir := ExpandConstant('{app}');
-  CreateDir(WorkDir);
-
-  Page := CreateOutputProgressPage('Building Container', 'Downloading and building the MCP server container...');
+  WorkDir := AppDir;
+  Page := CreateOutputProgressPage('Building Container', 'Building the MCP server container...');
   Page.Show;
-
   try
-    // Step 1: Download compose file
-    Page.SetText('Downloading container configuration...', '');
+    Page.SetText('Downloading container files...', '');
     Page.SetProgress(10, 100);
-    if not DownloadFile(COMPOSE_URL, AddBackslash(WorkDir) + 'docker-compose.yml', ErrorMsg) then Exit;
+    if not DownloadFile(GITHUB_RAW + '/docker/opencode-compose.yml', AddBackslash(WorkDir) + 'docker-compose.yml', ErrorMsg) then begin Page.Hide; Exit; end;
+    if not DownloadFile(GITHUB_RAW + '/docker/Dockerfile', AddBackslash(WorkDir) + 'Dockerfile', ErrorMsg) then begin Page.Hide; Exit; end;
 
-    // Step 2: Download Dockerfile
-    Page.SetText('Downloading Dockerfile...', '');
-    Page.SetProgress(20, 100);
-    if not DownloadFile(DOCKERFILE_URL, AddBackslash(WorkDir) + 'Dockerfile', ErrorMsg) then Exit;
-
-    // Step 3: Build and start
     Page.SetText('Building container (1-3 minutes)...', '');
     Page.SetProgress(40, 100);
-
-    PSCommand := Format(
-      'Set-Location "%s"; docker compose up -d --build 2>&1',
-      [WorkDir]
-    );
+    PSCommand := Format('Set-Location "%s"; docker compose up -d --build 2>&1', [WorkDir]);
     RunPowerShell(PSCommand, ExitCode);
-
-    if ExitCode = 0 then
-    begin
-      Page.SetText('Verifying container...', '');
-      Page.SetProgress(90, 100);
-      RunPowerShell('timeout /t 3', ExitCode);
+    if ExitCode = 0 then begin
+      Page.SetProgress(100, 100);
       Result := True;
-    end
-    else
-      ErrorMsg := 'Container build failed. Make sure Docker Desktop is running.';
+    end else
+      ErrorMsg := 'Container build failed. Is Docker Desktop running?';
   finally
     Page.Hide;
   end;
 end;
 
-// ─── Check box for Docker license ───────────────────────────────────
+// ─── Component selection page ──────────────────────────────────────
 var
-  DockerLicensePage: TInputOptionWizardPage;
-  MemoPage: TOutputMemoWizardPage;
+  ComponentsPage: TOutputMemoWizardPage;
 
 procedure InitializeWizard;
 begin
-  // Welcome page
   WizardForm.WelcomeLabel1.Caption := 'Welcome to opencode-container-server Setup';
-  WizardForm.WelcomeLabel2.Caption := 'This will install the MCP server container on your system.'#13#10 +
+  WizardForm.WelcomeLabel2.Caption := 'This will install the MCP server container and optional pathway modules.'#13#10 +
+    ''#13#10 +
     'You need:'#13#10 +
     '  - Windows 10 or later'#13#10 +
-    '  - Internet connection (for downloading components)'#13#10#13#10 +
+    '  - Internet connection'#13#10 +
+    ''#13#10 +
     'The installer will:'#13#10 +
     '  1. Install Docker Desktop (if missing)'#13#10 +
-    '  2. Download the container build files'#13#10 +
-    '  3. Build and start the MCP server'#13#10 +
-    '  4. Create shortcuts to manage it';
+    '  2. Download selected skill modules'#13#10 +
+    '  3. Build and start the MCP server container'#13#10 +
+    '  4. Create shortcuts for each module';
 
-  // Docker license agreement (appears if Docker needs to be installed)
-  DockerLicensePage := CreateInputOptionPage(
-    wpLicense, 'Docker Desktop License', 'Docker Desktop requires accepting their terms.',
-    'Docker Desktop is free for personal use. See https://www.docker.com/legal/docker-subscription-service-agreement',
-    True, False
+  // Components info page
+  ComponentsPage := CreateOutputMemoPage(
+    wpSelectComponents, 'Pathway Modules', 'Additional capabilities to install',
+    'Select the skill modules you want to include:', ''
   );
-  DockerLicensePage.Add('I accept the Docker Desktop license agreement');
-  DockerLicensePage.Values[0] := True;
 end;
 
-function ShouldSkipPage(PageID: Integer): Boolean;
+procedure CurPageChanged(CurPageID: Integer);
+var
+  Selected: string;
 begin
-  // Skip Docker license page if Docker is already installed
-  if (PageID = DockerLicensePage.ID) and IsDockerInstalled then
-    Result := True
-  else
-    Result := False;
+  if CurPageID = ComponentsPage.ID then
+  begin
+    Selected := '';
+    if IsComponentSelected('virtualization') then Selected := Selected + '  ✓ VM Test Engine (Hyper-V, Vagrant, QEMU)'#13#10;
+    if IsComponentSelected('samba') then Selected := Selected + '  ✓ Samba/NAS Debugging (mergerfs, Podman, Jellyfin)'#13#10;
+    if IsComponentSelected('framework') then Selected := Selected + '  ✓ Framework Builder (Rust, FFI, Tauri)'#13#10;
+    if IsComponentSelected('studytools') then Selected := Selected + '  ✓ Study Tutor (learning techniques)'#13#10;
+    if IsComponentSelected('speedopt') then Selected := Selected + '  ✓ Speed Optimizer (bottleneck analysis)'#13#10;
+    if Selected = '' then Selected := '  (none selected)';
+    ComponentsPage.RichEditViewer.Text := 'Selected modules:'#13#10#13#10 + Selected + #13#10#13#10 +
+      'Core MCP Server is always installed (68 tools, mem0, OpenCode).';
+  end;
 end;
 
-// ─── Main install logic ─────────────────────────────────────────────
+// ─── Install logic ─────────────────────────────────────────────────
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
   ErrorMsg: string;
+  AppDir: string;
+  Page: TOutputProgressWizardPage;
 begin
   Result := True;
 
   if CurPageID = wpReady then
   begin
-    // ── Step 1: Docker check ──
+    AppDir := ExpandConstant('{app}');
+
+    // Step 1: Docker
     if not IsDockerInstalled then
     begin
       if not InstallDocker(ErrorMsg) then
       begin
-        MsgBox('Docker installation failed:'#13#10 + ErrorMsg + #13#10#13#10 +
-          'You can install Docker manually from https://desktop.docker.com and run this installer again.',
-          mbError, MB_OK);
+        MsgBox('Docker installation failed:'#13#10 + ErrorMsg, mbError, MB_OK);
         Result := False;
         Exit;
       end;
     end;
 
-    // ── Step 2: Build container ──
-    if not BuildContainer(ErrorMsg) then
+    // Step 2: Download skill files for selected components
+    Page := CreateOutputProgressPage('Downloading Modules', 'Downloading selected pathway modules...');
+    Page.Show;
+    try
+      Page.SetText('Downloading skills...', '');
+      Page.SetProgress(10, 100);
+      DownloadSkills(AppDir, Page, ErrorMsg);
+    finally
+      Page.Hide;
+    end;
+
+    // Step 3: Build container
+    if not BuildContainer(AppDir, ErrorMsg) then
     begin
-      MsgBox('Container build failed:'#13#10 + ErrorMsg + #13#10#13#10 +
-        'Make sure Docker Desktop is running and try again.', mbError, MB_OK);
+      MsgBox('Container build failed:'#13#10 + ErrorMsg, mbError, MB_OK);
       Result := False;
       Exit;
     end;
   end;
 end;
 
-// ─── Post-install: create README ────────────────────────────────────
+// ─── Post-install: README ──────────────────────────────────────────
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ReadmePath: string;
-  ReadmeContent: TArrayOfString;
+  Lines: TArrayOfString;
+  Count: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
     ReadmePath := ExpandConstant('{app}\README.txt');
-    SetArrayLength(ReadmeContent, 14);
-    ReadmeContent[0] := 'opencode-container-server — MCP Server';
-    ReadmeContent[1] := '============================================';
-    ReadmeContent[2] := '';
-    ReadmeContent[3] := 'The container is running on port 3100.';
-    ReadmeContent[4] := '';
-    ReadmeContent[5] := 'To connect from OpenCode, add to your opencode.json:';
-    ReadmeContent[6] := '{';
-    ReadmeContent[7] := '  "mcpServers": {';
-    ReadmeContent[8] := '    "opencode-container-server": {';
-    ReadmeContent[9] := '      "command": "docker",';
-    ReadmeContent[10] := '      "args": ["exec", "-i", "opencode-server", "python3", "/app/scripts/tools-mcp-server.py"]';
-    ReadmeContent[11] := '    }';
-    ReadmeContent[12] := '  }';
-    ReadmeContent[13] := '}';
-    SaveStringsToFile(ReadmePath, ReadmeContent, False);
+    SetArrayLength(Lines, 20);
+    Count := 0;
+    Lines[Count] := 'opencode-container-server — MCP Server'; Count := Count + 1;
+    Lines[Count] := '============================================'; Count := Count + 1;
+    Lines[Count] := ''; Count := Count + 1;
+    Lines[Count] := 'The container is running on port 3100.'; Count := Count + 1;
+    Lines[Count] := ''; Count := Count + 1;
+    Lines[Count] := 'To connect from OpenCode, add to opencode.json:'; Count := Count + 1;
+    Lines[Count] := '{'; Count := Count + 1;
+    Lines[Count] := '  "mcpServers": {'; Count := Count + 1;
+    Lines[Count] := '    "opencode-container-server": {'; Count := Count + 1;
+    Lines[Count] := '      "command": "docker",'; Count := Count + 1;
+    Lines[Count] := '      "args": ["exec", "-i", "opencode-server", "python3", "/app/scripts/tools-mcp-server.py"]'; Count := Count + 1;
+    Lines[Count] := '    }'; Count := Count + 1;
+    Lines[Count] := '  }'; Count := Count + 1;
+    Lines[Count] := '}'; Count := Count + 1;
+    Lines[Count] := ''; Count := Count + 1;
+    Lines[Count] := 'Installed modules:'; Count := Count + 1;
+    Lines[Count] := '- Core MCP Server (68 tools)'; Count := Count + 1;
+    if IsComponentSelected('virtualization') then begin Lines[Count] := '- VM Test Engine'; Count := Count + 1; end;
+    if IsComponentSelected('samba') then begin Lines[Count] := '- Samba/NAS Debugging'; Count := Count + 1; end;
+    if IsComponentSelected('framework') then begin Lines[Count] := '- Framework Builder'; Count := Count + 1; end;
+    if IsComponentSelected('studytools') then begin Lines[Count] := '- Study Tutor'; Count := Count + 1; end;
+    if IsComponentSelected('speedopt') then begin Lines[Count] := '- Speed Optimizer'; Count := Count + 1; end;
+    SetArrayLength(Lines, Count);
+    SaveStringsToFile(ReadmePath, Lines, False);
   end;
 end;
 
-// ─── Uninstall: clean up config directory ───────────────────────────
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
