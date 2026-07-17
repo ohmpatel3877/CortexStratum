@@ -171,3 +171,109 @@ With the expansion to 52 rules, 17 trigger keywords appear in multiple rules (e.
 
 ### Recommendation
 Consider adding an exclusion mechanism or priority-based deduplication that prevents lower-priority rules from matching when a higher-priority rule already matched the same trigger. Currently `priority_highest_wins` only applies to conflict resolution, not trigger deduplication.
+
+---
+
+## Issue 9: Vector Search — Cross-Encoder Reranker Integration
+
+**Type**: Feature  
+**Priority**: Done  
+**Area**: Memory Engine  
+
+### Description
+Add cross-encoder reranker to the hybrid search pipeline. The bi-encoder (sentence-transformers) is fast but less accurate for relevance ranking. A cross-encoder evaluates each (query, candidate) pair jointly, giving much better relevance scores.
+
+### Status: ✅ COMPLETED (2026-07-17)
+- Added `_load_reranker()` to `NEMemorySearch` (lazy-loaded `cross-encoder/ms-marco-MiniLM-L-6-v2`)
+- Added `reranked_search(query, limit=5, candidates=20)` method
+- Hybrid retrieve 20 candidates → cross-encoder → rerank to top-5
+- New tool: `read_memory_reranked_search`
+- Configurable model via `AI_MEMORY_RERANKER_MODEL` env var
+- Falls back to hybrid-only if cross-encoder unavailable
+
+---
+
+## Issue 10: Inverted Index for BM25 Acceleration
+
+**Type**: Performance  
+**Priority**: Done  
+**Area**: Memory Engine  
+
+### Description
+Replace O(n) BM25 full-scan with inverted index. Pre-compute term→doc mapping so only documents containing query terms are scored. Add LRU query cache for repeated queries.
+
+### Status: ✅ COMPLETED (2026-07-17)
+- Added `_inverted_index: dict[str, set[int]]` — term → set of doc indices
+- `search()` now scores only matching docs: O(query_terms × matches) vs O(n)
+- Added `LRUCache` (128 entries) with `invalidate()` on `add_memory`/`consolidate`
+- Thread safety via `threading.Lock` + snapshot copies in `search()`
+
+---
+
+## Issue 11: Permission Mutate Layer — Dry-Run Protocol
+
+**Type**: Feature  
+**Priority**: Done  
+**Area**: Safety / Permissions  
+
+### Description
+Add a dry-run protocol to all write/mutate tools so agents can preview what a mutation would do without executing it. Add checkpoint/undo system and MCP annotations for OpenCode desktop permission prompts.
+
+### Status: ✅ COMPLETED (2026-07-17)
+- Created `scripts/permission_audit.py` with `simulate()`, `checkpoint()`, `undo()` methods
+- All 12 write/mutate tools accept `dry_run=true` parameter
+- New tools: `mutate_undo`, `read_audit_status`
+- All 79 tools have MCP annotations (`destructiveHint`, `readOnlyHint`, `idempotentHint`)
+- No checkpoint created on dry_run (only on real execution)
+
+---
+
+## Issue 12: Lifecycle Hooks Module
+
+**Type**: Feature  
+**Priority**: Done  
+**Area**: Memory Engine  
+
+### Description
+Create a lifecycle hooks system so agents can prefetch relevant context at session start, log observations during sessions, and finalize sessions. Bridges the gap between "agent must call tools manually" and "memory that surfaces itself automatically."
+
+### Status: ✅ COMPLETED (2026-07-17)
+- Created `scripts/hooks.py` with `HookManager` class
+- 4 tools: `read_hooks_prefetch`, `write_hooks_observe`, `read_hooks_session_status`, `write_hooks_session_end`
+- Auto-pushes decisions to DTrace and errors to xTrace
+- Session logs persisted to `data/session-logs/<session_id>.jsonl`
+- Zero LLM cost, session-scoped caching
+
+---
+
+## Issue 13: Hermes Agent MemoryProvider Plugin
+
+**Type**: Feature  
+**Priority**: Done  
+**Area**: Ecosystem Integration  
+
+### Description
+Build a Hermes Agent MemoryProvider plugin so ai-memory-core can be used as the memory backend for Hermes Agent. Implements the full MemoryProvider ABC with prefetch, sync_turn, on_session_end lifecycle hooks.
+
+### Status: ✅ COMPLETED (2026-07-17)
+- Created `hermes-plugin/` with 5 files
+- `AimeProvider` implements: `prefetch()`, `sync_turn()`, `on_session_end()`, `get_tool_schemas()` (5 tools)
+- Direct Python imports (no subprocess MCP) for lower latency
+- Configurable via `AI_MEMORY_EMBEDDING_MODEL` and `AI_MEMORY_RERANKER_MODEL` env vars
+
+---
+
+## Issue 14: Tool Router — Smart Tool Discovery
+
+**Type**: Feature  
+**Priority**: Done  
+**Area**: Developer Experience  
+
+### Description
+At 79 tools, agents need help finding the right tool. Create a tool routing system that categorizes tools and provides natural-language-based suggestions.
+
+### Status: ✅ COMPLETED (2026-07-17)
+- Created `scripts/tool_router.py` with `TOOL_CATEGORIES` dict (79 tools across 11 categories)
+- `suggest(task, tools, top_k=3)` uses keyword matching across names, descriptions, categories, tags
+- New tool: `read_tools_suggest(task)` — returns top-3 with reasoning
+- Categories: memory, lifecycle, permissions, trace, web, code, audio, art, devops, gamedev, utilities
