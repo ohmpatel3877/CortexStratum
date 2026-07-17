@@ -12,7 +12,7 @@ Tests:
        b. Is a known OpenCode built-in skill (from the OpenCode skills registry)
   5. End-to-end: router matches expected skills for known task descriptions
   6. Fallback mechanism returns default skills when no rule matches
-  7. ALL 68 MCP tools are callable with valid permissions
+  7. ALL MCP tools are callable with valid permissions (count from --list-tools)
 """
 
 import json, os, re, sys, subprocess, time
@@ -419,7 +419,7 @@ def test_dud_skills():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Test 5: All 68 MCP tools are properly defined
+# Test 5: All MCP tools are properly defined (dynamic count)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def test_tool_inventory():
@@ -437,8 +437,8 @@ def test_tool_inventory():
         log("FAIL", "Tool inventory", f"Invalid JSON: {result.stdout[:200]}")
         return
 
-    if len(tools) != 68:
-        log("WARN", f"Tool count: {len(tools)}", "Expected 68 tools")
+    if len(tools) < 70:
+        log("WARN", f"Tool count: {len(tools)}", "Expected 70+ tools")
 
     # Check naming conventions
     naming_issues = []

@@ -1,9 +1,9 @@
 # ai-memory-core
 
-**Production memory infrastructure for AI coding agents.** A 68-tool MCP server with permission-gated access — local BM25 memory, cross-session trace system, and 7 multi-modal modules. Zero cloud LLM dependencies.
+**Production memory infrastructure for AI coding agents.** A 79-tool MCP server with permission-gated access — BM25 + vector + cross-encoder reranker, lifecycle hooks, structured registries, Hermes plugin, and 7 multi-modal modules. Zero cloud LLM dependencies.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/MCP%20Server-67%20tools-blue?style=for-the-badge" alt="68 MCP Tools"/>
+  <img src="https://img.shields.io/badge/MCP%20Server-79%20tools-blue?style=for-the-badge" alt="79 MCP Tools"/>
   <img src="https://img.shields.io/badge/Permissions-read%20%2F%20write%20%2F%20mutate-orange?style=for-the-badge" alt="Permissions"/>
   <img src="https://img.shields.io/badge/Memory-Local%20BM25-brightgreen?style=for-the-badge" alt="Local Memory"/>
   <img src="https://img.shields.io/badge/OpenCode-Ready-4ade80?style=for-the-badge" alt="OpenCode Ready"/>
@@ -33,6 +33,129 @@ ai-memory-core fixes that. It gives your agent:
 ---
 
 ## Architecture
+
+```mermaid
+graph TB
+    subgraph Clients["MCP Clients"]
+        OC[OpenCode]
+        CD[Claude Desktop]
+        CR[Cursor]
+    end
+
+    subgraph Server["ai-memory-core MCP Server"]
+        PG[Permission Guard<br/>read/write/mutate]
+        TR[Tool Router<br/>79 tools, 11 categories]
+        
+        subgraph Memory["Memory Engine"]
+            BM25[BM25 Okapi<br/>inverted index]
+            VS[Vector Search<br/>sentence-transformers]
+            RR[Reranker<br/>cross-encoder]
+            HY[Hybrid Search<br/>BM25 + Vector + RRF]
+            LC[LRU Cache<br/>128 entries]
+        end
+        
+        subgraph Lifecycle["Lifecycle Hooks"]
+            PF[Prefetch<br/>session context]
+            OB[Observe<br/>log + auto-push]
+            SE[Session End<br/>finalize + persist]
+        end
+        
+        subgraph Registry["Structured Registries"]
+            ER[Error Registry<br/>xTrace]
+            DR[Decision Registry<br/>DTrace]
+            GR[Goal Registry<br/>alignment checks]
+            CR[Commitment Checker<br/>cross-session]
+        end
+        
+        subgraph Modules["Multi-Modal Modules"]
+            WEB[Web/Sensory<br/>Playwright]
+            COD[Code Analysis<br/>7 tools]
+            AUD[Audio<br/>7 tools]
+            ART[Art/SVG<br/>4 tools]
+            DEVOPS[DevOps<br/>7 tools]
+            GAME[Game Dev<br/>7 tools]
+            LIT[Literature<br/>4 tools]
+        end
+        
+        subgraph Audit["Permission Audit"]
+            DRY[Dry-Run Protocol<br/>preview + undo token]
+            UNDO[Undo/Checkpoint<br/>mutate_undo]
+            ANN[MCP Annotations<br/>destructiveHint]
+        end
+    end
+    
+    Clients --> PG
+    PG --> TR
+    TR --> Memory
+    TR --> Lifecycle
+    TR --> Registry
+    TR --> Modules
+    TR --> Audit
+    
+    BM25 --> LC
+    VS --> HY
+    BM25 --> HY
+    HY --> RR
+```
+
+### Permission Model Flow
+
+```mermaid
+flowchart LR
+    subgraph Input["Client Request"]
+        T[Tool Name + Args]
+    end
+    
+    subgraph Gate["Permission Gate"]
+        direction TB
+        PM{Mode?}
+        AUTO[Auto: read-only]
+        INT[Interactive: warn]
+        PERM[Permissive: allow]
+    end
+    
+    subgraph DryRun["Dry-Run Check"]
+        DR{dry_run=true?}
+        SIM[Simulate + Preview]
+        EXEC[Execute + Checkpoint]
+    end
+    
+    subgraph Output["Response"]
+        R[Result + Undo Token]
+    end
+    
+    T --> PM
+    PM -->|read| AUTO
+    PM -->|write/mutate| INT
+    PM -->|bypass| PERM
+    INT --> DR
+    DR -->|yes| SIM
+    DR -->|no| EXEC
+    EXEC --> R
+    SIM --> R
+```
+
+### Search Pipeline
+
+```mermaid
+flowchart LR
+    Q[Query] --> BM25[BM25<br/>inverted index]
+    Q --> VS[Vector Search<br/>cosine similarity]
+    BM25 --> RRFS1
+    VS --> RRFS2
+    subgraph RRF["Reciprocal Rank Fusion"]
+        RRFS1[BM25 Rank]
+        RRFS2[Vector Rank]
+        FUSE[Fused Score]
+    end
+    RRFS1 --> FUSE
+    RRFS2 --> FUSE
+    FUSE --> CE{Cross-encoder<br/>available?}
+    CE -->|yes| RERANK[Top-k Reranked]
+    CE -->|no| HYBRID[Hybrid Results]
+    RERANK --> OUT[Final Results]
+    HYBRID --> OUT
+```
 
 ```
 ┌──────────────────────────────────────────────────────────┐

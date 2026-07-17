@@ -919,6 +919,11 @@ def handle_tool_call(name: str, args: dict) -> dict:
         "sensory_read_file": lambda a: read_file(a["file_path"], a.get("max_size_kb", 500)),
         "sensory_search": lambda a: web_search(a["query"], a.get("num_results", 8)),
     }
+    # Strip known prefixes before dispatch
+    for prefix in ("read_sensory_", "mutate_sensory_", "sensory_", "read_", "mutate_"):
+        if name.startswith(prefix):
+            name = name[len(prefix):]
+            break
     handler = dispatch.get(name)
     if handler:
         return handler(args)

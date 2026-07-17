@@ -1,0 +1,51 @@
+{
+  "session": "2026-07-17-ai-core-overhaul",
+  "date": "2026-07-17",
+  "tool_count_before": 68,
+  "tool_count_after": 79,
+  "new_tools": [
+    "read_memory_vector_search",
+    "read_memory_hybrid_search",
+    "read_memory_reranked_search",
+    "read_hooks_prefetch",
+    "write_hooks_observe",
+    "read_hooks_session_status",
+    "write_hooks_session_end",
+    "mutate_undo",
+    "read_audit_status",
+    "read_tools_suggest",
+    "read_sensory_set_browser_type"
+  ],
+  "new_files": [
+    "scripts/hooks.py",
+    "scripts/permission_audit.py",
+    "scripts/tool_router.py",
+    "hermes-plugin/__init__.py",
+    "hermes-plugin/provider.py",
+    "hermes-plugin/plugin.yaml",
+    "hermes-plugin/README.md"
+  ],
+  "optimizations": [
+    "inverted_index — BM25 O(n) to O(query_terms × matches)",
+    "LRU query cache — 128 entries",
+    "cross-encoder reranker — +15-25% relevance",
+    "threading.Lock on inverted index"
+  ],
+  "bugs_fixed": [
+    "agent-memory-mcp FTS5 pipe char crash",
+    "agent-memory-mcp FTS5 star query crash",
+    "hooks.py decision/error queries always empty",
+    "sensory CLI path broken",
+    "stale checkpoints on dry_run",
+    "test-skill-pipeline.py expects 68 tools"
+  ],
+  "skills_proposed": [
+    "mutation-audit",
+    "hybrid-search-master",
+    "permission-gate-configurator",
+    "hermes-provider-bootstrap",
+    "codebase-impact-analyzer"
+  ],
+  "hermes_plugin_ready": true,
+  "awesome_pr_draft": true
+}

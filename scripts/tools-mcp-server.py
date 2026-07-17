@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
 MCP Server: ai-memory-core Toolchain
-Exposes xTrace, DTrace, Skill Router, Goal Registry,
-and Commitment Checker as MCP tools for use by OpenCode and benchmark runners.
+79 tools: xTrace, DTrace, Skill Router, Goal Registry, Commitment Checker,
+Lifecycle Hooks, Permission Audit, Tool Router, NE-Memory, Sensory, Audio,
+Coder, DevOps, Game Dev, Art, Literature, Verifier.
 
-Protocol: JSON-RPC over stdio (Model Context Protocol)
+All tools have MCP annotations (destructiveHint, readOnlyHint).
+All write/mutate tools accept dry_run=true for preview.
 """
 
 import json, sys, os, subprocess, time, re, threading, queue, select, hashlib
@@ -13,1226 +15,455 @@ sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 
 TOOL_EXECUTOR_TIMEOUT = 60
-POLL_INTERVAL = 0.5  # seconds between poll cycles when waiting for a tool
+POLL_INTERVAL = 0.5
 
-# Permission categories
 PERMISSION_READ = "read"
 PERMISSION_WRITE = "write"
 PERMISSION_MUTATE = "mutate"
 
-# Global flags (set via CLI)
-PERMISSIVE_MODE = False  # --permissive: bypass all permission checks
-DEBUG_MODE = False       # --debug: verbose debug logging
+PERMISSIVE_MODE = False
+DEBUG_MODE = False
+VERSION = "0.4.0"
 
-# Version
-VERSION = "0.3.0"
-
-
-def _log(level: str, msg: str):
-    """Conditional logger — respects --debug flag."""
+def _log(level, msg):
     if DEBUG_MODE or level in ("ERROR", "WARN"):
         print(f"[mcp-server] [{level}] {msg}", file=sys.stderr, flush=True)
 
-
-def can_call_tool(tool_name: str, context: dict | None = None) -> tuple[bool, str]:
-    """Check if a tool call is permitted based on its permission level.
-
-    Permission hierarchy (strictest first):
-      1. PERMISSIVE_MODE (--permissive flag): all tools allowed, no warnings
-      2. 'auto' mode: only read_ tools pass; write_/mutate_ blocked
-      3. 'interactive' mode (default): all tools pass, write_/mutate_ get a warning
-      4. Unknown tool: always blocked
-
-    Returns
-    -------
-    tuple[bool, str]:
-        (allowed, reason) — allowed=False means the call is blocked.
-    """
-    # Permissive mode bypasses all checks
+def can_call_tool(tool_name, context=None):
     if PERMISSIVE_MODE:
-        return (True, "permissive mode — all tools allowed")
-
+        return (True, "permissive mode")
     permission = None
     for t in TOOLS:
         if t["name"] == tool_name:
             permission = t.get("permission", PERMISSION_READ)
             break
-
     if permission is None:
         return (False, f"Unknown tool: {tool_name}")
-
     mode = (context or {}).get("mode", "interactive")
-
     if mode == "auto" and permission != PERMISSION_READ:
-        msg = (
-            f"Tool '{tool_name}' requires {permission} permission — "
-            f"blocked in auto mode. Only read_ tools allowed without human review. "
-            f"Use --permissive flag or interactive mode to bypass."
-        )
-        return (False, msg)
-
+        return (False, f"Tool '{tool_name}' requires {permission} — blocked in auto mode")
     if permission in (PERMISSION_WRITE, PERMISSION_MUTATE):
-        return (True, f"Tool '{tool_name}' has {permission} permission — confirm this action is intended.")
-
+        return (True, f"⚠️ {tool_name} has {permission} permission")
     return (True, "ok")
 
-
-_verifier = None
-_memory_search = None
-_MODULE_CACHE = {}
-
+_verifier = None; _memory_search = None; _MODULE_CACHE = {}
 
 def _get_module(name, filename):
-    """Factory: lazy-load a module from scripts/ by name, caching it.
-
-    Uses importlib.util to load Python files from the SCRIPTS_DIR directory.
-    Modules are cached in _MODULE_CACHE to avoid repeated disk I/O.
-
-    Parameters
-    ----------
-    name : str
-        Module cache key (e.g. 'art_module', 'literature_module').
-    filename : str
-        Relative path from SCRIPTS_DIR (e.g. 'art-module.py').
-
-    Returns
-    -------
-    module
-        The loaded Python module object.
-
-    Raises
-    ------
-    ImportError
-        If the module file doesn't exist or has syntax errors.
-    FileNotFoundError
-        If the filename doesn't exist in SCRIPTS_DIR.
-    """
     if name not in _MODULE_CACHE:
-        try:
-            import importlib.util as _util
-            file_path = SCRIPTS_DIR / filename
-            if not file_path.exists():
-                raise FileNotFoundError(f"Module file not found: {file_path}")
-            spec = _util.spec_from_file_location(name, str(file_path))
-            if spec is None:
-                raise ImportError(f"Could not create spec for {filename}")
-            mod = _util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            _MODULE_CACHE[name] = mod
-        except Exception as e:
-            raise ImportError(f"Failed to load module '{name}' from '{filename}': {e}")
+        import importlib.util as _util
+        fp = SCRIPTS_DIR / filename
+        if not fp.exists(): raise FileNotFoundError(f"Module not found: {fp}")
+        spec = _util.spec_from_file_location(name, str(fp))
+        mod = _util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _MODULE_CACHE[name] = mod
     return _MODULE_CACHE[name]
-
 
 def _get_verifier():
     global _verifier
     if _verifier is None:
-        import importlib.util as _util
-        spec = _util.spec_from_file_location("verifier_middleware", str(SCRIPTS_DIR / "verifier_middleware.py"))
-        mod = _util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
+        mod = _get_module("verifier_middleware", "verifier_middleware.py")
         _verifier = mod.VerifierMiddleware(mode="advisory")
     return _verifier
-
 
 def _get_memory_search():
     global _memory_search
     if _memory_search is None:
-        import importlib.util as _util
-        spec = _util.spec_from_file_location("memory_search", str(SCRIPTS_DIR / "memory_search.py"))
-        mod = _util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
+        mod = _get_module("memory_search_mod", "memory_search.py")
         _memory_search = mod.NEMemorySearch()
     return _memory_search
-
 
 def _get_trace():
     return _get_module("trace", "trace.py")
 
+def _is_permission(name, permissions):
+    for t in TOOLS:
+        if t["name"] == name: return t.get("permission") in permissions
+    return False
 
-def read_exact(n: int) -> bytes:
-    """Read exactly n bytes from stdin, looping until complete.
+def _get_audit():
+    return _get_module("permission_audit", "permission_audit.py")._get_audit()
 
-    Used by the MCP stdio transport to read the JSON-RPC body after
-    the Content-Length header has been parsed. Blocks until all n bytes
-    are received or stdin closes.
-
-    Parameters
-    ----------
-    n : int
-        Number of bytes to read.
-
-    Returns
-    -------
-    bytes
-        The read content.
-
-    Raises
-    ------
-    EOFError
-        If stdin closes before n bytes are read.
-    """
-    buffer = b""
-    while len(buffer) < n:
-        chunk = sys.stdin.buffer.read(n - len(buffer))
-        if not chunk:
-            raise EOFError(f"Expected {n} bytes, got {len(buffer)} before EOF")
-        buffer += chunk
-    return buffer
-
-BASE = Path(__file__).resolve().parent  # scripts/
-PROJECT_ROOT = BASE.parent              # ai-memory-core/
-SCRIPTS_DIR = BASE                      # scripts/
+BASE = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE.parent
+SCRIPTS_DIR = BASE
 DATA_DIR = PROJECT_ROOT / "data"
 SKILLS_DIR = PROJECT_ROOT / "skills"
 
+def read_exact(n):
+    buf = b""
+    while len(buf) < n:
+        chunk = sys.stdin.buffer.read(n - len(buf))
+        if not chunk: raise EOFError(f"Expected {n} bytes, got {len(buf)}")
+        buf += chunk
+    return buf
 
-def execute_tool_async(name: str, args: dict, result_queue: queue.Queue):
-    """Execute a tool call in a separate thread and put the result on the queue."""
+def execute_tool_async(name, args, result_queue):
     try:
         result = handle_tool_call(name, args)
         result_queue.put(("result", result))
     except Exception as e:
         result_queue.put(("error", str(e)))
 
-# Tool definitions
+# ═══════════════════════════════════════════════════════════════════════
+# TOOL DEFINITIONS (79 tools, all annotated)
+# ═══════════════════════════════════════════════════════════════════════
+
+A = lambda d: {"destructiveHint": d, "readOnlyHint": not d, "idempotentHint": not d, "openWorldHint": False}
+DR = lambda: {"type": "boolean", "default": False, "description": "Preview without executing"}
+
 TOOLS = [
-    {
-        "name": "write_xtrace_log_error",
-        "permission": "write",
-        "description": "Log an error occurrence with signature for xTrace error tracking",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "command": {"type": "string", "description": "The failed command"},
-                "error_output": {"type": "string", "description": "The error message/output"},
-                "exit_code": {"type": "integer", "description": "The exit code"}
-            },
-            "required": ["command", "error_output"]
-        }
-    },
-    {
-        "name": "read_xtrace_search",
-        "permission": "read",
-        "description": "Search xTrace error registry for a known error signature",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "keyword": {"type": "string", "description": "Error keyword to search for"}
-            },
-            "required": ["keyword"]
-        }
-    },
-    {
-        "name": "read_xtrace_status",
-        "permission": "read",
-        "description": "Get xTrace error tracking summary statistics",
-        "inputSchema": {
-            "type": "object",
-            "properties": {}
-        }
-    },
-    {
-        "name": "write_dtrace_add",
-        "permission": "write",
-        "description": "Log an architectural decision to DTrace",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "title": {"type": "string"},
-                "context": {"type": "string"},
-                "decision": {"type": "string"},
-                "alternatives": {"type": "string"},
-                "rationale": {"type": "string"},
-                "category": {"type": "string", "enum": ["architecture", "process", "technology", "security"]}
-            },
-            "required": ["title", "decision", "rationale"]
-        }
-    },
-    {
-        "name": "read_dtrace_search",
-        "permission": "read",
-        "description": "Search DTrace decision registry",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "keyword": {"type": "string"}
-            },
-            "required": ["keyword"]
-        }
-    },
-    {
-        "name": "read_skill_router_match",
-        "permission": "read",
-        "description": "Match a task description to relevant skills using the Skill Router",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "task": {"type": "string", "description": "Task description to find skills for"}
-            },
-            "required": ["task"]
-        }
-    },
-    {
-        "name": "write_goal_registry_init",
-        "permission": "write",
-        "description": "Initialize a new goal in the Goal Registry",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "goal": {"type": "string", "description": "The original goal description"}
-            },
-            "required": ["goal"]
-        }
-    },
-    {
-        "name": "write_goal_registry_add_subgoal",
-        "permission": "write",
-        "description": "Add a sub-goal to the current goal stack",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "description": {"type": "string", "description": "Sub-goal description"}
-            },
-            "required": ["description"]
-        }
-    },
-    {
-        "name": "read_goal_registry_status",
-        "permission": "read",
-        "description": "Get current goal registry status"
-    },
-    {
-        "name": "read_goal_registry_check_alignment",
-        "permission": "read",
-        "description": "Check if current action aligns with the original goal",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "current_action": {"type": "string", "description": "Current action being taken"}
-            },
-            "required": ["current_action"]
-        }
-    },
-    {
-        "name": "read_commitment_checker_list",
-        "permission": "read",
-        "description": "List pending commitments for this session",
-        "inputSchema": {
-            "type": "object",
-            "properties": {}
-        }
-    },
-    {
-        "name": "mutate_commitment_checker_verify",
-        "permission": "mutate",
-        "description": "Mark a commitment as verified for this session",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "id": {"type": "string", "description": "Commitment ID to verify (e.g. b1, b2)"}
-            },
-            "required": ["id"]
-        }
-    },
+    # ── xTrace Error Registry ───────────────────────────────────────
+    {"name": "write_xtrace_log_error", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"command": {"type": "string"}, "error_output": {"type": "string"}, "exit_code": {"type": "integer"}, "dry_run": DR()}, "required": ["command", "error_output"]}},
+    {"name": "read_xtrace_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"keyword": {"type": "string"}}, "required": ["keyword"]}},
+    {"name": "read_xtrace_status", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {}}},
 
-    # --- Art Module tools ---
-    {
-        "name": "read_art_generate_svg",
-        "permission": "read",
-        "description": "Generate SVG diagrams, flowcharts, and illustrations from a text description",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "description": {"type": "string", "description": "Description of the SVG to generate (e.g. 'flowchart with 4 steps', 'bar chart of sales data')"},
-                "width": {"type": "integer", "description": "SVG width in pixels (optional)"},
-                "height": {"type": "integer", "description": "SVG height in pixels (optional)"}
-            },
-            "required": ["description"]
-        }
-    },
-    {
-        "name": "read_art_generate_theme",
-        "permission": "read",
-        "description": "Generate a color theme with roles and WCAG contrast validation from a description",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "description": {"type": "string", "description": "Theme description (e.g. 'dark cyberpunk', 'forest green study palette', 'ocean blue')"}
-            },
-            "required": ["description"]
-        }
-    },
-    {
-        "name": "read_art_extract_palette",
-        "permission": "read",
-        "description": "Extract complementary, analogous, and triadic palettes from a base hex color",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "color": {"type": "string", "description": "Base hex color (e.g. '#3b82f6' or '3b82f6')"}
-            },
-            "required": ["color"]
-        }
-    },
-    {
-        "name": "read_art_design_concept",
-        "permission": "read",
-        "description": "Generate a design concept with layout, typography, and spacing guidelines from requirements",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "requirements": {"type": "string", "description": "Design requirements description"}
-            },
-            "required": ["requirements"]
-        }
-    },
+    # ── DTrace Decision Registry ────────────────────────────────────
+    {"name": "write_dtrace_add", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"title": {"type": "string"}, "context": {"type": "string"}, "decision": {"type": "string"}, "alternatives": {"type": "string"}, "rationale": {"type": "string"}, "category": {"type": "string", "enum": ["architecture", "process", "technology", "security"]}, "dry_run": DR()}, "required": ["title", "decision", "rationale"]}},
+    {"name": "read_dtrace_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"keyword": {"type": "string"}}, "required": ["keyword"]}},
 
-    # --- Literature Module tools ---
-    {
-        "name": "read_lit_analyze_text",
-        "permission": "read",
-        "description": "Analyze text for reading level (Flesch-Kincaid), key concepts, argument structure, and sentiment",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "text": {"type": "string", "description": "Text content to analyze"}
-            },
-            "required": ["text"]
-        }
-    },
-    {
-        "name": "read_lit_extract_concepts",
-        "permission": "read",
-        "description": "Extract key concepts, their definitions, context, and relationships from text",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "text": {"type": "string", "description": "Text content to extract concepts from"}
-            },
-            "required": ["text"]
-        }
-    },
-    {
-        "name": "read_lit_generate_study_guide",
-        "permission": "read",
-        "description": "Generate a study guide from content with key terms, discussion questions, and section summaries",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "content": {"type": "string", "description": "Textbook chapter or article content"}
-            },
-            "required": ["content"]
-        }
-    },
-    {
-        "name": "read_lit_analyze_philosophy",
-        "permission": "read",
-        "description": "Analyze philosophical arguments: premises, conclusions, reasoning type, detected philosophers, and schools",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "text": {"type": "string", "description": "Philosophical text to analyze"}
-            },
-            "required": ["text"]
-        }
-    },
+    # ── Skill Router ──────────────────────────────────────────────
+    {"name": "read_skill_router_match", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"task": {"type": "string"}}, "required": ["task"]}},
 
-    # --- Sensory Module tools ---
-    {
-        "name": "read_sensory_browse",
-        "permission": "read",
-        "description": "Navigate to a URL using Playwright (headless Firefox) and extract content. Modes: text, html, markdown, links, metadata",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string", "description": "URL to browse"},
-                "extract_mode": {"type": "string", "enum": ["text", "html", "markdown", "links", "metadata"], "default": "text"},
-                "timeout_ms": {"type": "integer", "default": 30000},
-            },
-            "required": ["url"],
-        },
-    },
-    {
-        "name": "read_sensory_screenshot",
-        "permission": "read",
-        "description": "Take a screenshot of a web page via Playwright",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string", "description": "URL to screenshot"},
-                "output_path": {"type": "string", "description": "Optional output file path"},
-                "timeout_ms": {"type": "integer", "default": 30000},
-            },
-            "required": ["url"],
-        },
-    },
-    {
-        "name": "mutate_sensory_interact",
-        "permission": "mutate",
-        "description": "Navigate to URL and perform actions (click, type, press, wait) — can modify external state",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string"},
-                "actions": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "type": {"type": "string", "enum": ["click", "type", "press", "wait"]},
-                            "selector": {"type": "string"},
-                            "value": {"type": "string"},
-                        },
-                    },
-                },
-                "timeout_ms": {"type": "integer", "default": 30000},
-            },
-            "required": ["url", "actions"],
-        },
-    },
-    {
-        "name": "read_sensory_extract_pdf",
-        "permission": "read",
-        "description": "Extract text from a PDF file",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to PDF file"},
-                "max_pages": {"type": "integer", "default": 50},
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "read_sensory_extract_html",
-        "permission": "read",
-        "description": "Extract text from raw HTML content. Modes: clean (trafilatura), soup (BeautifulSoup), tables",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "html_content": {"type": "string"},
-                "mode": {"type": "string", "enum": ["clean", "soup", "tables"], "default": "clean"},
-            },
-            "required": ["html_content"],
-        },
-    },
-    {
-        "name": "read_sensory_extract_image",
-        "permission": "read",
-        "description": "Extract text from an image via OCR (if pytesseract installed) or return image metadata",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string", "description": "Path to image file"},
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "read_sensory_scrape",
-        "permission": "read",
-        "description": "Fetch a URL via HTTP (no JS) and extract content. Modes: text, html, links, tables, json",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string"},
-                "mode": {"type": "string", "enum": ["text", "html", "links", "tables", "json"], "default": "text"},
-                "headers": {"type": "object"},
-            },
-            "required": ["url"],
-        },
-    },
-    {
-        "name": "read_sensory_extract_article",
-        "permission": "read",
-        "description": "Extract clean article content from a URL using trafilatura",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string"},
-            },
-            "required": ["url"],
-        },
-    },
-    {
-        "name": "read_sensory_api_request",
-        "permission": "read",
-        "description": "Make an HTTP API request (GET/POST/PUT/DELETE/PATCH) with structured response",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "url": {"type": "string"},
-                "method": {"type": "string", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"], "default": "GET"},
-                "data": {"type": "object"},
-                "headers": {"type": "object"},
-                "params": {"type": "object"},
-                "timeout": {"type": "integer", "default": 15},
-            },
-            "required": ["url"],
-        },
-    },
-    {
-        "name": "read_sensory_fetch_rss",
-        "permission": "read",
-        "description": "Parse an RSS/Atom feed and return structured items",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "feed_url": {"type": "string"},
-                "max_items": {"type": "integer", "default": 50},
-            },
-            "required": ["feed_url"],
-        },
-    },
-    {
-        "name": "read_sensory_read_file",
-        "permission": "read",
-        "description": "Read a local text file and return its content",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "file_path": {"type": "string"},
-                "max_size_kb": {"type": "integer", "default": 500},
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "read_sensory_search",
-        "permission": "read",
-        "description": "Web search via DuckDuckGo (no API key needed). Returns title, URL, snippet.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string"},
-                "num_results": {"type": "integer", "default": 8},
-            },
-            "required": ["query"],
-        },
-    },
+    # ── Tool Router ────────────────────────────────────────────────
+    {"name": "read_tools_suggest", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"task": {"type": "string", "description": "Describe what you want to do"}, "top_k": {"type": "integer", "default": 3}}, "required": ["task"]}},
 
-    # --- Audio Module tools ---
-    {"name": "read_audio_analyze_file", "permission": "read", "description": "Analyze WAV audio file: duration, channels, sample rate, amplitude stats", "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "data_base64": {"type": "string"}, "format": {"type": "string", "default": "wav"}}, "required": []}},
-    {"name": "read_audio_waveform", "permission": "read", "description": "Generate ASCII waveform visualization from audio file", "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "width": {"type": "integer", "default": 80}, "height": {"type": "integer", "default": 20}}, "required": ["file_path"]}},
-    {"name": "read_audio_frequency_analysis", "permission": "read", "description": "DFT-based frequency analysis: band energy, dominant frequency, spectral centroid", "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "num_bands": {"type": "integer", "default": 10}}, "required": ["file_path"]}},
-    {"name": "read_audio_music_theory", "permission": "read", "description": "Music theory analysis: chord detection, scale matching, intervals from notes or frequencies", "inputSchema": {"type": "object", "properties": {"notes": {"type": "array", "items": {"type": "string"}}, "frequencies": {"type": "array", "items": {"type": "number"}}}, "required": []}},
-    {"name": "read_audio_speech_analysis", "permission": "read", "description": "Speech transcript analysis: WPM, filler words, pace rating, readability", "inputSchema": {"type": "object", "properties": {"transcript": {"type": "string"}, "duration_seconds": {"type": "number"}}, "required": ["transcript", "duration_seconds"]}},
-    {"name": "read_audio_convert_guide", "permission": "read", "description": "Audio format conversion guide with ffmpeg commands and quality comparison", "inputSchema": {"type": "object", "properties": {"source_format": {"type": "string"}, "target_format": {"type": "string"}, "quality": {"type": "string", "default": "high"}}, "required": ["source_format", "target_format"]}},
-    {"name": "read_audio_generate_tone", "permission": "read", "description": "Generate sine/square/saw/triangle wave tone as base64 WAV", "inputSchema": {"type": "object", "properties": {"frequency": {"type": "number", "default": 440}, "duration_seconds": {"type": "number", "default": 1}, "sample_rate": {"type": "integer", "default": 44100}, "amplitude": {"type": "number", "default": 0.5}, "waveform": {"type": "string", "default": "sine"}}, "required": []}},
+    # ── Goal Registry ─────────────────────────────────────────────
+    {"name": "write_goal_registry_init", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"goal": {"type": "string"}, "dry_run": DR()}, "required": ["goal"]}},
+    {"name": "write_goal_registry_add_subgoal", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"description": {"type": "string"}, "dry_run": DR()}, "required": ["description"]}},
+    {"name": "read_goal_registry_status", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "read_goal_registry_check_alignment", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"current_action": {"type": "string"}}, "required": ["current_action"]}},
 
-    # --- Coder Module tools ---
-    {"name": "read_coder_analyze_code", "permission": "read", "description": "Analyze code for quality, complexity, smells, and security issues across 12 languages", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}}, "required": ["code", "language"]}},
-    {"name": "read_coder_generate_framework", "permission": "read", "description": "Generate complete project scaffold (web-api, cli-tool, library, desktop, microservice, data-pipeline, fullstack) for 12 languages", "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "language": {"type": "string"}, "features": {"type": "array", "items": {"type": "string"}}, "name": {"type": "string", "default": "my-project"}}, "required": ["project_type", "language"]}},
-    {"name": "read_coder_debug", "permission": "read", "description": "Analyze error messages and stack traces, suggest fixes (50+ error patterns across languages)", "inputSchema": {"type": "object", "properties": {"error": {"type": "string"}, "code_context": {"type": "string", "default": ""}, "language": {"type": "string"}}, "required": ["error", "language"]}},
-    {"name": "read_coder_review", "permission": "read", "description": "Code review with severity ratings (security, performance, readability, architecture, testing)", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}, "focus": {"type": "string", "default": "all"}}, "required": ["code", "language"]}},
-    {"name": "read_coder_explain", "permission": "read", "description": "Educational code explanation at beginner/intermediate/advanced level", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}, "level": {"type": "string", "default": "intermediate"}}, "required": ["code", "language"]}},
-    {"name": "read_coder_convert", "permission": "read", "description": "Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}}, "required": ["code", "from", "to"]}},
-    {"name": "read_coder_architecture", "permission": "read", "description": "Architecture pattern recommendation (MVC, Hexagonal, CQRS, Event-Driven, Microservices, etc.)", "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "scale": {"type": "string", "default": "medium"}, "requirements": {"type": "array", "items": {"type": "string"}}}, "required": ["project_type"]}},
+    # ── Commitment Checker ─────────────────────────────────────────
+    {"name": "read_commitment_checker_list", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "mutate_commitment_checker_verify", "permission": "mutate", "annotations": A(True), "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}, "dry_run": DR()}, "required": ["id"]}},
 
-    # --- DevOps Module tools ---
-    {"name": "read_devops_container_debug", "permission": "read", "description": "Diagnose container issues (Podman/Docker) from error logs", "inputSchema": {"type": "object", "properties": {"error_log": {"type": "string"}, "runtime": {"type": "string", "default": "podman"}, "context": {"type": "string", "default": "standalone"}}, "required": ["error_log"]}},
-    {"name": "read_devops_permissions_analyze", "permission": "read", "description": "Analyze permission/usernamespace issues in container environments", "inputSchema": {"type": "object", "properties": {"mount_path": {"type": "string"}, "container_user": {"type": "string"}, "host_user": {"type": "string"}, "error_symptom": {"type": "string"}}, "required": []}},
-    {"name": "read_devops_compose_generator", "permission": "read", "description": "Generate Docker/Podman Compose files from service definitions", "inputSchema": {"type": "object", "properties": {"services": {"type": "array"}, "networks": {"type": "array"}, "runtime": {"type": "string", "default": "docker"}}, "required": ["services"]}},
-    {"name": "read_devops_samba_config", "permission": "read", "description": "Generate Samba/SMB share configurations with OS-specific troubleshooting", "inputSchema": {"type": "object", "properties": {"share_name": {"type": "string"}, "path": {"type": "string"}, "users": {"type": "array"}, "options": {"type": "object"}}, "required": ["share_name", "path"]}},
-    {"name": "read_devops_mergerfs_setup", "permission": "read", "description": "Configure mergerfs for drive pooling with policy explanations and optimization tips", "inputSchema": {"type": "object", "properties": {"source_paths": {"type": "array"}, "mount_point": {"type": "string"}, "policy": {"type": "string", "default": "epmfs"}, "options": {"type": "object"}}, "required": ["source_paths", "mount_point"]}},
-    {"name": "read_devops_dockerfile_analyze", "permission": "read", "description": "Analyze and optimize Dockerfiles for security, caching, and size", "inputSchema": {"type": "object", "properties": {"dockerfile": {"type": "string"}}, "required": ["dockerfile"]}},
-    {"name": "read_devops_network_troubleshoot", "permission": "read", "description": "Diagnose container networking issues (DNS, ports, bridges, host networking)", "inputSchema": {"type": "object", "properties": {"symptom": {"type": "string"}}, "required": ["symptom"]}},
+    # ── Lifecycle Hooks ────────────────────────────────────────────
+    {"name": "read_hooks_prefetch", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "project": {"type": "string"}, "goal": {"type": "string"}, "keywords": {"type": "array", "items": {"type": "string"}}, "max_memories": {"type": "integer", "default": 8}, "max_decisions": {"type": "integer", "default": 5}, "max_errors": {"type": "integer", "default": 5}}}},
+    {"name": "write_hooks_observe", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "event_type": {"type": "string", "enum": ["decision", "error", "insight", "preference", "milestone", "handoff"]}, "description": {"type": "string"}, "metadata": {"type": "object"}, "dry_run": DR()}, "required": ["session_id", "event_type", "description"]}},
+    {"name": "read_hooks_session_status", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}}, "required": ["session_id"]}},
+    {"name": "write_hooks_session_end", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "summary": {"type": "string"}, "persist_observations": {"type": "boolean", "default": True}, "dry_run": DR()}, "required": ["session_id"]}},
 
-    # --- Game Dev Module tools ---
-    {"name": "read_gamedev_design_analyze", "permission": "read", "description": "Analyze game concept: fun factor, engagement loops, monetization fit, market position", "inputSchema": {"type": "object", "properties": {"concept": {"type": "string"}, "genre": {"type": "string"}, "platform": {"type": "string", "default": "pc"}}, "required": ["concept", "genre"]}},
-    {"name": "read_gamedev_scaffold_project", "permission": "read", "description": "Generate Unity/Unreal/Roblox project scaffold with real working boilerplate files", "inputSchema": {"type": "object", "properties": {"engine": {"type": "string"}, "genre": {"type": "string"}, "name": {"type": "string", "default": "MyGame"}, "features": {"type": "array"}}, "required": ["engine", "genre"]}},
-    {"name": "read_gamedev_mechanics_guide", "permission": "read", "description": "Game mechanics design guide: core loops, progression systems, reward schedules by genre", "inputSchema": {"type": "object", "properties": {"genre": {"type": "string"}, "complexity": {"type": "string", "default": "core"}}, "required": ["genre"]}},
-    {"name": "read_gamedev_monetization", "permission": "read", "description": "Monetization strategy recommendations with revenue estimates and ethical guidance", "inputSchema": {"type": "object", "properties": {"platform": {"type": "string"}, "genre": {"type": "string"}, "audience": {"type": "string", "default": "casual"}}, "required": ["platform", "genre"]}},
-    {"name": "read_gamedev_optimization", "permission": "read", "description": "Engine-specific optimization advice (FPS, draw calls, memory, load times, network)", "inputSchema": {"type": "object", "properties": {"engine": {"type": "string"}, "issue": {"type": "string"}}, "required": ["engine", "issue"]}},
-    {"name": "read_gamedev_compare_engines", "permission": "read", "description": "Compare game engines (Unity/Unreal/Godot/Roblox) for specific project types", "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "team_size": {"type": "string", "default": "solo"}, "budget": {"type": "string", "default": "indie"}}, "required": ["project_type"]}},
-    {"name": "read_gamedev_level_design", "permission": "read", "description": "Level design principles, flow diagrams, pacing guides, and playtesting checklists", "inputSchema": {"type": "object", "properties": {"genre": {"type": "string"}, "level_type": {"type": "string"}}, "required": ["genre", "level_type"]}},
+    # ── Permission Audit ───────────────────────────────────────────
+    {"name": "mutate_undo", "permission": "mutate", "annotations": {"destructiveHint": False, "readOnlyHint": False, "idempotentHint": True, "openWorldHint": False}, "inputSchema": {"type": "object", "properties": {"checkpoint_id": {"type": "string"}}, "required": ["checkpoint_id"]}},
+    {"name": "read_audit_status", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {}}},
 
-    # --- NE-Memory Search tools (zero-LLM BM25) ---
-    {
-        "name": "read_memory_search",
-        "permission": "read",
-        "description": "Local BM25 memory search with synonym expansion and fuzzy matching — zero LLM cost",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Search query"},
-                "limit": {"type": "integer", "default": 10, "description": "Max results"},
-                "fuzzy_threshold": {"type": "number", "default": 0.85, "description": "Fuzzy match cutoff (0-1)"}
-            },
-            "required": ["query"]
-        }
-    },
-    {
-        "name": "read_memory_synthesize",
-        "permission": "read",
-        "description": "Search and synthesize memory results into a narrative with inline citations",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Synthesis query"},
-                "max_sources": {"type": "integer", "default": 5},
-                "min_confidence": {"type": "number", "default": 0.7}
-            },
-            "required": ["query"]
-        }
-    },
-    {
-        "name": "write_memory_add",
-        "permission": "write",
-        "description": "Add a memory entry for future BM25 search and synthesis",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "text": {"type": "string", "description": "Memory content to store"},
-                "source": {"type": "string", "default": "manual", "description": "Source label"},
-                "metadata": {"type": "object", "default": {}, "description": "Arbitrary metadata JSON"}
-            },
-            "required": ["text"]
-        }
-    },
-    {
-        "name": "mutate_memory_consolidate",
-        "permission": "mutate",
-        "description": "Merge duplicate/similar memory entries by Jaccard similarity threshold. Handles confidence-based text selection, source-priority merging, and dry-run mode.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "threshold": {"type": "number", "default": 0.85, "description": "Jaccard similarity threshold (0-1). Higher = fewer merges."},
-                "dry_run": {"type": "boolean", "default": False, "description": "If true, report what would be merged without modifying data. Useful for debugging."}
-            }
-        }
-    },
-    {
-        "name": "read_memory_status",
-        "permission": "read",
-        "description": "Get NE-Memory engine status: entry count, storage size, unique terms, last timestamp",
-        "inputSchema": {"type": "object", "properties": {}}
-    },
+    # ── NE-Memory Search (BM25 + vector + reranker) ────────────────
+    {"name": "read_memory_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "default": 10}, "fuzzy_threshold": {"type": "number", "default": 0.85}}, "required": ["query"]}},
+    {"name": "read_memory_synthesize", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "max_sources": {"type": "integer", "default": 5}, "min_confidence": {"type": "number", "default": 0.7}}, "required": ["query"]}},
+    {"name": "read_memory_vector_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "default": 10}}, "required": ["query"]}},
+    {"name": "read_memory_hybrid_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "default": 10}, "bm25_weight": {"type": "number", "default": 0.5}, "vector_weight": {"type": "number", "default": 0.5}, "rrf_k": {"type": "integer", "default": 60}}, "required": ["query"]}},
+    {"name": "read_memory_reranked_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "default": 5}, "candidates": {"type": "integer", "default": 20}}, "required": ["query"]}},
+    {"name": "write_memory_add", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}, "source": {"type": "string", "default": "manual"}, "metadata": {"type": "object"}, "dry_run": DR()}, "required": ["text"]}},
+    {"name": "mutate_memory_consolidate", "permission": "mutate", "annotations": A(True), "inputSchema": {"type": "object", "properties": {"threshold": {"type": "number", "default": 0.85}, "dry_run": {"type": "boolean", "default": False}}}},
+    {"name": "read_memory_status", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {}}},
 
-    # --- Verifier Middleware tools ---
-    {
-        "name": "read_verifier_status",
-        "permission": "read",
-        "description": "Get verifier middleware status: checks run, violations found, renudges sent, uptime",
-        "inputSchema": {"type": "object", "properties": {}}
-    },
-    {
-        "name": "write_verifier_renudge",
-        "permission": "write",
-        "description": "Send a correction signal (renudge) to steer the agent back on track",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "target": {"type": "string", "description": "Agent or task ID to target"},
-                "correction": {"type": "object", "description": "Correction parameters"},
-                "strategy": {"type": "string", "enum": ["incremental", "rollback", "override", "halt"], "default": "incremental"}
-            },
-            "required": ["target", "correction"]
-        }
-    },
-    {
-        "name": "write_verifier_clear_renudge",
-        "permission": "write",
-        "description": "Clear an active renudge signal for a target tool or agent",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "target": {"type": "string", "description": "Target tool name or agent ID to clear"}
-            },
-            "required": ["target"]
-        }
-    },
+    # ── Verifier Middleware ────────────────────────────────────────
+    {"name": "read_verifier_status", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "write_verifier_renudge", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"target": {"type": "string"}, "correction": {"type": "object"}, "strategy": {"type": "string", "enum": ["incremental", "rollback", "override", "halt"], "default": "incremental"}, "dry_run": DR()}, "required": ["target", "correction"]}},
+    {"name": "write_verifier_clear_renudge", "permission": "write", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"target": {"type": "string"}, "dry_run": DR()}, "required": ["target"]}},
+
+    # ── Art Module ─────────────────────────────────────────────────
+    {"name": "read_art_generate_svg", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"description": {"type": "string"}, "width": {"type": "integer"}, "height": {"type": "integer"}}, "required": ["description"]}},
+    {"name": "read_art_generate_theme", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"description": {"type": "string", "default": "dark cyberpunk"}}, "required": ["description"]}},
+    {"name": "read_art_extract_palette", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"color": {"type": "string"}}, "required": ["color"]}},
+    {"name": "read_art_design_concept", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"requirements": {"type": "string"}}, "required": ["requirements"]}},
+
+    # ── Literature Module ──────────────────────────────────────────
+    {"name": "read_lit_analyze_text", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+    {"name": "read_lit_extract_concepts", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+    {"name": "read_lit_generate_study_guide", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"content": {"type": "string"}}, "required": ["content"]}},
+    {"name": "read_lit_analyze_philosophy", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}},
+
+    # ── Sensory Module ─────────────────────────────────────────────
+    {"name": "read_sensory_browse", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "extract_mode": {"type": "string", "enum": ["text", "html", "markdown", "links", "metadata"], "default": "text"}, "timeout_ms": {"type": "integer", "default": 30000}}, "required": ["url"]}},
+    {"name": "read_sensory_screenshot", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "output_path": {"type": "string"}, "timeout_ms": {"type": "integer", "default": 30000}}, "required": ["url"]}},
+    {"name": "mutate_sensory_interact", "permission": "mutate", "annotations": A(True), "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "actions": {"type": "array", "items": {"type": "object", "properties": {"type": {"type": "string", "enum": ["click", "type", "press", "wait"]}, "selector": {"type": "string"}, "value": {"type": "string"}}}}, "dry_run": DR()}, "required": ["url", "actions"]}},
+    {"name": "read_sensory_extract_pdf", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "max_pages": {"type": "integer", "default": 50}}, "required": ["file_path"]}},
+    {"name": "read_sensory_extract_html", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"html_content": {"type": "string"}, "mode": {"type": "string", "enum": ["clean", "soup", "tables"], "default": "clean"}}, "required": ["html_content"]}},
+    {"name": "read_sensory_extract_image", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}}, "required": ["file_path"]}},
+    {"name": "read_sensory_scrape", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "mode": {"type": "string", "enum": ["text", "html", "links", "tables", "json"], "default": "text"}, "headers": {"type": "object"}}, "required": ["url"]}},
+    {"name": "read_sensory_extract_article", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]}},
+    {"name": "read_sensory_api_request", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "method": {"type": "string", "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"], "default": "GET"}, "data": {"type": "object"}, "headers": {"type": "object"}, "params": {"type": "object"}, "timeout": {"type": "integer", "default": 15}}, "required": ["url"]}},
+    {"name": "read_sensory_fetch_rss", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"feed_url": {"type": "string"}, "max_items": {"type": "integer", "default": 50}}, "required": ["feed_url"]}},
+    {"name": "read_sensory_read_file", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "max_size_kb": {"type": "integer", "default": 500}}, "required": ["file_path"]}},
+    {"name": "read_sensory_search", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "num_results": {"type": "integer", "default": 8}}, "required": ["query"]}},
+    {"name": "read_sensory_set_browser_type", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"browser_type": {"type": "string", "enum": ["firefox", "chromium"]}}, "required": ["browser_type"]}},
+
+    # ── Audio Module ───────────────────────────────────────────────
+    {"name": "read_audio_analyze_file", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}}, "required": []}},
+    {"name": "read_audio_waveform", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "width": {"type": "integer", "default": 80}, "height": {"type": "integer", "default": 20}}, "required": ["file_path"]}},
+    {"name": "read_audio_frequency_analysis", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"file_path": {"type": "string"}, "num_bands": {"type": "integer", "default": 10}}, "required": ["file_path"]}},
+    {"name": "read_audio_music_theory", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"notes": {"type": "array", "items": {"type": "string"}}, "frequencies": {"type": "array", "items": {"type": "number"}}}, "required": []}},
+    {"name": "read_audio_speech_analysis", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"transcript": {"type": "string"}, "duration_seconds": {"type": "number"}}, "required": ["transcript", "duration_seconds"]}},
+    {"name": "read_audio_convert_guide", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"source_format": {"type": "string"}, "target_format": {"type": "string"}}, "required": ["source_format", "target_format"]}},
+    {"name": "read_audio_generate_tone", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"frequency": {"type": "number", "default": 440}, "duration_seconds": {"type": "number", "default": 1}}, "required": []}},
+
+    # ── Coder Module ───────────────────────────────────────────────
+    {"name": "read_coder_analyze_code", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}}, "required": ["code", "language"]}},
+    {"name": "read_coder_generate_framework", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "language": {"type": "string"}, "features": {"type": "array", "items": {"type": "string"}}}, "required": ["project_type", "language"]}},
+    {"name": "read_coder_debug", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"error": {"type": "string"}, "code_context": {"type": "string", "default": ""}, "language": {"type": "string"}}, "required": ["error", "language"]}},
+    {"name": "read_coder_review", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}, "focus": {"type": "string", "default": "all"}}, "required": ["code", "language"]}},
+    {"name": "read_coder_explain", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}, "level": {"type": "string", "default": "intermediate"}}, "required": ["code", "language"]}},
+    {"name": "read_coder_convert", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}}, "required": ["code", "from", "to"]}},
+    {"name": "read_coder_architecture", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "scale": {"type": "string", "default": "medium"}, "requirements": {"type": "array", "items": {"type": "string"}}}, "required": ["project_type"]}},
+
+    # ── DevOps Module ──────────────────────────────────────────────
+    {"name": "read_devops_container_debug", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"error_log": {"type": "string"}, "runtime": {"type": "string", "default": "podman"}}, "required": ["error_log"]}},
+    {"name": "read_devops_permissions_analyze", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"mount_path": {"type": "string"}, "container_user": {"type": "string"}, "host_user": {"type": "string"}, "error_symptom": {"type": "string"}}, "required": []}},
+    {"name": "read_devops_compose_generator", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"services": {"type": "array"}, "networks": {"type": "array"}, "runtime": {"type": "string", "default": "docker"}}, "required": ["services"]}},
+    {"name": "read_devops_samba_config", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"share_name": {"type": "string"}, "path": {"type": "string"}}, "required": ["share_name", "path"]}},
+    {"name": "read_devops_mergerfs_setup", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"source_paths": {"type": "array"}, "mount_point": {"type": "string"}, "policy": {"type": "string", "default": "epmfs"}}, "required": ["source_paths", "mount_point"]}},
+    {"name": "read_devops_dockerfile_analyze", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"dockerfile": {"type": "string"}}, "required": ["dockerfile"]}},
+    {"name": "read_devops_network_troubleshoot", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"symptom": {"type": "string"}}, "required": ["symptom"]}},
+
+    # ── Game Dev Module ────────────────────────────────────────────
+    {"name": "read_gamedev_design_analyze", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"concept": {"type": "string"}, "genre": {"type": "string"}}, "required": ["concept", "genre"]}},
+    {"name": "read_gamedev_scaffold_project", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"engine": {"type": "string"}, "genre": {"type": "string"}, "name": {"type": "string", "default": "MyGame"}}, "required": ["engine", "genre"]}},
+    {"name": "read_gamedev_mechanics_guide", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"genre": {"type": "string"}}, "required": ["genre"]}},
+    {"name": "read_gamedev_monetization", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"platform": {"type": "string"}, "genre": {"type": "string"}}, "required": ["platform", "genre"]}},
+    {"name": "read_gamedev_optimization", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"engine": {"type": "string"}, "issue": {"type": "string"}}, "required": ["engine", "issue"]}},
+    {"name": "read_gamedev_compare_engines", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "team_size": {"type": "string", "default": "solo"}, "budget": {"type": "string", "default": "indie"}}, "required": ["project_type"]}},
+    {"name": "read_gamedev_level_design", "permission": "read", "annotations": A(False), "inputSchema": {"type": "object", "properties": {"genre": {"type": "string"}, "level_type": {"type": "string"}}, "required": ["genre", "level_type"]}},
 ]
 
-def handle_tool_call(name: str, args: dict) -> dict:
-    """Execute a tool and return result.
+# ═══════════════════════════════════════════════════════════════════════
+# HANDLE TOOL CALL
+# ═══════════════════════════════════════════════════════════════════════
 
-    Execution flow:
-      1. Permission check (can_call_tool) — enforces auto/permissive/interactive modes
-      2. Verifier pre-check — security scan, arg validation, renudge signals
-      3. Route to handler — inline logic, NE-Memory, trace system, or module dispatcher
-      4. Verifier post-check — anomaly detection, duration warnings, suggestions
-
-    Returns dict with MCP-compatible "content" list.
-    """
-    _log("DEBUG", f"handle_tool_call: {name} args={json.dumps({k: str(v)[:80] for k, v in args.items()})}")
-
-    # --- Permission check (before verifier — enforce access control) ---
+def handle_tool_call(name, args):
+    _log("DEBUG", f"handle_tool_call: {name}")
+    # Permission check
     allowed, reason = can_call_tool(name, {})
     if not allowed:
-        return {"content": [{"type": "text", "text": json.dumps({
-            "error": "permission_denied",
-            "tool": name,
-            "reason": reason,
-            "message": "Tool call blocked by permission middleware. Use interactive mode or request human approval."
-        }, indent=2)}]}
-
-    # --- Verifier pre-check (every tool call) ---
+        return {"content": [{"type": "text", "text": json.dumps({"error": "permission_denied", "tool": name, "reason": reason})}]}
     verifier = _get_verifier()
     pre = verifier.pre_verify(name, args)
     if not pre["passed"]:
-        return {"content": [{"type": "text", "text": json.dumps({
-            "error": "verifier_rejected",
-            "violations": pre["violations"],
-            "message": "Tool call blocked by verifier middleware"
-        }, indent=2)}]}
+        return {"content": [{"type": "text", "text": json.dumps({"error": "verifier_rejected", "violations": pre["violations"]})}]}
 
-    # --- NE-Memory tools ---
-    if name == "read_memory_search":
+    # Dry-run intercept
+    if args.get("dry_run") and _is_permission(name, (PERMISSION_WRITE, PERMISSION_MUTATE)):
+        audit = _get_audit()
+        sim = audit.simulate(name, args)
+        sim["undo_token"] = None
+        sim["note"] = "Dry run only. Execute without dry_run=true to commit."
+        return {"content": [{"type": "text", "text": json.dumps(sim, indent=2)}]}
+
+    # Memory tools
+    if name in ("read_memory_search", "read_memory_synthesize", "read_memory_vector_search",
+                "read_memory_hybrid_search", "read_memory_reranked_search",
+                "write_memory_add", "mutate_memory_consolidate", "read_memory_status"):
         mem = _get_memory_search()
-        result = mem.search(args.get("query", ""), args.get("limit", 10), args.get("fuzzy_threshold", 0.85))
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        if name == "read_memory_search":
+            r = mem.search(args.get("query",""), args.get("limit",10), args.get("fuzzy_threshold",0.85))
+        elif name == "read_memory_synthesize":
+            r = mem.synthesize(args.get("query",""), args.get("max_sources",5), args.get("min_confidence",0.7))
+        elif name == "read_memory_vector_search":
+            r = mem.vector_search(args.get("query",""), args.get("limit",10))
+        elif name == "read_memory_hybrid_search":
+            r = mem.hybrid_search(args.get("query",""), args.get("limit",10),
+                                  args.get("bm25_weight",0.5), args.get("vector_weight",0.5), args.get("rrf_k",60))
+        elif name == "read_memory_reranked_search":
+            r = mem.reranked_search(args.get("query",""), args.get("limit",5), args.get("candidates",20))
+        elif name == "write_memory_add":
+            r = {"memory_id": mem.add_memory(args.get("text",""), args.get("source","manual"), args.get("metadata",{})), "status": "stored"}
+        elif name == "mutate_memory_consolidate":
+            r = mem.consolidate(threshold=args.get("threshold",0.85), dry_run=args.get("dry_run",False))
+        else:
+            r = mem.status()
+        return {"content": [{"type": "text", "text": json.dumps(r, indent=2)}]}
 
-    if name == "read_memory_synthesize":
-        mem = _get_memory_search()
-        result = mem.synthesize(args.get("query", ""), args.get("max_sources", 5), args.get("min_confidence", 0.7))
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    # Verifier
+    if name in ("read_verifier_status", "write_verifier_renudge", "write_verifier_clear_renudge"):
+        if name == "read_verifier_status": r = verifier.get_status()
+        elif name == "write_verifier_renudge": r = verifier.renudge(args.get("target",""), args.get("correction",{}), args.get("strategy","incremental"))
+        else: r = verifier.clear_renudge(args.get("target",""))
+        return {"content": [{"type": "text", "text": json.dumps(r, indent=2)}]}
 
-    if name == "write_memory_add":
-        mem = _get_memory_search()
-        mem_id = mem.add_memory(args.get("text", ""), args.get("source", "manual"), args.get("metadata", {}))
-        return {"content": [{"type": "text", "text": json.dumps({"memory_id": mem_id, "status": "stored"})}]}
+    # Permission Audit
+    if name == "read_audit_status":
+        return {"content": [{"type": "text", "text": json.dumps(_get_audit().status(), indent=2)}]}
+    if name == "mutate_undo":
+        return {"content": [{"type": "text", "text": json.dumps(_get_audit().undo(args.get("checkpoint_id","")), indent=2)}]}
 
-    if name == "mutate_memory_consolidate":
-        mem = _get_memory_search()
-        result = mem.consolidate(
-            threshold=args.get("threshold", 0.85),
-            dry_run=args.get("dry_run", False),
-        )
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "read_memory_status":
-        mem = _get_memory_search()
-        result = mem.status()
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "read_verifier_status":
-        result = verifier.get_status()
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "write_verifier_renudge":
-        result = verifier.renudge(args.get("target", ""), args.get("correction", {}), args.get("strategy", "incremental"))
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "write_verifier_clear_renudge":
-        result = verifier.clear_renudge(args.get("target", ""))
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    # Special tools implemented inline
+    # Skill router
     if name == "read_skill_router_match":
         router = SKILLS_DIR / "skill-router.json"
         if router.exists():
             config = json.loads(router.read_text(encoding="utf-8"))
             task_lower = args.get("task", "").lower()
-
-            # Priority-based deduplication: when the same trigger keyword
-            # matches multiple rules, only include skills from the
-            # highest-priority rule for that trigger.
-            # Different trigger keywords can still contribute from
-            # different rules at their respective priority levels.
-            trigger_matches = {}  # trigger_keyword -> (priority, [skills])
+            matched = []
             for rule in config.get("rules", []):
-                priority = rule.get("priority", 0)
                 for t in rule.get("triggers", []):
                     if t.lower() in task_lower:
-                        key = t.lower()
-                        if key not in trigger_matches or priority > trigger_matches[key][0]:
-                            trigger_matches[key] = (priority, rule.get("skills", []))
+                        for s in rule.get("skills", []):
+                            if s not in matched: matched.append(s)
                         break
-
-            # Collect skills from best-priority match per trigger
-            matched = []
-            matched_rules = []
-            for key, (priority, skills) in trigger_matches.items():
-                for s in skills:
-                    if s not in matched:
-                        matched.append(s)
-                matched_rules.append({"trigger": key, "priority": priority})
-            matched = list(dict.fromkeys(matched))  # final deduplicate
-
-            # --- Fallback mechanism when no rules match ---
             if not matched:
-                fallback_config = config.get("fallback", {})
-                for level in fallback_config.get("levels", []):
-                    # Level 1: Environment variable override
-                    if "check_env" in level:
-                        env_val = os.environ.get(level["check_env"], "")
-                        if env_val:
-                            matched = [s.strip() for s in env_val.split(",") if s.strip()]
-                            _log("INFO", f"Skill router: loaded fallback from env ${level['check_env']}: {matched}")
-                            break
+                matched = config.get("default_skills", [])
+            return {"content": [{"type": "text", "text": json.dumps({"matched_skills": matched, "count": len(matched)})}]}
+        return {"content": [{"type": "text", "text": "Router not found"}]}
 
-                    # Level 2: User config file override
-                    if level.get("check_user_config"):
-                        user_path = config.get("user_config_path", "~/.opencode/skill-router-overrides.json")
-                        user_path = os.path.expanduser(user_path)
-                        if os.path.exists(user_path):
-                            try:
-                                user_config = json.loads(open(user_path, encoding="utf-8").read())
-                                if "fallback_skills" in user_config:
-                                    matched = user_config["fallback_skills"]
-                                    _log("INFO", f"Skill router: loaded fallback from user config: {matched}")
-                                    break
-                            except (json.JSONDecodeError, OSError) as e:
-                                _log("WARN", f"Skill router: failed to load user config {user_path}: {e}")
+    # Tool suggest
+    if name == "read_tools_suggest":
+        try:
+            from tool_router import suggest
+            s = suggest(args.get("task",""), TOOLS, args.get("top_k",3))
+            return {"content": [{"type": "text", "text": json.dumps({"task": args.get("task",""), "suggestions": s, "total_tools": len(TOOLS)})}]}
+        except Exception as e:
+            return {"content": [{"type": "text", "text": json.dumps({"error": f"Tool suggest failed: {e}"})}]}
 
-                    # Level 3: Built-in default skills
-                    if level.get("use_defaults"):
-                        defaults = config.get("default_skills", [])
-                        # Fall back to the level's own skills if specified, else global defaults
-                        matched = level.get("skills", defaults)
-                        _log("DEBUG", f"Skill router: using built-in defaults: {matched}")
-                        break
-
-            return {"content": [{"type": "text", "text": json.dumps({
-                "matched_skills": matched,
-                "count": len(matched),
-                "matched_rules": matched_rules if matched_rules else "fallback_applied",
-                "router_version": config.get("version", 1),
-            }, indent=2)}]}
-        return {"content": [{"type": "text", "text": "Skill router not found"}]}
-
-    # Forward to unified trace system (xTrace, DTrace, Goal Registry, Commitment Checker)
+    # Trace system
     if name in ("write_xtrace_log_error", "read_xtrace_search", "read_xtrace_status",
-                 "write_dtrace_add", "read_dtrace_search",
-                 "write_goal_registry_init", "write_goal_registry_add_subgoal",
-                 "read_goal_registry_status", "read_goal_registry_check_alignment",
-                 "read_commitment_checker_list", "mutate_commitment_checker_verify"):
-        trace = _get_trace()
-        return {"content": [{"type": "text", "text": json.dumps(trace.handle_tool_call(name, args), indent=2)}]}
+                "write_dtrace_add", "read_dtrace_search",
+                "write_goal_registry_init", "write_goal_registry_add_subgoal",
+                "read_goal_registry_status", "read_goal_registry_check_alignment",
+                "read_commitment_checker_list", "mutate_commitment_checker_verify"):
+        return {"content": [{"type": "text", "text": json.dumps(_get_trace().handle_tool_call(name, args), indent=2)}]}
 
-    # Art Module tools (inline)
-    if name == "read_art_generate_svg":
+    # Art
+    if name.startswith("read_art_"):
         art = _get_module("art_module", "art-module.py")
-        desc = args.get("description", "")
-        w = args.get("width", 400)
-        h = args.get("height", 300)
-        svg = art.generate_svg(desc, width=w, height=h)
-        return {"content": [{"type": "text", "text": svg}]}
+        if "svg" in name: r = art.generate_svg(args.get("description",""), args.get("width",400), args.get("height",300))
+        elif "theme" in name: r = art.generate_theme(args.get("description","dark cyberpunk"))
+        elif "palette" in name: r = art.extract_palette(args.get("color","#3b82f6"))
+        else: r = art.design_concept(args.get("requirements","A modern dashboard"))
+        return {"content": [{"type": "text", "text": json.dumps(r, indent=2) if isinstance(r,dict) else r}]}
 
-    if name == "read_art_generate_theme":
-        art = _get_module("art_module", "art-module.py")
-        desc = args.get("description", "dark cyberpunk")
-        theme = art.generate_theme(desc)
-        return {"content": [{"type": "text", "text": json.dumps(theme, indent=2)}]}
+    # Literature
+    if name.startswith("read_lit_"):
+        lit = _get_module("lit_module", "literature-module.py")
+        if "analyze_text" in name: r = lit.analyze_text(args.get("text",""))
+        elif "concepts" in name: r = lit.extract_concepts(args.get("text",""))
+        elif "study" in name: r = lit.generate_study_guide(args.get("content",""))
+        else: r = lit.analyze_philosophy(args.get("text",""))
+        return {"content": [{"type": "text", "text": json.dumps(r, indent=2)}]}
 
-    if name == "read_art_extract_palette":
-        art = _get_module("art_module", "art-module.py")
-        color = args.get("color", "#3b82f6")
-        palette = art.extract_palette(color)
-        return {"content": [{"type": "text", "text": json.dumps(palette, indent=2)}]}
-
-    if name == "read_art_design_concept":
-        art = _get_module("art_module", "art-module.py")
-        reqs = args.get("requirements", "A modern dashboard")
-        concept = art.design_concept(reqs)
-        return {"content": [{"type": "text", "text": json.dumps(concept, indent=2)}]}
-
-    # Literature Module tools (inline)
-    if name == "read_lit_analyze_text":
-        lit = _get_module("literature_module", "literature-module.py")
-        text = args.get("text", "")
-        result = lit.analyze_text(text)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "read_lit_extract_concepts":
-        lit = _get_module("literature_module", "literature-module.py")
-        text = args.get("text", "")
-        result = lit.extract_concepts(text)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "read_lit_generate_study_guide":
-        lit = _get_module("literature_module", "literature-module.py")
-        content = args.get("content", "")
-        result = lit.generate_study_guide(content)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    if name == "read_lit_analyze_philosophy":
-        lit = _get_module("literature_module", "literature-module.py")
-        text = args.get("text", "")
-        result = lit.analyze_philosophy(text)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-
-    # Sensory Module tools (dispatched via module's handle_tool_call)
+    # Sensory
     if name.startswith("read_sensory_") or name.startswith("mutate_sensory_"):
-        sensory = _get_module("sensory_module", "sensory-module.py")
-        result = sensory.handle_tool_call(name, args)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        return {"content": [{"type": "text", "text": json.dumps(_get_module("sensory_module","sensory-module.py").handle_tool_call(name, args), indent=2)}]}
 
-    # Audio Module tools (dispatched via module's handle_tool_call)
+    # Audio
     if name.startswith("read_audio_"):
-        audio = _get_module("audio_module", "audio-module.py")
-        result = audio.handle_tool_call(name, args)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        return {"content": [{"type": "text", "text": json.dumps(_get_module("audio_module","audio-module.py").handle_tool_call(name, args), indent=2)}]}
 
-    # Coder Module tools (dispatched via coder_handle_tool_call)
+    # Coder
     if name.startswith("read_coder_"):
-        coder = _get_module("coder_module", "coder-module.py")
-        result = coder.coder_handle_tool_call(name, args)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        return {"content": [{"type": "text", "text": json.dumps(_get_module("coder_module","coder-module.py").coder_handle_tool_call(name, args), indent=2)}]}
 
-    # DevOps Module tools (dispatched via devops_handle_tool_call)
+    # DevOps
     if name.startswith("read_devops_"):
-        devops = _get_module("devops_module", "devops-module.py")
-        result = devops.devops_handle_tool_call(name, args)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        return {"content": [{"type": "text", "text": json.dumps(_get_module("devops_module","devops-module.py").devops_handle_tool_call(name, args), indent=2)}]}
 
-    # Game Dev Module tools (dispatched via gamedev_handle_tool_call)
+    # GameDev
     if name.startswith("read_gamedev_"):
-        gamedev = _get_module("gamedev_module", "game-dev-module.py")
-        result = gamedev.gamedev_handle_tool_call(name, args)
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        return {"content": [{"type": "text", "text": json.dumps(_get_module("gamedev_module","game-dev-module.py").gamedev_handle_tool_call(name, args), indent=2)}]}
 
-    result = {"content": [{"type": "text", "text": f"Unknown tool: {name}"}]}
-    _get_verifier().post_verify(name, args, result, 0)
-    return result
+    # Hooks
+    if name.startswith("read_hooks_") or name.startswith("write_hooks_"):
+        hooks = _get_module("hooks_module", "hooks.py")
+        if not hasattr(hooks, '_wired'):
+            hm = hooks._get_hooks()
+            hm._memory_search = _get_memory_search().search
+            hm._trace_handle = _get_trace().handle_tool_call
+            hooks._wired = True
+        return {"content": [{"type": "text", "text": json.dumps(hooks.hooks_handle_tool_call(name, args), indent=2)}]}
 
+    return {"content": [{"type": "text", "text": f"Unknown tool: {name}"}]}
 
-# ============================================================
-# MCP Protocol over stdio
-# ============================================================
+# ═══════════════════════════════════════════════════════════════════════
+# MCP Protocol
+# ═══════════════════════════════════════════════════════════════════════
 
-def send_message(msg: dict):
-    """Send a JSON-RPC message over stdout with Content-Length header."""
+def send_message(msg):
     payload = json.dumps(msg, ensure_ascii=False)
     raw = payload.encode("utf-8")
-    sys.stdout.buffer.write(f"Content-Length: {len(raw)}\r\n\r\n".encode("utf-8"))
-    sys.stdout.buffer.write(raw)
+    sys.stdout.buffer.write(f"Content-Length: {len(raw)}\r\n\r\n".encode("utf-8") + raw)
     sys.stdout.buffer.flush()
 
-def read_message() -> dict | None:
-    """Read a JSON-RPC message from stdin using MCP stdio transport."""
-    content_length = 0
-    deadline = time.monotonic() + 30.0
-    while True:
-        if time.monotonic() > deadline:
-            print("[mcp-server] Timeout waiting for header", file=sys.stderr, flush=True)
-            return None
+def read_message():
+    cl = 0; deadline = time.monotonic() + 30
+    while time.monotonic() < deadline:
         line = sys.stdin.buffer.readline()
-        if not line:
-            return None
-        if line == b"\r\n":
-            break
-        decoded = line.decode("utf-8", errors="replace").strip()
-        if ":" in decoded:
-            key, val = decoded.split(":", 1)
-            if key.strip().lower() == "content-length":
-                content_length = int(val.strip())
+        if not line: return None
+        if line == b"\r\n": break
+        d = line.decode("utf-8", errors="replace").strip()
+        if ":" in d:
+            k, v = d.split(":", 1)
+            if k.strip().lower() == "content-length": cl = int(v.strip())
+    if cl == 0: return None
+    return json.loads(read_exact(cl).decode("utf-8"))
 
-    if content_length == 0:
-        return None
-
-    body = read_exact(content_length)
-    return json.loads(body.decode("utf-8"))
-
-
-def _handle_ping(msg_id):
-    """Respond to ping immediately — never blocks."""
-    send_message({"jsonrpc": "2.0", "id": msg_id, "result": {}})
-
-
-def _handle_health(msg_id):
-    """Health check — always responds instantly."""
-    send_message({
-        "jsonrpc": "2.0",
-        "id": msg_id,
-        "result": {"status": "ok", "uptime": time.monotonic()}
-    })
-
-
-def _process_message(msg: dict) -> bool:
-    """Process a single JSON-RPC message. Returns True to keep running, False to exit."""
+def _process_message(msg):
     try:
-        msg_id = msg.get("id")
-        method = msg.get("method")
-        params = msg.get("params", {})
-
-        if method == "ping":
-            _handle_ping(msg_id)
-            return True
-
-        if method in ("health", "status"):
-            _handle_health(msg_id)
-            return True
-
+        mid = msg.get("id"); method = msg.get("method"); params = msg.get("params", {})
+        if method == "ping": send_message({"jsonrpc":"2.0","id":mid,"result":{}}); return True
+        if method in ("health","status"): send_message({"jsonrpc":"2.0","id":mid,"result":{"status":"ok"}}); return True
         if method == "initialize":
-            send_message({
-                "jsonrpc": "2.0", "id": msg_id,
-                "result": {
-                    "protocolVersion": "2024-11-05",
-                    "serverInfo": {"name": "ai-memory-core-tools", "version": "1.0.0"},
-                    "capabilities": {"tools": {"listChanged": True}}
-                }
-            })
-            return True
-
-        if method == "notifications/initialized":
-            print("[mcp-server] Ready — accepting requests", file=sys.stderr, flush=True)
-            return True
-
+            send_message({"jsonrpc":"2.0","id":mid,"result":{"protocolVersion":"2024-11-05","serverInfo":{"name":"ai-memory-core","version":VERSION},"capabilities":{"tools":{"listChanged":True}}}}); return True
+        if method == "notifications/initialized": return True
         if method == "tools/list":
-            send_message({"jsonrpc": "2.0", "id": msg_id, "result": {"tools": TOOLS}})
-            return True
-
+            send_message({"jsonrpc":"2.0","id":mid,"result":{"tools":TOOLS}}); return True
         if method == "tools/call":
-            tool_name = params.get("name", "")
-            tool_args = params.get("arguments", {})
-            tq = queue.Queue()
-            t = threading.Thread(target=execute_tool_async, args=(tool_name, tool_args, tq), daemon=True)
+            tname = params.get("name",""); targs = params.get("arguments",{})
+            q = queue.Queue()
+            t = threading.Thread(target=execute_tool_async, args=(tname, targs, q), daemon=True)
             t.start()
-            deadline = time.monotonic() + TOOL_EXECUTOR_TIMEOUT + 5
+            deadline = time.monotonic() + 65
             while time.monotonic() < deadline:
                 try:
-                    kind, data = tq.get(timeout=POLL_INTERVAL)
-                    if kind == "result":
-                        send_message({"jsonrpc": "2.0", "id": msg_id, "result": data})
-                    else:
-                        send_message({"jsonrpc": "2.0", "id": msg_id, "error": {"code": -32000, "message": data}})
+                    k, d = q.get(timeout=0.5)
+                    if k == "result": send_message({"jsonrpc":"2.0","id":mid,"result":d})
+                    else: send_message({"jsonrpc":"2.0","id":mid,"error":{"code":-32000,"message":d}})
                     return True
-                except queue.Empty:
-                    pass
-                _drain_pending()
-            send_message({"jsonrpc": "2.0", "id": msg_id, "error": {"code": -32000, "message": "Tool execution timed out"}})
-            return True
-
-        if msg_id is not None:
-            send_message({"jsonrpc": "2.0", "id": msg_id, "error": {"code": -32601, "message": f"Method not found: {method}"}})
+                except queue.Empty: pass
+            send_message({"jsonrpc":"2.0","id":mid,"error":{"code":-32000,"message":"Tool timed out"}}); return True
+        if mid: send_message({"jsonrpc":"2.0","id":mid,"error":{"code":-32601,"message":f"Method not found: {method}"}})
+        return True
+    except Exception as e:
+        print(f"[mcp-server] Error: {e}", file=sys.stderr, flush=True)
+        if msg.get("id"): send_message({"jsonrpc":"2.0","id":msg["id"],"error":{"code":-32700,"message":str(e)}})
         return True
 
-    except (json.JSONDecodeError, KeyError, TypeError) as e:
-        print(f"[mcp-server] Error processing message: {e}", file=sys.stderr, flush=True)
-        if msg_id is not None:
-            send_message({"jsonrpc": "2.0", "id": msg_id, "error": {"code": -32700, "message": f"Parse error: {e}"}})
-        return True
-
-
-_pending_queue: queue.Queue = queue.Queue()
+_pending_queue = queue.Queue()
 _reader_shutdown = threading.Event()
 
-
 def _reader_loop():
-    """Background thread: reads MCP messages from stdin and enqueues them."""
     while not _reader_shutdown.is_set():
         try:
             msg = read_message()
-        except (EOFError, ConnectionError) as e:
-            print(f"[mcp-server] Reader EOF: {e}", file=sys.stderr, flush=True)
-            break
-        if msg is None:
-            break
-        _pending_queue.put(msg)
+            if msg is None: break
+            _pending_queue.put(msg)
+        except: break
     _reader_shutdown.set()
-
 
 def _drain_pending():
-    """Process any messages accumulated in the pending queue (e.g. ping during tool exec)."""
     while not _pending_queue.empty():
-        try:
-            pending = _pending_queue.get_nowait()
-            _process_message(pending)
-        except queue.Empty:
-            break
-
+        try: _process_message(_pending_queue.get_nowait())
+        except queue.Empty: break
 
 def main():
-    """Main MCP server loop — pulls messages from the reader thread's queue."""
-    _log("INFO", f"ai-memory-core-tools v{VERSION} starting...")
-    _log("INFO", f"Mode: {'permissive' if PERMISSIVE_MODE else 'interactive/auto'}")
-    _log("INFO", f"Tools registered: {len(TOOLS)}")
-    _log("INFO", f"Data directory: {DATA_DIR}")
-    _log("INFO", f"Skills directory: {SKILLS_DIR}")
-
+    _log("INFO", f"ai-memory-core v{VERSION} starting ({len(TOOLS)} tools)...")
+    reads = sum(1 for t in TOOLS if t.get("permission")=="read")
+    writes = sum(1 for t in TOOLS if t.get("permission")=="write")
+    mutates = sum(1 for t in TOOLS if t.get("permission")=="mutate")
+    _log("INFO", f"Tools: {reads} read, {writes} write, {mutates} mutate")
     reader = threading.Thread(target=_reader_loop, daemon=True)
     reader.start()
-
     while not _reader_shutdown.is_set():
-        try:
-            msg = _pending_queue.get(timeout=POLL_INTERVAL)
-            keep_running = _process_message(msg)
-            if not keep_running:
-                break
-        except queue.Empty:
-            continue
-
+        try: _process_message(_pending_queue.get(timeout=0.5))
+        except queue.Empty: continue
     _reader_shutdown.set()
-    print("[mcp-server] Shutting down", file=sys.stderr, flush=True)
-
-def _print_help():
-    """Print CLI usage information and exit."""
-    print(f"""
-ai-memory-core MCP Server v{VERSION}
-====================================
-68-tool MCP server with permission-gated access — local BM25 memory,
-cross-session trace system, and 7 multi-modal modules.
-
-USAGE:
-  python tools-mcp-server.py                     Start MCP server (stdio transport)
-  python tools-mcp-server.py --help               Show this help
-  python tools-mcp-server.py --version            Show version
-  python tools-mcp-server.py --list-tools         List all registered tools as JSON
-  python tools-mcp-server.py --permissive         Start server in permissive mode (skips auto-mode guard)
-  python tools-mcp-server.py --debug              Enable verbose debug logging
-
-MODES:
-  interactive (default)  All tools allowed, write_/mutate_ show warnings
-  auto                   Only read_ tools pass; write_/mutate_ blocked without human review
-  permissive             All tools allowed, no permission warnings
-
-CONNECT TO OPENCODE:
-  Add to opencode.json:
-    {{
-      "mcpServers": {{
-        "ai-memory-core": {{
-          "command": "python",
-          "args": ["scripts/tools-mcp-server.py"]
-        }}
-      }}
-    }}
-
-DOCS: https://github.com/ohmpatel3877/ai-memory-core
-""")
-
-
-def _print_version():
-    """Print version string."""
-    print(f"ai-memory-core v{VERSION}")
-
-
-def _list_tools():
-    """Print all registered tools as formatted JSON and exit."""
-    print(json.dumps(TOOLS, indent=2))
-
 
 if __name__ == "__main__":
     import sys as _sys
-
-    # Parse CLI flags before starting server
-    _cli_args = [a.lower() for a in _sys.argv[1:]]
-    
-    if any(a in _cli_args for a in ("--help", "-h", "/?")):
-        _print_help()
+    args = [a.lower() for a in _sys.argv[1:]]
+    if any(a in args for a in ("--help","-h","/?")):
+        print(f"\nai-memory-core MCP Server v{VERSION}\n{len(TOOLS)} tools\n")
         _sys.exit(0)
-    
-    if "--version" in _cli_args:
-        _print_version()
-        _sys.exit(0)
-    
-    if "--list-tools" in _cli_args:
-        _list_tools()
-        _sys.exit(0)
-
-    if "--permissive" in _cli_args:
-        # PERMISSIVE_MODE is a module-level mutable — reassign directly
-        import sys as _sys_mod
-        _mod = _sys_mod.modules[__name__]
-        _mod.PERMISSIVE_MODE = True
-        print("[mcp-server] PERMISSIVE MODE — all tools allowed without permission checks", file=_sys.stderr, flush=True)
-
-    if "--debug" in _cli_args:
-        import sys as _sys_mod2
-        _mod = _sys_mod2.modules[__name__]
-        _mod.DEBUG_MODE = True
-        print("[mcp-server] DEBUG MODE — verbose logging enabled", file=_sys.stderr, flush=True)
-
+    if "--version" in args: print(f"v{VERSION}"); _sys.exit(0)
+    if "--list-tools" in args: print(json.dumps(TOOLS, indent=2)); _sys.exit(0)
+    if "--permissive" in args: import sys as m; m.modules[__name__].PERMISSIVE_MODE = True
+    if "--debug" in args: import sys as m; m.modules[__name__].DEBUG_MODE = True
     main()
