@@ -2,7 +2,7 @@
 
 **Persistent memory and safe execution infrastructure for AI coding agents.**
 
-Your agent remembers bugs it fixed yesterday, architecture decisions from last week, and what it learned an hour ago — without any of it living in a prompt window.
+Your agent remembers bugs it fixed yesterday, architecture decisions from last week, and what it learned an hour ago without any of it living in a prompt window.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Memory-BM25%20%2B%20Vector%20%2B%20Reranker-blue?style=for-the-badge" alt="Memory"/>
