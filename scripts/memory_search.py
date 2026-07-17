@@ -246,7 +246,10 @@ class NEMemorySearch:
         if not self.memories: return []
         if self._vectors is None or len(self._vectors) != len(self.memories): self._compute_vectors()
         if self._vectors is None or len(self._vectors) == 0: return []
-        try: query_vec = self._vector_model.encode([query])[0]
+        try:
+            query_vec = self._vector_model.encode([query])[0]
+            if self._vectors.shape[1] != query_vec.shape[0]: self._compute_vectors()
+            query_vec = self._vector_model.encode([query])[0]
         except: return {"error": "Query encoding failed"}
         scores = []
         for i, vec in enumerate(self._vectors):
