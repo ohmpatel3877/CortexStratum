@@ -234,7 +234,7 @@ TOOLS = [
 def handle_tool_call(name, args):
     _log("DEBUG", f"handle_tool_call: {name}")
     # Permission check
-    allowed, reason = can_call_tool(name, {})
+    allowed, reason = can_call_tool(name, {"mode": "interactive" if not PERMISSIVE_MODE else "permissive"})
     if not allowed:
         return {"content": [{"type": "text", "text": json.dumps({"error": "permission_denied", "tool": name, "reason": reason})}]}
     verifier = _get_verifier()
@@ -249,6 +249,12 @@ def handle_tool_call(name, args):
         sim["undo_token"] = None
         sim["note"] = "Dry run only. Execute without dry_run=true to commit."
         return {"content": [{"type": "text", "text": json.dumps(sim, indent=2)}]}
+
+    # Checkpoint before memory mutations
+    if name in ("write_memory_add", "mutate_memory_consolidate") and not args.get("dry_run"):
+        ckpt = _get_audit().checkpoint(name, args)
+    else:
+        ckpt = None
 
     # Memory tools
     if name in ("read_memory_search", "read_memory_synthesize", "read_memory_vector_search",

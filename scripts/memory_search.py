@@ -121,7 +121,13 @@ class NEMemorySearch:
                     self.memories = data if isinstance(data, list) else []
             else:
                 self.memories = []; self._save_memories()
-        except Exception:
+        except Exception as e:
+            # Backup corrupted file before resetting
+            import logging, shutil
+            logging.warning("Failed to load memories.json: " + str(e))
+            if __import__("os").path.isfile(self.memories_path) and __import__("os").path.getsize(self.memories_path) > 0:
+                bak = self.memories_path + ".corrupted." + str(__import__("time").time()).replace(".", "_")
+                shutil.copy2(self.memories_path, bak)
             self.memories = []
         self._rebuild_index(); self._loaded = True
 
@@ -248,8 +254,9 @@ class NEMemorySearch:
         if self._vectors is None or len(self._vectors) == 0: return []
         try:
             query_vec = self._vector_model.encode([query])[0]
-            if self._vectors.shape[1] != query_vec.shape[0]: self._compute_vectors()
-            query_vec = self._vector_model.encode([query])[0]
+            if self._vectors.shape[1] != query_vec.shape[0]:
+                self._compute_vectors()
+                query_vec = self._vector_model.encode([query])[0]
         except: return {"error": "Query encoding failed"}
         scores = []
         for i, vec in enumerate(self._vectors):
@@ -340,12 +347,13 @@ class NEMemorySearch:
         with self._lock:
             idx_snap = dict(self._inverted_index)
             df_snap = dict(self._doc_freq)
+            mem_snap = list(self.memories)
         candidate_indices: set[int] = set()
         for qt in all_query_terms:
             if qt in idx_snap: candidate_indices.update(idx_snap[qt])
         scored = []
         for idx in candidate_indices:
-            mem = self.memories[idx]
+            mem = mem_snap[idx]
             dt = self._tokenize(mem.get("text",""))
             scored.append((self._bm25_score(all_query_terms, dt, len(dt), self._avg_doc_len, total_docs, df_snap), mem))
         scored.sort(key=lambda x: x[0], reverse=True)
