@@ -11,7 +11,9 @@
       "description": "68-tool MCP server: BM25 memory, trace, skill router, multi-modal AI generation",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
-      "env": {},
+      "env": {
+        "AI_MEMORY_EMBEDDING_MODEL": "all-mpnet-base-v2"
+      },
       "disabled": false
     },
     "ai-memory-core-permissive": {
@@ -19,7 +21,9 @@
       "description": "Same server with all permission checks bypassed",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py", "--permissive"],
-      "env": {},
+      "env": {
+        "AI_MEMORY_EMBEDDING_MODEL": "all-mpnet-base-v2"
+      },
       "disabled": false
     }
   },
