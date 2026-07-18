@@ -1,3 +1,3 @@
 # Core dependencies — zero pip packages needed
-# ai-memory-core runs entirely on Python stdlib.
+# CortexStratum runs entirely on Python stdlib.
 # This file exists for compatibility; no packages are required.

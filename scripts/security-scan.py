@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Security Scanner — ai-memory-core toolchain security audit module.
+Security Scanner — CortexStratum toolchain security audit module.
 
 Scans a codebase for hardcoded secrets, vulnerable dependencies, security
 anti-patterns, and configuration weaknesses. Integrates with xTrace
@@ -831,7 +831,7 @@ def print_summary(report: Dict[str, Any]):
         count = s["findings_by_severity"].get(sev, 0)
         color = {"high": R, "medium": Y, "low": C, "info": DIM}.get(sev, N)
         label = sev.upper()
-        bar = f"{color}{'█' * min(count, 30)}{N}" if count > 0 else ""
+        bar = f"{color}{'' * min(count, 30)}{N}" if count > 0 else ""
         print(f"  {color}{label:8}{N} {count:3}  {bar}")
     print()
     for cat, count in s["findings_by_category"].items():

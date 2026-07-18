@@ -1,0 +1,11 @@
+{
+  "checkpoint_id": "undo_6b2eac02728a",
+  "tool": "write_memory_add",
+  "args": {
+    "text": "test dry run",
+    "source": "manual",
+    "dry_run": true
+  },
+  "timestamp": "2026-07-17T16:42:52.998542+00:00",
+  "restored": false
+}

@@ -26,10 +26,10 @@ Sum the scores from each factor. If score >= 12, the task MUST be parallelized w
 
 | Score | Mode | Action |
 |---|---|---|
-| 0-5 | 🔵 **Direct** | Execute in current context. No subagents needed. |
-| 6-11 | 🟡 **Split** | Identify independent workstreams. Use 2-3 parallel subagents for those, keep sequential parts inline. |
-| 12-17 | 🟠 **Orchestrate** | Full orchestration: decompose into workstreams, spawn 3-5 parallel subagents, merge results. |
-| 18+ | 🔴 **Pipeline** | Multi-phase: discovery → design → parallel build → integration → verify. Use serial phases with parallel subagents within each. |
+| 0-5 |  **Direct** | Execute in current context. No subagents needed. |
+| 6-11 |  **Split** | Identify independent workstreams. Use 2-3 parallel subagents for those, keep sequential parts inline. |
+| 12-17 |  **Orchestrate** | Full orchestration: decompose into workstreams, spawn 3-5 parallel subagents, merge results. |
+| 18+ |  **Pipeline** | Multi-phase: discovery → design → parallel build → integration → verify. Use serial phases with parallel subagents within each. |
 
 ### Orchestration Protocol
 

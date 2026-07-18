@@ -1,5 +1,5 @@
 {
-  "name": "ai-memory-core",
+  "name": "CortexStratum",
   "version": "0.3.0",
   "description": "67-tool MCP server — local-only persistent memory, skill routing, task orchestration, and multi-modal AI generation",
   "main": "index.js",
@@ -23,13 +23,13 @@
   "dependencies": {},
   "install": {
     "harnesses": ["opencode", "claude-code", "cursor"],
-    "windows": "pwsh plugin-tools/install-ai-memory-core.ps1",
-    "unix": "bash plugin-tools/install-ai-memory-core.sh",
+    "windows": "pwsh plugin-tools/install-CortexStratum.ps1",
+    "unix": "bash plugin-tools/install-CortexStratum.sh",
     "docker": "docker compose up -d"
   },
   "mcpServers": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
+    "CortexStratum": {
+      "name": "CortexStratum",
       "description": "67-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],

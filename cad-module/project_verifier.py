@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 project_verifier.py - Verifies SCAD files against project spec requirements
-ai-memory-core cad-module
+CortexStratum cad-module
 Checks: all mandatory subsystems covered, dimensions match spec, component positions valid
 """
 import re

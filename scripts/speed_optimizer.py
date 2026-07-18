@@ -22,7 +22,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-# ─── Event Schema ─────────────────────────────────────────────────
+#  Event Schema 
 # Each slowdown is logged as a memory event with this structure:
 
 @dataclass
@@ -42,7 +42,7 @@ class SpeedEvent:
         self.fingerprint = hashlib.md5(raw.encode()).hexdigest()[:12]
 
 
-# ─── Known Bottleneck Patterns ────────────────────────────────────
+#  Known Bottleneck Patterns 
 # These are cross-session learnings stored as resolution strategies.
 
 BOTTLENECK_PATTERNS = {
@@ -337,7 +337,7 @@ class SpeedOptimizer:
         if bottlenecks:
             lines.append(f"\nBottlenecks detected ({len(bottlenecks)}):")
             for b in bottlenecks[:5]:
-                lines.append(f"  ⚠ {b['key']}: {b['slowdown_ratio']}x slower than expected")
+                lines.append(f"   {b['key']}: {b['slowdown_ratio']}x slower than expected")
 
         strategies = self.generate_strategies()
         if strategies:
@@ -348,7 +348,7 @@ class SpeedOptimizer:
         return "\n".join(lines)
 
 
-# ─── CLI ──────────────────────────────────────────────────────────
+#  CLI 
 
 def main():
     import argparse

@@ -1,0 +1,30 @@
+{
+  "sessions": [
+    {
+      "session_id": "test-001",
+      "timestamp": "2026-07-18T15:43:55.102475+00:00",
+      "phases_completed": [
+        "help",
+        "context"
+      ],
+      "session_duration_seconds": 0.015264,
+      "total_tools_used": 0,
+      "scope_creep_events": 1,
+      "context_switches": 0,
+      "projects_touched": [
+        "StudySpace"
+      ],
+      "what_went_well": [],
+      "causes_of_context_switches": [
+        "1 out-of-scope tasks saved to Global Memory"
+      ],
+      "recommendations": [
+        "Low tool usage suggests more automation opportunities"
+      ],
+      "tool_pattern": [
+        0,
+        0
+      ]
+    }
+  ]
+}

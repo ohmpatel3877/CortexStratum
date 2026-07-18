@@ -24,7 +24,7 @@ DAG_SCHEMAS = os.path.join(DATA, "dag-schemas")
 DAG_TRACES = os.path.join(DATA, "dag-traces")
 
 G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
-BAR = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+BAR = ""
 
 
 def now_iso() -> str:
@@ -151,7 +151,7 @@ def generate_report(quick: bool = False) -> str:
     # Build HTML
     checks_rows = ""
     for c in checks:
-        status_icon = "✅" if c.get("status") == "PASS" else "❌"
+        status_icon = "" if c.get("status") == "PASS" else ""
         details = ""
         if "size" in c and c.get("exists"):
             details = f"Size: {c['size']} bytes"
@@ -188,7 +188,7 @@ def generate_report(quick: bool = False) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ai-memory-core — Integration Status</title>
+<title>CortexStratum — Integration Status</title>
 <style>
     {{font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #0d1117; color: #c9d1d9;}}
     h1, h2 {{color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem;}}
@@ -208,7 +208,7 @@ def generate_report(quick: bool = False) -> str:
 </style>
 </head>
 <body>
-    <h1>ai-memory-core — Integration Status <span>{timestamp}</span></h1>
+    <h1>CortexStratum — Integration Status <span>{timestamp}</span></h1>
 
     <div class="summary">
         <div class="card">
@@ -267,17 +267,17 @@ def main():
 
     # Also print summary to console
     check_count = html.count("<tr>")
-    pass_count = html.count('✅')
-    fail_count = html.count('❌')
+    pass_count = html.count('')
+    fail_count = html.count('')
     print(f"  Checks:  {check_count} ({pass_count} pass, {fail_count} fail)")
     print(f"  Report:  {G}{args.output}{N}")
-    print(f"\n  {'─'*50}")
+    print(f"\n  {''*50}")
     print(f"  Workstream A (DAG):      dag-coordinator.py, seed DAG, schemas")
     print(f"  Workstream B (Identity): identity-manager.py with IdentityManager")
     print(f"  Workstream C (Sandbox):  sandbox-manager.py with SandboxManager")
     print(f"  Workstream D (Docs):     doc-generator.py with DocGenerator")
     print(f"  Workstream E (Integrate): orchestrate-all.ps1, ADRs, tests")
-    print(f"  {'─'*50}")
+    print(f"  {''*50}")
     print(f"\n  To run tests:  python scripts/test-integration-layer.py")
     print(f"  To re-generate: python scripts/integration-status.py\n")
 

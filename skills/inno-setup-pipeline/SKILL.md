@@ -19,38 +19,38 @@ Automate compiling an Inno Setup `.iss` script into a signed `.exe` installer an
 
 ```
 Push tag v1.0.0
-       │
-       ▼
- ┌─────────────────┐
- │ GitHub Actions   │
- │ (windows-latest) │
- └─────────────────┘
-       │
-       ▼
- ┌─────────────────┐
- │ Install Inno     │  (choco install innosetup)
- │ Setup 6          │
- └─────────────────┘
-       │
-       ▼
- ┌─────────────────┐
- │ Compile .iss     │  (ISCC.exe installer.iss)
- │ → .exe           │
- └─────────────────┘
-       │
-       ▼
- ┌─────────────────┐
- │ Sign the .exe    │  (signtool + .pfx cert)
- │                  │
- └─────────────────┘
-       │
-       ▼
- ┌─────────────────┐
- │ Publish Release  │  (gh release upload)
- │ (draft)          │
- └─────────────────┘
-       │
-       ▼
+       
+       
+ 
+  GitHub Actions   
+  (windows-latest) 
+ 
+       
+       
+ 
+  Install Inno       (choco install innosetup)
+  Setup 6          
+ 
+       
+       
+ 
+  Compile .iss       (ISCC.exe installer.iss)
+  → .exe           
+ 
+       
+       
+ 
+  Sign the .exe      (signtool + .pfx cert)
+                   
+ 
+       
+       
+ 
+  Publish Release    (gh release upload)
+  (draft)          
+ 
+       
+       
    Manual smoke-test → flip to published
 ```
 
@@ -70,13 +70,13 @@ Example structure matching this repo:
 
 ```
 project/
-├── installer/
-│   ├── myapp.iss          # Inno Setup script
-│   └── icons/             # Installer assets
-├── src/                   # Your app source
-└── .github/
-    └── workflows/
-        └── release.yml    # CI workflow
+ installer/
+    myapp.iss          # Inno Setup script
+    icons/             # Installer assets
+ src/                   # Your app source
+ .github/
+     workflows/
+         release.yml    # CI workflow
 ```
 
 ### 3. Compile locally to test

@@ -21,28 +21,28 @@ Design and build application frameworks with a Rust core, cross-language FFI bou
 ## Architecture Decision Framework
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                    Framework Decision Tree                       │
-├────────────────────────────────────────────────────────────────┤
-│                                                                │
-│  Desktop App? ──→ Tauri 2 (Rust core + web frontend)           │
-│       or Electron (JS-only, heavier)                            │
-│                                                                │
-│  CLI Tool? ──→ Rust native (clap, termion)                      │
-│       or Python (rich, typer)                                   │
-│                                                                │
-│  Web Service? ──→ Rust (axum, actix) for performance            │
-│       or Python (FastAPI) for rapid development                 │
-│                                                                │
-│  MCP Server? ──→ Rust (mcp-sdk) for production                  │
-│       or Python (mcp library) for prototyping                   │
-│                                                                │
-│  Cross-Platform Lib? ──→ Rust core + bindings per language      │
-│       WASM for web, PyO3 for Python, napi-rs for Node          │
-│                                                                │
-│  Game/GPU? ──→ Rust (wgpu, bevy, macroquad)                     │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
+
+                    Framework Decision Tree                       
+
+                                                                
+  Desktop App? → Tauri 2 (Rust core + web frontend)           
+       or Electron (JS-only, heavier)                            
+                                                                
+  CLI Tool? → Rust native (clap, termion)                      
+       or Python (rich, typer)                                   
+                                                                
+  Web Service? → Rust (axum, actix) for performance            
+       or Python (FastAPI) for rapid development                 
+                                                                
+  MCP Server? → Rust (mcp-sdk) for production                  
+       or Python (mcp library) for prototyping                   
+                                                                
+  Cross-Platform Lib? → Rust core + bindings per language      
+       WASM for web, PyO3 for Python, napi-rs for Node          
+                                                                
+  Game/GPU? → Rust (wgpu, bevy, macroquad)                     
+                                                                
+
 ```
 
 ## Rust Workspace Architecture
@@ -51,27 +51,27 @@ Design and build application frameworks with a Rust core, cross-language FFI bou
 
 ```
 project/
-├── Cargo.toml              # [workspace] with members
-├── crates/
-│   ├── core/               # Core library (no external deps beyond std)
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   ├── cli/                # CLI binary
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   ├── server/             # HTTP/WebSocket server
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   ├── mcp/                # MCP protocol implementation
-│   │   ├── Cargo.toml
-│   │   └── src/
-│   └── ffi/                # FFI bindings (cdylib)
-│       ├── Cargo.toml
-│       └── src/
-├── tests/                  # Integration tests
-├── benches/                # Benchmarks
-├── scripts/                # Build/deploy scripts
-└── .github/workflows/
+ Cargo.toml              # [workspace] with members
+ crates/
+    core/               # Core library (no external deps beyond std)
+       Cargo.toml
+       src/
+    cli/                # CLI binary
+       Cargo.toml
+       src/
+    server/             # HTTP/WebSocket server
+       Cargo.toml
+       src/
+    mcp/                # MCP protocol implementation
+       Cargo.toml
+       src/
+    ffi/                # FFI bindings (cdylib)
+        Cargo.toml
+        src/
+ tests/                  # Integration tests
+ benches/                # Benchmarks
+ scripts/                # Build/deploy scripts
+ .github/workflows/
 ```
 
 ### Cargo.toml Template
@@ -426,24 +426,24 @@ if __name__ == "__main__":
 ### Architecture
 
 ```
-┌──────────────────────────────────────────────────────┐
-│                  Tauri 2 Desktop App                   │
-├───────────────────────┬──────────────────────────────┤
-│   Rust Backend        │   Web Frontend               │
-│                       │                              │
-│   ┌───────────────┐   │   ┌──────────────────────┐   │
-│   │ State Machine  │   │   │  React/Vue/Svelte    │   │
-│   │ (app flow)     │◄──┼──►│  (Frontend UI)       │   │
-│   └───────────────┘   │   └──────────────────────┘   │
-│   ┌───────────────┐   │                              │
-│   │ MCP Server     │   │                              │
-│   │ (embedded)     │   │                              │
-│   └───────────────┘   │                              │
-│   ┌───────────────┐   │                              │
-│   │ FFI Bridge     │   │                              │
-│   │ (Python/Node)  │   │                              │
-│   └───────────────┘   │                              │
-└───────────────────────┴──────────────────────────────┘
+
+                  Tauri 2 Desktop App                   
+
+   Rust Backend           Web Frontend               
+                                                     
+            
+    State Machine          React/Vue/Svelte       
+    (app flow)       (Frontend UI)          
+            
+                                    
+    MCP Server                                      
+    (embedded)                                      
+                                    
+                                    
+    FFI Bridge                                      
+    (Python/Node)                                   
+                                    
+
 ```
 
 ### Tauri Commands

@@ -64,8 +64,8 @@ if ($exitCode -eq 0) {
     Write-Host "  Working directory: $workDir" -ForegroundColor Gray
 
     $files = @{
-        "docker-compose.yml" = "https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml"
-        "Dockerfile" = "https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile"
+        "docker-compose.yml" = "https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/docker-compose.yml"
+        "Dockerfile" = "https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/Dockerfile"
     }
 
     foreach ($file in $files.Keys) {

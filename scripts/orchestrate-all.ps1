@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-  Unified Orchestration Entry Point — Full pipeline orchestrator for ai-memory-core.
+  Unified Orchestration Entry Point — Full pipeline orchestrator for CortexStratum.
 
 .DESCRIPTION
   Orchestrates the complete pipeline: task analysis → complexity scoring →

@@ -19,34 +19,34 @@ Automatically detects operations that are slower than expected, clusters them by
 
 ```
 Operation completes
-       │
-       ▼
-┌──────────────────┐
-│  log_slowdown()  │  ← Call after any timed operation
-│  (category, op,  │
-│   duration,      │
-│   expected)      │
-└──────┬───────────┘
-       │
-       ▼
-┌──────────────────┐
-│  Memory Store     │  ← Events stored as type: speed_event
-│  (cross-session)  │
-└──────┬───────────┘
-       │
-       ▼
-┌──────────────────┐
-│  analyze()        │  ← Clusters by category:operation
-│  → bottlenecks    │     Computes avg, ratio, totals
-│  → clock_consumers│
-└──────┬───────────┘
-       │
-       ▼
-┌──────────────────┐
-│  generate_        │  ← Matches against known patterns
-│  strategies()     │     (pip, docker, npm, inference, etc.)
-│  → recommendations│     Returns actionable strategies
-└──────────────────┘
+       
+       
+
+  log_slowdown()    ← Call after any timed operation
+  (category, op,  
+   duration,      
+   expected)      
+
+       
+       
+
+  Memory Store       ← Events stored as type: speed_event
+  (cross-session)  
+
+       
+       
+
+  analyze()          ← Clusters by category:operation
+  → bottlenecks         Computes avg, ratio, totals
+  → clock_consumers
+
+       
+       
+
+  generate_          ← Matches against known patterns
+  strategies()          (pip, docker, npm, inference, etc.)
+  → recommendations     Returns actionable strategies
+
 ```
 
 ## Usage

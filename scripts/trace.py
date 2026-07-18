@@ -58,22 +58,7 @@ def _session_id() -> str:
     return f"ses_{uuid.uuid4().hex[:12]}"
 
 
-def _load_json(path: Path, default):
-    try:
-        if path.exists():
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        pass
-    return default
-
-
-def _save_json(path: Path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".tmp")
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-    tmp.replace(path)
+from utils import load_json, save_json
 
 
 def _result(success: bool, data=None, error: str = None) -> dict:
@@ -101,16 +86,16 @@ def _normalize_signature(text: str) -> str:
 
 def _ensure_error_registry():
     if not ERROR_REGISTRY_PATH.exists():
-        _save_json(ERROR_REGISTRY_PATH, {"version": 1, "errors": []})
+        save_json(ERROR_REGISTRY_PATH, {"version": 1, "errors": []})
 
 
 def _load_error_registry():
     _ensure_error_registry()
-    return _load_json(ERROR_REGISTRY_PATH, {"version": 1, "errors": []})
+    return load_json(ERROR_REGISTRY_PATH, {"version": 1, "errors": []})
 
 
 def _save_error_registry(data):
-    _save_json(ERROR_REGISTRY_PATH, data)
+    save_json(ERROR_REGISTRY_PATH, data)
 
 
 def _next_error_id(data):
@@ -289,12 +274,12 @@ _SEED_DECISIONS = [
     },
     {
         "id": "dt-20260715-003",
-        "title": "Centralize meta-cognitive artifacts in ai-memory-core",
+        "title": "Centralize meta-cognitive artifacts in CortexStratum",
         "context": "Model study guides, behavioral fix lists, and process docs were scattered across multiple repos and local paths",
-        "decision": "All meta-cognitive artifacts live under ai-memory-core",
+        "decision": "All meta-cognitive artifacts live under CortexStratum",
         "alternatives": ["Keep artifacts co-located with each project", "Use a separate meta-knowledge repo"],
         "rationale": "Single source of truth for agent improvement artifacts; accessible from any project context via reference",
-        "consequences": ["ai-memory-core becomes a dependency for all agent sessions", "Must maintain consistent cross-references"],
+        "consequences": ["CortexStratum becomes a dependency for all agent sessions", "Must maintain consistent cross-references"],
         "category": "architecture",
         "files": ["model-study-guide.md", "data\\decision-registry.json", "data\\error-registry.json"],
         "status": "active",
@@ -310,16 +295,16 @@ _VALID_DECISION_STATUSES = {"active", "superseded", "deprecated", "reverted"}
 
 def _ensure_decision_registry():
     if not DECISION_REGISTRY_PATH.exists():
-        _save_json(DECISION_REGISTRY_PATH, {"version": 1, "decisions": list(_SEED_DECISIONS)})
+        save_json(DECISION_REGISTRY_PATH, {"version": 1, "decisions": list(_SEED_DECISIONS)})
 
 
 def _load_decision_registry():
     _ensure_decision_registry()
-    return _load_json(DECISION_REGISTRY_PATH, {"version": 1, "decisions": []})
+    return load_json(DECISION_REGISTRY_PATH, {"version": 1, "decisions": []})
 
 
 def _save_decision_registry(data):
-    _save_json(DECISION_REGISTRY_PATH, data)
+    save_json(DECISION_REGISTRY_PATH, data)
 
 
 def _next_decision_id(data):
@@ -457,11 +442,11 @@ GOAL_REGISTRY_PATH = DATA_DIR / "goal-registry.json"
 
 
 def _load_goal_registry():
-    return _load_json(GOAL_REGISTRY_PATH, None)
+    return load_json(GOAL_REGISTRY_PATH, None)
 
 
 def _save_goal_registry(data):
-    _save_json(GOAL_REGISTRY_PATH, data)
+    save_json(GOAL_REGISTRY_PATH, data)
 
 
 def _require_goal_registry():
@@ -662,16 +647,16 @@ _SEED_COMMITMENTS = [
 
 def _ensure_commitments():
     if not COMMITMENTS_PATH.exists():
-        _save_json(COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)})
+        save_json(COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)})
 
 
 def _load_commitments():
     _ensure_commitments()
-    return _load_json(COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)})
+    return load_json(COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)})
 
 
 def _save_commitments(data):
-    _save_json(COMMITMENTS_PATH, data)
+    save_json(COMMITMENTS_PATH, data)
 
 
 def commitment_list(session_start: bool = False) -> dict:
@@ -793,7 +778,7 @@ def handle_tool_call(name: str, args: dict) -> dict:
         "read_commitment_checker_list": lambda a: commitment_list(
             session_start=a.get("session_start", False),
         ),
-        "mutate_commitment_checker_verify": lambda a: commitment_verify(
+        "write_commitment_verify": lambda a: commitment_verify(
             commitment_id=a.get("commitment_id", ""),
             dry_run=a.get("dry_run", False),
         ),

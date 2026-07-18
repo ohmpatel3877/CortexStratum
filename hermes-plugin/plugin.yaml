@@ -1,4 +1,4 @@
-name: ai-memory-core
+name: CortexStratum
 version: 0.3.0
 kind: memory
 description: >
@@ -7,7 +7,7 @@ description: >
   registries. Zero GPU, zero API keys, zero cloud LLM dependencies.
   The only memory MCP server with a 3-tier permission model (read/write/mutate).
 author: Ohm Patel
-repository: https://github.com/ohmpatel3877/ai-memory-core
+repository: https://github.com/ohmpatel3877/CortexStratum
 tags:
   - memory
   - mcp-server
@@ -23,7 +23,7 @@ config_schema:
   properties:
     memory_path:
       type: string
-      description: Path to memory storage directory (default: ~/.ai-memory-core)
+      description: Path to memory storage directory (default: ~/.CortexStratum)
       default: ""
     embedding_model:
       type: string

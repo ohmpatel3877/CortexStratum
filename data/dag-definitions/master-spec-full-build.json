@@ -1,0 +1,100 @@
+{
+  "dag_id": "master-spec-full-build",
+  "name": "Master Spec — Full Multi-Phase Build",
+  "description": "Implements all 6 Master Spec phases using module-pattern (parallel create → serial wire). Phase 0 (permission UX) and Phase 4.4 (mechanics) are complete — this DAG covers the remaining phases.",
+  "version": "2.0.0",
+  "tags": ["master-spec", "multi-phase", "module-pattern"],
+  "nodes": [
+    {
+      "id": "mod-compact",
+      "description": "Phase 1: /compact — Context Compaction Engine (token velocity, state condensation, artifact protection)",
+      "prompt_template": "Create scripts/compact-module.py with MCP tools: read_compact_token_velocity, read_compact_synthesize, read_compact_status, write_compact_execute, read_compact_record_tick",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": ["module_file", "module_summary"]
+    },
+    {
+      "id": "mod-mutation",
+      "description": "Phase 2: /mutate — Algorithmic Mutation Engine (scope assessment, redundancy audit, execution)",
+      "prompt_template": "Create scripts/mutation-module.py with MCP tools: read_mutate_scope, read_mutate_audit, mutate_execute, read_mutate_status",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": ["module_file", "module_summary"]
+    },
+    {
+      "id": "mod-plumber",
+      "description": "Phase 3: Plumber Module (socket inspection, handoff tracing, artifact checkpointing)",
+      "prompt_template": "Create scripts/plumber-module.py with MCP tools: read_plumber_inspect_socket, read_plumber_trace_handoff, write_plumber_checkpoint, read_plumber_checkpoints",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": ["module_file", "module_summary"]
+    },
+    {
+      "id": "mod-math",
+      "description": "Phase 4.1: Math Engine (matrix solve, ODE solver, ASCII plot, LaTeX generator)",
+      "prompt_template": "Create scripts/sim-math-module.py with MCP tools: read_sim_matrix_solve, read_sim_ode, read_sim_latex, read_sim_plot",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": ["module_file", "module_summary"]
+    },
+    {
+      "id": "mod-pedagogy",
+      "description": "Phase 5: Pedagogy Engine (assess understanding, adapt depth, store profile)",
+      "prompt_template": "Create scripts/pedagogy-module.py with MCP tools: read_pedagogy_assess, read_pedagogy_adapt, write_pedagogy_profile",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": ["module_file", "module_summary"]
+    },
+    {
+      "id": "mod-consolidation",
+      "description": "Phase 5: Consolidation Daemon (offline cross-pollination, TF-IDF similarity linking)",
+      "prompt_template": "Create scripts/consolidation-daemon.py with MCP tools: read_consolidation_status, mutate_consolidation_run, read_consolidation_links",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": ["module_file", "module_summary"]
+    },
+    {
+      "id": "wire-all",
+      "description": "Wire all new tools into tools-mcp-server.py: add tool definitions to TOOLS list, add dispatch handlers to handle_tool_call",
+      "prompt_template": "Add tool definitions and dispatch handlers to tools-mcp-server.py for all newly created module files. Each module needs: 1) TOOLS list entries with permission annotations, 2) dispatch block in handle_tool_call(), 3) proper JSON-RPC error handling.",
+      "temperature": 0.3,
+      "timeout_seconds": 600,
+      "critical_file": "scripts/tools-mcp-server.py",
+      "expected_outputs": ["tool_defs", "dispatch_code", "tool_count"]
+    },
+    {
+      "id": "verify-all",
+      "description": "Run cross-phase verification and tool count check",
+      "prompt_template": "Run full verification: python scripts/phase-verify-full.py && python scripts/tools-mcp-server.py --list-tools | python -c \"import sys,json; t=json.loads(sys.stdin.read()); print(f'{len(t)} tools registered')\"",
+      "temperature": 0.2,
+      "timeout_seconds": 120,
+      "expected_outputs": ["test_results", "tool_count"]
+    }
+  ],
+  "edges": [
+    {"from": "mod-compact", "to": "wire-all"},
+    {"from": "mod-mutation", "to": "wire-all"},
+    {"from": "mod-plumber", "to": "wire-all"},
+    {"from": "mod-math", "to": "wire-all"},
+    {"from": "mod-pedagogy", "to": "wire-all"},
+    {"from": "mod-consolidation", "to": "wire-all"},
+    {"from": "wire-all", "to": "verify-all"}
+  ],
+  "merge_rules": [
+    {
+      "type": "independent",
+      "sources": ["mod-compact", "mod-mutation", "mod-plumber", "mod-math", "mod-pedagogy", "mod-consolidation"],
+      "strategy": "All module files are independent — merge order does not matter. Each module is its own .py file."
+    },
+    {
+      "type": "sequential_cumulative",
+      "sources": ["wire-all"],
+      "strategy": "Wiring edits tools-mcp-server.py. Must be serial — no parallel access allowed."
+    }
+  ],
+  "config": {
+    "error_mode": "abort",
+    "global_timeout_seconds": 3600,
+    "post_merge_verify": "python scripts/phase-verify-full.py"
+  }
+}

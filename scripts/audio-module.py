@@ -288,7 +288,7 @@ def analyze_file(args: dict) -> dict:
 # 2. audio_waveform
 # ---------------------------------------------------------------------------
 
-BLOCK_CHARS = "▁▂▃▄▅▆▇█"
+BLOCK_CHARS = ""
 
 
 def generate_waveform(args: dict) -> dict:
@@ -553,7 +553,7 @@ def music_theory(args: dict) -> dict:
     elif chord_name == "augmented":
         alternative_names = [f"{root_name}aug", f"{root_name}+"]
     elif chord_name == "half_diminished_7th":
-        alternative_names = [f"{root_name}m7♭5", f"{root_name}ø"]
+        alternative_names = [f"{root_name}m75", f"{root_name}ø"]
     elif chord_name == "sus2":
         alternative_names = [f"{root_name}sus2"]
     elif chord_name == "sus4":
@@ -943,7 +943,7 @@ AUDIO_TOOLS: list[dict[str, Any]] = [
     },
     {
         "name": "audio_waveform",
-        "description": "Generate ASCII waveform art from a WAV file using Unicode block characters (▁▂▃▄▅▆▇█)",
+        "description": "Generate ASCII waveform art from a WAV file using Unicode block characters ()",
         "inputSchema": {
             "type": "object",
             "properties": {

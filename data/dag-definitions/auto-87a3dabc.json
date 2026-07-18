@@ -1,0 +1,54 @@
+{
+  "dag_id": "auto-87a3dabc",
+  "name": "Auto: Create compact and mutation modules and wire them into tools-mcp-server.py",
+  "description": "Auto-generated DAG for module-pattern build (87a3dabc)",
+  "version": "2.0.0",
+  "tags": [
+    "auto-generated",
+    "module-pattern"
+  ],
+  "nodes": [
+    {
+      "id": "mod-1",
+      "description": "Create compact and mutation modules and wire them into tools-mcp-server.py",
+      "prompt_template": "Create compact and mutation modules and wire them into tools-mcp-server.py",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": [
+        "module_file",
+        "module_summary"
+      ]
+    },
+    {
+      "id": "wire-1",
+      "description": "Wire all new tools into tools-mcp-server.py (tool defs + dispatch)",
+      "prompt_template": "Wire the tools from modules mod-1 into tools-mcp-server.py. Add tool definitions to TOOLS list and dispatch handlers to handle_tool_call.",
+      "temperature": 0.7,
+      "timeout_seconds": 300,
+      "expected_outputs": [
+        "tool_defs",
+        "dispatch_code"
+      ],
+      "critical_file": "scripts/tools-mcp-server.py"
+    }
+  ],
+  "edges": [
+    {
+      "from": "mod-1",
+      "to": "wire-1"
+    }
+  ],
+  "merge_rules": [
+    {
+      "type": "independent",
+      "sources": [
+        "mod-1"
+      ]
+    }
+  ],
+  "config": {
+    "error_mode": "abort",
+    "global_timeout_seconds": 3600,
+    "post_merge_verify": "python scripts/phase-verify-full.py"
+  }
+}

@@ -57,10 +57,10 @@ Step 3: attempt = 3, delay = 4s
 Final state: Ok(response), 3 attempts, 2 errors logged, total wait = 3s
 
 Invariant check:
-- Total retries (2) ≤ 5 ✓
-- Backoff followed: 1s, 2s ✓ (was 2^0=1, 2^1=2 -- correct)
-- Non-retryable errors: none encountered ✓
-- Return type is Ok(Response) ✓
-- Max wait (3s) ≤ 31s ✓
+- Total retries (2) ≤ 5 
+- Backoff followed: 1s, 2s  (was 2^0=1, 2^1=2 -- correct)
+- Non-retryable errors: none encountered 
+- Return type is Ok(Response) 
+- Max wait (3s) ≤ 31s 
 
 Confidence: HIGH — all edge cases covered, invariants held, AST trace verified.

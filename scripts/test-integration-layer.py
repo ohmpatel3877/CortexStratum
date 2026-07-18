@@ -34,8 +34,8 @@ DAG_DEFS = os.path.join(DATA, "dag-definitions")
 DAG_SCHEMAS = os.path.join(DATA, "dag-schemas")
 
 G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
-PASS = f"{G}✓ PASS{N}"
-FAIL = f"{R}✗ FAIL{N}"
+PASS = f"{G} PASS{N}"
+FAIL = f"{R} FAIL{N}"
 SKIP = f"{Y}~ SKIP{N}"
 
 results = {"passed": 0, "failed": 0, "skipped": 0, "tests": []}
@@ -74,7 +74,7 @@ def import_from_path(module_name: str, file_path: str):
     return mod
 
 
-# ── Tests ──────────────────────────────────────────────────
+#  Tests 
 
 def test_dag_coordinator_import():
     mod = import_from_path("dag_coordinator", os.path.join(SCRIPTS, "dag-coordinator.py"))
@@ -261,7 +261,7 @@ def test_dag_coordinator_plan():
         f"DAG plan output missing expected content: {output[:300]}"
 
 
-# ── Main ───────────────────────────────────────────────────
+#  Main 
 
 def run_all():
     print(f"\n{B}{'=' * 60}{N}")

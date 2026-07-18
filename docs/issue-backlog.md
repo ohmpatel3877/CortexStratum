@@ -1,4 +1,4 @@
-# ai-memory-core Issue Backlog
+# CortexStratum Issue Backlog
 
 Created: 2026-07-16
 Milestone: v1.3.0 (Polish & Stability)
@@ -74,7 +74,7 @@ Skill router had 30 trigger rules with no fallback mechanism when no triggers ma
 **Area**: NE-Memory
 
 ### Description
-`mutate_memory_consolidate` used simple text-length-based merging. No confidence scoring, no source priority, no way to preview merges.
+`write_memory_consolidate` used simple text-length-based merging. No confidence scoring, no source priority, no way to preview merges.
 
 ### Changes Made
 - Added confidence-based text selection (keeps higher confidence entry's text)
@@ -183,7 +183,7 @@ Consider adding an exclusion mechanism or priority-based deduplication that prev
 ### Description
 Add cross-encoder reranker to the hybrid search pipeline. The bi-encoder (sentence-transformers) is fast but less accurate for relevance ranking. A cross-encoder evaluates each (query, candidate) pair jointly, giving much better relevance scores.
 
-### Status: ✅ COMPLETED (2026-07-17)
+### Status:  COMPLETED (2026-07-17)
 - Added `_load_reranker()` to `NEMemorySearch` (lazy-loaded `cross-encoder/ms-marco-MiniLM-L-6-v2`)
 - Added `reranked_search(query, limit=5, candidates=20)` method
 - Hybrid retrieve 20 candidates → cross-encoder → rerank to top-5
@@ -202,7 +202,7 @@ Add cross-encoder reranker to the hybrid search pipeline. The bi-encoder (senten
 ### Description
 Replace O(n) BM25 full-scan with inverted index. Pre-compute term→doc mapping so only documents containing query terms are scored. Add LRU query cache for repeated queries.
 
-### Status: ✅ COMPLETED (2026-07-17)
+### Status:  COMPLETED (2026-07-17)
 - Added `_inverted_index: dict[str, set[int]]` — term → set of doc indices
 - `search()` now scores only matching docs: O(query_terms × matches) vs O(n)
 - Added `LRUCache` (128 entries) with `invalidate()` on `add_memory`/`consolidate`
@@ -219,10 +219,10 @@ Replace O(n) BM25 full-scan with inverted index. Pre-compute term→doc mapping 
 ### Description
 Add a dry-run protocol to all write/mutate tools so agents can preview what a mutation would do without executing it. Add checkpoint/undo system and MCP annotations for OpenCode desktop permission prompts.
 
-### Status: ✅ COMPLETED (2026-07-17)
+### Status:  COMPLETED (2026-07-17)
 - Created `scripts/permission_audit.py` with `simulate()`, `checkpoint()`, `undo()` methods
 - All 12 write/mutate tools accept `dry_run=true` parameter
-- New tools: `mutate_undo`, `read_audit_status`
+- New tools: `write_audit_undo`, `read_audit_status`
 - All 79 tools have MCP annotations (`destructiveHint`, `readOnlyHint`, `idempotentHint`)
 - No checkpoint created on dry_run (only on real execution)
 
@@ -237,7 +237,7 @@ Add a dry-run protocol to all write/mutate tools so agents can preview what a mu
 ### Description
 Create a lifecycle hooks system so agents can prefetch relevant context at session start, log observations during sessions, and finalize sessions. Bridges the gap between "agent must call tools manually" and "memory that surfaces itself automatically."
 
-### Status: ✅ COMPLETED (2026-07-17)
+### Status:  COMPLETED (2026-07-17)
 - Created `scripts/hooks.py` with `HookManager` class
 - 4 tools: `read_hooks_prefetch`, `write_hooks_observe`, `read_hooks_session_status`, `write_hooks_session_end`
 - Auto-pushes decisions to DTrace and errors to xTrace
@@ -253,11 +253,11 @@ Create a lifecycle hooks system so agents can prefetch relevant context at sessi
 **Area**: Ecosystem Integration  
 
 ### Description
-Build a Hermes Agent MemoryProvider plugin so ai-memory-core can be used as the memory backend for Hermes Agent. Implements the full MemoryProvider ABC with prefetch, sync_turn, on_session_end lifecycle hooks.
+Build a Hermes Agent MemoryProvider plugin so CortexStratum can be used as the memory backend for Hermes Agent. Implements the full MemoryProvider ABC with prefetch, sync_turn, on_session_end lifecycle hooks.
 
-### Status: ✅ COMPLETED (2026-07-17)
+### Status:  COMPLETED (2026-07-17)
 - Created `hermes-plugin/` with 5 files
-- `AimeProvider` implements: `prefetch()`, `sync_turn()`, `on_session_end()`, `get_tool_schemas()` (5 tools)
+- `CortexProvider` implements: `prefetch()`, `sync_turn()`, `on_session_end()`, `get_tool_schemas()` (5 tools)
 - Direct Python imports (no subprocess MCP) for lower latency
 - Configurable via `AI_MEMORY_EMBEDDING_MODEL` and `AI_MEMORY_RERANKER_MODEL` env vars
 
@@ -272,8 +272,89 @@ Build a Hermes Agent MemoryProvider plugin so ai-memory-core can be used as the 
 ### Description
 At 79 tools, agents need help finding the right tool. Create a tool routing system that categorizes tools and provides natural-language-based suggestions.
 
-### Status: ✅ COMPLETED (2026-07-17)
+### Status:  COMPLETED (2026-07-17)
 - Created `scripts/tool_router.py` with `TOOL_CATEGORIES` dict (79 tools across 11 categories)
 - `suggest(task, tools, top_k=3)` uses keyword matching across names, descriptions, categories, tags
 - New tool: `read_tools_suggest(task)` — returns top-3 with reasoning
 - Categories: memory, lifecycle, permissions, trace, web, code, audio, art, devops, gamedev, utilities
+
+
+---
+
+## Issue 12: Split CortexStratum into 3 separate repos
+
+**Type**: Architecture
+**Priority**: P1
+**Area**: Infrastructure
+
+Only 12% of the codebase serves the stated purpose. Split into: cortexstratum-core (memory, cognitive), cortexstratum-sim (FEA, CFD, math), cortexstratum-agents (coder, gamedev, sensory, etc). Each gets its own MCP server.
+
+---
+
+## Issue 13: Add authentication layer
+
+**Type**: Security
+**Priority**: P1
+**Area**: Infrastructure
+
+No auth at all. Any MCP client can read/write all memory. Add API key or token-based auth.
+
+---
+
+## Issue 14: Audio Processing Suite expansion
+
+**Type**: Feature
+**Priority**: P2
+**Area**: Agent Skills
+
+Foundation exists (tone gen, music theory). Build: EQ matching, room mode calculator, RT60 estimator, impulse response gen, convolution. See future/agent-skills/audio-processing-suite.md.
+
+---
+
+## Issue 15: Music Personality & Recommendation Engine
+
+**Type**: Feature
+**Priority**: P3
+**Area**: Agent Skills
+
+Personality analyzer, album intel, Spotify-synced recommendations. Requires Spotify API credentials. See future/agent-skills/music-personality-engine.md.
+
+---
+
+## Issue 16: Add type hints to public API
+
+**Type**: Refactor
+**Priority**: P2
+**Area**: Code Quality
+
+Zero type hints across 15,000+ lines. Add typing to all public functions in core modules.
+
+---
+
+## Issue 17: Add query logging and rate limiting
+
+**Type**: Enhancement
+**Priority**: P2
+**Area**: Infrastructure
+
+No query performance monitoring. No rate limiting for runaway agents.
+
+---
+
+## Issue 18: Data migration system
+
+**Type**: Enhancement
+**Priority**: P2
+**Area**: Data
+
+JSON format changes silently break old data. Add schema versioning and migration path.
+
+---
+
+## Issue 19: Remove remaining deprecated tools
+
+**Type**: Cleanup
+**Priority**: P2
+**Area**: Code Quality
+
+17 deprecated tools remain as backward compat. Remove them now that merged replacements are stable.

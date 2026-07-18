@@ -1,235 +1,169 @@
-# ai-memory-core
+# CortexStratum
 
-**Persistent memory and safe execution infrastructure for AI coding agents.**
-
-Your agent remembers bugs it fixed yesterday, architecture decisions from last week, and what it learned an hour ago without any of it living in a prompt window.
+**Persistent memory, simulation, and cognitive toolchain for AI agents.**  
+135 MCP tools across memory, engineering simulation, focus management, context compaction, and agent orchestration.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Memory-BM25%20%2B%20Vector%20%2B%20Reranker-blue?style=for-the-badge" alt="Memory"/>
-  <img src="https://img.shields.io/badge/Permissions-read%20%2F%20write%20%2F%20mutate-orange?style=for-the-badge" alt="Permissions"/>
+  <img src="https://img.shields.io/badge/Tools-135-blue?style=for-the-badge" alt="Tools"/>
+  <img src="https://img.shields.io/badge/Memory-BM25%20%2B%20SQLite-blue?style=for-the-badge" alt="Memory"/>
   <img src="https://img.shields.io/badge/Local-Pure%20Python%2C%20Zero%20GPU-brightgreen?style=for-the-badge" alt="Local"/>
   <img src="https://img.shields.io/badge/Zero%20API%20Keys-3776AB?style=for-the-badge" alt="Zero API Keys"/>
 </p>
 
-Zero cloud LLM dependencies. Zero GPU required. Zero API keys. Pure Python.
+Zero cloud dependencies. Zero GPU. Zero API keys. Pure Python stdlib core.
 
 ---
 
-## Four Hard Problems This Solves
+## Four Scenarios
 
-| Problem | Before | With ai-memory-core |
-|---------|--------|---------------------|
-| **Persistent debugging** | Same error every session, grep Slack, ask again | `read_xtrace_search` → resolved in 0.3s, cross-session |
-| **Architecture memory** | Decisions buried in chat history, forgotten by next week | `read_dtrace_search` → auto-logged, searchable forever |
-| **Session continuity** | Every session starts blank, re-explain project context | `read_hooks_prefetch` → full context in one call |
-| **Safe autonomous execution** | No safety net for destructive operations | `dry_run=true` → preview every mutation before it runs |
+### Scenario 1: Engineering Simulation
 
----
+```python
+# Beam stress analysis for a 3m steel beam
+read_sim_mech_stress(moment=1000, distance_neutral=0.05, I=1.2e-5)
+# → {"stress_mpa": 4.17, "formula": "σ = M*y / I"}
 
-## Quick Benchmarks
+# Column buckling check
+read_sim_mech_buckle(E=200e9, I=1.2e-5, K=1.0, L=3.0)
+# → {"critical_load_kN": 2631.89, "slenderness_ratio": 86.6}
 
-| Task | No memory | ai-memory-core | Speedup |
-|------|-----------|----------------|---------|
-| Re-find a bug fixed 3 sessions ago | 5-8 min scrolling chat history | 0.4s (`read_xtrace_search`) | ~750× |
-| Recall architecture decision from last week | Manual search, may miss context | 0.3s (`read_dtrace_search`) | ~600× |
-| Resume session after restart | Lost context, re-prompt from scratch | 0.5s (`read_hooks_prefetch`) | Instant |
-| Preview a destructive merge | No safety net, hope for the best | 0.01s (`dry_run=true`) | Risk-free |
-| Find semantically related memories | Keyword search misses connections | 0.1s (`read_memory_hybrid_search`) | 2× recall |
+# Pipe flow pressure drop (Darcy-Weisbach)
+read_sim_cfd_pipe(rho=1000, v=2.0, D=0.1, mu=1e-3, L=50)
+# → {"delta_P_kPa": 8.2, "Reynolds": 200000, "regime": "turbulent"}
 
-All benchmarks measured on CPU (no GPU) with 100+ stored entries.
+# FEA beam element stiffness matrix
+read_sim_fea_beam(E=200e9, I=1.2e-5, L=3.0)
+# → {"stiffness_matrix": [[4x4 matrix]], "dof": 4}
+
+# Solve Ax = b with LaTeX derivation
+read_sim_matrix_solve(A=[[2,1],[1,3]], b=[5,6])
+# → {"solution": [1.8, 1.4], "latex": "x = \\begin{bmatrix} 1.8 \\\\ 1.4 \\end{bmatrix}"}
+```
+
+### Scenario 2: Focus & Scope Management
+
+```python
+# A convoluted prompt arrives — decompose it
+read_focus_decompose(prompt_text="Build an API, also add a dashboard, 
+  and can you make a mobile app too? Oh and fix the database migration")
+# → {"tasks": [
+#     {"id": 1, "category": "backend", "description": "Build API"},
+#     {"id": 2, "category": "frontend", "description": "Add dashboard"},
+#     {"id": 3, "category": "mobile", "description": "Make mobile app"},
+#     {"id": 4, "category": "database", "description": "Fix migration"}
+#   ], "total_tasks": 4}
+
+# Prioritize them
+read_focus_prioritize(tasks=[...])
+# → {"ordered_plan": [4, 1, 2, 3], "rationale": "Migration blocks API, API blocks dashboard"}
+
+# Check for scope creep mid-session
+read_focus_scope_check(input_text="Actually let's rewrite everything in Rust instead")
+# → {"classification": "scope_creep", "nudge": "That's a new project — store in Global Memory?"}
+
+# Store an off-task idea for later
+write_focus_store_global(project="rust-rewrite", task="Evaluate Rust for backend")
+```
+
+### Scenario 3: Context Compaction
+
+```python
+# Check token velocity (how fast context is growing)
+read_compact_token_velocity()
+# → {"velocity_5min": 12, "spike_detected": true, "recommendation": "compact now"}
+
+# Condense verbose output into a summary
+read_compact_synthesize(content="[300 lines of build logs...]")
+# → {"summary": "Build failed: ModuleNotFound in 3 files.\nFixed: npm install react-dom",
+#     "compression_ratio": 0.04, "protected_blocks": 2}
+
+# Execute full compaction cycle
+write_compact_execute(content="[session content...]")
+# → {"status": "compacted", "compression_ratio": 0.12}
+
+# Advanced: cross-pollinate memory entries
+write_consolidation_run()
+# → {"links_found": 15, "entries_analyzed": 80}
+```
+
+### Scenario 4: Agent Orchestration
+
+```python
+# Analyze task complexity and generate workstream plan
+python scripts/task-orchestrator.py --task "Create FEA module and wire it" --plan
+# → Workstreams: mod-1 (parallel create) → wire-1 (serial wiring)
+
+# Execute with DAG coordination
+python scripts/dag-coordinator.py --dag data/dag-definitions/master-spec-full-build.json --dry-run
+# → 3 levels: 6 parallel module nodes → 1 serial wiring → 1 verification
+
+# Auto-detect module pattern (parallel create → serial wire)
+python scripts/task-orchestrator.py --task "Create compact and mutation modules" --orchestrate
+# → Phase 1 (parallel): mod-1
+# → Phase 2 (serial):   wire-1
+# → Post-merge: python scripts/phase-verify-full.py
+```
 
 ---
 
 ## Architecture
 
-```mermaid
-graph TB
-    subgraph Layer1["Layer 1: Persistent Memory"]
-        BM25[BM25 Okapi — inverted index]
-        VS[Vector Search — all-mpnet-base-v2]
-        RR[Cross-Encoder Reranker]
-        HY[Hybrid Search — BM25 + Vector + RRF]
-        LC[LRU Query Cache — 128 entries]
-        REG[Structured Registries — errors, decisions, goals, commitments]
-    end
-    
-    subgraph Layer2["Layer 2: Agent Infrastructure"]
-        PG[3-Tier Permission Model<br/>read / write / mutate]
-        DRY[Dry-Run Protocol — preview before execute]
-        UNDO[Checkpoint / Undo System]
-        ANN[MCP Annotations — destructiveHint]
-        HOOKS[Lifecycle Hooks — prefetch, observe, session end]
-        HERMES[Hermes Agent MemoryProvider Plugin]
-    end
-    
-    subgraph Layer3["Layer 3: Capability Modules"]
-        WEB[Web Browsing — Playwright, anti-bot, popup handling]
-        CODE[Code Analysis — 7 languages, review, debug, convert]
-        AUD[Audio Analysis — WAV, frequency, music theory]
-        SVG[SVG Generation — diagrams, flowcharts, themes]
-        LIT[Literature — text analysis, study guides, philosophy]
-        DEV[DevOps — containers, compose, Samba, network]
-        GAME[Game Dev — design analysis, engine comparison, optimization]
-    end
-    
-    Layer1 --> Layer2
-    Layer2 --> Layer3
 ```
+Layer 1: Persistent Memory & Storage
+  BM25 search · SQLite session store · Structured registries (errors, decisions, goals)
 
-### Permission Model
+Layer 2: Cognitive Pipeline
+  /compact  → Context compaction, token velocity, state condensation
+  /mutate   → Scope assessment, redundancy audit, execution
+  /focus    → Scope detection, nudges, prompt decomposition, session pipeline
+  /plumber  → Socket inspection, handoff tracing, artifact checkpointing
 
-```mermaid
-flowchart LR
-    T[Tool Call] --> PM{Server Mode}
-    PM -->|auto| READ[Read-only tools pass, writes blocked]
-    PM -->|interactive| WARN[Write/mutate warned, user confirms]
-    PM -->|permissive| ALLOW[All tools allowed, no warnings]
-    READ --> DR{dry_run?}
-    WARN --> DR
-    ALLOW --> DR
-    DR -->|yes| SIM[Preview only, no side effects]
-    DR -->|no| EXEC[Execute + checkpoint for undo]
-```
+Layer 3: Simulation Engines
+  sim_mech  → Beam stress, column buckling, fatigue (Goodman/Miner), fasteners
+  sim_fea   → Beam elements, truss, modal analysis, heat conduction
+  sim_cfd   → Pipe flow, boundary layer, drag, Bernoulli
+  sim_math  → Matrix solve (Ax=b), ODE (RK4), ASCII plot, LaTeX generation
 
-### Search Pipeline
+Layer 4: Agent Skills
+  sensory   → Web browsing (Playwright), scraping, PDF/OCR, RSS
+  coder     → Analyze, review, debug, convert, scaffold
+  devops    → Containers, compose, Samba, network
+  gamedev   → Design, scaffold, mechanics, monetization
+  audio     → WAV analysis, waveform, frequency, music theory
+  art       → SVG, themes, palettes, design concepts
+  literature→ Text analysis, concepts, study guides
 
-```mermaid
-flowchart LR
-    Q[Query] --> BM25[BM25<br/>inverted index]
-    Q --> VEC[Vector<br/>cosine similarity]
-    BM25 --> RRF
-    VEC --> RRF
-    RRF[Reciprocal Rank Fusion] --> CE{Cross-encoder<br/>available?}
-    CE -->|yes| RERANK[Top-k reranked]
-    CE -->|no| HYBRID[Hybrid results]
-    RERANK --> OUT[Final results]
-    HYBRID --> OUT
+Layer 5: Orchestration
+  task-orchestrator.py  → Module-pattern detection, auto-DAG, parallel subagents
+  dag-coordinator.py    → Topological sort, conditional branching, fan-in merge
+  phase-verify-full.py  → Cross-phase integration tests
 ```
 
 ---
 
-## Layer 1: Persistent Memory
+## Quick Start
 
-The foundation. Every component works with zero LLM calls, zero GPU, zero API keys.
+### One-Click Install (Windows)
 
-### Search (3 tiers, automatic fallback)
+Double-click `ONE-CLICK.cmd` — it downloads Docker, builds the container, and prints your MCP config.
 
-```python
-# 1. BM25 keyword search — no deps, instant
-read_memory_search(query="module not found react")
-
-# 2. Hybrid BM25 + vector — needs sentence-transformers
-read_memory_hybrid_search(query="how does async error handling work")
-
-# 3. Cross-encoder reranked — most accurate, ~50ms
-read_memory_reranked_search(query="architecture decision for database migration")
-```
-
-If sentence-transformers isn't installed, hybrid falls back to BM25. If the cross-encoder isn't installed, reranked falls back to hybrid. **No crashes, no dependency hell.**
-
-### Structured Registries
-
-| Registry | What it stores | Example |
-|----------|---------------|---------|
-| **Error** (`xTrace`) | Error signatures + resolutions | `ModuleNotFound: react → npm install react` |
-| **Decision** (`DTrace`) | Architecture decisions + rationale | Why PostgreSQL over MySQL |
-| **Goal** | Session goals + alignment checks | Are we still on track? |
-| **Commitment** | Cross-session promises + verification | Did we follow through? |
-
-### Lifecycle Hooks
-
-| Hook | When | What |
-|------|------|------|
-| `read_hooks_prefetch` | Session start | One call → memories + decisions + errors |
-| `write_hooks_observe` | During session | Log milestones, auto-push decisions to registry |
-| `write_hooks_session_end` | Session end | Finalize, persist observations |
-
----
-
-## Layer 2: Agent Infrastructure
-
-### Permission Model (unique to this project)
-
-Every tool has a permission level. The server enforces it at three tiers:
-
-| Mode | Use Case | `read_*` | `write_*` | `mutate_*` |
-|------|----------|----------|-----------|------------|
-| `auto` | CI, unattended agents | ✅ Allowed | ❌ Blocked | ❌ Blocked |
-| `interactive` | Human-in-the-loop | ✅ Allowed | ⚠️ Warned | ⚠️ Warned |
-| `permissive` | Trusted environments | ✅ Allowed | ✅ Allowed | ✅ Allowed |
-
-No other MCP memory server has this.
-
-### Dry-Run Protocol
-
-Every write and mutate tool accepts `dry_run=true`:
-
-```python
-# Preview — no side effects
-write_memory_add(text="important fact", dry_run=true)
-# → {"committed": false, "description": "Would add memory (13 chars)", "undo_token": null}
-
-# Execute — creates checkpoint for undo
-write_memory_add(text="important fact")
-# → {"memory_id": "abc...", "status": "stored"}
-
-# Undo if needed
-mutate_undo(checkpoint_id="undo_abc123")
-# → {"status": "restored", "tool": "write_memory_add"}
-```
-
-### MCP Annotations
-
-All tools include standard MCP annotations (`destructiveHint`, `readOnlyHint`, `idempotentHint`) so OpenCode Desktop and other MCP clients show proper permission prompts.
-
-### Hermes Agent Integration
-
-A full `MemoryProvider` plugin with 5 agent tools and 3 lifecycle hooks. See [`hermes-plugin/`](hermes-plugin/).
-
----
-
-## Layer 3: Capability Modules
-
-Each module is a standalone Python file loaded on demand. No import cost until you use it.
-
-| Module | Tools | What |
-|--------|-------|------|
-| Web browsing | 13 | Playwright (Firefox + Chromium), anti-bot, popup dismissal, screenshots, PDF, OCR, RSS, API requests |
-| Code analysis | 7 | Analyze, review, debug, explain, convert, scaffold, architecture recommendations |
-| Audio | 7 | WAV analysis, waveform visualization, DFT frequency analysis, music theory, speech analysis, format conversion, tone generation |
-| Art/SVG | 4 | SVG diagram generation, color themes, palette extraction, design concepts |
-| Literature | 4 | Text analysis, concept extraction, study guides, philosophy analysis |
-| DevOps | 7 | Container debugging, compose generation, Samba config, mergerfs setup, Dockerfile analysis, network troubleshooting |
-| Game Dev | 7 | Design analysis, project scaffolding, mechanics guides, monetization, optimization, engine comparison, level design |
-
----
-
-## Getting Started
-
-### Quick Install
+### Manual Install
 
 ```bash
-git clone https://github.com/ohmpatel3877/ai-memory-core.git
-cd ai-memory-core
+git clone https://github.com/ohmpatel3877/CortexStratum.git
+cd CortexStratum
 python scripts/tools-mcp-server.py
 ```
 
-That's it. Memory works with zero dependencies.
-
-### Optional: Vector Search
-
-```bash
-pip install sentence-transformers numpy
-# Embedding model auto-downloads on first use
-# Default: all-mpnet-base-v2 (768-dim, best quality/speed balance)
-```
+Memory works immediately with zero dependencies (stdlib only).  
+Optional: `pip install sentence-transformers` for vector search.
 
 ### Connect to OpenCode
 
 ```json
 {
   "mcpServers": {
-    "ai-memory-core": {
+    "CortexStratum": {
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"]
     }
@@ -239,53 +173,92 @@ pip install sentence-transformers numpy
 
 ---
 
-## Benchmarks
+## Tool Inventory
 
-### Search Quality (MTEB Score)
+135 tools across 20 domains:
 
-| Model | Dims | MTEB | Speed | Size |
-|-------|------|------|-------|------|
-| `all-MiniLM-L6-v2` | 384 | 58.8 | ⚡ Fast | 80MB |
-| `all-mpnet-base-v2` **(default)** | 768 | **61.7** | 🐢 Moderate | 420MB |
-
-### Search Performance (100 entries, CPU)
-
-| Mode | Latency | Quality |
-|------|---------|---------|
-| BM25 keyword | ~0.5ms | Exact match |
-| Vector semantic | ~8ms | Conceptual match |
-| Hybrid RRF | ~9ms | Best of both |
-| Reranked | ~50ms | Most accurate |
+| Domain | Tools | Category |
+|--------|-------|----------|
+| Memory (BM25/SQLite) | 8 | Core |
+| Trace (error/decision registries) | 5 | Core |
+| Lifecycle Hooks | 4 | Core |
+| Verifier Middleware | 3 | Core |
+| Goal Registry | 4 | Core |
+| Commitment Checker | 2 | Core |
+| Compact Phase | 5 | Cognitive Pipeline |
+| Mutation Phase | 4 | Cognitive Pipeline |
+| Focus Module | 9 | Cognitive Pipeline |
+| Plumber Module | 4 | Cognitive Pipeline |
+| Pedagogy | 3 | Cognitive Pipeline |
+| Consolidation | 3 | Cognitive Pipeline |
+| Mechanics | 14 | Simulation |
+| FEA | 4 | Simulation |
+| CFD | 4 | Simulation |
+| Math Engine | 4 | Simulation |
+| CAD (3D printing) | 2 | Simulation |
+| Electrical (circuits) | 2 | Simulation |
+| Sensory (web) | 13 | Agent Skills |
+| Coder | 7 | Agent Skills |
+| DevOps | 7 | Agent Skills |
+| Game Dev | 7 | Agent Skills |
+| Audio | 7 | Agent Skills |
+| Art/SVG | 4 | Agent Skills |
+| Literature | 4 | Agent Skills |
+| Skill Router / Tool Suggest | 2 | Infrastructure |
+| Permission Audit / Undo | 2 | Infrastructure |
+| Task Orchestrator | — | Infrastructure |
 
 ---
 
 ## Project Structure
 
 ```
-ai-memory-core/
-├── scripts/
-│   ├── tools-mcp-server.py    # MCP server (entry point)
-│   ├── memory_search.py       # BM25 + vector + reranker engine
-│   ├── hooks.py               # Lifecycle hooks
-│   ├── permission_audit.py    # Dry-run + checkpoint/undo
-│   ├── tool_router.py         # Tool suggestions
-│   ├── trace.py               # Error, decision, goal registries
-│   └── *-module.py            # 7 capability modules
-├── hermes-plugin/             # Hermes Agent integration
-├── data/                      # Persistent storage (JSON)
-└── opencode.json              # OpenCode project config
+CortexStratum/
+  scripts/
+    tools-mcp-server.py      # MCP server entrypoint (135 tools)
+    memory_search.py          # BM25 + SQLite engine
+    compact-module.py         # Context compaction
+    mutation-module.py        # Algorithmic mutation
+    focus-module.py           # Scope & session management
+    plumber-module.py         # Execution pipelines
+    sim-mechanics-module.py   # 14 mechanics tools
+    sim-fea-module.py         # 4 FEA tools
+    sim-cfd-module.py         # 4 CFD tools
+    sim-math-module.py        # 4 math tools
+    pedagogy-module.py        # Teaching adaptation
+    consolidation-daemon.py   # TF-IDF cross-pollination
+    sensory-module.py         # Web browsing (Playwright)
+    coder-module.py           # Code analysis
+    audio-module.py           # Audio processing
+    art-module.py             # SVG generation
+    literature-module.py      # Text analysis
+    devops-module.py          # Container/network ops
+    game-dev-module.py        # Game development
+    task-orchestrator.py      # Parallel subagent orchestration
+    dag-coordinator.py        # DAG execution engine
+    phase-verify-full.py      # Cross-phase integration tests
+  cad-module/                 # 3D printing (OpenSCAD)
+  electrical-module/          # Circuit design
+  hermes-plugin/              # Agent MemoryProvider
+  data/                       # Persistent storage (JSON + SQLite)
+  opencode.json               # Project config
 ```
 
 ---
 
 ## Comparisons
 
-| Feature | ai-memory-core | Anthropic server-memory | ClawMem |
-|---------|---------------|------------------------|---------|
-| Permission model | ✅ 3-tier read/write/mutate | ❌ None | ❌ None |
-| Search | BM25 + vector + reranker | Naive substring match | BM25 + vector + graph |
-| Structured registries | ✅ Error, decision, goal | ❌ | ❌ FTS5 only |
-| Dry-run preview | ✅ All write/mutate | ❌ | ❌ |
-| GPU required | ❌ Zero | ❌ Zero | ✅ 4-16 GB |
-| Python-native | ✅ | ❌ TypeScript | ❌ Bun/TypeScript |
-| Hermes plugin | ✅ Production-ready | ❌ | ✅ |
+| Feature | CortexStratum | Basic MCP memory servers |
+|---------|---------------|--------------------------|
+| Total tools | **135** | 5-15 |
+| Permission model | 3-tier (read/write/mutate) | None |
+| Search | BM25 + vector + reranker | Naive substring |
+| Simulation engines | Mechanics, FEA, CFD, math | None |
+| Cognitive pipeline | Compact, mutate, focus, plumber | None |
+| Session lifecycle | /help → context → execute → /end | None |
+| Scope management | Prompt decomposition, prioritizer | None |
+| Orchestration | DAG coordinator, auto-parallelization | None |
+| Dry-run preview | All write/mutate tools | None |
+| Checkpoint/undo | All mutations | None |
+| GPU required | Zero | Varies |
+| API keys | Zero | Often required |

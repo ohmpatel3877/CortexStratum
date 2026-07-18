@@ -20,7 +20,7 @@ from collections import Counter
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-# ── Paths ───────────────────────────────────────────────────
+#  Paths 
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(BASE, "data")
@@ -33,12 +33,12 @@ EVOLUTION_LOG = os.path.join(DATA, "identity-evolution-log.json")
 IDENTITY_SCHEMA = os.path.join(DATA, "identity-schema.json")
 CURRENT_IDENTITY = os.path.join(IDENTITY_DIR, "current-identity.json")
 
-# ── Style ───────────────────────────────────────────────────
+#  Style 
 
 G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; M = "\033[95m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
-BAR = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+BAR = ""
 
-# ── Helpers ─────────────────────────────────────────────────
+#  Helpers 
 
 def ensure_dirs() -> None:
     """Create identity storage directories if they don't exist."""
@@ -49,30 +49,7 @@ def now_iso() -> str:
     """Return current UTC ISO 8601 timestamp."""
     return datetime.now(timezone.utc).isoformat()
 
-def _load_json(path: str, default=None):
-    """Load JSON from path; return default on failure."""
-    try:
-        if os.path.isfile(path):
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    except Exception:
-        pass
-    return default if default is not None else {}
-
-def _save_json(path: str, data, indent: int = 2) -> None:
-    """Atomically write JSON to path using temp file."""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    tmp = path + ".tmp"
-    try:
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=indent, ensure_ascii=False)
-        os.replace(tmp, path)
-    finally:
-        if os.path.isfile(tmp):
-            try:
-                os.remove(tmp)
-            except Exception:
-                pass
+from utils import load_json, save_json
 
 def _list_profiles() -> list[dict]:
     """Read all profile files from .memory/profiles/."""
@@ -82,7 +59,7 @@ def _list_profiles() -> list[dict]:
     for fname in sorted(os.listdir(PROFILES_DIR)):
         fpath = os.path.join(PROFILES_DIR, fname)
         if fname.endswith(".json"):
-            data = _load_json(fpath, {})
+            data = load_json(fpath, {})
             if isinstance(data, dict):
                 data["_file"] = fname
                 profiles.append(data)
@@ -100,7 +77,7 @@ def _query_local_memories(category: Optional[str] = None, limit: int = 50) -> li
     ne_dir = os.path.join(MEMORY_DIR, "ne")
     ne_json = os.path.join(ne_dir, "memories.json")
     if os.path.isfile(ne_json):
-        data = _load_json(ne_json, [])
+        data = load_json(ne_json, [])
         if isinstance(data, list):
             for m in data:
                 if category:
@@ -147,7 +124,7 @@ class IdentityManager:
     def __init__(self):
         ensure_dirs()
 
-    # ── Consolidation ───────────────────────────────────────
+    #  Consolidation 
 
     def consolidate_identity(self, persona_name: str = "default") -> dict:
         """
@@ -167,7 +144,7 @@ class IdentityManager:
         categories = _read_local_categories()
         existing = self._load_current()
 
-        # ── Extract principles from architecture decisions ──
+        #  Extract principles from architecture decisions 
         principles: list[dict] = []
         principle_counter: Counter = Counter()
         for mem in memories:
@@ -185,7 +162,7 @@ class IdentityManager:
                 "rationale": f"Appeared {count}x in architecture decisions. {rationale_cat}"
             })
 
-        # ── Extract traits from user_preferences ────────────
+        #  Extract traits from user_preferences 
         trait_map: dict[str, list[str]] = {}
         pref_patterns = {
             "conciseness": ["concise", "brief", "short", "terse", "minimal", "succinct"],
@@ -229,7 +206,7 @@ class IdentityManager:
             })
         traits.sort(key=lambda t: t["strength"], reverse=True)
 
-        # ── Extract behavioral patterns ─────────────────────
+        #  Extract behavioral patterns 
         behavioral_patterns: list[dict] = []
         anti_pattern_count: Counter = Counter()
         seen_bp = set()
@@ -250,7 +227,7 @@ class IdentityManager:
                     "last_observed": now_iso(),
                 })
 
-        # ── Knowledge boundaries ────────────────────────────
+        #  Knowledge boundaries 
         strong_areas: Counter = Counter()
         weak_areas: Counter = Counter()
         for profile in profiles:
@@ -283,10 +260,10 @@ class IdentityManager:
                     })
         recent_learnings = recent_learnings[-5:]
 
-        # ── Communication style (evolving defaults) ─────────
+        #  Communication style (evolving defaults) 
         comm = self._infer_communication_style(traits, memories)
 
-        # ── Build identity ──────────────────────────────────
+        #  Build identity 
         old_version = existing.get("version", "0.0.0")
         new_version = self._bump_version(old_version)
 
@@ -305,11 +282,11 @@ class IdentityManager:
             "last_consolidated": now_iso(),
         }
 
-        # ── Track evolution ─────────────────────────────────
+        #  Track evolution 
         changes = self._diff_identity(existing, identity)
         self._record_evolution(new_version, changes)
 
-        # ── Save ────────────────────────────────────────────
+        #  Save 
         self._save_identity(identity)
         self._archive_version(identity)
 
@@ -377,7 +354,7 @@ class IdentityManager:
 
     def _record_evolution(self, version: str, changes: list[str]) -> None:
         """Append a version entry to the evolution log."""
-        log = _load_json(EVOLUTION_LOG, {"versions": []})
+        log = load_json(EVOLUTION_LOG, {"versions": []})
         if "versions" not in log:
             log["versions"] = []
         log["versions"].append({
@@ -386,18 +363,18 @@ class IdentityManager:
             "changes_made": changes,
             "triggers": ["consolidation"],
         })
-        _save_json(EVOLUTION_LOG, log)
+        save_json(EVOLUTION_LOG, log)
 
     def _save_identity(self, identity: dict) -> None:
         """Save identity to current-identity.json."""
-        _save_json(CURRENT_IDENTITY, identity)
-        print(f"  {G}✓ Identity v{identity['version']} saved to {CURRENT_IDENTITY}{N}")
+        save_json(CURRENT_IDENTITY, identity)
+        print(f"  {G} Identity v{identity['version']} saved to {CURRENT_IDENTITY}{N}")
 
     def _archive_version(self, identity: dict) -> None:
         """Keep a timestamped copy in history/, prune to last 10."""
         ts = now_iso().replace(":", "-").replace(".", "-")
         path = os.path.join(IDENTITY_HISTORY, f"{ts}.json")
-        _save_json(path, identity)
+        save_json(path, identity)
         all_versions = sorted(
             f for f in os.listdir(IDENTITY_HISTORY) if f.endswith(".json")
         )
@@ -410,9 +387,9 @@ class IdentityManager:
 
     def _load_current(self) -> dict:
         """Load current identity or return empty defaults."""
-        return _load_json(CURRENT_IDENTITY, {})
+        return load_json(CURRENT_IDENTITY, {})
 
-    # ── Session Prompt Rendering ────────────────────────────
+    #  Session Prompt Rendering 
 
     def render_session_prompt(self) -> str:
         """
@@ -446,7 +423,7 @@ class IdentityManager:
         if patterns:
             lines.append("Behavioral Notes:")
             for bp in patterns[:3]:
-                prefix = "🚫 " if "AVOID" in bp.get("pattern", "") else "✅ "
+                prefix = " " if "AVOID" in bp.get("pattern", "") else " "
                 lines.append(f"- {prefix}{bp['pattern'][:120]}")
         else:
             lines.append("Behavioral Notes: (none consolidated yet)")
@@ -480,7 +457,7 @@ class IdentityManager:
             "Recent Learnings: (none — run `consolidate_identity` first)"
         )
 
-    # ── Trait Accessor ──────────────────────────────────────
+    #  Trait Accessor 
 
     def get_trait(self, trait_name: str) -> Optional[float]:
         """
@@ -501,7 +478,7 @@ class IdentityManager:
                 return t["strength"]
         return None
 
-    # ── Behavior Logger ─────────────────────────────────────
+    #  Behavior Logger 
 
     def log_behavior(self, behavior_text: str, context: str = "") -> None:
         """
@@ -518,7 +495,7 @@ class IdentityManager:
             Situational context in which it occurred.
         """
         log_path = os.path.join(IDENTITY_DIR, "behavior-log.json")
-        entries = _load_json(log_path, [])
+        entries = load_json(log_path, [])
         if not isinstance(entries, list):
             entries = []
         entries.append({
@@ -528,10 +505,10 @@ class IdentityManager:
         })
         # Keep last 200 entries
         entries = entries[-200:]
-        _save_json(log_path, entries)
-        print(f"  {G}✓ Behavior logged: {behavior_text[:80]}{N}")
+        save_json(log_path, entries)
+        print(f"  {G} Behavior logged: {behavior_text[:80]}{N}")
 
-    # ── Utility ─────────────────────────────────────────────
+    #  Utility 
 
     def status(self) -> dict:
         """Return current identity status summary."""
@@ -552,7 +529,7 @@ class IdentityManager:
         }
 
 
-# ── CLI ─────────────────────────────────────────────────────
+#  CLI 
 
 def print_status(status: dict) -> None:
     """Pretty-print identity status."""
@@ -576,7 +553,7 @@ def print_status(status: dict) -> None:
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Identity Manager — persona persistence for ai-memory-core")
+    parser = argparse.ArgumentParser(description="Identity Manager — persona persistence for CortexStratum")
     parser.add_argument("--consolidate", action="store_true", help="Consolidate identity from local memories")
     parser.add_argument("--render", action="store_true", help="Render session prompt fragment")
     parser.add_argument("--get-trait", type=str, metavar="TRAIT", help="Get strength of a named trait")
@@ -593,7 +570,7 @@ if __name__ == "__main__":
         print(f"{B}{BOLD}  CONSOLIDATING IDENTITY{N}")
         print(f"{B}{BAR}{N}")
         identity = mgr.consolidate_identity(persona_name=args.persona)
-        print(f"\n  {G}✓ Done. Version {identity['version']} — {len(identity['traits'])} traits, "
+        print(f"\n  {G} Done. Version {identity['version']} — {len(identity['traits'])} traits, "
               f"{len(identity['principles'])} principles{N}")
         print()
 

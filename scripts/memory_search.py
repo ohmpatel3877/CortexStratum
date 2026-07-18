@@ -203,7 +203,7 @@ class NEMemorySearch:
         if not all_terms: return []
         return get_close_matches(term, all_terms, n=3, cutoff=0.85)
 
-    # ── Vector Search ────────────────────────────────────────────────
+    #  Vector Search 
     def vector_available(self) -> bool:
         return _NUMPY_AVAILABLE and _SENTENCE_AVAILABLE
 
@@ -268,7 +268,7 @@ class NEMemorySearch:
                  "timestamp": self.memories[idx].get("timestamp",""), "id": self.memories[idx].get("id","")}
                 for sim, idx in scores[:limit]]
 
-    # ── Cross-Encoder Reranker ────────────────────────────────────────
+    #  Cross-Encoder Reranker 
     def _load_reranker(self):
         if getattr(self, '_reranker', None) is not None: return True
         if not _SENTENCE_AVAILABLE: return False
@@ -296,7 +296,7 @@ class NEMemorySearch:
         except Exception as e:
             return {"results": results_list[:limit], "method": "hybrid_only", "reranker": f"error: {e}"}
 
-    # ── Hybrid Search (BM25 + Vector RRF) ────────────────────────────
+    #  Hybrid Search (BM25 + Vector RRF) 
     def hybrid_search(self, query, limit=10, bm25_weight=0.5, vector_weight=0.5, rrf_k=60):
         bm25_results = self.search(query, limit=limit * 2)
         bm25_map = {r["id"]: r for r in bm25_results}
@@ -329,7 +329,7 @@ class NEMemorySearch:
                 "bm25_weight": bm25_weight, "vector_weight": vector_weight, "rrf_k": rrf_k,
                 "bm25_results_count": len(bm25_results), "vector_results_count": len(vec_results)}
 
-    # ── BM25 Search (with inverted index) ─────────────────────────────
+    #  BM25 Search (with inverted index) 
     def search(self, query: str, limit: int = 10, fuzzy_threshold: float = 0.85) -> list:
         if not self.memories: return []
         cache_key = f"{query}:{limit}:{fuzzy_threshold}"
@@ -363,7 +363,7 @@ class NEMemorySearch:
         self._query_cache.put(cache_key, results)
         return results
 
-    # ── Aggregate Methods ─────────────────────────────────────────────
+    #  Aggregate Methods 
     def synthesize(self, query, max_sources=5, min_confidence=0.7):
         results = self.search(query, limit=max_sources)
         sources = [r for r in results if r["score"] >= min_confidence]

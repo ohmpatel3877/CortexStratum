@@ -15,30 +15,30 @@ Automated virtual machine provisioning, OS deployment, snapshot management, and 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                    VM Test Engine                         │
-├──────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │
-│  │  Hyper-V     │  │  VirtualBox  │  │  QEMU/KVM    │   │
-│  │  (Windows)   │  │  (Cross-plat)│  │  (Linux)     │   │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘   │
-│         │                 │                  │           │
-│  ┌──────┴─────────────────┴──────────────────┴───────┐   │
-│  │              Provisioning Layer                     │   │
-│  │  Vagrant  │  Packer  │  cloud-init  │  Ansible    │   │
-│  └──────────────────────┬──────────────────────────────┘   │
-│                         │                                  │
-│  ┌──────────────────────┴──────────────────────────────┐   │
-│  │              Testing Layer                            │   │
-│  │  Snapshot/Rollback  │  Destructive Tests             │   │
-│  │  Network Isolation  │  Integration Tests             │   │
-│  └──────────────────────┬──────────────────────────────┘   │
-│                         │                                  │
-│  ┌──────────────────────┴──────────────────────────────┐   │
-│  │              CI/CD Integration                       │   │
-│  │  GitHub Actions  │  Self-Hosted Runners             │   │
-│  └─────────────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────┘
+
+                    VM Test Engine                         
+
+         
+    Hyper-V         VirtualBox      QEMU/KVM       
+    (Windows)       (Cross-plat)    (Linux)        
+         
+                                                       
+     
+                Provisioning Layer                        
+    Vagrant    Packer    cloud-init    Ansible       
+     
+                                                           
+     
+                Testing Layer                               
+    Snapshot/Rollback    Destructive Tests                
+    Network Isolation    Integration Tests                
+     
+                                                           
+     
+                CI/CD Integration                          
+    GitHub Actions    Self-Hosted Runners                
+     
+
 ```
 
 ## Quick Start — Spin Up a Test VM
@@ -395,26 +395,26 @@ jobs:
 ## VM Test Engine Architecture Diagram
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  Hyper-V     │     │  Vagrant     │     │  QEMU/KVM    │
-│  (Native)    │     │  (Abstract)  │     │  (Native)    │
-├──────────────┤     ├──────────────┤     ├──────────────┤
-│ windows11    │     │ windows11    │     │ ubuntu       │
-│ windows10    │     │ ubuntu       │     │ debian       │
-│ windows-server│    │ debian       │     │ arch         │
-└──────┬───────┘     │ macos (host) │     └──────┬───────┘
-       │             └──────┬───────┘            │
-       └────────────────────┼────────────────────┘
-                            │
-                    ┌───────┴────────┐
-                    │  Test Runner    │
-                    ├────────────────┤
-                    │  Install Test   │
-                    │  Uninstall Test │
-                    │  Destructive    │
-                    │  Network Test   │
-                    │  Upgrade Test   │
-                    └────────────────┘
+          
+  Hyper-V            Vagrant            QEMU/KVM    
+  (Native)           (Abstract)         (Native)    
+          
+ windows11          windows11          ubuntu       
+ windows10          ubuntu             debian       
+ windows-server     debian             arch         
+      macos (host)      
+                                
+       
+                            
+                    
+                      Test Runner    
+                    
+                      Install Test   
+                      Uninstall Test 
+                      Destructive    
+                      Network Test   
+                      Upgrade Test   
+                    
 ```
 
 ## Common Issues

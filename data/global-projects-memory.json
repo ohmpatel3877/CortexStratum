@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "id": "54473ac2-a552-4887-a0d8-8c1e7ebec6ad",
+      "timestamp": "2026-07-18T15:43:55.051998+00:00",
+      "project": "StudySpace",
+      "task": "Build dashboard",
+      "context": "From scope check",
+      "source_session": "test-001",
+      "status": "pending"
+    }
+  ]
+}

@@ -578,7 +578,7 @@ class SandboxManager:
 def format_result(result: Dict[str, Any], title: str = "Execution Result") -> str:
     """Format a sandbox result dict for human-readable output."""
     status_color = G if result.get("success") else R
-    status_icon = "✓" if result.get("success") else "✗"
+    status_icon = "" if result.get("success") else ""
     lines = [
         f"\n{B}{'=' * 60}{N}",
         f"{B}  {title}{N}",
@@ -622,7 +622,7 @@ def format_safety(safety: Dict[str, Any]) -> str:
     if safety["warnings"]:
         lines.append(f"\n  {Y}Warnings ({len(safety['warnings'])}):{N}")
         for w in safety["warnings"]:
-            lines.append(f"    {Y}⚠ {w}{N}")
+            lines.append(f"    {Y} {w}{N}")
     else:
         lines.append(f"\n  {G}No warnings detected{N}")
     lines.append(f"{'=' * 60}\n")
@@ -682,7 +682,7 @@ def main():
         print(f"{B}{'=' * 60}{N}")
         for entry in log[-20:]:
             color = G if entry["success"] else R
-            print(f"  {color}{'✓' if entry['success'] else '✗'}{N} "
+            print(f"  {color}{'' if entry['success'] else ''}{N} "
                   f"{entry['timestamp'][:19]}  "
                   f"{entry['language']:12}  "
                   f"{entry['duration']:>6.3f}s  "

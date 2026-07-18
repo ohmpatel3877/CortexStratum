@@ -1,4 +1,4 @@
-# ai-memory-core Hermes Plugin
+# CortexStratum Hermes Plugin
 
 Memory provider for Hermes Agent — sandboxed, structured, permission-gated.
 
@@ -14,13 +14,13 @@ Memory provider for Hermes Agent — sandboxed, structured, permission-gated.
 
 ```bash
 # Clone the repo
-git clone https://github.com/ohmpatel3877/ai-memory-core.git ~/ai-memory-core
+git clone https://github.com/ohmpatel3877/CortexStratum.git ~/CortexStratum
 
 # Symlink the plugin
-ln -s ~/ai-memory-core/hermes-plugin ~/.hermes/plugins/ai-memory-core
+ln -s ~/CortexStratum/hermes-plugin ~/.hermes/plugins/CortexStratum
 
 # Enable in Hermes
-hermes plugins enable ai-memory-core
+hermes plugins enable CortexStratum
 hermes memory setup
 ```
 
@@ -45,10 +45,10 @@ Set via `hermes memory setup` or environment:
 
 ## Comparison
 
-| Feature | ai-memory-core | ClawMem |
+| Feature | CortexStratum | ClawMem |
 |---------|---------------|---------|
-| Permission model | ✅ 3-tier | ❌ None |
-| Hybrid search | ✅ BM25 + vector + reranker | ✅ BM25 + vector + graph |
-| Structured registries | ✅ Error, decision, goal | ❌ FTS5 only |
-| Zero GPU | ✅ CPU only | ❌ 4-16 GB VRAM |
-| Python-native | ✅ | ❌ Bun/TypeScript |
+| Permission model |  3-tier |  None |
+| Hybrid search |  BM25 + vector + reranker |  BM25 + vector + graph |
+| Structured registries |  Error, decision, goal |  FTS5 only |
+| Zero GPU |  CPU only |  4-16 GB VRAM |
+| Python-native |  |  Bun/TypeScript |

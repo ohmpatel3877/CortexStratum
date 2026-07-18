@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # ai-memory-core root
+BASE_DIR = Path(__file__).resolve().parent.parent  # CortexStratum root
 SCRIPTS_DIR = BASE_DIR / "scripts"
 DATA_DIR = BASE_DIR / "data"
 
@@ -391,7 +391,7 @@ def test_output_condenser():
 > vite build
 
 vite v5.0.0 building for production...
-✓ 42 modules transformed.
+ 42 modules transformed.
 rendering chunks...
 computing chunk map...
 rendering modules...
@@ -596,7 +596,7 @@ def main():
     
     print("=" * 60)
     print("  AGENT TOOL SYSTEMS EVALUATION HARNESS")
-    print("  deepseek-v4-flash | ai-memory-core")
+    print("  deepseek-v4-flash | CortexStratum")
     print("=" * 60)
     
     test_fns = [

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 fea_analyzer.py - Basic FEA structural analysis for 3D printed / laser-cut parts
-ai-memory-core cad-module
+CortexStratum cad-module
 Provides: section property analysis, beam stress calc, safety factor estimation
 """
 import math

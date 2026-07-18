@@ -1,4 +1,4 @@
-# ai-memory-core — Full dependency installation
+# CortexStratum — Full dependency installation
 # Install with: pip install -r requirements-full.txt
 # For core-only functionality, no packages are needed (stdlib only).
 

@@ -103,7 +103,7 @@ def main():
             "read_skill_router_match",
             "write_goal_registry_init", "write_goal_registry_add_subgoal",
             "read_goal_registry_status", "read_goal_registry_check_alignment",
-            "read_commitment_checker_list", "mutate_commitment_checker_verify",
+            "read_commitment_checker_list", "write_commitment_verify",
         ]
         missing = [t for t in expected_tools if t not in tool_names]
         record("tools/list",

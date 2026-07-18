@@ -1,6 +1,6 @@
 # CAD Workshop Skill
 
-Integrates the ai-memory-core cad-module for mechanical design validation, STL export, FEA analysis, and OpenSCAD project verification.
+Integrates the CortexStratum cad-module for mechanical design validation, STL export, FEA analysis, and OpenSCAD project verification.
 
 ## When to use
 
@@ -52,4 +52,4 @@ python <cad-module>/cad_exporter.py <path> -q high
 
 ## Base directory
 
-`C:\Users\ohmpa\github\ai-memory-core\cad-module\`
+`C:\Users\ohmpa\github\CortexStratum\cad-module\`

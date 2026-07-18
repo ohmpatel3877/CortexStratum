@@ -1,16 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
-  "name": "ai-memory-core",
+  "name": "CortexStratum",
   "description": "Local memory infrastructure for AI coding agents. 68-tool MCP server with permission-gated BM25 memory, cross-session trace system, skill routing, and 7 multi-modal modules (sensory, coder, audio, art, devops, game dev, literature). Zero cloud LLM dependencies for memory operations.",
   "version": "0.3.0",
   "author": {
     "name": "Ohm Patel"
   },
-  "homepage": "https://github.com/ohmpatel3877/ai-memory-core",
-  "repository": "https://github.com/ohmpatel3877/ai-memory-core",
+  "homepage": "https://github.com/ohmpatel3877/CortexStratum",
+  "repository": "https://github.com/ohmpatel3877/CortexStratum",
   "license": "MIT",
   "keywords": [
-    "ai-memory-core", "mcp-server", "memory", "bm25", "local-memory",
+    "CortexStratum", "mcp-server", "memory", "bm25", "local-memory",
     "agent-memory", "trace-system", "skill-router", "persistence",
     "opencode", "open-code", "ai-agent", "local-first",
     "error-tracking", "decision-registry", "goal-tracking"

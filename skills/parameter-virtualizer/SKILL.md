@@ -19,26 +19,26 @@ Gives weaker models "virtual parameters" through structured reasoning protocols,
 
 ```
 User Prompt
-     │
-     ▼
-┌─────────────────────────────┐
-│  Parameter Virtualizer       │
-├─────────────────────────────┤
-│  1. Mode Selection           │  auto / enhanced / expert / genius
-│  2. Persona Injection        │  senior_engineer / architect / polymath
-│  3. CoT Scaffolding          │  Step-by-step reasoning protocol
-│  4. Context Augmentation     │  File contents, domain hints
-│  5. Inference Plan           │  Temperature, token budget, passes
-│  6. Self-Consistency         │  N passes → vote → merge
-│  7. Verification             │  Criteria matching output type
-└──────────┬──────────────────┘
-           │
-           ▼
-┌─────────────────────────────┐
-│  Target Model (weaker)       │
-│  Receives AUGMENTED prompt   │
-│  → produces stronger output  │
-└─────────────────────────────┘
+     
+     
+
+  Parameter Virtualizer       
+
+  1. Mode Selection             auto / enhanced / expert / genius
+  2. Persona Injection          senior_engineer / architect / polymath
+  3. CoT Scaffolding            Step-by-step reasoning protocol
+  4. Context Augmentation       File contents, domain hints
+  5. Inference Plan             Temperature, token budget, passes
+  6. Self-Consistency           N passes → vote → merge
+  7. Verification               Criteria matching output type
+
+           
+           
+
+  Target Model (weaker)       
+  Receives AUGMENTED prompt   
+  → produces stronger output  
+
 ```
 
 ## How It Works

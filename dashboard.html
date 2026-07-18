@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ai-memory-core · MCP Server Dashboard</title>
+<title>CortexStratum · MCP Server Dashboard</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#0b1120;color:#e2e8f0;min-height:100vh;font-size:14px}
 
-/* ── Header ── */
+/*  Header  */
 .header{background:#0f172a;border-bottom:1px solid #1e293b;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .header h1{font-size:1.1rem;font-weight:600;color:#38bdf8;display:flex;align-items:center;gap:8px}
 .header h1 span{color:#64748b;font-weight:400;font-size:.8rem}
@@ -22,7 +22,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0b1120;color:#e2
 .btn:hover{background:#334155;border-color:#475569}
 .last-updated{color:#475569;font-size:.72rem}
 
-/* ── Stats Bar ── */
+/*  Stats Bar  */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 24px}
 .stat{background:#131c31;border:1px solid #1e293b;border-radius:10px;padding:14px;text-align:center}
 .stat .num{font-size:1.6rem;font-weight:700;color:#38bdf8;line-height:1.2}
@@ -31,7 +31,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0b1120;color:#e2
 .stat .num.green{color:#4ade80}.stat .num.purple{color:#a78bfa}.stat .num.amber{color:#fbbf24}
 .stat .num.rose{color:#f87171}.stat .num.teal{color:#2dd4bf}
 
-/* ── Tabs ── */
+/*  Tabs  */
 .tabs{display:flex;gap:0;margin:0 24px;border-bottom:1px solid #1e293b;overflow-x:auto}
 .tab{padding:10px 18px;font-size:.8rem;cursor:pointer;border-bottom:2px solid transparent;color:#64748b;transition:all .15s;white-space:nowrap}
 .tab:hover{color:#e2e8f0;background:#131c31}
@@ -39,12 +39,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0b1120;color:#e2
 .tab-content{display:none;padding:16px 24px}
 .tab-content.active{display:block}
 
-/* ── Cards ── */
+/*  Cards  */
 .card{background:#131c31;border:1px solid #1e293b;border-radius:10px;margin-bottom:14px;overflow:hidden}
 .card-hdr{padding:10px 14px;border-bottom:1px solid #1e293b;font-size:.8rem;font-weight:600;color:#94a3b8;display:flex;justify-content:space-between;align-items:center}
 .card-body{padding:14px}
 
-/* ── Table ── */
+/*  Table  */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.78rem}
 th{text-align:left;padding:8px 10px;color:#64748b;font-weight:500;border-bottom:1px solid #1e293b;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
@@ -56,7 +56,7 @@ tr.priority-recurring td:first-child{border-left:3px solid #fbbf24;background:#1
 tr.priority-recurring:hover td{background:#221d0e}
 tr.priority-open td:first-child{border-left:3px solid #fb923c}
 
-/* ── Badges ── */
+/*  Badges  */
 .perm{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.68rem;font-weight:600}
 .perm-read{background:#0f3b2e;color:#4ade80}
 .perm-write{background:#3b2e0f;color:#fbbf24}
@@ -67,11 +67,11 @@ tr.priority-open td:first-child{border-left:3px solid #fb923c}
 .tag-tech{background:#1b3b2e;color:#4ade80;border:1px solid #166534}
 .tag-sec{background:#3b0f1a;color:#f87171;border:1px solid #7f1d1d}
 
-/* ── Bars ── */
+/*  Bars  */
 .bar{height:6px;border-radius:3px;background:#1e293b;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
 
-/* ── Filters ── */
+/*  Filters  */
 .filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .filters input{background:#0f172a;border:1px solid #1e293b;color:#e2e8f0;padding:6px 12px;border-radius:6px;font-size:.78rem;flex:1;min-width:140px}
 .filters input:focus{outline:none;border-color:#38bdf8}
@@ -79,7 +79,7 @@ tr.priority-open td:first-child{border-left:3px solid #fb923c}
 .filters select{background:#0f172a;border:1px solid #1e293b;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
 .filters select:focus{outline:none;border-color:#38bdf8}
 
-/* ── Decision cards ── */
+/*  Decision cards  */
 code{background:#1a1a2e;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:.78rem;color:#a78bfa}
 pre{background:transparent !important;padding:0 !important;margin:0 !important}
 .d-card{padding:12px;border:1px solid #1e293b;border-radius:8px;margin-bottom:8px;font-size:.8rem}
@@ -88,14 +88,14 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 .d-card .meta{color:#64748b;font-size:.7rem;margin-bottom:5px}
 .d-card p{color:#94a3b8;line-height:1.5}
 
-/* ── Checklist ── */
+/*  Checklist  */
 .cl-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #0f172a;font-size:.8rem}
 .cl-item:last-child{border-bottom:none}
 .cl-dot{width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;margin-top:1px}
 .cl-done{background:#0f3b2e;color:#4ade80}
 .cl-pending{background:#3b2e0f;color:#fbbf24}
 
-/* ── Goal ── */
+/*  Goal  */
 .goal-hdr{font-size:1rem;font-weight:600;color:#e2e8f0;margin-bottom:2px}
 .goal-meta{color:#64748b;font-size:.75rem;margin-bottom:12px}
 .goal-pct{text-align:right;font-size:.72rem;color:#94a3b8;margin-bottom:3px}
@@ -103,7 +103,7 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 .goal-sub{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #0f172a;font-size:.78rem}
 .goal-sub:last-child{border-bottom:none}
 
-/* ── States ── */
+/*  States  */
 .empty{padding:40px 20px;text-align:center;color:#475569;font-size:.82rem}
 .empty .icon{font-size:2rem;margin-bottom:8px;opacity:.3}
 .error-msg{padding:20px;text-align:center;color:#f87171;font-size:.82rem}
@@ -111,7 +111,7 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading::after{content:'';display:inline-block;width:18px;height:18px;border:2px solid #1e293b;border-top-color:#38bdf8;border-radius:999px;animation:spin .6s linear infinite;margin-left:8px;vertical-align:middle}
 
-/* ── Mobile ── */
+/*  Mobile  */
 @media(max-width:640px){
   .header h1{font-size:.95rem}
   .stats{grid-template-columns:repeat(2,1fr);margin:12px}
@@ -124,7 +124,7 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 <body>
 
 <div class="header">
-  <h1>ai-memory-core <span>· MCP Server</span></h1>
+  <h1>CortexStratum <span>· MCP Server</span></h1>
   <div class="header-right">
     <div class="status-dot" id="statusDot"></div>
     <span class="last-updated" id="lastUpdated">—</span>
@@ -143,12 +143,12 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 </div>
 
 <div class="tabs" id="tabBar">
-  <div class="tab active" data-tab="tools" onclick="switchTab('tools')">🧰 Tools</div>
-  <div class="tab" data-tab="trace" onclick="switchTab('trace')">📋 Trace</div>
-  <div class="tab" data-tab="decisions" onclick="switchTab('decisions')">📐 Decisions</div>
-  <div class="tab" data-tab="goals" onclick="switchTab('goals')">🎯 Goals</div>
-  <div class="tab" data-tab="commitments" onclick="switchTab('commitments')">✅ Commitments</div>
-  <div class="tab" data-tab="opencode" onclick="switchTab('opencode')">🔌 OpenCode</div>
+  <div class="tab active" data-tab="tools" onclick="switchTab('tools')"> Tools</div>
+  <div class="tab" data-tab="trace" onclick="switchTab('trace')"> Trace</div>
+  <div class="tab" data-tab="decisions" onclick="switchTab('decisions')"> Decisions</div>
+  <div class="tab" data-tab="goals" onclick="switchTab('goals')"> Goals</div>
+  <div class="tab" data-tab="commitments" onclick="switchTab('commitments')"> Commitments</div>
+  <div class="tab" data-tab="opencode" onclick="switchTab('opencode')"> OpenCode</div>
 </div>
 
 <div id="toolsTab" class="tab-content active"></div>
@@ -159,7 +159,7 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 <div id="opencodeTab" class="tab-content"></div>
 
 <script>
-// ── Data ──
+//  Data 
 const DATA = {};
 let TOOLS_CACHE = null;
 
@@ -191,7 +191,7 @@ function priorityClass(e) {
   return '';
 }
 
-// ── Load ──
+//  Load 
 async function loadAll() {
   document.getElementById('statusDot').className = 'status-dot loading';
   document.getElementById('lastUpdated').textContent = 'loading...';
@@ -268,7 +268,7 @@ document.getElementById('errorSub').textContent = resolved + ' resolved' + (recu
   document.getElementById('statusDot').className = 'status-dot ok';
 }
 
-// ── Tab switching ──
+//  Tab switching 
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -276,10 +276,10 @@ function switchTab(name) {
   document.getElementById(name + 'Tab').classList.add('active');
 }
 
-// ── Render: Tools ──
+//  Render: Tools 
 function renderTools() {
   const tools = DATA.tools;
-  if (!tools) { document.getElementById('toolsTab').innerHTML = '<div class="empty"><div class="icon">⚙</div>Tool inventory not found. Run the MCP server first.</div>'; return; }
+  if (!tools) { document.getElementById('toolsTab').innerHTML = '<div class="empty"><div class="icon"></div>Tool inventory not found. Run the MCP server first.</div>'; return; }
 
   const modules = [...new Set(tools.map(t => t.module || 'core'))].sort();
 
@@ -324,11 +324,11 @@ window.filterTools = function() {
   });
 };
 
-// ── Render: Trace (Error Registry) ──
+//  Render: Trace (Error Registry) 
 function renderTrace() {
-  if (!DATA.errors) { document.getElementById('traceTab').innerHTML = '<div class="empty"><div class="icon">📋</div>No error registry data.</div>'; return; }
+  if (!DATA.errors) { document.getElementById('traceTab').innerHTML = '<div class="empty"><div class="icon"></div>No error registry data.</div>'; return; }
   const list = DATA.errors.errors || [];
-  if (list.length === 0) { document.getElementById('traceTab').innerHTML = '<div class="empty"><div class="icon">✅</div>No errors logged. Clean run.</div>'; return; }
+  if (list.length === 0) { document.getElementById('traceTab').innerHTML = '<div class="empty"><div class="icon"></div>No errors logged. Clean run.</div>'; return; }
 
   const sorted = [...list].sort((a,b) => (b.occurrence_count||0) - (a.occurrence_count||0));
   const maxOcc = Math.max(...sorted.map(e => e.occurrence_count||0), 1);
@@ -359,11 +359,11 @@ function renderTrace() {
   document.getElementById('traceTab').innerHTML = html;
 }
 
-// ── Render: Decisions ──
+//  Render: Decisions 
 function renderDecisions() {
-  if (!DATA.decisions) { document.getElementById('decisionsTab').innerHTML = '<div class="empty"><div class="icon">📐</div>No decision registry data.</div>'; return; }
+  if (!DATA.decisions) { document.getElementById('decisionsTab').innerHTML = '<div class="empty"><div class="icon"></div>No decision registry data.</div>'; return; }
   const list = DATA.decisions.decisions || [];
-  if (list.length === 0) { document.getElementById('decisionsTab').innerHTML = '<div class="empty"><div class="icon">📐</div>No decisions recorded.</div>'; return; }
+  if (list.length === 0) { document.getElementById('decisionsTab').innerHTML = '<div class="empty"><div class="icon"></div>No decisions recorded.</div>'; return; }
 
   let html = '';
   [...list].reverse().forEach(d => {
@@ -381,15 +381,15 @@ function renderDecisions() {
   document.getElementById('decisionsTab').innerHTML = '<div class="card"><div class="card-hdr">Decision Registry <span>'+list.length+' entries</span></div><div class="card-body">'+html+'</div></div>';
 }
 
-// ── Render: Goals ──
+//  Render: Goals 
 function renderGoals() {
-  if (!DATA.goal) { document.getElementById('goalsTab').innerHTML = '<div class="empty"><div class="icon">🎯</div>No goal data.</div>'; return; }
+  if (!DATA.goal) { document.getElementById('goalsTab').innerHTML = '<div class="empty"><div class="icon"></div>No goal data.</div>'; return; }
   const g = DATA.goal;
   const subs = g.sub_goals || [];
   const done = subs.filter(s => s.status === 'completed').length;
   const pct = subs.length > 0 ? Math.round(done/subs.length*100) : 0;
 
-  if (!g.original_goal) { document.getElementById('goalsTab').innerHTML = '<div class="empty"><div class="icon">🎯</div>No active goal.</div>'; return; }
+  if (!g.original_goal) { document.getElementById('goalsTab').innerHTML = '<div class="empty"><div class="icon"></div>No active goal.</div>'; return; }
 
   let html = '<div class="card"><div class="card-hdr">Goal Registry</div><div class="card-body">';
   html += '<div class="goal-hdr">'+(g.original_goal||'Untitled')+'</div>';
@@ -400,7 +400,7 @@ function renderGoals() {
     html += '<div style="margin-top:10px">';
     subs.forEach(s => {
       const d = s.status === 'completed';
-      html += `<div class="goal-sub"><span>${s.description||'Untitled'}</span><span class="perm ${d?'perm-read':'perm-write'}">${d?'✅ done':'⏳ '+s.status}</span></div>`;
+      html += `<div class="goal-sub"><span>${s.description||'Untitled'}</span><span class="perm ${d?'perm-read':'perm-write'}">${d?' done':'⏳ '+s.status}</span></div>`;
     });
     html += '</div>';
   } else {
@@ -410,18 +410,18 @@ function renderGoals() {
   document.getElementById('goalsTab').innerHTML = html;
 }
 
-// ── Render: Commitments ──
+//  Render: Commitments 
 function renderCommitments() {
-  if (!DATA.commitments) { document.getElementById('commitmentsTab').innerHTML = '<div class="empty"><div class="icon">✅</div>No commitment data.</div>'; return; }
+  if (!DATA.commitments) { document.getElementById('commitmentsTab').innerHTML = '<div class="empty"><div class="icon"></div>No commitment data.</div>'; return; }
   const list = DATA.commitments.commitments || [];
-  if (list.length === 0) { document.getElementById('commitmentsTab').innerHTML = '<div class="empty"><div class="icon">✅</div>No commitments defined.</div>'; return; }
+  if (list.length === 0) { document.getElementById('commitmentsTab').innerHTML = '<div class="empty"><div class="icon"></div>No commitments defined.</div>'; return; }
 
   let html = '<div class="card"><div class="card-hdr">Commitments <span>'+list.length+' total</span></div><div class="card-body">';
   list.forEach(c => {
     const sessions = c.verified_sessions || [];
     const v = sessions.length > 0;
     html += `<div class="cl-item">
-      <div class="cl-dot ${v?'cl-done':'cl-pending'}">${v?'✓':'·'}</div>
+      <div class="cl-dot ${v?'cl-done':'cl-pending'}">${v?'':'·'}</div>
       <div style="flex:1">
         <div style="color:#e2e8f0">${c.text||'Untitled'}</div>
         <div style="color:#475569;font-size:.7rem;margin-top:2px">${v?'Verified in '+sessions.length+' session(s)':'Not yet verified'} · Next: ${fd(c.next_verify)}</div>
@@ -432,7 +432,7 @@ function renderCommitments() {
   document.getElementById('commitmentsTab').innerHTML = html;
 }
 
-// ── Render: OpenCode Integration ──
+//  Render: OpenCode Integration 
 function renderOpenCode() {
   const router = DATA.router;
   const skills = DATA.activeSkills || [];
@@ -446,7 +446,7 @@ function renderOpenCode() {
   let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
 
   // Card 1: MCP Server Connection
-  html += '<div class="card"><div class="card-hdr">🔌 MCP Server</div><div class="card-body">';
+  html += '<div class="card"><div class="card-hdr"> MCP Server</div><div class="card-body">';
   html += '<table><tbody>';
   html += '<tr><td style="color:#64748b">Protocol</td><td style="color:#e2e8f0">JSON-RPC 2.0 over stdio</td></tr>';
   html += '<tr><td style="color:#64748b">Tools</td><td style="color:#e2e8f0">' + totalTools + ' <span style="color:#64748b;font-size:.72rem">(' + rCount + 'r / ' + wCount + 'w / ' + mCount + 'm)</span></td></tr>';
@@ -462,7 +462,7 @@ function renderOpenCode() {
   const rPct = totalP > 0 ? Math.round(rCount/totalP*100) : 0;
   const wPct = totalP > 0 ? Math.round(wCount/totalP*100) : 0;
   const mPct = totalP > 0 ? Math.round(mCount/totalP*100) : 0;
-  html += '<div class="card"><div class="card-hdr">🛡️ Permission Model</div><div class="card-body">';
+  html += '<div class="card"><div class="card-hdr"> Permission Model</div><div class="card-body">';
   html += '<div style="margin-bottom:10px"><div class="bar" style="height:20px;display:flex;gap:2px">';
   html += '<div class="bar-fill" style="width:'+rPct+'%;background:#4ade80;border-radius:3px 0 0 3px" title="read: '+rCount+' tools"></div>';
   html += '<div class="bar-fill" style="width:'+wPct+'%;background:#fbbf24" title="write: '+wCount+' tools"></div>';
@@ -482,7 +482,7 @@ function renderOpenCode() {
   const fallback = router ? router.fallback || {} : {};
   const fallbackLevels = fallback.levels ? fallback.levels.length : 0;
   const defaults = router ? router.default_skills || [] : [];
-  html += '<div class="card"><div class="card-hdr">🧠 Skill Router <span>v' + (router?.version || '?') + '</span></div><div class="card-body">';
+  html += '<div class="card"><div class="card-hdr"> Skill Router <span>v' + (router?.version || '?') + '</span></div><div class="card-body">';
   html += '<table><tbody>';
   html += '<tr><td style="color:#64748b">Rules</td><td style="color:#e2e8f0">' + rules.length + ' trigger rules</td></tr>';
   html += '<tr><td style="color:#64748b">Fallback</td><td style="color:#e2e8f0">' + fallbackLevels + ' levels <span style="color:#475569;font-size:.72rem">(env → config → defaults)</span></td></tr>';
@@ -498,7 +498,7 @@ function renderOpenCode() {
   html += '</div></div></div>';
 
   // Card 4: Active Skills
-  html += '<div class="card"><div class="card-hdr">⚡ Active Skills <span>' + skills.length + '</span></div><div class="card-body">';
+  html += '<div class="card"><div class="card-hdr"> Active Skills <span>' + skills.length + '</span></div><div class="card-body">';
   if (skills.length > 0) {
     const cols = Math.ceil(skills.length / 2);
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.75rem">';
@@ -513,14 +513,14 @@ function renderOpenCode() {
   html += '</div></div>';
 
   // Card 5: Integration Code Snippets
-  html += '<div class="card" style="grid-column:1/-1"><div class="card-hdr">📋 Quick Integration</div><div class="card-body">';
+  html += '<div class="card" style="grid-column:1/-1"><div class="card-hdr"> Quick Integration</div><div class="card-body">';
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.75rem">';
 
   // opencode.json snippet
   html += '<div style="background:#0f172a;border-radius:6px;padding:10px">';
   html += '<div style="color:#64748b;margin-bottom:4px">opencode.json</div>';
   html += '<pre style="margin:0;color:#38bdf8;font-family:monospace;line-height:1.5">' +
-    '{\n  "mcpServers": {\n    "ai-memory-core": {\n      "command": "python",\n      "args": ["scripts/tools-mcp-server.py"]\n    }\n  }\n}' +
+    '{\n  "mcpServers": {\n    "CortexStratum": {\n      "command": "python",\n      "args": ["scripts/tools-mcp-server.py"]\n    }\n  }\n}' +
     '</pre></div>';
 
   // Commands
@@ -536,7 +536,7 @@ function renderOpenCode() {
   document.getElementById('opencodeTab').innerHTML = html;
 }
 
-// ── Init ──
+//  Init 
 loadAll();
 </script>
 </body>

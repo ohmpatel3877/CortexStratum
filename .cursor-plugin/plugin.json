@@ -1,11 +1,11 @@
 {
-  "name": "ai-memory-core",
+  "name": "CortexStratum",
   "description": "68-tool MCP server: local BM25 memory, trace system, skill routing, multi-modal AI generation. Zero cloud LLM dependencies.",
   "version": "0.3.0",
   "author": "Ohm Patel",
-  "repository": "https://github.com/ohmpatel3877/ai-memory-core",
+  "repository": "https://github.com/ohmpatel3877/CortexStratum",
   "license": "MIT",
-  "homepage": "https://github.com/ohmpatel3877/ai-memory-core",
+  "homepage": "https://github.com/ohmpatel3877/CortexStratum",
   "tools": [
     {
       "name": "memory-search",

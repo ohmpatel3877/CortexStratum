@@ -1,26 +1,16 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "name": "ai-memory-core",
-  "version": "0.3.0",
-  "description": "68-tool MCP server: BM25 memory, trace system, skill routing, 7 multi-modal modules. Zero cloud LLM dependencies.",
-  "icon": "🧠",
+  "name": "CortexStratum",
+  "version": "0.4.0",
+  "description": "124-tool MCP server: BM25+SQLite memory, trace system, skill routing, 13 multi-modal modules, simulation engines, compaction/mutation/pedagogy cognitive architecture.",
+  "icon": "",
 
   "mcpServers": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
-      "description": "68-tool MCP server: BM25 memory, trace, skill router, multi-modal AI generation",
+    "CortexStratum": {
+      "name": "CortexStratum",
+      "description": "124-tool MCP server: BM25+SQLite memory, simulation, cognitive pipeline",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
-      "env": {
-        "AI_MEMORY_EMBEDDING_MODEL": "all-mpnet-base-v2"
-      },
-      "disabled": false
-    },
-    "ai-memory-core-permissive": {
-      "name": "ai-memory-core (permissive)",
-      "description": "Same server with all permission checks bypassed",
-      "command": "python",
-      "args": ["scripts/tools-mcp-server.py", "--permissive"],
       "env": {
         "AI_MEMORY_EMBEDDING_MODEL": "all-mpnet-base-v2"
       },
@@ -140,19 +130,37 @@
   },
 
   "projects": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
+    "CortexStratum": {
+      "name": "CortexStratum",
       "root": ".",
-      "icon": "🧠",
+      "icon": "",
       "color": "#6C5CE7"
     }
   },
 
   "references": {
-    "ai-memory-core": {
-      "path": "~/github/ai-memory-core",
-      "repository": "ohmpatel3877/ai-memory-core",
-      "description": "68-tool MCP server: local BM25 memory, trace system, skill router, multi-modal AI. v0.3.0."
+    "CortexStratum": {
+      "path": "~/github/CortexStratum",
+      "repository": "ohmpatel3877/CortexStratum",
+      "description": "124-tool MCP server: BM25+SQLite memory, simulation engines, orchestration. v0.4.0."
+    }
+  },
+
+  "commands": {
+    "/compact": {
+      "template": "Run context compaction. Usage: /compact synthesize|status|execute [content]",
+      "description": "Dynamic context compaction — token velocity tracking, state condensation, artifact protection.",
+      "agent": "build"
+    },
+    "/mutate": {
+      "template": "Run algorithmic mutation phase. Usage: /mutate scope|audit|execute [trigger]",
+      "description": "DAG redundancy audit, structural refactoring, execution validation.",
+      "agent": "build"
+    },
+    "/sim": {
+      "template": "Run engineering simulation. Usage: /sim mech|math|fea|cfd <params>",
+      "description": "Engineering computation — FEA, CFD, mechanics, math engine.",
+      "agent": "build"
     }
   }
 }

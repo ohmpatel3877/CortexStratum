@@ -1875,17 +1875,17 @@ def recommend_architecture(project_type: str, scale: str = "medium",
         tech_stack = ["Node.js or Go", "WebSocket or SSE", "Redis Pub/Sub", "Kafka (event streaming)"]
 
     diagram = f"""
-    ┌─────────────────────────────────────┐
-    │      {best['name']}     │
-    └─────────────────────────────────────┘
+    
+          {best['name']}     
+    
     """
     for i, layer in enumerate(best.get("layers", [])):
-        connector = "│           │       ▲            │" if i < len(best["layers"]) - 1 else ""
-        diagram += f"    ┌─── {layer} ───┐\n"
+        connector = "                              " if i < len(best["layers"]) - 1 else ""
+        diagram += f"     {layer} \n"
         if i < len(best["layers"]) - 1:
-            diagram += "    │        ┌───────────┐       │\n"
-            diagram += "    └────────┤  depends  ├───────┘\n"
-            diagram += "             └───────────┘\n"
+            diagram += "                   \n"
+            diagram += "      depends  \n"
+            diagram += "             \n"
 
     return {
         "recommended_pattern": best["name"],

@@ -22,10 +22,10 @@ All learning follows: **Encode → Store → Retrieve**
 Most students optimize encoding (reading, highlighting, watching). The bottleneck is always retrieval.
 
 ```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│  Encode  │ ──→ │  Store   │ ──→ │ Retrieve │
-│  (Input) │     │  (Hold)  │     │  (Output)│
-└──────────┘     └──────────┘     └──────────┘
+          
+  Encode   →   Store    →  Retrieve 
+  (Input)        (Hold)         (Output)
+          
       ↑                ↑                ↑
    reading          sleep,           practice
    listening       spacing,         tests,

@@ -57,7 +57,7 @@ class DAGStateManager:
         self.state_dir = _ensure_dir(os.path.join(self.base_dir, dag_id))
         self._lock = threading.Lock()
 
-    # ── Path Helpers ────────────────────────────────────────
+    #  Path Helpers 
 
     def _state_path(self, node_id: str) -> str:
         """Path to a node's state JSON file."""
@@ -71,7 +71,7 @@ class DAGStateManager:
         """Path for temporary write before atomic rename."""
         return os.path.join(self.state_dir, f".{node_id}.{uuid.uuid4().hex[:8]}.tmp")
 
-    # ── Locking ─────────────────────────────────────────────
+    #  Locking 
 
     def acquire_lock(self, node_id: str, timeout: float = 10.0) -> bool:
         """
@@ -113,7 +113,7 @@ class DAGStateManager:
         except OSError:
             pass
 
-    # ── CRUD Operations ─────────────────────────────────────
+    #  CRUD Operations 
 
     def write_state(self, node_id: str, data: dict) -> str:
         """
@@ -243,7 +243,7 @@ class DAGStateManager:
         state = self.read_state(node_id)
         return state.get("phase", "unknown") if state else "unknown"
 
-    # ── Merge Operations ────────────────────────────────────
+    #  Merge Operations 
 
     def merge_outputs(self, node_ids: list[str], strategy: str = "deep_merge") -> dict:
         """
@@ -305,7 +305,7 @@ class DAGStateManager:
             else:
                 target[key] = val
 
-    # ── Initialization ──────────────────────────────────────
+    #  Initialization 
 
     def init_node_state(self, node_id: str, input_data: dict, temperature: float = 0.7) -> dict:
         """
@@ -382,7 +382,7 @@ class DAGStateManager:
         self.write_state(node_id, state)
         return state
 
-    # ── Heartbeat ───────────────────────────────────────────
+    #  Heartbeat 
 
     def write_heartbeat(self, node_id: str, step: str = "") -> None:
         """
@@ -422,7 +422,7 @@ class DAGStateManager:
             return None
 
 
-# ── CLI Entry Point ─────────────────────────────────────────
+#  CLI Entry Point 
 
 if __name__ == "__main__":
     import argparse

@@ -5,7 +5,7 @@
     {
       "name": "initialize",
       "passed": true,
-      "detail": "serverInfo={'name': 'ai-memory-core-tools', 'version': '1.0.0'}"
+      "detail": "serverInfo={'name': 'CortexStratum-tools', 'version': '1.0.0'}"
     },
     {
       "name": "tools/list",

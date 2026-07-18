@@ -906,6 +906,14 @@ SENSORY_TOOLS = [
 def handle_tool_call(name: str, args: dict) -> dict:
     """Dispatch MCP tool call to the appropriate handler function."""
     dispatch = {
+        # MERGED: read_sensory_fetch replaces browse + scrape + extract_article
+        "sensory_fetch": lambda a: (
+            browse_url(a["url"], a.get("mode", "text"), a.get("timeout_ms", 30000))
+            if a.get("method", "browser") == "browser"
+            else scrape_url(a["url"], a.get("mode", "text"), a.get("headers"))
+            if a.get("method") == "http"
+            else scrape_extract_article(a["url"])
+        ),
         "sensory_browse": lambda a: browse_url(a["url"], a.get("extract_mode", "text"), a.get("timeout_ms", 30000)),
         "sensory_screenshot": lambda a: browse_screenshot(a["url"], a.get("output_path", ""), a.get("timeout_ms", 30000)),
         "sensory_interact": lambda a: browse_interact(a["url"], a.get("actions", []), a.get("timeout_ms", 30000)),

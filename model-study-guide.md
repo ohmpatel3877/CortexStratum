@@ -123,7 +123,7 @@ STEP 5: Execute
 
 ```
 Session Type        Skills to Preload                    Verification Gate
-─────────────────────────────────────────────────────────────────────────
+
 Code/build          brainstorm, tdd, concise-filter       lint + typecheck + test
 Audit/inspect       model-psychologist, pr-review, api-contract   read confirms + @verify
 Research            educate, wikipedia-ghost, context-extractor   cross-check sources

@@ -153,6 +153,9 @@ class HookManager:
         _SESSION_CACHE[session_id] = context
         _SESSION_OBSERVATIONS[session_id] = []
 
+        # Auto-check compaction needed after prefetch
+        context["compaction"] = _check_compaction_needed()
+
         return context
 
     def _query_memories(self, query: str, limit: int) -> list:
@@ -447,6 +450,23 @@ def _get_hooks():
     return _DEFAULT_HOOKS
 
 
+def _check_compaction_needed():
+    """Auto-check if compaction is needed after session events."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("compact_module",
+            os.path.join(os.path.dirname(__file__), "compact-module.py"))
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            velocity = mod.get_token_velocity()
+            if velocity.get("spike_detected"):
+                return {"compaction_recommended": True, "velocity": velocity["velocity_5min"], "message": "Token velocity spike detected. Run write_compact_execute to condense."}
+    except Exception:
+        pass
+    return {"compaction_recommended": False}
+
+
 def hooks_handle_tool_call(name: str, args: dict) -> dict:
     """Dispatch tool calls to the HookManager.
 
@@ -479,6 +499,7 @@ def hooks_handle_tool_call(name: str, args: dict) -> dict:
                 max_decisions=args.get("max_decisions", 5),
                 max_errors=args.get("max_errors", 5),
             )
+            result["compaction"] = _check_compaction_needed()
             return result
 
         if name == "write_hooks_observe":
@@ -518,7 +539,7 @@ if __name__ == "__main__":
     # Simulate a session
     ctx = hm.prefetch(
         session_id="test-session-001",
-        project="ai-memory-core",
+        project="CortexStratum",
         goal="Add lifecycle hooks module",
         keywords=["hooks", "prefetch", "session"],
     )

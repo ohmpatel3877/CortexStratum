@@ -1,0 +1,16 @@
+{
+  "checkpoint_id": "undo_184c677f140f",
+  "tool": "mutate_sensory_interact",
+  "args": {
+    "url": "https://example.com",
+    "actions": [
+      {
+        "type": "click",
+        "selector": "#btn"
+      }
+    ],
+    "dry_run": true
+  },
+  "timestamp": "2026-07-17T16:42:53.004445+00:00",
+  "restored": false
+}

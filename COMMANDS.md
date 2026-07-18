@@ -1,6 +1,6 @@
 # Command Reference
 
-Central registry of every CLI command available in ai-memory-core.
+Central registry of every CLI command available in CortexStratum.
 
 ## MCP Server
 

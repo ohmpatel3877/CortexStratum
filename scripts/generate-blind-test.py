@@ -8,7 +8,7 @@ The runner presents questions, I answer, it scores without me seeing the key."""
 import json, os, sys
 sys.stdout.reconfigure(encoding="utf-8")
 
-BASE = "C:\\Users\\ohmpa\\github\\ai-memory-core\\data"
+BASE = "C:\\Users\\ohmpa\\github\\CortexStratum\\data"
 
 # Step 1: Generate fresh questions + encrypted answer file
 # The answer file is written with a simple XOR mask so even if I read the file,

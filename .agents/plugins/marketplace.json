@@ -1,11 +1,11 @@
 {
-  "name": "ai-memory-core",
+  "name": "CortexStratum",
   "interface": {
-    "displayName": "ai-memory-core MCP Server"
+    "displayName": "CortexStratum MCP Server"
   },
   "plugins": [
     {
-      "name": "ai-memory-core",
+      "name": "CortexStratum",
       "source": {
         "source": "local",
         "path": "./"

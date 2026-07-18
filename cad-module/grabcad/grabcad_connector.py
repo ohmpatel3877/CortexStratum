@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 grabcad_connector.py - Search, download, and import GrabCAD models
-ai-memory-core cad-module
+CortexStratum cad-module
 
 Provides:
   - Search GrabCAD library by keyword

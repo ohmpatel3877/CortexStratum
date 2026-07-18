@@ -253,6 +253,6 @@ For subagents, assign faster/cheaper models and reserve strong models for the pr
 ## Full Template
 
 The complete provider template with all 7 providers is at:
-`~/github/ai-memory-core/data/free-provider-template.json`
+`~/github/CortexStratum/data/free-provider-template.json`
 
 Copy the relevant `provider` blocks from that file into your `~/.config/opencode/opencode.jsonc` file, add your API keys, and restart OpenCode.

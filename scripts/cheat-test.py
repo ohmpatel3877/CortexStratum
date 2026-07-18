@@ -3,9 +3,9 @@
 import json, sys
 sys.stdout.reconfigure(encoding="utf-8")
 
-with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\blind-answer-key.json") as f:
+with open("C:\\Users\\ohmpa\\github\\CortexStratum\\data\\blind-answer-key.json") as f:
     key = json.load(f)
-with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\blind-my-answers.json") as f:
+with open("C:\\Users\\ohmpa\\github\\CortexStratum\\data\\blind-my-answers.json") as f:
     my = json.load(f)
 
 # Letter from index
@@ -29,13 +29,13 @@ for qid in sorted(key.keys(), key=lambda x: int(x[1:])):
             q3_analysis = """
 Q3 DEEP DIVE — The answer key claims D (contradictory) but I found A=knight, B=knight, C=knave works:
 
-A=knight → A says "B is knight AND C is knave" = (T ∧ T) = T ✓
-B=knight → B says "If A is knight then C is knave" = (T → T) = T ✓  
-C=knave → C says "At most one of us is a knight" = FALSE (2 knights) ✓
+A=knight → A says "B is knight AND C is knave" = (T ∧ T) = T 
+B=knight → B says "If A is knight then C is knave" = (T → T) = T   
+C=knave → C says "At most one of us is a knight" = FALSE (2 knights) 
 
 All consistent. Answer key says two solutions exist but both are actually inconsistent:
-- (A=knight, B=knave, C=knave): A=knight says "B is knight AND C is knave" = F ∧ T = F. A tells falsehood? ✗
-- (A=knave, B=knight, C=knave): A=knave says "B is knight AND C is knave" = T ∧ T = T. A tells truth? ✗
+- (A=knight, B=knave, C=knave): A=knight says "B is knight AND C is knave" = F ∧ T = F. A tells falsehood? 
+- (A=knave, B=knight, C=knave): A=knave says "B is knight AND C is knave" = T ∧ T = T. A tells truth? 
 
 CONCLUSION: The answer key may have a bug. My answer B (C=knave) is logically correct.
 """
@@ -54,7 +54,7 @@ print("=" * 60)
 
 score = 0
 for qid, ok, my_val, correct_val, expl in results:
-    status = "✅" if ok else "❌"
+    status = "" if ok else ""
     if ok: score += 1
     print(f"\n  {status} {qid}")
     print(f"     I answered:   {my_val}")

@@ -7,17 +7,17 @@
 #  ⚡ No Node.js. No Python. No npm. No pip.
 #  ⚡ Everything runs inside the container.
 #
-# Deploys the opencode-container-server: ai-memory-core MCP
+# Deploys the opencode-container-server: CortexStratum MCP
 # server + OpenCode CLI + local memory + OpenCode Zen config.
 # Fully local — no cloud services required.
 #
 # Usage (recommended — clone first):
-#   git clone https://github.com/ohmpatel3877/ai-memory-core.git
-#   cd ai-memory-core
+#   git clone https://github.com/ohmpatel3877/CortexStratum.git
+#   cd CortexStratum
 #   bash docker/setup-opencode-container.sh
 #
 # Usage (pipe-to-shell — not recommended, but available):
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/setup-opencode-container.sh | bash
 #
 # Options:
 #   OPENCODE_ZEN_API_KEY=xxx bash ...                     # pass OpenCode Zen key inline
@@ -25,7 +25,7 @@
 # ═══════════════════════════════════════════════════════════════
 
 set -Eeuo pipefail
-REPO_URL="https://github.com/ohmpatel3877/ai-memory-core.git"
+REPO_URL="https://github.com/ohmpatel3877/CortexStratum.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -80,16 +80,16 @@ else
   fail "Docker required. Install it and re-run this script."
 fi
 
-# ─── Clone / Update ai-memory-core ────────────────────────────────
-info "Setting up ai-memory-core..."
+# ─── Clone / Update CortexStratum ────────────────────────────────
+info "Setting up CortexStratum..."
 if [ -d "$PROJECT_DIR/.git" ]; then
   ok "Already cloned at $PROJECT_DIR"
 else
   cd /tmp
   git clone --depth 1 "$REPO_URL" 2>&1
-  PROJECT_DIR="/tmp/ai-memory-core"
+  PROJECT_DIR="/tmp/CortexStratum"
   cd "$PROJECT_DIR"
-  ok "Cloned ai-memory-core"
+  ok "Cloned CortexStratum"
 fi
 
 # ─── Local Memory (fully local, no API key needed) ────────────────
@@ -127,10 +127,10 @@ if [ -f docker/docker-compose.yml ]; then
 else
   # Fallback: run MCP server directly
   $ENGINE run -d \
-    --name ai-memory-core \
+    --name CortexStratum \
     --restart unless-stopped \
     -p 3100:3100 \
-    -v ai_memory_data:/app/data \
+    -v cortex_data:/app/data \
     -e MEMORY_BACKEND=local \
     -w /app \
     node:22 npm start 2>&1 || warn "Direct run failed"

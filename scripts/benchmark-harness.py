@@ -207,9 +207,9 @@ GPQA_QUESTIONS: List[Dict[str, Any]] = [
     {
         "id": "gpqa-qm-1",
         "subject": "Quantum Mechanics",
-        "question": "Consider a spin-1/2 particle in a magnetic field B along the z-axis. The Hamiltonian is H = -γ B S_z. If the particle starts in the state |ψ(0)⟩ = (|↑⟩ + |↓⟩)/√2, what is the probability of measuring spin-up along the x-axis at time t = π/(γB)?",
+        "question": "Consider a spin-1/2 particle in a magnetic field B along the z-axis. The Hamiltonian is H = -γ B S_z. If the particle starts in the state |ψ(0) = (|↑ + |↓)/√2, what is the probability of measuring spin-up along the x-axis at time t = π/(γB)?",
         "answer": "0.0",
-        "explanation": "The state evolves as |ψ(t)⟩ = (e^{iγBt/2}|↑⟩ + e^{-iγBt/2}|↓⟩)/√2. The S_x operator has eigenstates (|↑⟩ ± |↓⟩)/√2. At t = π/(γB), the phase difference is π, giving |ψ⟩ = (e^{iπ/2}|↑⟩ + e^{-iπ/2}|↓⟩)/√2 = (i|↑⟩ - i|↓⟩)/√2 = i(|↑⟩ - |↓⟩)/√2, which is orthogonal to the +x eigenstate. Probability = 0."
+        "explanation": "The state evolves as |ψ(t) = (e^{iγBt/2}|↑ + e^{-iγBt/2}|↓)/√2. The S_x operator has eigenstates (|↑ ± |↓)/√2. At t = π/(γB), the phase difference is π, giving |ψ = (e^{iπ/2}|↑ + e^{-iπ/2}|↓)/√2 = (i|↑ - i|↓)/√2 = i(|↑ - |↓)/√2, which is orthogonal to the +x eigenstate. Probability = 0."
     },
     {
         "id": "gpqa-oc-1",
@@ -230,7 +230,7 @@ GPQA_QUESTIONS: List[Dict[str, Any]] = [
         "subject": "Statistical Mechanics",
         "question": "For a system of N non-interacting spin-1/2 particles in a magnetic field B at temperature T, the partition function per particle is Z₁ = 2 cosh(βμB). What is the heat capacity C at very high temperatures (k_B T ≫ μB)?",
         "answer": "C → 0 as T → ∞ (Schottky anomaly behavior: C = Nk_B(μB/k_B T)² sech²(μB/k_B T), goes to 0)",
-        "explanation": "At high T, both spin states are nearly equally populated, so the energy approaches a constant (saturation). The heat capacity C = d⟨E⟩/dT has the Schottky anomaly form: C = Nk_B(ΔE/k_B T)² e^{ΔE/k_B T} / (1 + e^{ΔE/k_B T})², which → 0 as T → ∞ because the system is already maximally disordered."
+        "explanation": "At high T, both spin states are nearly equally populated, so the energy approaches a constant (saturation). The heat capacity C = dE/dT has the Schottky anomaly form: C = Nk_B(ΔE/k_B T)² e^{ΔE/k_B T} / (1 + e^{ΔE/k_B T})², which → 0 as T → ∞ because the system is already maximally disordered."
     },
     {
         "id": "gpqa-em-1",
@@ -669,11 +669,11 @@ def horizontal_bar(label: str, value: float, max_val: float, width: int = 40, co
     """Build a colored ASCII horizontal bar."""
     bar_len = max(1, int(value / max(max_val, 1) * width))
     if value >= 90:
-        bar_fill = f"{G}{'█' * bar_len}{N}"
+        bar_fill = f"{G}{'' * bar_len}{N}"
     elif value >= 70:
-        bar_fill = f"{Y}{'█' * bar_len}{N}"
+        bar_fill = f"{Y}{'' * bar_len}{N}"
     else:
-        bar_fill = f"{R}{'█' * bar_len}{N}"
+        bar_fill = f"{R}{'' * bar_len}{N}"
     pad = width - bar_len
     return f"  {label:<22} {bar_fill}{' ' * pad} {color}{value:.1f}%{N}"
 
@@ -941,11 +941,11 @@ def show_stats(saved_results: Optional[Dict] = None):
     for rank, (model, avg) in enumerate(ranked, 1):
         marker = f"{M}←" if "ours" in model else ""
         if rank == 1:
-            icon = "🥇"
+            icon = ""
         elif rank == 2:
-            icon = "🥈"
+            icon = ""
         elif rank == 3:
-            icon = "🥉"
+            icon = ""
         else:
             icon = f" {rank}. "
         print(f"  {icon} {model:<28} {avg:.1f}% {marker}{N}")
@@ -1001,7 +1001,7 @@ def main():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     section_header("BENCHMARK HARNESS: deepseek-v4-flash vs Frontier Models")
-    print(f"  {DIM}{time.strftime('%Y-%m-%d %H:%M:%S')} | ai-memory-core | Python 3.13{N}")
+    print(f"  {DIM}{time.strftime('%Y-%m-%d %H:%M:%S')} | CortexStratum | Python 3.13{N}")
 
     if show_stat:
         saved = safe_json_load(DATA_DIR / "benchmark-results.json")

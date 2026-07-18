@@ -1,5 +1,5 @@
 """
-Hermes Agent MemoryProvider implementation for ai-memory-core.
+Hermes Agent MemoryProvider implementation for CortexStratum.
 
 Provides the full Hermes MemoryProvider ABC with:
   - prefetch() — semantic context retrieval via hybrid search + reranker
@@ -60,11 +60,11 @@ def _get_audit():
     return _AUDIT
 
 
-# ─── Tool schemas (returned by get_tool_schemas) ─────────────────────
+#  Tool schemas (returned by get_tool_schemas) 
 
 AIME_RETRIEVE_SCHEMA = {
     "name": "aime_retrieve",
-    "description": "Search ai-memory-core using hybrid BM25 + vector search with cross-encoder reranking",
+    "description": "Search CortexStratum using hybrid BM25 + vector search with cross-encoder reranking",
     "parameters": {
         "type": "object",
         "properties": {
@@ -128,8 +128,8 @@ AIME_OBSERVE_SCHEMA = {
 }
 
 
-class AimeProvider:
-    """Hermes MemoryProvider implementation for ai-memory-core.
+class CortexProvider:
+    """Hermes MemoryProvider implementation for CortexStratum.
 
     Provides sandboxed memory with read/write/mutate permission tiers.
     The provider's tools are read-only by default; destructive operations
@@ -142,13 +142,13 @@ class AimeProvider:
         self._config = {}
         self._lock = threading.Lock()
 
-    # ── Required Properties ────────────────────────────────────────
+    #  Required Properties 
 
     @property
     def name(self) -> str:
-        return "ai-memory-core"
+        return "CortexStratum"
 
-    # ── Required ABC Methods ───────────────────────────────────────
+    #  Required ABC Methods 
 
     def is_available(self) -> bool:
         """Check if dependencies are available (pure Python core always works)."""
@@ -199,7 +199,7 @@ class AimeProvider:
                 "memory_path": {
                     "type": "string",
                     "default": "",
-                    "description": "Path to memory storage (default: ~/.ai-memory-core)",
+                    "description": "Path to memory storage (default: ~/.CortexStratum)",
                 },
                 "embedding_model": {
                     "type": "string",
@@ -227,7 +227,7 @@ class AimeProvider:
         if values.get("embedding_model"):
             os.environ["AI_MEMORY_EMBEDDING_MODEL"] = values["embedding_model"]
 
-    # ── Optional Lifecycle Hooks ───────────────────────────────────
+    #  Optional Lifecycle Hooks 
 
     def prefetch(self, query: str, *, session_id: str = "") -> str:
         """Called before each LLM turn — returns relevant context.
@@ -247,7 +247,7 @@ class AimeProvider:
                 return ""
 
             lines = []
-            lines.append("<vault-context source='ai-memory-core'>")
+            lines.append("<vault-context source='CortexStratum'>")
             for r in results:
                 snippet = r.get("text", "")[:300]
                 score = r.get("rerank_score") or r.get("score", 0)
@@ -312,7 +312,7 @@ class AimeProvider:
         """Clean connections on Hermes exit."""
         pass
 
-    # ── Internal Tool Handlers ─────────────────────────────────────
+    #  Internal Tool Handlers 
 
     def _handle_retrieve(self, args: dict) -> dict:
         """Hybrid search + cross-encoder reranking."""

@@ -3,7 +3,7 @@
 Comprehensive guide for configuring, documenting, and populating GitHub repositories
 and integrating them with OpenCode.
 
-Based on real-world experience building ai-memory-core v0.3.0.
+Based on real-world experience building CortexStratum v0.3.0.
 
 ## When to Use
 
@@ -35,18 +35,18 @@ git push -u origin main
 
 | File | Purpose | Required |
 |------|---------|----------|
-| `README.md` | Project overview, quick start, badges | ✅ Yes |
-| `ARCHITECTURE.md` | System design, permission model, data flow | ✅ Recommended |
-| `QUICKSTART.md` | Minimal steps to get running in 2 minutes | ✅ Recommended |
-| `LICENSE` | MIT, Apache 2.0, GPL — pick one | ✅ Yes |
-| `.gitignore` | Ignore build artifacts, deps, secrets | ✅ Yes |
-| `CHANGELOG.md` | Keep a Changelog format | ✅ Recommended |
-| `VERSION` | Plain-text single-line version | ✅ Recommended |
-| `BUILD.md` | Build pipeline documentation | ✅ Recommended |
+| `README.md` | Project overview, quick start, badges |  Yes |
+| `ARCHITECTURE.md` | System design, permission model, data flow |  Recommended |
+| `QUICKSTART.md` | Minimal steps to get running in 2 minutes |  Recommended |
+| `LICENSE` | MIT, Apache 2.0, GPL — pick one |  Yes |
+| `.gitignore` | Ignore build artifacts, deps, secrets |  Yes |
+| `CHANGELOG.md` | Keep a Changelog format |  Recommended |
+| `VERSION` | Plain-text single-line version |  Recommended |
+| `BUILD.md` | Build pipeline documentation |  Recommended |
 | `COMMANDS.md` | Central command registry | For CLIs |
 | `DEPENDENCIES.md` | Required vs optional packages per module | For multi-module |
 | `MILESTONES.md` | Project roadmap with dates | Recommended |
-| `requirements.txt` | Core deps (even if empty/stdlib) | ✅ Recommended |
+| `requirements.txt` | Core deps (even if empty/stdlib) |  Recommended |
 | `requirements-full.txt` | Optional/extra deps | For large projects |
 | `CONTRIBUTING.md` | How to contribute | For OSS |
 
@@ -127,7 +127,7 @@ Create `opencode.json` in repo root:
   "name": "my-project",
   "version": "0.3.0",
   "description": "One-line description",
-  "icon": "🧠",
+  "icon": "",
   "mcpServers": {
     "my-server": {
       "command": "python",
@@ -471,18 +471,18 @@ Package your project for multiple AI assistants from a single source:
 ### 6.1 Directory Structure
 
 ```
-├── .claude-plugin/
-│   └── plugin.json          # Claude Code marketplace
-├── .cursor-plugin/
-│   ├── plugin.json          # Cursor IDE
-│   └── marketplace.json     # Cursor marketplace
-├── .codex-plugin/
-│   └── plugin.json          # Codex CLI
-├── .agents/
-│   └── plugins/
-│       └── marketplace.json # Open Agent marketplace
-├── .mcp.json                # Generic MCP registration
-└── CLAUDE.md                # Claude Code agent guide
+ .claude-plugin/
+    plugin.json          # Claude Code marketplace
+ .cursor-plugin/
+    plugin.json          # Cursor IDE
+    marketplace.json     # Cursor marketplace
+ .codex-plugin/
+    plugin.json          # Codex CLI
+ .agents/
+    plugins/
+        marketplace.json # Open Agent marketplace
+ .mcp.json                # Generic MCP registration
+ CLAUDE.md                # Claude Code agent guide
 ```
 
 ### 6.2 Claude Code Plugin

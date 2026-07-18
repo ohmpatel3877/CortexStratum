@@ -145,21 +145,21 @@ def test_output_condenser():
 > vite build
 
 vite v5.0.0 building for production...
-✓ 42 modules transformed.
+ 42 modules transformed.
 rendering chunks...
 computing chunk map...
-✓ 42 modules transformed. (repeated)
+ 42 modules transformed. (repeated)
 rendering modules...
 dist/index.html                  0.45 kB
 dist/assets/index-Bxq2x3p4.js   142.32 kB / gzip: 48.22 kB
-✓ Build completed in 2.15s
-✓ 42 modules transformed. (repeated)
+ Build completed in 2.15s
+ 42 modules transformed. (repeated)
 dist/assets/vendor-D4e5F6g7.js  89.12 kB / gzip: 31.05 kB
-✓ Build completed in 2.15s
+ Build completed in 2.15s
 """.strip().split('\n')
     
     # 40 lines of which 6 are useful (exit code, files, errors)
-    # 34 lines are noise (progress, repeated "✓" lines)
+    # 34 lines are noise (progress, repeated "" lines)
     
     # WITHOUT condenser: load ALL lines into context
     without_signal = len([l for l in raw_output if 'error' in l.lower() or 'fail' in l.lower() or 'completed' in l.lower() or 'Error' in l])
@@ -305,7 +305,7 @@ def test_decision_trace():
                 },
                 {
                     "id": "dt-20260715-003",
-                    "title": "Centralize meta-cognitive artifacts in ai-memory-core",
+                    "title": "Centralize meta-cognitive artifacts in CortexStratum",
                     "category": "architecture",
                     "status": "active",
                     "rationale": "Single source of truth for agent improvement artifacts",
@@ -429,7 +429,7 @@ def test_integration():
 def main():
     print(f"{B}{'='*60}{N}")
     print(f"{B}  SIDE-BY-SIDE COMPARISON: Agent WITH Tools vs WITHOUT Tools{N}")
-    print(f"{B}  deepseek-v4-flash | ai-memory-core | {time.strftime('%Y-%m-%d')}{N}")
+    print(f"{B}  deepseek-v4-flash | CortexStratum | {time.strftime('%Y-%m-%d')}{N}")
     print(f"{B}{'='*60}{N}")
     print(f"\n  This test measures the same agent task performed with and without")
     print(f"  the 6 performance-enhancing tools, comparing steps, signal ratio,")

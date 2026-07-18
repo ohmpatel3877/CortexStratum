@@ -1,8 +1,8 @@
 <#
 .SYNOPSIS
-    1-Click Install: ai-memory-core for OpenCode / Claude Code / Cursor
+    1-Click Install: CortexStratum for OpenCode / Claude Code / Cursor
 .DESCRIPTION
-    Installs the ai-memory-core plugin into an AI coding harness (OpenCode by default).
+    Installs the CortexStratum plugin into an AI coding harness (OpenCode by default).
     Sets up:
       - MCP server registration (68 tools via tools-mcp-server.py)
       - Skills linking (task-orchestrator, etc.)
@@ -11,16 +11,16 @@
       - Environment validation
 
     Usage (OpenCode):
-      irm https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/plugin-tools/install.ps1 | iex
+      irm https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/plugin-tools/install.ps1 | iex
 
     Or from local repo:
-      .\plugin-tools\install-ai-memory-core.ps1 -Harness opencode
+      .\plugin-tools\install-CortexStratum.ps1 -Harness opencode
 
 .PARAMETER Harness
     Target AI coding harness: opencode (default), claude-code, cursor, or all.
 
 .PARAMETER ProjectDir
-    Path to ai-memory-core. Defaults to the repo root (parent of this script's directory).
+    Path to CortexStratum. Defaults to the repo root (parent of this script's directory).
 
 .PARAMETER Force
     Overwrite existing configurations without prompting.
@@ -58,7 +58,7 @@ if ($OneClick -or $Containerized) {
             & $installerScript
         } else {
             $tmpScript = "$env:TEMP\install-docker.ps1"
-            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.ps1" -OutFile $tmpScript
+            Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/install-docker.ps1" -OutFile $tmpScript
             & $tmpScript
         }
         # Re-check after install
@@ -69,16 +69,16 @@ if ($OneClick -or $Containerized) {
         }
     }
 
-    # Get ai-memory-core
+    # Get CortexStratum
     $targetDir = "$env:USERPROFILE\opencode-container"
     if (-not (Test-Path "$targetDir\docker\docker-compose.yml")) {
         Write-Host "Downloading opencode-container-server..." -ForegroundColor Yellow
-        $zip = "$env:TEMP\ai-memory-core.zip"
-        Invoke-WebRequest -Uri "https://github.com/ohmpatel3877/ai-memory-core/archive/refs/heads/main.zip" -OutFile $zip
+        $zip = "$env:TEMP\CortexStratum.zip"
+        Invoke-WebRequest -Uri "https://github.com/ohmpatel3877/CortexStratum/archive/refs/heads/main.zip" -OutFile $zip
         Remove-Item -Path $targetDir -Recurse -Force -ErrorAction SilentlyContinue
         Expand-Archive -Path $zip -DestinationPath "$env:USERPROFILE" -Force
-        Move-Item "$env:USERPROFILE\ai-memory-core-main\*" $targetDir -Force
-        Remove-Item "$env:USERPROFILE\ai-memory-core-main" -Recurse -Force
+        Move-Item "$env:USERPROFILE\CortexStratum-main\*" $targetDir -Force
+        Remove-Item "$env:USERPROFILE\CortexStratum-main" -Recurse -Force
     }
 
     # Prompt for OpenCode Zen key if needed
@@ -88,7 +88,7 @@ if ($OneClick -or $Containerized) {
 
     # Write .env (fully local — no cloud API keys needed)
     @"
-NE_MEMORY_PROJECT=ai-memory-core
+NE_MEMORY_PROJECT=CortexStratum
 OPENCODE_ZEN_API_KEY=$OpenCodeZenApiKey
 OPENCODE_ZEN_BASE_URL=https://api.opencode.ai
 OPENCODE_HOST=opencode-container
@@ -110,7 +110,7 @@ LOG_LEVEL=info
 }
 
 $ErrorActionPreference = "Stop"
-$Host.UI.RawUI.WindowTitle = "🧠 ai-memory-core Installer"
+$Host.UI.RawUI.WindowTitle = "🧠 CortexStratum Installer"
 
 # ─── Resolve paths ───────────────────────────────────────────────
 if (-not $ProjectDir) {
@@ -122,7 +122,7 @@ $SkillsDir = Join-Path $ProjectDir "skills"
 $DataDir    = Join-Path $ProjectDir "data"
 
 Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║    ai-memory-core — 1-Click Installer           ║" -ForegroundColor Cyan
+Write-Host "║    CortexStratum — 1-Click Installer           ║" -ForegroundColor Cyan
 Write-Host "║    $ProjectDir" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
@@ -175,7 +175,7 @@ Write-Host "▶ Step 3/6: Configuring local memory..." -ForegroundColor Yellow
 
 $envFile = Join-Path $ProjectDir ".env"
 if (-not (Test-Path $envFile)) {
-    "NE_MEMORY_PROJECT=ai-memory-core`n# Fully local — no API keys required" | Set-Content -Path $envFile -Force
+    "NE_MEMORY_PROJECT=CortexStratum`n# Fully local — no API keys required" | Set-Content -Path $envFile -Force
     Write-Host "  ✓ Local memory configured (no API key required)" -ForegroundColor Green
 } else {
     Write-Host "  ✓ .env already exists" -ForegroundColor Green
@@ -188,7 +188,7 @@ Write-Host "▶ Step 4/6: Registering MCP server..." -ForegroundColor Yellow
 function Register-McpForOpenCode {
     param([string]$ConfigPath)
     $mcpEntry = @{
-        "name" = "ai-memory-core"
+        "name" = "CortexStratum"
         "description" = "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, and multi-module AI"
         "command" = "python"
         "args" = @("scripts/tools-mcp-server.py")
@@ -201,11 +201,11 @@ function Register-McpForOpenCode {
         if (-not $config.mcpServers) {
             $config | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue @{}
         }
-        $config.mcpServers | Add-Member -NotePropertyName "ai-memory-core" -NotePropertyValue $mcpEntry -Force
+        $config.mcpServers | Add-Member -NotePropertyName "CortexStratum" -NotePropertyValue $mcpEntry -Force
         $config | ConvertTo-Json -Depth 10 | Set-Content $ConfigPath -Encoding UTF8 -Force
         Write-Host "  ✓ Registered in $ConfigPath" -ForegroundColor Green
     } else {
-        $config = @{ mcpServers = @{ "ai-memory-core" = $mcpEntry } }
+        $config = @{ mcpServers = @{ "CortexStratum" = $mcpEntry } }
         $config | ConvertTo-Json -Depth 10 | Set-Content $ConfigPath -Encoding UTF8 -Force
         Write-Host "  ✓ Created $ConfigPath" -ForegroundColor Green
     }
@@ -220,11 +220,11 @@ switch ($Harness) {
         $ccConfig = Join-Path $ProjectDir "CLAUDE.md"
         if (-not (Test-Path $ccConfig)) {
             @"
-# Claude Code — ai-memory-core MCP Server
+# Claude Code — CortexStratum MCP Server
 
 <mcpserver>
 {
-  "name": "ai-memory-core",
+  "name": "CortexStratum",
   "description": "68-tool MCP server for memory, tracing, and orchestration",
   "command": "python",
   "args": ["scripts/tools-mcp-server.py"],
@@ -239,7 +239,7 @@ switch ($Harness) {
         # Cursor uses .cursorrules or opencode.json format
         $cursorConfig = Join-Path $ProjectDir ".cursorrules"
         @"
-# ai-memory-core Cursor Integration
+# CortexStratum Cursor Integration
 - MCP server: python scripts/tools-mcp-server.py
 - Skills: skills/task-orchestrator/SKILL.md
 "@ | Set-Content $cursorConfig -Encoding UTF8 -Force
@@ -322,6 +322,6 @@ if ($fail -gt 0) {
     Write-Host "  3. Ensure Python 3.10+ is on PATH" -ForegroundColor DarkYellow
 } else {
     Write-Host ""
-    Write-Host "  🧠 ai-memory-core is ready!" -ForegroundColor Green
+    Write-Host "  🧠 CortexStratum is ready!" -ForegroundColor Green
     Write-Host "  Restart your AI coding harness to load the MCP server." -ForegroundColor Green
 }

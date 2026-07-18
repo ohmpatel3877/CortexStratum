@@ -22,7 +22,7 @@ from dataclasses import dataclass, field, asdict
 from typing import Optional, Callable
 from pathlib import Path
 
-# ─── Parameter Profiles — Simulate different "model sizes" ────────
+#  Parameter Profiles — Simulate different "model sizes" 
 # Each profile injects specific behavioral scaffolding that compensates
 # for missing training data, weaker attention mechanisms, or reduced
 # parameter counts in the base model.
@@ -66,7 +66,7 @@ PARAMETER_PROFILES = {
     },
 }
 
-# ─── Personas — Behavioral masks that simulate parameter depth ────
+#  Personas — Behavioral masks that simulate parameter depth 
 
 PERSONAS = {
     "senior_engineer": {
@@ -276,7 +276,7 @@ class ParameterVirtualizer:
         }
 
 
-# ─── Self-Consistency Engine ──────────────────────────────────────
+#  Self-Consistency Engine 
 # Runs multiple inference passes and aggregates results. This simulates
 # the ensemble-like behavior that larger parameter counts provide natively.
 
@@ -321,7 +321,7 @@ class SelfConsistencyEngine:
         return results[0]["output"] if results else ""
 
 
-# ─── CLI Entry Point ─────────────────────────────────────────────
+#  CLI Entry Point 
 
 def main():
     import argparse
@@ -364,7 +364,7 @@ def main():
             print(f"  {k}: {v}")
         print(f"\nVerification Criteria:")
         for c in result['verification_criteria']:
-            print(f"  ☐ {c}")
+            print(f"   {c}")
         print(f"\nExpected Quality: {result['expected_quality']['expected_level']}")
         print(f"Confidence: {result['expected_quality']['confidence']:.0%}")
 

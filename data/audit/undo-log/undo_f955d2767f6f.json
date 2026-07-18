@@ -1,0 +1,10 @@
+{
+  "checkpoint_id": "undo_f955d2767f6f",
+  "tool": "write_memory_add",
+  "args": {
+    "text": "test"
+  },
+  "timestamp": "2026-07-17T16:38:09.613746+00:00",
+  "restored": true,
+  "restored_at": "2026-07-17T16:38:09.632700+00:00"
+}

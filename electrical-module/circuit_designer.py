@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 circuit_designer.py - Circuit schematic generator & wiring diagram creator
-ai-memory-core electrical-module
+CortexStratum electrical-module
 Generates SVG wiring diagrams, validates connections, produces pin maps
 """
 import json

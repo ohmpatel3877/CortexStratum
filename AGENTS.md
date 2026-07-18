@@ -1,6 +1,6 @@
-# ai-memory-core - Agent Instructions
+# CortexStratum - Agent Instructions
 
-**72-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.3.0.
+**133-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.3.0.
 
 [CLAUDE.md](CLAUDE.md) covers basic MCP tool usage. This file covers everything an agent would likely miss without help.
 
@@ -12,7 +12,7 @@ python scripts/tools-mcp-server.py
 python scripts/tools-mcp-server.py --permissive   # bypass all permission checks
 python scripts/tools-mcp-server.py --debug        # verbose logging
 
-# List all 72 tools (verify registration)
+# List all 135 tools (verify registration)
 python scripts/tools-mcp-server.py --list-tools
 
 # Run full test suite (each script is self-validating, exit non-zero on failure)
@@ -25,15 +25,18 @@ python scripts/memory_search.py           # BM25 smoke test (no assertions)
 
 **Prerequisites:** Python 3.10+. No pip required for core. Optional: `pip install -r requirements-full.txt` + `playwright install firefox` for web/OCR/audio tools.
 
-## Permission Model (enforced per-call)
+## Permission Model & Workflow
 
-The guard is `can_call_tool()` in `tools-mcp-server.py` (line 37). Fix permission errors with `--permissive` flag, **not** by editing code.
+Every tool is self-documenting: `read_*` tools are safe, `write_*` and `mutate_*` tools include a ` WRITE`/` MUTATE` prefix in their description and accept `dry_run=true` to preview before executing.
 
-| Prefix | Count | auto mode | interactive mode | permissive mode |
-|--------|-------|-----------|-----------------|-----------------|
-| `read_*` | 58 | ✅ | ✅ | ✅ |
-| `write_*` | 6 | ❌ blocked | ⚠️ warning | ✅ |
-| `mutate_*` | 3 | ❌ blocked | ⚠️ warning | ✅ |
+**Single server.** There is one `CortexStratum` MCP server. The `--permissive` flag exists but is only needed if your MCP client enforces strict auto-mode blocking (rare).
+
+**Workflow:** `verify → check → mutate`
+1. **Verify** — use analysis/validation tools to confirm intent
+2. **Check** — use `read_*` tools to inspect current state
+3. **Mutate** — use `write_*` or `mutate_*` tools to persist changes
+
+All write/mutate tools accept `dry_run=true` for zero-risk preview. The permission guard in `can_call_tool()` (line 37) only blocks writes in auto mode; in interactive mode it returns a warning advisory.
 
 ## Module Architecture
 
@@ -111,7 +114,7 @@ All runtime data is local JSON in `data/` and `.memory/`. **Not git-tracked** (e
 | `data/goal-registry.json` | Current goal with sub-goal decomposition |
 | `data/commitments.json` | Session promises with cross-session verification |
 | `data/synonyms.json` | BM25 synonym expansion map (**git-tracked**) |
-| `data/tool-inventory.json` | All 68 tool definitions (for verification) |
+| `data/tool-inventory.json` | All 135 tool definitions (for verification) |
 | `.memory/ne/` | BM25 index files |
 | `.memory/profiles/` | Agent identity profiles |
 
@@ -141,7 +144,7 @@ The `previous_task` parameter is accepted by the `read_skill_router_match` MCP t
 `scripts/tools-mcp-server.py` (1238 lines) is the single entrypoint. It owns:
 - Permission guard (`can_call_tool`, line 37)
 - Module factory (`_get_module`, line 85)
-- All 68 tool definitions (`TOOLS` list, starts ~line 150)
+- All 135 tool definitions (`TOOLS` list, starts ~line 150)
 - Tool dispatch (`handle_tool_call`, line 748)
 - CLI flags (`--permissive`, `--debug`, `--list-tools`, `--version`)
 - stdio JSON-RPC loop (`main()`, ~line 1100)

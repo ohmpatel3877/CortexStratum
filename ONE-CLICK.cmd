@@ -1,20 +1,17 @@
 @echo off
-title opencode-container-server
+title CortexStratum
 echo.
 echo ==========================================
-echo   opencode-container-server
+echo   CortexStratum — 1-Click Setup
 echo ==========================================
 echo.
-echo   This installer has been updated for security.
-echo   Instead of piping directly from GitHub, please:
+echo   This launches the PowerShell installer which
+echo   downloads Docker, builds the container,
+echo   and prints your MCP config.
 echo.
-echo   1. Clone the repository:
-echo      git clone https://github.com/ohmpatel3877/ai-memory-core.git
-echo.
-echo   2. Run the installer locally:
-echo      cd ai-memory-core
-echo      powershell -NoProfile -ExecutionPolicy Bypass -File install.ps1
+echo   Repository: https://github.com/ohmpatel3877/CortexStratum
 echo.
 echo ==========================================
 echo.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0install.ps1"
 pause

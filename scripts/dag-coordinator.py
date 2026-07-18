@@ -13,7 +13,7 @@ Usage:
     python scripts/dag-coordinator.py --dag data/dag-definitions/research-implement-verify.json --resume
 """
 
-import json, sys, os, time, copy, threading, math, re as _re
+import json, sys, os, time, copy, threading, math, subprocess, re as _re
 from datetime import datetime, timezone
 from collections import deque
 from typing import Optional, Any
@@ -28,7 +28,7 @@ DAG_TRACE_DIR = os.path.join(DATA, "dag-traces")
 
 G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; M = "\033[95m"
 R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
-BAR = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+BAR = ""
 
 _state_manager = None
 
@@ -63,7 +63,7 @@ def write_json(path: str, data: dict) -> None:
     os.replace(temp, path)
 
 
-# ── DAG Definition Loader ──────────────────────────────────
+#  DAG Definition Loader 
 
 def load_dag_definition(path: str) -> dict:
     dag = load_json(path)
@@ -86,7 +86,7 @@ def load_dag_definition(path: str) -> dict:
     return dag
 
 
-# ── Topological Sort (Kahn's Algorithm) ────────────────────
+#  Topological Sort (Kahn's Algorithm) 
 
 def topological_sort(dag: dict) -> list[list[str]]:
     nodes = {n["id"]: n for n in dag["nodes"]}
@@ -129,7 +129,7 @@ def get_dependents(dag: dict) -> dict[str, list[str]]:
     return deps
 
 
-# ── Condition Evaluation ───────────────────────────────────
+#  Condition Evaluation 
 
 def _evaluate_condition(condition: str, state: dict) -> bool:
     if not condition:
@@ -171,7 +171,7 @@ def _evaluate_condition(condition: str, state: dict) -> bool:
     return False
 
 
-# ── Input Builder ──────────────────────────────────────────
+#  Input Builder 
 
 def _build_node_input(nid, node_def, upstream_outputs, root_input):
     input_data = {
@@ -227,7 +227,7 @@ def _substitute_template(template, context):
     return _re.sub(r'\{\{(.+?)\}\}', _resolver, template)
 
 
-# ── Simulated Node Execution ───────────────────────────────
+#  Simulated Node Execution 
 
 def _simulate_node_execution(nid, node_def, input_data, timeout_s):
     import random as _random
@@ -241,7 +241,7 @@ def _simulate_node_execution(nid, node_def, input_data, timeout_s):
     return {"success": True, "output": output, "errors": []}
 
 
-# ── Pipeline Execution ─────────────────────────────────────
+#  Pipeline Execution 
 
 def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
     dag_id = dag["dag_id"]
@@ -293,16 +293,16 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
 
     for level_idx, level in enumerate(levels):
         if error_mode == "abort" and failed_nodes:
-            print(f"\n{R}  ⛔ Aborted due to failures{N}")
+            print(f"\n{R}   Aborted due to failures{N}")
             break
         if time.time() - start_wall > global_timeout:
             print(f"\n{R}  ⏰ Timeout ({global_timeout}s){N}")
             trace["status"] = "timeout"
             break
 
-        print(f"\n{C}  {'─'*60}{N}")
+        print(f"\n{C}  {''*60}{N}")
         print(f"{C}{BOLD}  Level {level_idx+1}/{len(levels)}: {', '.join(level)}{N}")
-        print(f"{C}  {'─'*60}{N}")
+        print(f"{C}  {''*60}{N}")
 
         for nid in level:
             if error_mode == "abort" and failed_nodes:
@@ -321,7 +321,7 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
             for dep_id in deps:
                 dep_state = mgr.read_state(dep_id)
                 if dep_state is None:
-                    print(f"  {R}  ✗ {nid}: missing dep {dep_id}{N}")
+                    print(f"  {R}   {nid}: missing dep {dep_id}{N}")
                     mgr.mark_failed(nid, [{"type": "missing_dependency",
                                             "message": f"Dependency {dep_id} has no state"}])
                     failed_nodes.append(nid); skip_node = True; break
@@ -382,11 +382,60 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
     print(f"  Duration: {wall_elapsed:.1f}s")
     print(f"  Status:   {final_status}")
     print(f"  Nodes:    {len(all_states)} total -> {dict(phase_counts)}")
-    print(f"  Trace:    {trace_path}\n")
+    print(f"  Trace:    {trace_path}")
+
+    #  Post-Pipeline: MCP Tool Registration Verification 
+    post_verify = dag.get("config", {}).get("post_merge_verify", "")
+    if post_verify:
+        print(f"\n  {C}Post-pipeline verification:{N}")
+        print(f"    {post_verify}")
+        try:
+            result = subprocess.run(
+                post_verify.split(),
+                capture_output=True, text=True, timeout=30
+            )
+            if result.returncode == 0:
+                last_line = [l for l in result.stdout.strip().split("\n") if l][-1]
+                print(f"  {G}     {last_line}{N}")
+            else:
+                print(f"  {R}     Verification failed (code {result.returncode}){N}")
+                if result.stderr:
+                    for line in result.stderr.strip().split("\n")[-3:]:
+                        print(f"  {R}      {line}{N}")
+        except FileNotFoundError:
+            print(f"  {Y}     Verification script not found{N}")
+        except subprocess.TimeoutExpired:
+            print(f"  {Y}     Verification timed out{N}")
+
+    # Tool count check
+    server_script = os.path.join(PROJECT_ROOT, "scripts", "tools-mcp-server.py")
+    if os.path.isfile(server_script):
+        try:
+            result = subprocess.run(
+                [sys.executable, server_script, "--list-tools"],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                tools = json.loads(result.stdout)
+                print(f"  {C}    Tools registered: {len(tools)}{N}")
+                # Check expected tools from DAG
+                expected = set()
+                for node in dag.get("nodes", []):
+                    nid = node["id"]
+                    # Map node IDs to expected tool name patterns
+                    if "sim" in nid or "mech" in nid or "math" in nid:
+                        expected.add(f"read_{nid}")
+                if expected:
+                    found = sum(1 for t in tools if any(e in t["name"] for e in expected))
+                    print(f"  {C}    Expected tools matched: {found}/{len(expected)}{N}")
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, FileNotFoundError):
+            print(f"  {Y}     Tool count check skipped{N}")
+
+    print()
     return trace
 
 
-# ── DAG Info Display ───────────────────────────────────────
+#  DAG Info Display 
 
 def show_dag_info(dag):
     levels = topological_sort(dag)
@@ -420,7 +469,7 @@ def show_dag_info(dag):
     print()
 
 
-# ── Main ────────────────────────────────────────────────────
+#  Main 
 
 if __name__ == "__main__":
     import argparse

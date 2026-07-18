@@ -5,7 +5,7 @@ Answer key is XOR-masked; I (the model) CANNOT read answers from the file."""
 import json, os, sys, base64
 sys.stdout.reconfigure(encoding="utf-8")
 
-BASE = "C:\\Users\\ohmpa\\github\\ai-memory-core\\data"
+BASE = "C:\\Users\\ohmpa\\github\\CortexStratum\\data"
 
 with open(os.path.join(BASE, "blind-questions.json")) as f:
     questions = json.load(f)
@@ -123,7 +123,7 @@ for q in questions:
         correct_letter = chr(65 + correct_idx)
         ok = my_idx == correct_idx
         if ok: mc_correct += 1; score += 1
-        status = "✅" if ok else "❌"
+        status = "" if ok else ""
         print(f"  {status} {qid}: I said {my_letter}, correct was {correct_letter}")
     
     elif enc.get("type") == "code":
@@ -132,10 +132,10 @@ for q in questions:
         all_pass = all(got == exp for got, exp, _ in tests)
         if all_pass: code_correct += 1; score += 1
         
-        print(f"  {'✅' if all_pass else '❌'} {qid}: {'all ' + str(len(tests)) + ' tests pass' if all_pass else 'some tests failed'}")
+        print(f"  {'' if all_pass else ''} {qid}: {'all ' + str(len(tests)) + ' tests pass' if all_pass else 'some tests failed'}")
         for got, exp, desc in tests:
             ok = got == exp
-            print(f"    {'✅' if ok else '❌'} {desc}: got '{got}', expected '{exp}'")
+            print(f"    {'' if ok else ''} {desc}: got '{got}', expected '{exp}'")
 
 print(f"\n{'='*60}")
 print(f"  FINAL SCORE: {score}/{len(questions)}")

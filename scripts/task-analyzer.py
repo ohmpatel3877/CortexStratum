@@ -170,7 +170,7 @@ if __name__ == "__main__":
     else:
         # Default: analyze the current session context from a temp file if it exists
         try:
-            with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\last-task.txt") as f:
+            with open("C:\\Users\\ohmpa\\github\\CortexStratum\\data\\last-task.txt") as f:
                 task = f.read()
         except FileNotFoundError:
             print("Usage: python task-analyzer.py --task \"<task description>\"")
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         print()
         print("  Factor Breakdown:")
         for factor, score in result['factors'].items():
-            bar = "█" * max(1, int(score)) + "░" * max(0, 10 - max(1, int(score)))
+            bar = "" * max(1, int(score)) + "" * max(0, 10 - max(1, int(score)))
             print(f"    {factor:15s} [{score:>4.0f}/10] {bar}")
         print()
         print(f"  Summary: {result['summary']}")

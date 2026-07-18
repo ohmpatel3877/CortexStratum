@@ -1,4 +1,4 @@
-# ai-memory-core CI Pipeline
+# CortexStratum CI Pipeline
 # Runs on every push and PR to main: syntax check, all 5 test suites, installer build
 name: CI
 
@@ -14,7 +14,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ─── Stage 1: Syntax Check ───────────────────────────────────────────
+  #  Stage 1: Syntax Check 
   syntax-check:
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +43,7 @@ for f in files:
         sys.exit(1)
           "
 
-  # ─── Stage 2: Core Tests ────────────────────────────────────────────
+  #  Stage 2: Core Tests 
   core-tests:
     runs-on: ubuntu-latest
     needs: syntax-check
@@ -68,7 +68,7 @@ for f in files:
           python scripts/tools-mcp-server.py --help | head -5
           python scripts/tools-mcp-server.py --list-tools | python -c "import sys,json; t=json.load(sys.stdin); print(f'{len(t)} tools OK')"
 
-  # ─── Stage 3: Memory Engine Tests ───────────────────────────────────
+  #  Stage 3: Memory Engine Tests 
   memory-tests:
     runs-on: ubuntu-latest
     needs: syntax-check
@@ -113,7 +113,7 @@ print('ALL MEMORY ENGINE TESTS PASSED')
           name: memory-test-results
           path: data/*.json
 
-  # ─── Stage 4: Skill Router Validation ──────────────────────────────
+  #  Stage 4: Skill Router Validation 
   skill-router-validation:
     runs-on: ubuntu-latest
     needs: syntax-check
@@ -154,7 +154,7 @@ print(f'Unique skill refs: {len(referenced)}')
 print('SKILL ROUTER VALIDATION PASSED')
           "
 
-  # ─── Stage 5: Installer Build (Windows only) ───────────────────────
+  #  Stage 5: Installer Build (Windows only) 
   build-installer:
     if: github.ref_type == 'tag'
     runs-on: windows-latest

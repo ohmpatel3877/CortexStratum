@@ -21,39 +21,39 @@ Systematic debugging skill for home-lab and production NAS stacks built on **Sam
 ## Architecture Overview — The Stack Layers
 
 ```
-┌─────────────────────────────────────────────┐
-│  Client Layer                                │
-│  (Windows Explorer, macOS Finder,           │
-│   Jellyfin App, Nextcloud Client, Kodi)     │
-├─────────────────────────────────────────────┤
-│  Application Layer                           │
-│  ┌──────────┐  ┌──────────┐  ┌───────────┐ │
-│  │ Jellyfin │  │Nextcloud │  │ Other     │ │
-│  │ (media)  │  │ (cloud)  │  │ Containers│ │
-│  └────┬─────┘  └────┬─────┘  └─────┬─────┘ │
-├───────┴──────────────┴──────────────┴───────┤
-│  Container Layer (Podman/Docker)             │
-│  ┌──────────────────────────────────────┐   │
-│  │  Podman Networking (netavark/pasta)  │   │
-│  │  Volume Mounts, Rootless Mapping     │   │
-│  └────────────────┬─────────────────────┘   │
-├───────────────────┴────────────────────────┤
-│  Share Layer                                 │
-│  ┌──────────┐  ┌──────────┐  ┌───────────┐ │
-│  │  Samba   │  │  NFS     │  │  SFTP     │ │
-│  │  (CIFS)  │  │          │  │           │ │
-│  └────┬─────┘  └────┬─────┘  └─────┬─────┘ │
-├───────┴──────────────┴──────────────┴───────┤
-│  Storage Layer                                │
-│  ┌──────────────────────────────────────┐   │
-│  │  mergerfs (union mount)              │   │
-│  │  ┌────────┐ ┌────────┐ ┌────────┐  │   │
-│  │  │ disk1  │ │ disk2  │ │ disk3  │  │   │
-│  │  │(ext4)  │ │(ext4)  │ │(ext4)  │  │   │
-│  │  └────────┘ └────────┘ └────────┘  │   │
-│  │  Optional: SnapRAID parity below    │   │
-│  └──────────────────────────────────────┘   │
-└─────────────────────────────────────────────┘
+
+  Client Layer                                
+  (Windows Explorer, macOS Finder,           
+   Jellyfin App, Nextcloud Client, Kodi)     
+
+  Application Layer                           
+       
+   Jellyfin   Nextcloud    Other      
+   (media)     (cloud)     Containers 
+       
+
+  Container Layer (Podman/Docker)             
+     
+    Podman Networking (netavark/pasta)     
+    Volume Mounts, Rootless Mapping        
+     
+
+  Share Layer                                 
+       
+    Samba       NFS         SFTP      
+    (CIFS)                            
+       
+
+  Storage Layer                                
+     
+    mergerfs (union mount)                 
+           
+     disk1    disk2    disk3       
+    (ext4)   (ext4)   (ext4)       
+           
+    Optional: SnapRAID parity below       
+     
+
 ```
 
 ### Common Failure Propagation Paths
@@ -252,20 +252,20 @@ mount | grep mergerfs | grep -o 'category.create=[^,]*'
 mount | grep mergerfs | grep -o 'category.search=[^,]*'
 
 # Common policies and when they cause problems:
-# ┌────────────────┬──────────────────────────────────────────┐
-# │ Policy         │ Behavior & Failure Mode                   │
-# ├────────────────┼──────────────────────────────────────────┤
-# │ epmfs (default)│ Existing path, most free space. Can cause │
-# │                │ files to scatter randomly across disks.   │
-# │ lfs            │ Least free space. Fills one disk first.   │
-# │ mfs            │ Most free space. Spreads writes out.      │
-# │ rand           │ Random. Unpredictable test behavior.      │
-# │ ff             │ First found. Creates on first writable    │
-# │                │ branch.                                   │
-# │ epff           │ Existing path, first found. Best for      │
-# │                │ minimizing scatter — creates files on     │
-# │                │ the same branch as the parent.            │
-# └────────────────┴──────────────────────────────────────────┘
+# 
+#  Policy          Behavior & Failure Mode                   
+# 
+#  epmfs (default) Existing path, most free space. Can cause 
+#                  files to scatter randomly across disks.   
+#  lfs             Least free space. Fills one disk first.   
+#  mfs             Most free space. Spreads writes out.      
+#  rand            Random. Unpredictable test behavior.      
+#  ff              First found. Creates on first writable    
+#                  branch.                                   
+#  epff            Existing path, first found. Best for      
+#                  minimizing scatter — creates files on     
+#                  the same branch as the parent.            
+# 
 
 # Test: simulate what mergerfs will do
 /usr/bin/mergerfs -o use_ino,category.create=epff,<other-opts> /mnt/disk1:/mnt/disk2 /mnt/merged

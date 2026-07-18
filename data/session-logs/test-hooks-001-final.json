@@ -1,0 +1,19 @@
+{
+  "session_id": "test-hooks-001",
+  "project": "CortexStratum",
+  "goal": "Test lifecycle hooks",
+  "started_at": "2026-07-17T15:49:45.507972+00:00",
+  "ended_at": "2026-07-17T15:49:45.592031+00:00",
+  "observation_count": 1,
+  "observations": [
+    {
+      "id": "obs_440dd473",
+      "session_id": "test-hooks-001",
+      "event_type": "milestone",
+      "description": "Hooks integration test passed",
+      "metadata": {},
+      "timestamp": "2026-07-17T15:49:45.521960+00:00"
+    }
+  ],
+  "summary": "All hooks tests passed"
+}

@@ -17,7 +17,7 @@ from enum import Enum
 from pathlib import Path
 
 
-# ─── Strategy Definitions ─────────────────────────────────────────
+#  Strategy Definitions 
 
 class Strategy(Enum):
     COT = "chain-of-thought"         # Step-by-step linear reasoning
@@ -75,7 +75,7 @@ STRATEGY_DESCRIPTIONS = {
 }
 
 
-# ─── Prompt Templates per Strategy ────────────────────────────────
+#  Prompt Templates per Strategy 
 
 STRATEGY_PROMPTS = {
     Strategy.COT: """<strategy>chain-of-thought</strategy>
@@ -98,7 +98,7 @@ Instead of a single chain, explore MULTIPLE reasoning paths:
 
 1. Generate 3 distinct approaches to this problem
 2. For each approach, think 2-3 steps ahead
-3. Evaluate each path for viability (✓/✗/?)
+3. Evaluate each path for viability (//?)
 4. Prune dead ends, expand promising branches
 5. Select the best path and develop it fully
 
@@ -286,7 +286,7 @@ class PatternFlipper:
         return results
 
 
-# ─── CLI ──────────────────────────────────────────────────────────
+#  CLI 
 
 def main():
     import argparse

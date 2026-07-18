@@ -35,17 +35,17 @@ from collections import OrderedDict
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 
-# ── Paths ──────────────────────────────────────────────────────────────────
+#  Paths 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = BASE_DIR / "scripts"
 DATA_DIR = BASE_DIR / "data"
 
-# ── Terminal Colors ────────────────────────────────────────────────────────
+#  Terminal Colors 
 G = "\033[92m"; R = "\033[91m"; Y = "\033[93m"; B = "\033[94m"
 C = "\033[96m"; M = "\033[95m"; W = "\033[97m"; N = "\033[0m"
 DIM = "\033[2m"; BOLD = "\033[1m"
 
-# ── Pipeline Registry ──────────────────────────────────────────────────────
+#  Pipeline Registry 
 PIPELINES = OrderedDict({
     "mcp-server": {
         "label": "MCP Server Protocol",
@@ -141,7 +141,7 @@ PIPELINES = OrderedDict({
 
 PIPELINE_ORDER = list(PIPELINES.keys())
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+#  Helpers 
 
 def safe_json_load(path: Path, default=None):
     if not path.exists():
@@ -162,17 +162,17 @@ def safe_json_save(path: Path, data):
 
 
 def section(title: str):
-    print(f"\n{B}{'═' * 72}{N}")
+    print(f"\n{B}{'' * 72}{N}")
     print(f"{B}  {title}{N}")
-    print(f"{B}{'═' * 72}{N}")
+    print(f"{B}{'' * 72}{N}")
 
 
 def subsection(label: str):
-    print(f"\n  {Y}─── {label} ───{N}")
+    print(f"\n  {Y} {label} {N}")
 
 
 def status_icon(passed: bool) -> str:
-    return f"{G}✔ PASS{N}" if passed else f"{R}✘ FAIL{N}"
+    return f"{G} PASS{N}" if passed else f"{R} FAIL{N}"
 
 
 def timed_test(name: str, fn, *args, **kwargs) -> Tuple[bool, float, Any]:
@@ -191,13 +191,13 @@ def timed_test(name: str, fn, *args, **kwargs) -> Tuple[bool, float, Any]:
 def horizontal_bar(label: str, pct: float, width: int = 40) -> str:
     bar_len = max(1, int(pct / 100 * width))
     color = G if pct >= 80 else Y if pct >= 50 else R
-    bar = f"{color}{'█' * bar_len}{N}"
+    bar = f"{color}{'' * bar_len}{N}"
     return f"  {label:<28} {bar}{' ' * (width - bar_len)} {pct:.1f}%"
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# 
 # PIPELINE TEST SUITES
-# ════════════════════════════════════════════════════════════════════════════
+# 
 
 def test_mcp_server_pipeline() -> Dict[str, Any]:
     """Test tools-mcp-server.py: initialize, tools/list, tools/call for core tools."""
@@ -249,7 +249,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None and "result" in resp
         results["tests"].append({"name": "initialize", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"serverInfo={resp.get('result',{}).get('serverInfo',{}).get('name','?')}" if ok else "no response"})
-        print(f"    {'✔' if ok else '✘'} initialize ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} initialize ({elapsed:.0f}ms)")
 
         # T2: tools/list
         passed, elapsed, resp = timed_test("tools/list", lambda: (
@@ -261,7 +261,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None and n_tools >= 11
         results["tests"].append({"name": "tools/list", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"{n_tools} tools registered"})
-        print(f"    {'✔' if ok else '✘'} tools/list — {n_tools} tools ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} tools/list — {n_tools} tools ({elapsed:.0f}ms)")
 
         # T3: tools/call — skill_router_match
         passed, elapsed, resp = timed_test("tools/call: skill_router_match", lambda: (
@@ -273,7 +273,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None and ("matched_skills" in txt or "count" in txt)
         results["tests"].append({"name": "tools/call: skill_router_match", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"matched skills: {'yes' if ok else 'no'}"})
-        print(f"    {'✔' if ok else '✘'} skill_router_match ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} skill_router_match ({elapsed:.0f}ms)")
 
         # T4: tools/call — xtrace_status
         passed, elapsed, resp = timed_test("tools/call: xtrace_status", lambda: (
@@ -285,7 +285,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None and len(txt) > 0
         results["tests"].append({"name": "tools/call: xtrace_status", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"{len(txt)} chars output"})
-        print(f"    {'✔' if ok else '✘'} xtrace_status ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} xtrace_status ({elapsed:.0f}ms)")
 
         # T5: tools/call — goal_registry_status
         passed, elapsed, resp = timed_test("tools/call: goal_registry_status", lambda: (
@@ -297,7 +297,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None and len(txt) > 0
         results["tests"].append({"name": "tools/call: goal_registry_status", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"{len(txt)} chars output"})
-        print(f"    {'✔' if ok else '✘'} goal_registry_status ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} goal_registry_status ({elapsed:.0f}ms)")
 
         # T6: Unknown tool returns gracefully
         passed, elapsed, resp = timed_test("tools/call: unknown tool", lambda: (
@@ -308,7 +308,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None
         results["tests"].append({"name": "tools/call: unknown tool graceful", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": "returned response (not crash)"})
-        print(f"    {'✔' if ok else '✘'} unknown tool graceful ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} unknown tool graceful ({elapsed:.0f}ms)")
 
         # T7: Unknown method returns error
         passed, elapsed, resp = timed_test("unknown method error", lambda: (
@@ -318,7 +318,7 @@ def test_mcp_server_pipeline() -> Dict[str, Any]:
         ok = resp is not None and "error" in resp
         results["tests"].append({"name": "unknown method returns error", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"error code: {resp.get('error',{}).get('code','?')}" if ok else "no error"})
-        print(f"    {'✔' if ok else '✘'} unknown method error ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} unknown method error ({elapsed:.0f}ms)")
 
     finally:
         if proc:
@@ -351,7 +351,7 @@ def test_agent_memory_pipeline() -> Dict[str, Any]:
     ok = mid is not None and isinstance(mid, (str, int))
     results["tests"].append({"name": "memory add", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"id={mid}" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} BM25 memory add ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} BM25 memory add ({elapsed:.0f}ms)")
 
     # T2: memory search
     passed, elapsed, sr = timed_test("memory search",
@@ -360,7 +360,7 @@ def test_agent_memory_pipeline() -> Dict[str, Any]:
     n = len(sr) if isinstance(sr, list) else 0
     results["tests"].append({"name": "memory search", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"{n} results"})
-    print(f"    {'✔' if ok else '✘'} BM25 memory search ({elapsed:.0f}ms) — {n} results")
+    print(f"    {'' if ok else ''} BM25 memory search ({elapsed:.0f}ms) — {n} results")
 
     # T3: memory status
     passed, elapsed, st = timed_test("memory status",
@@ -369,7 +369,7 @@ def test_agent_memory_pipeline() -> Dict[str, Any]:
     ec = st.get("entry_count", 0) if isinstance(st, dict) else 0
     results["tests"].append({"name": "memory status", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"{ec} entries" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} BM25 memory status ({elapsed:.0f}ms) — {ec} entries")
+    print(f"    {'' if ok else ''} BM25 memory status ({elapsed:.0f}ms) — {ec} entries")
 
     # T4: memory synthesize
     passed, elapsed, syn = timed_test("memory synthesize",
@@ -377,7 +377,7 @@ def test_agent_memory_pipeline() -> Dict[str, Any]:
     ok = isinstance(syn, str) and len(syn) > 0
     results["tests"].append({"name": "memory synthesize", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"{len(syn)} chars" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} BM25 memory synthesize ({elapsed:.0f}ms) — {len(syn)} chars")
+    print(f"    {'' if ok else ''} BM25 memory synthesize ({elapsed:.0f}ms) — {len(syn)} chars")
 
     # T5: memory consolidate
     passed, elapsed, cons = timed_test("memory consolidate",
@@ -386,7 +386,7 @@ def test_agent_memory_pipeline() -> Dict[str, Any]:
     dedup = cons.get("deduplicated", 0) if isinstance(cons, dict) else 0
     results["tests"].append({"name": "memory consolidate", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"deduplicated: {dedup}" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} BM25 memory consolidate ({elapsed:.0f}ms) — {dedup} merged")
+    print(f"    {'' if ok else ''} BM25 memory consolidate ({elapsed:.0f}ms) — {dedup} merged")
 
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
@@ -411,7 +411,7 @@ def test_orchestration_pipeline() -> Dict[str, Any]:
     complexity = analysis.get("complexity_score", -1) if isinstance(analysis, dict) else -1
     results["tests"].append({"name": "task-analyzer analyze", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"complexity={complexity}" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} task-analyzer analyze ({elapsed:.0f}ms) — complexity={complexity}")
+    print(f"    {'' if ok else ''} task-analyzer analyze ({elapsed:.0f}ms) — complexity={complexity}")
 
     # T2: task-orchestrator splits work
     spec2 = _util.spec_from_file_location("task_orchestrator", str(SCRIPTS_DIR / "task-orchestrator.py"))
@@ -424,7 +424,7 @@ def test_orchestration_pipeline() -> Dict[str, Any]:
     n_ws = len(plan.get("workstreams", [])) if isinstance(plan, dict) else 0
     results["tests"].append({"name": "task-orchestrator plan", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"{n_ws} workstreams" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} task-orchestrator plan ({elapsed:.0f}ms) — {n_ws} workstreams")
+    print(f"    {'' if ok else ''} task-orchestrator plan ({elapsed:.0f}ms) — {n_ws} workstreams")
 
     # T3: DAG coordinator
     spec3 = _util.spec_from_file_location("dag_coordinator", str(SCRIPTS_DIR / "dag-coordinator.py"))
@@ -436,7 +436,7 @@ def test_orchestration_pipeline() -> Dict[str, Any]:
     ok = dags is not None
     results["tests"].append({"name": "dag-coordinator list", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"dags: {dags}" if ok else "failed"})
-    print(f"    {'✔' if ok else '✘'} dag-coordinator list ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} dag-coordinator list ({elapsed:.0f}ms)")
 
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
@@ -463,7 +463,7 @@ def test_goal_commitment_pipeline() -> Dict[str, Any]:
     ok = r["ok"]
     results["tests"].append({"name": "goal-registry status", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"ok" if ok else r["stderr"][:60]})
-    print(f"    {'✔' if ok else '✘'} goal-registry status ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} goal-registry status ({elapsed:.0f}ms)")
 
     # T2: goal-registry init
     passed, elapsed, r = timed_test("goal-registry init",
@@ -471,7 +471,7 @@ def test_goal_commitment_pipeline() -> Dict[str, Any]:
     ok = r["ok"]
     results["tests"].append({"name": "goal-registry init", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"ok" if ok else r["stderr"][:60]})
-    print(f"    {'✔' if ok else '✘'} goal-registry init ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} goal-registry init ({elapsed:.0f}ms)")
 
     # T3: goal-registry add subgoal
     passed, elapsed, r = timed_test("goal-registry add subgoal",
@@ -479,7 +479,7 @@ def test_goal_commitment_pipeline() -> Dict[str, Any]:
     ok = r["ok"]
     results["tests"].append({"name": "goal-registry add subgoal", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"ok" if ok else r["stderr"][:60]})
-    print(f"    {'✔' if ok else '✘'} goal-registry add subgoal ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} goal-registry add subgoal ({elapsed:.0f}ms)")
 
     # T4: goal-registry check alignment
     passed, elapsed, r = timed_test("goal-registry check alignment",
@@ -487,7 +487,7 @@ def test_goal_commitment_pipeline() -> Dict[str, Any]:
     ok = r["ok"]
     results["tests"].append({"name": "goal-registry check alignment", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"ok" if ok else r["stderr"][:60]})
-    print(f"    {'✔' if ok else '✘'} goal-registry check alignment ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} goal-registry check alignment ({elapsed:.0f}ms)")
 
     # T5: commitment checker list
     passed, elapsed, r = timed_test("commitment checker list",
@@ -495,7 +495,7 @@ def test_goal_commitment_pipeline() -> Dict[str, Any]:
     ok = r["ok"]
     results["tests"].append({"name": "commitment checker list", "passed": ok, "elapsed_ms": round(elapsed, 1),
                               "detail": f"ok" if ok else r["stderr"][:60]})
-    print(f"    {'✔' if ok else '✘'} commitment checker list ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} commitment checker list ({elapsed:.0f}ms)")
 
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
@@ -521,7 +521,7 @@ def test_error_decision_pipeline() -> Dict[str, Any]:
         lambda: run_ps("error-trace.ps1", ["-Action", "Status"]))
     ok = r["ok"]
     results["tests"].append({"name": "xtrace status", "passed": ok, "elapsed_ms": round(elapsed, 1)})
-    print(f"    {'✔' if ok else '✘'} xtrace status ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} xtrace status ({elapsed:.0f}ms)")
 
     # T2: xtrace log error
     passed, elapsed, r = timed_test("xtrace log error",
@@ -529,14 +529,14 @@ def test_error_decision_pipeline() -> Dict[str, Any]:
                                             "-ErrorOutput", "test error logging", "-ExitCode", "1"]))
     ok = r["ok"]
     results["tests"].append({"name": "xtrace log error", "passed": ok, "elapsed_ms": round(elapsed, 1)})
-    print(f"    {'✔' if ok else '✘'} xtrace log error ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} xtrace log error ({elapsed:.0f}ms)")
 
     # T3: xtrace search
     passed, elapsed, r = timed_test("xtrace search",
         lambda: run_ps("error-trace.ps1", ["-Action", "Search", "-Keyword", "test"]))
     ok = r["ok"]
     results["tests"].append({"name": "xtrace search", "passed": ok, "elapsed_ms": round(elapsed, 1)})
-    print(f"    {'✔' if ok else '✘'} xtrace search ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} xtrace search ({elapsed:.0f}ms)")
 
     # T4: dtrace add
     passed, elapsed, r = timed_test("dtrace add",
@@ -545,14 +545,14 @@ def test_error_decision_pipeline() -> Dict[str, Any]:
                                                "-Category", "process"]))
     ok = r["ok"]
     results["tests"].append({"name": "dtrace add", "passed": ok, "elapsed_ms": round(elapsed, 1)})
-    print(f"    {'✔' if ok else '✘'} dtrace add ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} dtrace add ({elapsed:.0f}ms)")
 
     # T5: dtrace search
     passed, elapsed, r = timed_test("dtrace search",
         lambda: run_ps("decision-trace.ps1", ["-Action", "Search", "-Keyword", "benchmark"]))
     ok = r["ok"]
     results["tests"].append({"name": "dtrace search", "passed": ok, "elapsed_ms": round(elapsed, 1)})
-    print(f"    {'✔' if ok else '✘'} dtrace search ({elapsed:.0f}ms)")
+    print(f"    {'' if ok else ''} dtrace search ({elapsed:.0f}ms)")
 
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
@@ -570,7 +570,7 @@ def test_skill_pipeline() -> Dict[str, Any]:
         lambda: router_path.exists())
     results["tests"].append({"name": "skill-router config exists", "passed": exists, "elapsed_ms": round(elapsed, 1),
                               "detail": str(router_path) if exists else "not found"})
-    print(f"    {'✔' if exists else '✘'} skill-router config exists ({elapsed:.0f}ms)")
+    print(f"    {'' if exists else ''} skill-router config exists ({elapsed:.0f}ms)")
 
     if exists:
         # T2: skill router parses
@@ -580,7 +580,7 @@ def test_skill_pipeline() -> Dict[str, Any]:
         n_rules = len(config.get("rules", []))
         results["tests"].append({"name": "skill-router valid JSON", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"{n_rules} rules" if ok else "missing 'rules' key"})
-        print(f"    {'✔' if ok else '✘'} skill-router valid JSON ({elapsed:.0f}ms) — {n_rules} rules")
+        print(f"    {'' if ok else ''} skill-router valid JSON ({elapsed:.0f}ms) — {n_rules} rules")
 
     # T3: output condenser function
     import importlib.util as _util
@@ -592,7 +592,7 @@ def test_skill_pipeline() -> Dict[str, Any]:
         lambda: "error" in "line1\nBuild failed with error: timeout\nline3".lower())
     results["tests"].append({"name": "output condenser logic", "passed": True, "elapsed_ms": 0.1,
                               "detail": "pattern matching works"})
-    print(f"    {'✔' if True else '✘'} output condenser logic")
+    print(f"    {'' if True else ''} output condenser logic")
 
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
@@ -625,7 +625,7 @@ def test_module_coder() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None and (isinstance(result, dict) or "error" not in str(result)[:50])
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "coder module load", "passed": False, "elapsed_ms": 0,
@@ -660,7 +660,7 @@ def test_module_devops() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "devops module load", "passed": False, "elapsed_ms": 0,
@@ -695,7 +695,7 @@ def test_module_sensory() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "sensory module load", "passed": False, "elapsed_ms": 0,
@@ -728,7 +728,7 @@ def test_module_audio() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "audio module load", "passed": False, "elapsed_ms": 0,
@@ -759,7 +759,7 @@ def test_module_art() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None and (isinstance(result, dict) or isinstance(result, str))
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "art module load", "passed": False, "elapsed_ms": 0,
@@ -790,7 +790,7 @@ def test_module_literature() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None and isinstance(result, dict)
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "literature module load", "passed": False, "elapsed_ms": 0,
@@ -823,7 +823,7 @@ def test_module_gamedev() -> Dict[str, Any]:
             passed, elapsed, result = timed_test(name, fn)
             ok = result is not None
             results["tests"].append({"name": name, "passed": ok, "elapsed_ms": round(elapsed, 1)})
-            print(f"    {'✔' if ok else '✘'} {name} ({elapsed:.0f}ms)")
+            print(f"    {'' if ok else ''} {name} ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "gamedev module load", "passed": False, "elapsed_ms": 0,
@@ -852,7 +852,7 @@ def test_verification_pipeline() -> Dict[str, Any]:
         ok = st is not None
         results["tests"].append({"name": "verifier status", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"ok" if ok else "failed"})
-        print(f"    {'✔' if ok else '✘'} verifier status ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} verifier status ({elapsed:.0f}ms)")
 
         # T2: verifier pre-check
         passed, elapsed, pre = timed_test("verifier pre-check",
@@ -860,7 +860,7 @@ def test_verification_pipeline() -> Dict[str, Any]:
         ok = pre is not None
         results["tests"].append({"name": "verifier pre-check", "passed": ok, "elapsed_ms": round(elapsed, 1),
                                   "detail": f"passed={pre.get('passed')}" if ok else "failed"})
-        print(f"    {'✔' if ok else '✘'} verifier pre-check ({elapsed:.0f}ms)")
+        print(f"    {'' if ok else ''} verifier pre-check ({elapsed:.0f}ms)")
 
     except Exception as e:
         results["tests"].append({"name": "verifier module load", "passed": False, "elapsed_ms": 0,
@@ -886,7 +886,7 @@ def test_benchmark_integration() -> Dict[str, Any]:
     ok = bh_results != {}
     results["tests"].append({"name": "benchmark-harness results", "passed": ok, "elapsed_ms": 0,
                               "detail": f"{bh_pct:.1f}% overall ({bh_passed}/{bh_total})" if ok else "no results found"})
-    print(f"    {'✔' if ok else '✘'} benchmark-harness results — {bh_pct:.1f}%" if ok else f"    {'✘' if not ok else '✔'} benchmark-harness results — no data")
+    print(f"    {'' if ok else ''} benchmark-harness results — {bh_pct:.1f}%" if ok else f"    {'' if not ok else ''} benchmark-harness results — no data")
 
     # T2: Load blind benchmark results
     fb_results = safe_json_load(DATA_DIR / "flash-benchmark-results.json", {})
@@ -894,13 +894,13 @@ def test_benchmark_integration() -> Dict[str, Any]:
     ok2 = fb_results != {}
     results["tests"].append({"name": "blind benchmark results", "passed": ok2, "elapsed_ms": 0,
                               "detail": f"{fb_pct:.1f}% blind score" if ok2 else "no results"})
-    print(f"    {'✔' if ok2 else '✘'} blind benchmark results — {fb_pct:.1f}%" if ok2 else f"    {'✘'} blind benchmark results — no data")
+    print(f"    {'' if ok2 else ''} blind benchmark results — {fb_pct:.1f}%" if ok2 else f"    {''} blind benchmark results — no data")
 
     # T3: Combined capability score
     combined_pct = (bh_pct * 0.6 + fb_pct * 0.4) if bh_results and fb_results else (bh_pct or fb_pct)
     results["tests"].append({"name": "combined capability score", "passed": combined_pct >= 70, "elapsed_ms": 0,
                               "detail": f"{combined_pct:.1f}% (threshold: 70%)"})
-    print(f"    {'✔' if combined_pct >= 70 else '✘'} combined capability score — {combined_pct:.1f}%")
+    print(f"    {'' if combined_pct >= 70 else ''} combined capability score — {combined_pct:.1f}%")
 
     results["total"] = len(results["tests"])
     results["score"] = sum(1 for t in results["tests"] if t["passed"])
@@ -908,9 +908,9 @@ def test_benchmark_integration() -> Dict[str, Any]:
     return results
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# 
 # TEST DISPATCHER
-# ════════════════════════════════════════════════════════════════════════════
+# 
 
 TEST_FUNCTIONS = {
     "mcp-server": test_mcp_server_pipeline,
@@ -951,9 +951,9 @@ RUN_ORDER = [
 DOMAIN_ORDER = ["core", "memory", "module", "evaluation"]
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# 
 # DISPLAY
-# ════════════════════════════════════════════════════════════════════════════
+# 
 
 def show_capability_matrix(all_results: Dict[str, Dict], overall: Dict):
     """Display a comprehensive capability matrix."""
@@ -961,7 +961,7 @@ def show_capability_matrix(all_results: Dict[str, Dict], overall: Dict):
 
     # Header
     print(f"\n  {W}{'Pipeline':<28} {'Status':>10} {'Score':>8} {'Tests':>8} {'Domain':<12} {'Latency'}{N}")
-    print(f"  {DIM}{'─' * 28} {'─' * 10} {'─' * 8} {'─' * 8} {'─' * 12} {'─' * 10}{N}")
+    print(f"  {DIM}{'' * 28} {'' * 10} {'' * 8} {'' * 8} {'' * 12} {'' * 10}{N}")
 
     domain_totals = {}
 
@@ -991,7 +991,7 @@ def show_capability_matrix(all_results: Dict[str, Dict], overall: Dict):
         else:
             status = f"{R}FAIL{N}"
 
-        status_short = f"{'✔' if pct >= 70 else '⚠' if pct >= 50 else '✘'}"
+        status_short = f"{'' if pct >= 70 else '' if pct >= 50 else ''}"
 
         color = G if pct >= 80 else Y if pct >= 50 else R
         print(f"  {label:<28} {color}{status_short:>3}{N} {color}{pct:>6.1f}%{N}  {n_score}/{n_total:<3} {domain:<12} {avg_latency:>5.0f}ms")
@@ -1020,18 +1020,18 @@ def show_capability_matrix(all_results: Dict[str, Dict], overall: Dict):
     overall_latency = overall.get("avg_latency_ms", 0)
     color = G if overall_pct >= 80 else Y if overall_pct >= 50 else R
 
-    print(f"\n  {W}{'═' * 80}{N}")
+    print(f"\n  {W}{'' * 80}{N}")
     print(f"  {BOLD}OVERALL CAPABILITY SCORE:{N}    {color}{overall_pct:.1f}%{N}  ({overall_score}/{overall_total} tests across {len(all_results)} pipelines)")
     print(f"  {BOLD}AVERAGE LATENCY:{N}          {overall_latency:.0f}ms per test")
     print(f"  {BOLD}RUN TIMESTAMP:{N}            {overall.get('timestamp', '?')}")
-    print(f"  {W}{'═' * 80}{N}")
+    print(f"  {W}{'' * 80}{N}")
 
 
 def show_pipeline_list():
     """List all available pipelines."""
     section("AVAILABLE PIPELINES")
     print(f"\n  {'Key':<20} {'Label':<30} {'Domain':<12} {'Tests'}{N}")
-    print(f"  {DIM}{'─' * 20} {'─' * 30} {'─' * 12} {'─' * 5}{N}")
+    print(f"  {DIM}{'' * 20} {'' * 30} {'' * 12} {'' * 5}{N}")
     for key, info in PIPELINES.items():
         print(f"  {key:<20} {info['label']:<30} {info['domain']:<12} {info['tests']}")
     print(f"\n  Use: python scripts/terminal-bench.py --pipeline <key>")
@@ -1054,9 +1054,9 @@ def show_stats(saved: Optional[Dict] = None):
     print(f"\n  Results saved to: {DATA_DIR / 'terminal-bench-results.json'}")
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# 
 # MAIN
-# ════════════════════════════════════════════════════════════════════════════
+# 
 
 def parse_args():
     pipelines_to_run = None
@@ -1113,7 +1113,7 @@ def main():
         return
 
     section(f"TERMINAL BENCH — OpenCode MCP Pipeline Capability Benchmark")
-    print(f"  {DIM}{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | ai-memory-core | Python {sys.version.split()[0]}{N}")
+    print(f"  {DIM}{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | CortexStratum | Python {sys.version.split()[0]}{N}")
     print(f"  {DIM}{len(PIPELINES)} pipelines registered | {sum(p['tests'] for p in PIPELINES.values())} total tests{N}")
 
     if pipelines_to_run == "all" or pipelines_to_run is None:
@@ -1121,7 +1121,7 @@ def main():
     else:
         run_keys = pipelines_to_run
 
-    # ── Run each pipeline ──
+    #  Run each pipeline 
     all_results = {}
     total_score = 0
     total_tests = 0
@@ -1155,13 +1155,13 @@ def main():
 
         pct = result.get("pct", 0)
         if pct >= 100:
-            print(f"\n  {G}✔ PIPELINE PASS: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
+            print(f"\n  {G} PIPELINE PASS: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
         elif pct >= 70:
-            print(f"\n  {G}✔ PIPELINE PASS: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
+            print(f"\n  {G} PIPELINE PASS: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
         elif pct >= 50:
-            print(f"\n  {Y}⚠ PIPELINE PARTIAL: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
+            print(f"\n  {Y} PIPELINE PARTIAL: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
         else:
-            print(f"\n  {R}✘ PIPELINE FAIL: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
+            print(f"\n  {R} PIPELINE FAIL: {pct:.0f}% ({result.get('score')}/{result.get('total')}){N}")
 
     duration = time.time() - start_time
     overall_pct = (total_score / total_tests * 100) if total_tests else 0
@@ -1177,19 +1177,19 @@ def main():
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
-    # ── Capability Matrix ──
+    #  Capability Matrix 
     if not json_only:
         show_capability_matrix(all_results, overall)
 
-        # ── Detail Summary ──
+        #  Detail Summary 
         print(f"\n  {W}Execution Summary:{N}")
         print(f"  ⏱  Duration:       {duration:.1f}s")
-        print(f"  🧪 Tests run:      {total_tests} across {len(all_results)} pipelines")
-        print(f"  ✅ Passed:         {total_score}")
-        print(f"  ❌ Failed:         {total_tests - total_score}")
-        print(f"  ⚡ Avg latency:    {avg_latency:.0f}ms per test")
+        print(f"   Tests run:      {total_tests} across {len(all_results)} pipelines")
+        print(f"   Passed:         {total_score}")
+        print(f"   Failed:         {total_tests - total_score}")
+        print(f"   Avg latency:    {avg_latency:.0f}ms per test")
 
-    # ── Save results ──
+    #  Save results 
     output = {
         "benchmark": "terminal-bench",
         "model": "deepseek-v4-flash",

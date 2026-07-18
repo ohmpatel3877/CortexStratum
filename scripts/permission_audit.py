@@ -152,18 +152,18 @@ class PermissionAudit:
             }
             sim["description"] = f"Would finalize session '{args.get('session_id', '?')}'"
 
-        elif tool_name in ("mutate_memory_consolidate",):
+        elif tool_name in ("write_memory_consolidate",):
             threshold = args.get("threshold", 0.85)
             sim["preview"] = {
                 "action": "merge",
                 "target": "memory_store",
                 "threshold": threshold,
                 "dry_run_available": True,
-                "note": "Use mutate_memory_consolidate with dry_run=true for detailed preview",
+                "note": "Use write_memory_consolidate with dry_run=true for detailed preview",
             }
             sim["description"] = f"Would consolidate memories (threshold={threshold})"
 
-        elif tool_name in ("mutate_commitment_checker_verify",):
+        elif tool_name in ("write_commitment_verify",):
             sim["preview"] = {
                 "action": "update",
                 "target": "commitment_registry",
@@ -171,7 +171,7 @@ class PermissionAudit:
             }
             sim["description"] = f"Would verify commitment '{args.get('id', '?')}'"
 
-        elif tool_name in ("mutate_sensory_interact",):
+        elif tool_name in ("write_sensory_interact",):
             actions = args.get("actions", [])
             sim["preview"] = {
                 "action": "browser_interact",
@@ -182,7 +182,7 @@ class PermissionAudit:
             }
             sim["description"] = f"Would perform {len(actions)} browser actions on '{args.get('url', '?')[:60]}'"
 
-        elif tool_name in ("mutate_undo",):
+        elif tool_name in ("write_audit_undo",):
             ckpt_id = args.get("checkpoint_id", "")
             sim["preview"] = {
                 "action": "restore",
@@ -458,8 +458,8 @@ if __name__ == "__main__":
         ("write_memory_add", {"text": "Test memory entry", "source": "manual"}),
         ("write_xtrace_log_error", {"command": "npm build", "error_output": "Module not found"}),
         ("write_dtrace_add", {"title": "Use Postgres", "decision": "Yes", "rationale": "ACID"}),
-        ("mutate_memory_consolidate", {"threshold": 0.85}),
-        ("mutate_sensory_interact", {"url": "https://example.com", "actions": [{"type": "click", "selector": "#btn"}]}),
+        ("write_memory_consolidate", {"threshold": 0.85}),
+        ("write_sensory_interact", {"url": "https://example.com", "actions": [{"type": "click", "selector": "#btn"}]}),
         ("unknown_tool", {}),
     ]
     for name, args in tests:

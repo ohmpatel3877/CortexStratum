@@ -3,21 +3,21 @@
 ## Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                  ai-memory-core Build Pipeline                    │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  ┌──────────┐    ┌───────────┐    ┌──────────┐    ┌───────────┐  │
-│  │  Source   │───▶│  Python   │───▶│   Test   │───▶│  Package  │  │
-│  │  Code     │    │  Compile  │    │  Suite   │    │           │  │
-│  └──────────┘    └───────────┘    └──────────┘    └───────────┘  │
-│       │                │               │               │         │
-│       ▼                ▼               ▼               ▼         │
-│  *.py files      py_compile     5 test suites     Inno Setup     │
-│  skill files     passes all     all pass         .exe output     │
-│  JSON config     syntax check                                      │
-│  .iss script                                                      │
-└──────────────────────────────────────────────────────────────────┘
+
+                  CortexStratum Build Pipeline                    
+
+                                                                   
+                
+    Source     Python      Test     Package    
+    Code           Compile        Suite                    
+                
+                                                              
+                                                              
+  *.py files      py_compile     5 test suites     Inno Setup     
+  skill files     passes all     all pass         .exe output     
+  JSON config     syntax check                                      
+  .iss script                                                      
+
 ```
 
 ## Prerequisites
@@ -38,8 +38,8 @@
 
 ```powershell
 # Clone
-git clone https://github.com/ohmpatel3877/ai-memory-core.git
-cd ai-memory-core
+git clone https://github.com/ohmpatel3877/CortexStratum.git
+cd CortexStratum
 
 # Verify Python syntax
 python -m py_compile scripts/tools-mcp-server.py

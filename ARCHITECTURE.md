@@ -3,46 +3,46 @@
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    MCP Client                                │
-│          (OpenCode, Claude Code, Cursor...)                  │
-├─────────────────────────────────────────────────────────────┤
-│                  JSON-RPC 2.0 over stdio                     │
-├─────────────────────────────────────────────────────────────┤
-│                   tools-mcp-server.py                        │
-│                                                              │
-│  ┌──────────── Permission Guard ─────────────────────────┐  │
-│  │  can_call_tool(name, {mode})                          │  │
-│  │  auto mode     → blocks write_/mutate_                │  │
-│  │  interactive   → allows all, warns on write/mutate    │  │
-│  │  permissive    → all tools allowed, no warnings       │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                              │
-│  ┌──────────┐ ┌──────┐ ┌──────┐ ┌────────┐ ┌──────────┐   │
-│  │ Trace    │ │Memory│ │Coder │ │ Audio  │ │Sensory   │   │
-│  │ 13 tools │ │5 tls │ │7 tls │ │ 7 tls  │ │ 12 tls   │   │
-│  └──────────┘ └──────┘ └──────┘ └────────┘ └──────────┘   │
-│  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐   │
-│  │DevOps  │ │GameDev │ │Art     │ │Lit     │ │Verifier│   │
-│  │ 7 tls  │ │ 7 tls  │ │4 tls   │ │4 tls   │ │ 4 tls  │   │
-│  └────────┘ └────────┘ └────────┘ └────────┘ └────────┘   │
-│                                                              │
-│  ┌─────────── Module Factory ─────────────────────────┐     │
-│  │  _get_module(name, filename) — lazy-loaded, cached  │     │
-│  │  Error handling: try/except with user-friendly msgs │     │
-│  └────────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────┘
-         │                                      │
-         ▼                                      ▼
-┌────────────────────┐              ┌─────────────────────────┐
-│ data/              │              │ .memory/                │
-│  error-registry    │              │  profiles/              │
-│  decision-registry │              │  identity/              │
-│  goal-registry     │              │  ne/ (BM25 index)      │
-│  commitments       │              └─────────────────────────┘
-│  tool-inventory    │
-│  synonyms          │
-└────────────────────┘
+
+                    MCP Client                                
+          (OpenCode, Claude Code, Cursor...)                  
+
+                  JSON-RPC 2.0 over stdio                     
+
+                   tools-mcp-server.py                        
+                                                              
+   Permission Guard   
+    can_call_tool(name, {mode})                            
+    auto mode     → blocks write_/mutate_                  
+    interactive   → allows all, warns on write/mutate      
+    permissive    → all tools allowed, no warnings         
+    
+                                                              
+         
+   Trace     Memory Coder   Audio   Sensory      
+   13 tools  5 tls  7 tls   7 tls    12 tls      
+         
+         
+  DevOps   GameDev  Art      Lit      Verifier   
+   7 tls    7 tls   4 tls    4 tls     4 tls     
+         
+                                                              
+   Module Factory      
+    _get_module(name, filename) — lazy-loaded, cached       
+    Error handling: try/except with user-friendly msgs      
+       
+
+                                               
+                                               
+              
+ data/                             .memory/                
+  error-registry                    profiles/              
+  decision-registry                 identity/              
+  goal-registry                     ne/ (BM25 index)      
+  commitments                     
+  tool-inventory    
+  synonyms          
+
 ```
 
 ## Permission Model
@@ -55,9 +55,9 @@ at three levels:
 
 | Mode | Flag | `read_*` | `write_*` | `mutate_*` | Use Case |
 |------|------|----------|-----------|------------|----------|
-| **auto** | default | ✅ Allowed | ❌ Blocked | ❌ Blocked | Unattended agents, CI |
-| **interactive** | default | ✅ Allowed | ⚠️ Warning | ⚠️ Warning | Human-in-the-loop |
-| **permissive** | `--permissive` | ✅ Allowed | ✅ Allowed | ✅ Allowed | Trusted environments |
+| **auto** | default |  Allowed |  Blocked |  Blocked | Unattended agents, CI |
+| **interactive** | default |  Allowed |  Warning |  Warning | Human-in-the-loop |
+| **permissive** | `--permissive` |  Allowed |  Allowed |  Allowed | Trusted environments |
 
 ### Auto Mode Failure Behavior
 
@@ -113,17 +113,17 @@ Each module in `scripts/` follows the same pattern:
 
 | Module | File | Dependencies | Status |
 |--------|------|-------------|--------|
-| Memory | `memory_search.py` | stdlib only | ✅ Pure BM25 |
-| Trace | `trace.py` | stdlib only | ✅ No deps |
-| Verifier | `verifier_middleware.py` | guardrails.py | ✅ |
-| Guardrails | `guardrails.py` | stdlib only | ✅ |
-| Sensory | `sensory-module.py` | playwright, bs4, pdfplumber, trafilatura | ⚠️ Optional |
-| Coder | `coder-module.py` | stdlib only | ✅ |
-| Audio | `audio-module.py` | numpy (optional) | ⚠️ Optional |
-| Art | `art-module.py` | stdlib only | ✅ |
-| DevOps | `devops-module.py` | stdlib only | ✅ |
-| Game Dev | `game-dev-module.py` | stdlib only | ✅ |
-| Literature | `literature-module.py` | stdlib only | ✅ |
+| Memory | `memory_search.py` | stdlib only |  Pure BM25 |
+| Trace | `trace.py` | stdlib only |  No deps |
+| Verifier | `verifier_middleware.py` | guardrails.py |  |
+| Guardrails | `guardrails.py` | stdlib only |  |
+| Sensory | `sensory-module.py` | playwright, bs4, pdfplumber, trafilatura |  Optional |
+| Coder | `coder-module.py` | stdlib only |  |
+| Audio | `audio-module.py` | numpy (optional) |  Optional |
+| Art | `art-module.py` | stdlib only |  |
+| DevOps | `devops-module.py` | stdlib only |  |
+| Game Dev | `game-dev-module.py` | stdlib only |  |
+| Literature | `literature-module.py` | stdlib only |  |
 
 ## Skill Router
 

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get ai-memory-core running in under 2 minutes.
+Get CortexStratum running in under 2 minutes.
 
 ## Prerequisites
 
@@ -10,8 +10,8 @@ Get ai-memory-core running in under 2 minutes.
 ## Step 1: Clone
 
 ```bash
-git clone https://github.com/ohmpatel3877/ai-memory-core.git
-cd ai-memory-core
+git clone https://github.com/ohmpatel3877/CortexStratum.git
+cd CortexStratum
 ```
 
 ## Step 2: Install Dependencies
@@ -54,7 +54,7 @@ Add to your `opencode.json`:
 ```json
 {
   "mcpServers": {
-    "ai-memory-core": {
+    "CortexStratum": {
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"]
     }
@@ -67,7 +67,7 @@ Or use the permissive variant to bypass permission checks:
 ```json
 {
   "mcpServers": {
-    "ai-memory-core": {
+    "CortexStratum": {
       "command": "python",
       "args": ["scripts/tools-mcp-server.py", "--permissive"]
     }
@@ -92,7 +92,7 @@ python scripts/test-mcp-server.py
 
 ## Windows Installer (Alternative)
 
-Download the installer from [GitHub Releases](https://github.com/ohmpatel3877/ai-memory-core/releases):
+Download the installer from [GitHub Releases](https://github.com/ohmpatel3877/CortexStratum/releases):
 
 ```
 opencode-container-server-setup.exe

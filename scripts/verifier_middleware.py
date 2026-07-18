@@ -1,5 +1,5 @@
 """
-verifier-middleware.py — Parallel verifier for ai-memory-core MCP pipeline.
+verifier-middleware.py — Parallel verifier for CortexStratum MCP pipeline.
 
 Cross-checks every tool call for security violations, oversight anomalies,
 state drift, and generates renudge correction signals.

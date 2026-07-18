@@ -1,6 +1,6 @@
 # Electrical Assembly Skill
 
-Integrates the ai-memory-core electrical-module for circuit design, wiring diagrams, pin mapping, and power budgeting.
+Integrates the CortexStratum electrical-module for circuit design, wiring diagrams, pin mapping, and power budgeting.
 
 ## When to use
 
@@ -8,7 +8,7 @@ Use when designing circuits, wiring diagrams, Arduino pin assignments, power bud
 
 ## Module Location
 
-`C:\Users\ohmpa\github\ai-memory-core\electrical-module\`
+`C:\Users\ohmpa\github\CortexStratum\electrical-module\`
 
 ## Tools
 

@@ -1,8 +1,8 @@
-# ai-memory-core — Create GitHub Issues
+# CortexStratum — Create GitHub Issues
 # Run this from your authenticated gh terminal (at repo root)
 # One-liner: pwsh -NoProfile .github\create-issues.ps1
 
-$Repo = "ohmpatel3877/ai-memory-core"
+$Repo = "ohmpatel3877/CortexStratum"
 
 # Milestones already exist:
 # 1 = v0.3.0 - Polish and Stability (closed)
@@ -23,7 +23,7 @@ Write-Host "Creating $($Issues.Count) issues..." -ForegroundColor Cyan
 $Results = $Issues | ForEach-Object -Parallel {
     $issue = $_
     $result = gh issue create `
-        --repo "ohmpatel3877/ai-memory-core" `
+        --repo "ohmpatel3877/CortexStratum" `
         --title $issue.title `
         --label $($issue.labels -join ",") `
         --milestone $issue.milestone `

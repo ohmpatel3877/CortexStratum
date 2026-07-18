@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 cad_validator.py - SCAD file structure & syntax validator
-ai-memory-core cad-module
+CortexStratum cad-module
 Validates: brace balance, module definitions, parameter completeness,
            unused variables, common OpenSCAD pitfalls
 """

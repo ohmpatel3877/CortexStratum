@@ -1,4 +1,4 @@
-﻿[2026-07-15 14:34:41] Command=CondenseBash Type=build File=
+[2026-07-15 14:34:41] Command=CondenseBash Type=build File=
 ------------------------------------------------------------
 [CONDENSED] Type: build | Lines: 3
 Status: FAILED (exit 1) | 340 tests -> 337 passed, 3 failed

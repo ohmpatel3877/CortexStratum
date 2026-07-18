@@ -1,0 +1,17 @@
+{
+  "phases": [
+    {
+      "phase": "help",
+      "start_time": "2026-07-18T15:43:55.073022+00:00",
+      "summary": "",
+      "tool_count": 0
+    },
+    {
+      "phase": "context",
+      "start_time": "2026-07-18T15:43:55.088286+00:00",
+      "summary": "",
+      "tool_count": 0
+    }
+  ],
+  "current_phase": "context"
+}

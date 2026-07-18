@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Skill Pipeline Test Suite — validates the full skill routing, loading, and
-cross-reference integrity of the ai-memory-core skill system.
+cross-reference integrity of the CortexStratum skill system.
 
 Tests:
   1. Local skill SKILL.md files exist and are parseable
@@ -23,7 +23,7 @@ from collections import Counter
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-# ── Paths ───────────────────────────────────────────────────────────────────
+#  Paths 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = PROJECT_ROOT / "skills"
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
@@ -46,9 +46,9 @@ def log(status: str, test: str, detail: str = ""):
         RESULTS["warnings"] += 1
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 # Test 1: Validate all local skill SKILL.md files
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 
 def test_local_skills():
     """Check every directory under skills/ has a SKILL.md with valid structure."""
@@ -86,9 +86,9 @@ def test_local_skills():
     log("INFO", f"  Total skill directories: {len(skill_dirs)}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 # Test 2: Validate skill router JSON
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 
 def test_router_structure():
     """Validate the skill-router.json schema and all rule fields."""
@@ -170,9 +170,9 @@ def test_router_structure():
         log("WARN", "Fallback mechanism", "No fallback levels configured")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 # Test 3: Router end-to-end matching (direct logic, no subprocess)
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 
 def _match_skills_direct(task: str, router_config: dict) -> dict:
     """Replicate the router matching logic from tools-mcp-server.py inline."""
@@ -263,9 +263,9 @@ def test_router_matching():
         log("WARN", "  Fallback mechanism: no-match task", f"expected fallback, got: {fallback_result['matched_skills']}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 # Test 4: Identify dud skills (referenced but not available)
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 
 def test_dud_skills():
     """
@@ -418,9 +418,9 @@ def test_dud_skills():
     return duds
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 # Test 5: All MCP tools are properly defined (dynamic count)
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 
 def test_tool_inventory():
     """Validate the MCP tool definitions from --list-tools output."""
@@ -476,13 +476,13 @@ def test_tool_inventory():
     log("INFO", f"Permission distribution", f"read={perms['read']} write={perms['write']} mutate={perms['mutate']}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 # Main
-# ═══════════════════════════════════════════════════════════════════════════════
+# 
 
 def main():
     print("=" * 60)
-    print("  ai-memory-core Skill Pipeline Test Suite")
+    print("  CortexStratum Skill Pipeline Test Suite")
     print("=" * 60)
     print(f"  Project: {PROJECT_ROOT}")
     print(f"  Skills:  {SKILLS_DIR}")
@@ -503,7 +503,7 @@ def main():
     print(f"  Failed:   {RESULTS['failed']}")
     print(f"  Warnings: {RESULTS['warnings']}")
     if duds:
-        print(f"\n  ⚠ DUD SKILLS FOUND: {duds}")
+        print(f"\n   DUD SKILLS FOUND: {duds}")
     print(f"\n  {'ALL SKILL PIPELINE TESTS PASSED' if RESULTS['failed'] == 0 else 'SOME TESTS FAILED'}")
     print("=" * 60)
 

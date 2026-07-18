@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 cad_exporter.py - Batch SCAD to STL export via OpenSCAD CLI
-ai-memory-core cad-module
+CortexStratum cad-module
 """
 import subprocess
 import sys
