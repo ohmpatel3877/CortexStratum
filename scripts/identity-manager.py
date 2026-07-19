@@ -580,7 +580,7 @@ def print_status(status: dict) -> None:
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Identity Manager — persona persistence for ai-memory-core")
+    parser = argparse.ArgumentParser(description="Identity Manager — persona persistence for cortex-stratum")
     parser.add_argument("--consolidate", action="store_true", help="Consolidate identity from mem0 memories")
     parser.add_argument("--render", action="store_true", help="Render session prompt fragment")
     parser.add_argument("--get-trait", type=str, metavar="TRAIT", help="Get strength of a named trait")

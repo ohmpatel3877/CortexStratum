@@ -1,6 +1,6 @@
 # opencode-container-server
 # One-command deploy: docker compose up -d
-# Spins up the ai-memory-core MCP server + OpenCode CLI environment.
+# Spins up the cortex-stratum MCP server + OpenCode CLI environment.
 # You only need Docker. Everything else runs in the container.
 
 services:

@@ -1,0 +1,25 @@
+{
+  "dag_id": "verify-realexec",
+  "name": "Verify Real Execution",
+  "started_at": "2026-07-19T10:18:51.235552+00:00",
+  "completed_at": "2026-07-19T10:18:51.574709+00:00",
+  "node_count": 2,
+  "edge_count": 1,
+  "levels": [
+    [
+      "a"
+    ],
+    [
+      "b"
+    ]
+  ],
+  "status": "completed",
+  "summary": {
+    "total_nodes": 2,
+    "phases": {
+      "completed": 2
+    },
+    "failed_nodes": [],
+    "duration_seconds": 0.3
+  }
+}

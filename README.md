@@ -5,9 +5,9 @@
   <img src="https://img.shields.io/badge/Claude%20Code-Ready-4ade80?style=for-the-badge" alt="Claude Code Ready"/>
 </p>
 
-# ai-memory-core
+# cortex-stratum
 
-**Persistent memory infrastructure for AI coding agents.** A 68-tool MCP server that gives OpenCode, Claude Code, and Cursor agents memory that persists across sessions — error tracking, decision logging, skill routing, task orchestration, multi-modal AI generation, and behavioral verification.
+**Persistent memory infrastructure for AI coding agents.** A 75-tool MCP server that gives OpenCode, Claude Code, and Cursor agents memory that persists across sessions — error tracking, decision logging, skill routing, task orchestration, multi-modal AI generation, and behavioral verification.
 
 Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent-memory-mcp for local project-specific conventions.
 
@@ -54,18 +54,18 @@ Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent
 ### Windows
 Send your friend this link — it downloads the file, then they double-click it:
 ```
-https://github.com/ohmpatel3877/ai-memory-core/releases/download/v1.0.0/ONE-CLICK.cmd
+https://github.com/ohmpatel3877/cortex-stratum/releases/download/v0.6.0-dev/ONE-CLICK.cmd
 ```
 This is a GitHub Release link, so the browser will **download** it (not display it). They double-click the downloaded file and it runs.
 
 ### Mac / Linux
 Open Terminal, paste this one line, press Enter:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/docker/setup-opencode-container.sh | bash
 ```
 
 ### What they get
-A running container with the 68-tool MCP server. Connect it to OpenCode by adding to `opencode.json`:
+A running container with the 75-tool MCP server. Connect it to OpenCode by adding to `opencode.json`:
 ```json
 {
   "mcpServers": {
@@ -88,16 +88,16 @@ A running container with the 68-tool MCP server. Connect it to OpenCode by addin
 
 ### Windows (PowerShell 7+)
 ```powershell
-git clone https://github.com/ohmpatel3877/ai-memory-core.git
-cd ai-memory-core
-pwsh plugin-tools/install-ai-memory-core.ps1
+git clone https://github.com/ohmpatel3877/cortex-stratum.git
+cd cortex-stratum
+pwsh plugin-tools/install-cortex-stratum.ps1
 ```
 
 ### macOS / Linux
 ```bash
-git clone https://github.com/ohmpatel3877/ai-memory-core.git
-cd ai-memory-core
-bash plugin-tools/install-ai-memory-core.sh
+git clone https://github.com/ohmpatel3877/cortex-stratum.git
+cd cortex-stratum
+bash plugin-tools/install-cortex-stratum.sh
 ```
 
 ### Docker
@@ -236,7 +236,7 @@ The router auto-loads skills based on keywords in your task description:
 
 ### Memory Categories
 
-ai-memory-core uses 16 custom memory categories with configurable retention:
+cortex-stratum uses 16 custom memory categories with configurable retention:
 
 | Category | Retention | Purpose |
 |----------|-----------|---------|
@@ -301,7 +301,7 @@ All CLI scripts live in `scripts/`:
 
 | Script | Language | Purpose |
 |--------|----------|---------|
-| `tools-mcp-server.py` | Python | 68-tool MCP server (main entry point) |
+| `tools-mcp-server.py` | Python | 75-tool MCP server (main entry point) |
 | `task-analyzer.py` | Python | Complexity scoring for task orchestration |
 | `task-orchestrator.py` | Python | DAG-based multi-agent pipeline execution |
 | `verifier_middleware.py` | Python | Behavioral correction signal engine |
@@ -347,7 +347,7 @@ Edit `skills/skill-router.json` to add trigger rules:
 Edit `package.json` → `mcpServers` or `opencode.json` to change server args:
 
 ```json
-"ai-memory-core": {
+"cortex-stratum": {
   "command": "python",
   "args": ["scripts/tools-mcp-server.py"]
 }

@@ -25,7 +25,7 @@
       "command": "npx",
       "args": ["-y", "mcp-fetch-server"],
       "env": {
-        "FETCH_USER_AGENT": "opencode-ai-memory-core/1.0",
+        "FETCH_USER_AGENT": "opencode-cortex-stratum/1.0",
         "FETCH_TIMEOUT": "30000"
       }
     },

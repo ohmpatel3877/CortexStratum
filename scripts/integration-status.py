@@ -188,7 +188,7 @@ def generate_report(quick: bool = False) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ai-memory-core — Integration Status</title>
+<title>cortex-stratum — Integration Status</title>
 <style>
     {{font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #0d1117; color: #c9d1d9;}}
     h1, h2 {{color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 0.5rem;}}
@@ -208,7 +208,7 @@ def generate_report(quick: bool = False) -> str:
 </style>
 </head>
 <body>
-    <h1>ai-memory-core — Integration Status <span>{timestamp}</span></h1>
+    <h1>cortex-stratum — Integration Status <span>{timestamp}</span></h1>
 
     <div class="summary">
         <div class="card">

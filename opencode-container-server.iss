@@ -15,7 +15,7 @@
 #define MyAppName "opencode-container-server"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Ohm Patel"
-#define MyAppURL "https://github.com/ohmpatel3877/ai-memory-core"
+#define MyAppURL "https://github.com/ohmpatel3877/cortex-stratum"
 
 [Setup]
 AppId={{F8A7B3C2-5D4E-4F6A-8B1C-9D2E3F4A5B6C}
@@ -95,7 +95,7 @@ Filename: "{cmd}"; Parameters: "/C docker rmi ohmpatel3877/opencode-container-se
 [Code]
 
 const
-  GITHUB_RAW = 'https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main';
+  GITHUB_RAW = 'https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main';
   DOCKER_INSTALLER_URL = 'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe';
 
 // ─── Helper: Run PowerShell and capture output ──────────────────────

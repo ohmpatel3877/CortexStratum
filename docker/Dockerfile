@@ -6,7 +6,7 @@
 FROM node:22-bookworm-slim
 
 LABEL description="opencode-container-server — 68-tool MCP server + OpenCode CLI"
-LABEL org.opencontainers.image.source="https://github.com/ohmpatel3877/ai-memory-core"
+LABEL org.opencontainers.image.source="https://github.com/ohmpatel3877/cortex-stratum"
 LABEL org.opencontainers.image.title="opencode-container-server"
 
 # ─── System deps ──────────────────────────────────────────────────
@@ -17,9 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ─── Install OpenCode CLI ─────────────────────────────────────────
 RUN npm install -g @opencode/cli@latest
 
-# ─── Clone ai-memory-core (always pulls latest) ───────────────────
+# ─── Clone cortex-stratum (always pulls latest) ───────────────────
 WORKDIR /app
-RUN git clone --depth 1 https://github.com/ohmpatel3877/ai-memory-core.git /tmp/repo && \
+RUN git clone --depth 1 https://github.com/ohmpatel3877/cortex-stratum.git /tmp/repo && \
     cp -r /tmp/repo/scripts /app/scripts && \
     cp -r /tmp/repo/skills /app/skills && \
     cp -r /tmp/repo/data /app/data && \

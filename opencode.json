@@ -1,14 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "name": "ai-memory-core",
+  "name": "cortex-stratum",
   "version": "1.0.0",
-  "description": "68-tool MCP server with persistent memory, skill router, task orchestrator, and multi-modal AI generation",
+  "description": "75-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
   "icon": "🧠",
 
   "mcpServers": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
-      "description": "68-tool MCP server: xTrace error tracking, DTrace ADRs, Skill Router, Goal Registry, Verifier, Coder/Sensory/Audio/Art/DevOps/GameDev/Literature modules",
+    "cortex-stratum": {
+      "name": "cortex-stratum",
+      "description": "75-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {},
@@ -74,8 +74,8 @@
   },
 
   "projects": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
+    "cortex-stratum": {
+      "name": "cortex-stratum",
       "root": ".",
       "icon": "🧠",
       "color": "#6C5CE7"

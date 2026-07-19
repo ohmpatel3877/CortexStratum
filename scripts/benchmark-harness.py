@@ -1001,7 +1001,7 @@ def main():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     section_header("BENCHMARK HARNESS: deepseek-v4-flash vs Frontier Models")
-    print(f"  {DIM}{time.strftime('%Y-%m-%d %H:%M:%S')} | ai-memory-core | Python 3.13{N}")
+    print(f"  {DIM}{time.strftime('%Y-%m-%d %H:%M:%S')} | cortex-stratum | Python 3.13{N}")
 
     if show_stat:
         saved = safe_json_load(DATA_DIR / "benchmark-results.json")

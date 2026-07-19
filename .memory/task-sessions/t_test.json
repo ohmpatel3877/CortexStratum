@@ -1,0 +1,18 @@
+{
+  "session_id": "t_test",
+  "tasks": [
+    {
+      "id": "t1",
+      "content": "wire task tool",
+      "status": "completed",
+      "verifications": [
+        {
+          "note": "imported + dispatch wired",
+          "at": "2026-07-19T11:22:55.550247+00:00"
+        }
+      ],
+      "created_at": "2026-07-19T11:22:55.517008+00:00"
+    }
+  ],
+  "updated_at": "2026-07-19T11:22:55.584309+00:00"
+}

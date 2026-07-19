@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  ai-memory-core Dashboard — usage, memories, goals, commitments, errors, MCP status.
+  cortex-stratum Dashboard — usage, memories, goals, commitments, errors, MCP status.
 .DESCRIPTION
   Full-session overview panel pulling from mem0, Goal Registry, Commitment Checker,
   xTrace error registry, DTrace decisions, and MCP server status.
@@ -61,7 +61,7 @@ function Write-ProgressBar($label, $pct, $used, $total) {
 if (-not $Simple) {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════╗" -ForegroundColor $cHeader
-    Write-Host "  ║       ai-memory-core DASHBOARD           ║" -ForegroundColor $cHeader
+    Write-Host "  ║       cortex-stratum DASHBOARD           ║" -ForegroundColor $cHeader
     Write-Host "  ╚══════════════════════════════════════════╝" -ForegroundColor $cHeader
     Write-Host ("  Session: $((Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))") -ForegroundColor $cDim
 }
@@ -266,7 +266,7 @@ if (Test-Path $errPath) {
 }
 
 # ───── 7. MCP STATUS ─────
-$mcpStatus = @("ai-memory-core-tools: check right sidebar", "mem0: connected via API", "LSP: disabled")
+$mcpStatus = @("cortex-stratum-tools: check right sidebar", "mem0: connected via API", "LSP: disabled")
 Write-Box "🔌 MCP SERVERS" $mcpStatus
 
 # ───── 8. QUICK ACTIONS ─────

@@ -1,0 +1,24 @@
+{
+  "dag_id": "verify-failgate",
+  "name": "Verify Failing Gate",
+  "started_at": "2026-07-19T10:18:52.211375+00:00",
+  "completed_at": "2026-07-19T10:18:52.430526+00:00",
+  "node_count": 1,
+  "edge_count": 0,
+  "levels": [
+    [
+      "a"
+    ]
+  ],
+  "status": "failed",
+  "summary": {
+    "total_nodes": 1,
+    "phases": {
+      "failed": 1
+    },
+    "failed_nodes": [
+      "a"
+    ],
+    "duration_seconds": 0.2
+  }
+}

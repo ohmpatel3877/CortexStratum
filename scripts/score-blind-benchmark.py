@@ -81,6 +81,6 @@ result = {
     "overall": f"{total_correct}/{total_possible}",
     "overall_pct": total_correct/total_possible*100,
 }
-with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\flash-benchmark-results.json", "w") as f:
+with open("C:\\Users\\ohmpa\\github\\cortex-stratum\\data\\flash-benchmark-results.json", "w") as f:
     json.dump(result, f, indent=2)
 print(f"\n  Results saved to data/flash-benchmark-results.json")

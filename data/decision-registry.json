@@ -60,10 +60,10 @@
                                         "data\\error-registry.json"
                                     ],
                           "consequences":  [
-                                               "ai-memory-core becomes a dependency for all agent sessions",
+                                               "cortex-stratum becomes a dependency for all agent sessions",
                                                "Must maintain consistent cross-references"
                                            ],
-                          "title":  "Centralize meta-cognitive artifacts in ai-memory-core",
+                          "title":  "Centralize meta-cognitive artifacts in cortex-stratum",
                           "alternatives":  [
                                                "Keep artifacts co-located with each project",
                                                "Use a separate meta-knowledge repo"
@@ -74,7 +74,7 @@
                           "rationale":  "Single source of truth for agent improvement artifacts; accessible from any project context via reference",
                           "notes":  "",
                           "created_at":  "2026-07-15T11:00:00Z",
-                          "decision":  "All meta-cognitive artifacts live under ai-memory-core"
+                          "decision":  "All meta-cognitive artifacts live under cortex-stratum"
                       },
                       {
                           "updated_at":  "2026-07-15T13:24:38Z",

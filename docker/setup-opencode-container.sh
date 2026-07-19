@@ -7,11 +7,11 @@
 #  ⚡ No Node.js. No Python. No npm. No pip.
 #  ⚡ Everything runs inside the container.
 #
-# Deploys the opencode-container-server: ai-memory-core MCP
+# Deploys the opencode-container-server: cortex-stratum MCP
 # server + OpenCode CLI + mem0 + OpenCode Zen config.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/setup-opencode-container.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/docker/setup-opencode-container.sh | bash
 #   # or locally:
 #   bash docker/setup-opencode-container.sh
 #
@@ -22,7 +22,7 @@
 # ═══════════════════════════════════════════════════════════════
 
 set -Eeuo pipefail
-REPO_URL="https://github.com/ohmpatel3877/ai-memory-core.git"
+REPO_URL="https://github.com/ohmpatel3877/cortex-stratum.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -76,7 +76,7 @@ else
   if [ -f "$SCRIPT_DIR/install-docker.sh" ]; then
     bash "$SCRIPT_DIR/install-docker.sh"
   else
-    curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/docker/install-docker.sh | bash
   fi
   # Re-check
   if command -v docker &>/dev/null && docker info &>/dev/null 2>&1; then
@@ -107,16 +107,16 @@ else
   ok "Portainer started → http://$(hostname -I 2>/dev/null | awk '{print $1}'):${PORTAINER_PORT}"
 fi
 
-# ─── Clone / Update ai-memory-core ────────────────────────────────
-info "Setting up ai-memory-core..."
+# ─── Clone / Update cortex-stratum ────────────────────────────────
+info "Setting up cortex-stratum..."
 if [ -d "$PROJECT_DIR/.git" ]; then
   ok "Already cloned at $PROJECT_DIR"
 else
   cd /tmp
   git clone --depth 1 "$REPO_URL" 2>&1
-  PROJECT_DIR="/tmp/ai-memory-core"
+  PROJECT_DIR="/tmp/cortex-stratum"
   cd "$PROJECT_DIR"
-  ok "Cloned ai-memory-core"
+  ok "Cloned cortex-stratum"
 fi
 
 # ─── mem0 API Key ─────────────────────────────────────────────────
@@ -172,7 +172,7 @@ if [ -f docker/docker-compose.yml ]; then
 else
   # Fallback: run MCP server directly
   $ENGINE run -d \
-    --name ai-memory-core \
+    --name cortex-stratum \
     --restart unless-stopped \
     -p 3100:3100 \
     -v ai_memory_data:/app/data \

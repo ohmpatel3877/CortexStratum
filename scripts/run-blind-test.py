@@ -5,7 +5,7 @@ Answer key is XOR-masked; I (the model) CANNOT read answers from the file."""
 import json, os, sys, base64
 sys.stdout.reconfigure(encoding="utf-8")
 
-BASE = "C:\\Users\\ohmpa\\github\\ai-memory-core\\data"
+BASE = "C:\\Users\\ohmpa\\github\\cortex-stratum\\data"
 
 with open(os.path.join(BASE, "blind-questions.json")) as f:
     questions = json.load(f)

@@ -1,0 +1,39 @@
+name: CortexStratum
+version: 1.0.0
+kind: memory
+description: >
+  Permissions-gated memory provider with BM25 search, vector/hybrid search,
+  cross-encoder reranking, lifecycle hooks, and structured decision/error/goal
+  registries. Zero GPU, zero API keys, zero cloud LLM dependencies.
+  The only memory MCP server with a 3-tier permission model (read/write/mutate).
+author: Ohm Patel
+repository: https://github.com/ohmpatel3877/CortexStratum
+tags:
+  - memory
+  - mcp-server
+  - search
+  - bm25
+  - vector-search
+  - permissions
+  - local-first
+maturity: production
+entry: __init__.py
+config_schema:
+  type: object
+  properties:
+    memory_path:
+      type: string
+      description: "Path to memory storage directory (default: ~/.CortexStratum)"
+      default: ""
+    embedding_model:
+      type: string
+      description: Sentence-transformers model for embeddings
+      default: all-MiniLM-L6-v2
+    reranker_model:
+      type: string
+      description: Cross-encoder model for reranking
+      default: cross-encoder/ms-marco-MiniLM-L-6-v2
+    max_memories:
+      type: integer
+      description: Max memories to return in prefetch
+      default: 8

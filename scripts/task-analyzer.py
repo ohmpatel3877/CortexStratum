@@ -170,7 +170,7 @@ if __name__ == "__main__":
     else:
         # Default: analyze the current session context from a temp file if it exists
         try:
-            with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\last-task.txt") as f:
+            with open("C:\\Users\\ohmpa\\github\\cortex-stratum\\data\\last-task.txt") as f:
                 task = f.read()
         except FileNotFoundError:
             print("Usage: python task-analyzer.py --task \"<task description>\"")

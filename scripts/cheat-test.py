@@ -3,9 +3,9 @@
 import json, sys
 sys.stdout.reconfigure(encoding="utf-8")
 
-with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\blind-answer-key.json") as f:
+with open("C:\\Users\\ohmpa\\github\\cortex-stratum\\data\\blind-answer-key.json") as f:
     key = json.load(f)
-with open("C:\\Users\\ohmpa\\github\\ai-memory-core\\data\\blind-my-answers.json") as f:
+with open("C:\\Users\\ohmpa\\github\\cortex-stratum\\data\\blind-my-answers.json") as f:
     my = json.load(f)
 
 # Letter from index

@@ -1,0 +1,31 @@
+{
+  "dag_id": "_verify_realexec",
+  "phase": "completed",
+  "node_id": "a",
+  "input": {
+    "task": "echo hello",
+    "context": {},
+    "artifacts": []
+  },
+  "output": {
+    "summary": "hello",
+    "stdout": "hello\n",
+    "stderr": "",
+    "returncode": 0,
+    "data": {},
+    "artifacts": [],
+    "files_changed": [],
+    "decisions": []
+  },
+  "metadata": {
+    "started_at": "2026-07-19T10:24:35.759875+00:00",
+    "updated_at": "2026-07-19T10:24:35.868040+00:00",
+    "completed_at": "2026-07-19T10:24:35.868040+00:00",
+    "errors": [],
+    "warnings": [],
+    "duration_ms": 85.94369888305664,
+    "retry_count": 0,
+    "temperature": 0.7,
+    "node_version": "1.0.0"
+  }
+}

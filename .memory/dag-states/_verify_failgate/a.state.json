@@ -1,0 +1,27 @@
+{
+  "dag_id": "_verify_failgate",
+  "phase": "failed",
+  "node_id": "a",
+  "input": {
+    "task": "echo foo but expect BAR",
+    "context": {},
+    "artifacts": []
+  },
+  "output": {},
+  "metadata": {
+    "started_at": "2026-07-19T10:24:53.884496+00:00",
+    "updated_at": "2026-07-19T10:24:54.022522+00:00",
+    "completed_at": "2026-07-19T10:24:54.022522+00:00",
+    "errors": [
+      {
+        "type": "verify_gate_failed",
+        "message": "node stdout missing expected substring: 'BAR'"
+      }
+    ],
+    "warnings": [],
+    "duration_ms": 115.43083190917969,
+    "retry_count": 0,
+    "temperature": 0.7,
+    "node_version": "1.0.0"
+  }
+}

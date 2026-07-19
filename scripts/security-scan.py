@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Security Scanner — ai-memory-core toolchain security audit module.
+Security Scanner — cortex-stratum toolchain security audit module.
 
 Scans a codebase for hardcoded secrets, vulnerable dependencies, security
 anti-patterns, and configuration weaknesses. Integrates with xTrace

@@ -6,7 +6,7 @@
 
 ## Context
 
-The ai-memory-core project has 45+ scripts, 68 MCP tools (across tools-mcp-server.py), and a growing DAG pipeline system. Documentation is manually maintained and frequently falls out of sync with the actual code. New scripts and tools are added without corresponding docs updates.
+The CortexStratum project has 45+ scripts, 68 MCP tools (across tools-mcp-server.py), and a growing DAG pipeline system. Documentation is manually maintained and frequently falls out of sync with the actual code. New scripts and tools are added without corresponding docs updates.
 
 Key documentation challenges:
 - Script docstrings follow varying formats (Google-style, reStructuredText, plain)

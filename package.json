@@ -1,7 +1,7 @@
 {
-  "name": "ai-memory-core",
+  "name": "cortex-stratum",
   "version": "1.0.0",
-  "description": "Central mem0 memory architecture for AI agent persistence",
+  "description": "75-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
   "main": "index.js",
   "scripts": {
     "mem0:seed": "node scripts/seed-memories.js",
@@ -26,14 +26,14 @@
   },
   "install": {
     "harnesses": ["opencode", "claude-code", "cursor"],
-    "windows": "pwsh plugin-tools/install-ai-memory-core.ps1",
-    "unix": "bash plugin-tools/install-ai-memory-core.sh",
+    "windows": "pwsh plugin-tools/install-cortex-stratum.ps1",
+    "unix": "bash plugin-tools/install-cortex-stratum.sh",
     "docker": "docker compose up -d"
   },
   "mcpServers": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
-      "description": "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
+    "cortex-stratum": {
+      "name": "cortex-stratum",
+      "description": "75-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {}

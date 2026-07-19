@@ -64,12 +64,12 @@ function Ensure-Registry {
             }
             @{
                 id = "dt-20260715-003"
-                title = "Centralize meta-cognitive artifacts in ai-memory-core"
+                title = "Centralize meta-cognitive artifacts in cortex-stratum"
                 context = "Model study guides, behavioral fix lists, and process docs were scattered across multiple repos and local paths"
-                decision = "All meta-cognitive artifacts live under ai-memory-core"
+                decision = "All meta-cognitive artifacts live under cortex-stratum"
                 alternatives = @("Keep artifacts co-located with each project", "Use a separate meta-knowledge repo")
                 rationale = "Single source of truth for agent improvement artifacts; accessible from any project context via reference"
-                consequences = @("ai-memory-core becomes a dependency for all agent sessions", "Must maintain consistent cross-references")
+                consequences = @("cortex-stratum becomes a dependency for all agent sessions", "Must maintain consistent cross-references")
                 category = "architecture"
                 files = @("model-study-guide.md", "data\decision-registry.json", "data\error-registry.json")
                 status = "active"

@@ -2,7 +2,7 @@
 
 Installed: 2026-07-15
 
-Three high-priority external MCP modules installed for the ai-memory-core project.
+Three high-priority external MCP modules installed for the cortex-stratum project.
 
 ---
 
@@ -104,7 +104,7 @@ Copy the desired entries into the `"mcp"` section of `~/.config/opencode/opencod
     "type": "local",
     "command": ["npx", "-y", "mcp-fetch-server"],
     "env": {
-      "FETCH_USER_AGENT": "opencode-ai-memory-core/1.0",
+      "FETCH_USER_AGENT": "opencode-cortex-stratum/1.0",
       "FETCH_TIMEOUT": "30000"
     },
     "enabled": true

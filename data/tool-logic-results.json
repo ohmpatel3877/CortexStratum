@@ -1,0 +1,40 @@
+{
+  "tests": [
+    {
+      "name": "schema: missing required 'text' on memory_add is flagged",
+      "passed": true,
+      "detail": "[{'type': 'schema_violation', 'severity': 'medium', 'match': \"memory_add: missing required property 'text'\"}]"
+    },
+    {
+      "name": "schema: valid memory_add call is clean",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "renudge: halt blocks targeted tool (memory_status)",
+      "passed": true,
+      "detail": "{\"content\": [{\"type\": \"text\", \"text\": \"{\\n  \\\"error\\\": \\\"renudge_halt\\\",\\n  \\\"si"
+    },
+    {
+      "name": "renudge: halt persists across calls (memory_status stays blocked)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "drift: changed_keys isolates only modified key",
+      "passed": true,
+      "detail": "['b']"
+    },
+    {
+      "name": "tool: memory_search returns real list of results (no <x>_result mock)",
+      "passed": true,
+      "detail": "type=list, len=3"
+    }
+  ],
+  "overall": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "status": "passed"
+  }
+}

@@ -305,7 +305,7 @@ def test_decision_trace():
                 },
                 {
                     "id": "dt-20260715-003",
-                    "title": "Centralize meta-cognitive artifacts in ai-memory-core",
+                    "title": "Centralize meta-cognitive artifacts in cortex-stratum",
                     "category": "architecture",
                     "status": "active",
                     "rationale": "Single source of truth for agent improvement artifacts",
@@ -429,7 +429,7 @@ def test_integration():
 def main():
     print(f"{B}{'='*60}{N}")
     print(f"{B}  SIDE-BY-SIDE COMPARISON: Agent WITH Tools vs WITHOUT Tools{N}")
-    print(f"{B}  deepseek-v4-flash | ai-memory-core | {time.strftime('%Y-%m-%d')}{N}")
+    print(f"{B}  deepseek-v4-flash | cortex-stratum | {time.strftime('%Y-%m-%d')}{N}")
     print(f"{B}{'='*60}{N}")
     print(f"\n  This test measures the same agent task performed with and without")
     print(f"  the 6 performance-enhancing tools, comparing steps, signal ratio,")

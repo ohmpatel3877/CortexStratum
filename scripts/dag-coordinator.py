@@ -13,7 +13,7 @@ Usage:
     python scripts/dag-coordinator.py --dag data/dag-definitions/research-implement-verify.json --resume
 """
 
-import json, sys, os, time, copy, threading, math, re as _re
+import json, sys, os, time, copy, threading, math, re as _re, subprocess
 from datetime import datetime, timezone
 from collections import deque
 from typing import Optional, Any
@@ -227,18 +227,142 @@ def _substitute_template(template, context):
     return _re.sub(r'\{\{(.+?)\}\}', _resolver, template)
 
 
-# ── Simulated Node Execution ───────────────────────────────
+# ── Real Node Execution ────────────────────────────────────
 
-def _simulate_node_execution(nid, node_def, input_data, timeout_s):
-    import random as _random
-    sim_duration = min(0.5 + _random.random() * 1.0, timeout_s * 0.5)
-    time.sleep(sim_duration)
-    expected = node_def.get("expected_outputs", [])
-    output = {"summary": f"Completed: {input_data.get('task', node_def['description'])[:80]}",
-              "data": {}, "artifacts": [], "files_changed": [], "decisions": []}
-    for exp in expected:
-        output["data"][exp] = f"<{exp}_result>"
+def execute_node(nid, node_def, input_data, timeout_s):
+    """REAL node execution.
+
+    If node_def has a 'command' string, run it via subprocess (shell=True) from
+    PROJECT_ROOT and report real stdout/stderr/returncode. If no command is given,
+    fall back gracefully but flag it in output['data']['_note'] so we don't
+    silently fake work. Returns {"success":bool, "output":dict, "errors":list}.
+    The caller measures authoritative wall-clock elapsed_ms; we only track an
+    internal measurement for the timeout branch.
+    """
+    cmd = node_def.get("command")
+    if isinstance(cmd, str) and cmd.strip():
+        try:
+            proc = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                  timeout=timeout_s, cwd=PROJECT_ROOT)
+            rc = proc.returncode
+            stdout = proc.stdout or ""
+            stderr = proc.stderr or ""
+            output = {
+                "summary": (stdout.strip()[:200] or f"exit rc={rc}"),
+                "stdout": stdout,
+                "stderr": stderr,
+                "returncode": rc,
+                "data": {},
+                "artifacts": [],
+                "files_changed": [],
+                "decisions": [],
+            }
+            success = (rc == 0)
+            errors = [] if success else [{
+                "type": "command_failed",
+                "message": f"command exited rc={rc}: {(stderr.strip() or 'no stderr')[:200]}",
+            }]
+            return {"success": success, "output": output, "errors": errors}
+        except subprocess.TimeoutExpired as e:
+            out = e.stdout if isinstance(e.stdout, str) else ""
+            err = e.stderr if isinstance(e.stderr, str) else ""
+            output = {
+                "summary": f"timeout after {timeout_s}s",
+                "stdout": out or "",
+                "stderr": err or "",
+                "returncode": None,
+                "data": {},
+                "artifacts": [],
+                "files_changed": [],
+                "decisions": [],
+            }
+            return {"success": False, "output": output, "errors": [{
+                "type": "timeout",
+                "message": f"command timed out after {timeout_s}s",
+            }]}
+    # Graceful fallback: no command — do not fake a result.
+    output = {
+        "summary": f"No command: {input_data.get('task', node_def.get('description', nid))[:160]}",
+        "stdout": "", "stderr": "", "returncode": None,
+        "data": {"_note": "no command specified; nothing executed"},
+        "artifacts": [], "files_changed": [], "decisions": [],
+    }
     return {"success": True, "output": output, "errors": []}
+
+
+def _run_verify_gate(verify, node_output):
+    """Run a node's verify block. Returns [] on pass, else list of error dicts.
+
+    Supports: files_exist (paths resolved under PROJECT_ROOT), an optional
+    verify command (checked via returncode == expect_returncode and optional
+    stdout_contains against the verify command's stdout), and a bare
+    stdout_contains that matches against the NODE's own stdout when no verify
+    command is given (e.g. node ran `echo hello`, verify {stdout_contains:hello}).
+    """
+    errors = []
+    files_exist = verify.get("files_exist") or []
+    for rel in files_exist:
+        p = rel if os.path.isabs(rel) else os.path.join(PROJECT_ROOT, rel)
+        if not os.path.exists(p):
+            errors.append({"type": "verify_gate_failed",
+                           "message": f"expected file missing: {rel}"})
+    node_stdout = (node_output or {}).get("stdout", "") or ""
+    vcmd = verify.get("command")
+    if vcmd:
+        expect_rc = verify.get("expect_returncode", 0)
+        try:
+            vp = subprocess.run(vcmd, shell=True, capture_output=True, text=True,
+                                timeout=30, cwd=PROJECT_ROOT)
+            if vp.returncode != expect_rc:
+                errors.append({"type": "verify_gate_failed",
+                               "message": f"verify command rc={vp.returncode} (expected {expect_rc})"})
+            contains = verify.get("stdout_contains")
+            if contains is not None and contains not in (vp.stdout or ""):
+                errors.append({"type": "verify_gate_failed",
+                               "message": f"stdout missing expected substring: {contains!r}"})
+        except subprocess.TimeoutExpired:
+            errors.append({"type": "verify_gate_failed",
+                           "message": f"verify command timed out: {vcmd}"})
+    else:
+        contains = verify.get("stdout_contains")
+        if contains is not None and contains not in node_stdout:
+            errors.append({"type": "verify_gate_failed",
+                           "message": f"node stdout missing expected substring: {contains!r}"})
+    return errors
+
+
+def _execute_node_with_retry(nid, node_def, input_data, base_timeout_s, max_retries):
+    """Execute a node (real or fallback) + verify gate inside a self-healing
+    retry loop. Progressive correction: timeout grows 50% per attempt.
+
+    Returns {"success":bool, "output":dict, "errors":list}.
+    """
+    timeout_s = float(base_timeout_s)
+    last_result = None
+    last_errors = []
+    for attempt in range(1, max_retries + 1):
+        if attempt > 1:
+            print(f"  {Y}↻ Retry {attempt}/{max_retries} for {nid} "
+                  f"(timeout={timeout_s:.1f}s){N}")
+        result = execute_node(nid, node_def, input_data, timeout_s)
+        last_result = result
+        if not result["success"]:
+            last_errors = result.get("errors", [])
+            timeout_s *= 1.5
+            continue
+        verify = node_def.get("verify")
+        if verify:
+            v_errors = _run_verify_gate(verify, result.get("output", {}))
+            if v_errors:
+                print(f"  {R}✗ {nid}: verify gate failed — {v_errors[0]['message']}{N}")
+                last_errors = v_errors
+                timeout_s *= 1.5
+                continue
+        # execution + verify both passed
+        return result
+    return {"success": False,
+            "output": (last_result or {}).get("output", {}),
+            "errors": last_errors}
 
 
 # ── Pipeline Execution ─────────────────────────────────────
@@ -289,6 +413,7 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
     failed_nodes = []
     error_mode = dag.get("config", {}).get("error_mode", "abort")
     global_timeout = dag.get("config", {}).get("global_timeout_seconds", 3600)
+    dag_max_retries = dag.get("config", {}).get("max_retries", 1)
     start_wall = time.time()
 
     for level_idx, level in enumerate(levels):
@@ -350,7 +475,9 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
             mgr.mark_running(nid)
 
             node_start = time.time()
-            node_result = _simulate_node_execution(nid, node_def, merged_input, timeout_s)
+            node_result = _execute_node_with_retry(
+                nid, node_def, merged_input, timeout_s,
+                node_def.get("max_retries", dag_max_retries))
             elapsed_ms = (time.time() - node_start) * 1000
 
             if node_result["success"]:

@@ -1,4 +1,4 @@
-# ai-memory-core API Documentation
+# cortex-stratum API Documentation
 
 *Generated: 2026-07-16 03:13:16 UTC*
 
@@ -33,7 +33,7 @@
 | `consultation-room.ps1` | ps1 | .SYNOPSIS Multi-perspective decision analysis for the Consultation Room. .DESCRI | `Get-Timestamp, Get-FileTimestamp` |
 | `dag-coordinator.py` | py | DAG Coordinator — topological execution engine for multi-agent pipelines.  Reads | `get_state_manager, now_iso, ensure_dirs, load_json, write_json +10 more` |
 | `dashboard-mem0.py` | py | Mem0 query helper for dashboard.ps1 - fetches recent memories via API. | `` |
-| `dashboard.ps1` | ps1 | .SYNOPSIS ai-memory-core Dashboard — usage, memories, goals, commitments, errors | `` |
+| `dashboard.ps1` | ps1 | .SYNOPSIS cortex-stratum Dashboard — usage, memories, goals, commitments, errors | `` |
 | `decision-trace.ps1` | ps1 | *No docstring* | `Ensure-Registry, Load-Registry, Get-Timestamp, Invoke-Add, Invoke-Update +3 more` |
 | `devops-module.py` | py | DevOps/Container Module — AI DevOps expert for Podman, Docker, permissions, Samb | `dockerfile_analyze, network_troubleshoot, devops_handle_tool_call` |
 | `error-trace.ps1` | ps1 | *No docstring* | `Ensure-Registry, Load-Registry, Invoke-LogError, Invoke-LogAttempt, Invoke-Resolve +2 more` |
@@ -58,7 +58,7 @@
 | `sandbox-integration.ps1` | ps1 | .SYNOPSIS Sandbox Integration Wrapper — calls sandbox-manager.py with structured | `` |
 | `sandbox-manager.py` | py | Sandbox Manager — Lightweight code execution sandbox for running untrusted or is | `_compute_code_hash, _now_iso, _load_log, _append_log, format_result +3 more` |
 | `score-blind-benchmark.py` | py | Score the blind benchmark by comparing my answers to the answer key. | `is_anagram` |
-| `security-scan.py` | py | Security Scanner — ai-memory-core toolchain security audit module.  Scans a code | `find_target_files, scan_secrets_in_file, scan_code_antipatterns_in_file, parse_version, scan_dependency_vulnerabilities +10 more` |
+| `security-scan.py` | py | Security Scanner — cortex-stratum toolchain security audit module.  Scans a code | `find_target_files, scan_secrets_in_file, scan_code_antipatterns_in_file, parse_version, scan_dependency_vulnerabilities +10 more` |
 | `sensory-module.py` | py | Sensory Module — AI agent sensory input layer. Connects AI tools to: web browsin | `_get_requests, _get_bs4, _get_pdfplumber, _get_trafilatura, _get_playwright +14 more` |
 | `side-by-side-comparison.py` | py | Side-by-Side Comparison: Agent WITH tools vs WITHOUT tools  Tests the same task  | `safe_json_load, seed_json, section, report, test_skill_router +7 more` |
 | `state_file_manager.py` | py | DAG State File Manager — atomic file-based state passing between DAG nodes.  Pro | `now_iso, _ensure_dir` |
@@ -68,8 +68,8 @@
 | `test-integration-layer.py` | py | Integration Layer Test Suite — Verifies all 5 workstream outputs wire together c | `test, skip, import_from_path, test_dag_coordinator_import, test_identity_manager_import +10 more` |
 | `test-mcp-server.py` | py | Test harness for tools-mcp-server.py Validates the MCP stdio protocol and all 6  | `send_mcp_message, main` |
 | `test-sensory-module.py` | py | Integration tests for sensory-module.py Run: python test-sensory-module.py | `run, test_scrape_text, test_scrape_json, test_scrape_links, test_extract_html_clean +8 more` |
-| `tools-mcp-server.py` | py | MCP Server: ai-memory-core Toolchain Exposes xTrace, DTrace, Skill Router, Outpu | `_get_verifier, _get_memory_search, read_exact, _get_art_module, _get_lit_module +15 more` |
-| `verifier_middleware.py` | py | verifier-middleware.py — Parallel verifier for ai-memory-core MCP pipeline.  Cro | `_demo` |
+| `tools-mcp-server.py` | py | MCP Server: cortex-stratum Toolchain Exposes xTrace, DTrace, Skill Router, Outpu | `_get_verifier, _get_memory_search, read_exact, _get_art_module, _get_lit_module +15 more` |
+| `verifier_middleware.py` | py | verifier-middleware.py — Parallel verifier for cortex-stratum MCP pipeline.  Cro | `_demo` |
 
 ---
 ## MCP Tools

@@ -23,7 +23,7 @@ STOPWORDS = {
 
 
 class NEMemorySearch:
-    def __init__(self, storage_path: str = "C:/Users/ohmpa/github/ai-memory-core/.memory/ne"):
+    def __init__(self, storage_path: str = "C:/Users/ohmpa/CortexStratum/.memory/ne"):
         self.storage_path = storage_path.replace("/", os.sep)
         self.memories_path = os.path.join(self.storage_path, "memories.json")
         self.synonyms_path = os.path.join(self.storage_path, "data", "synonyms.json")

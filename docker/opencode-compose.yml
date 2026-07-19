@@ -1,7 +1,7 @@
 # opencode-container-server
 # Standalone compose file — download this + Dockerfile, run anywhere.
-# curl -o docker-compose.yml https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/opencode-compose.yml
-# curl -o Dockerfile https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/Dockerfile
+# curl -o docker-compose.yml https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/docker/opencode-compose.yml
+# curl -o Dockerfile https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/docker/Dockerfile
 # docker compose up -d --build
 
 services:

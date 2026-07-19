@@ -1,5 +1,5 @@
 """
-verifier-middleware.py — Parallel verifier for ai-memory-core MCP pipeline.
+verifier-middleware.py — Parallel verifier for cortex-stratum MCP pipeline.
 
 Cross-checks every tool call for security violations, oversight anomalies,
 state drift, and generates renudge correction signals.
@@ -13,6 +13,7 @@ Thread-safe via threading.Lock. Zero external dependencies.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
@@ -78,6 +79,82 @@ ERROR_INDICATORS: list[re.Pattern] = [
 
 
 # ---------------------------------------------------------------------------
+# Minimal, dependency-free JSON Schema validator (stdlib only)
+# ---------------------------------------------------------------------------
+
+_PY_TYPES: dict[str, tuple[type, ...]] = {
+    "object": (dict,),
+    "array": (list,),
+    "string": (str,),
+    "boolean": (bool,),
+    "null": (type(None),),
+    "integer": (int,),
+    "number": (int, float),
+}
+
+
+def _schema_check_type(value: Any, expected: str) -> bool:
+    """True if *value* matches JSON-schema type *expected*."""
+    if expected not in _PY_TYPES:
+        return True
+    if expected == "integer":
+        # bool is a subclass of int — reject it for integer/number
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    return isinstance(value, _PY_TYPES[expected])
+
+
+def validate_schema(data: Any, schema: dict) -> list[str]:
+    """
+    Validate *data* against a minimal JSON Schema subset.
+
+    Supports: type, required, properties (per-key type checks), enum,
+    additionalProperties:false.  Returns a list of human-readable reasons
+    for each violation (empty list == valid).
+    """
+    reasons: list[str] = []
+
+    # type check
+    if "type" in schema:
+        if not _schema_check_type(data, schema["type"]):
+            reasons.append(
+                f"expected type {schema['type']!r}, got {type(data).__name__}"
+            )
+            # For type mismatch on the root, further property checks are moot
+            return reasons
+
+    if isinstance(data, dict):
+        # required
+        for req in schema.get("required", []):
+            if req not in data:
+                reasons.append(f"missing required property {req!r}")
+
+        # properties
+        props = schema.get("properties", {})
+        for key, sub in props.items():
+            if key in data:
+                if "enum" in sub and data[key] not in sub["enum"]:
+                    reasons.append(
+                        f"property {key!r} value {data[key]!r} not in enum {sub['enum']}"
+                    )
+                if "type" in sub and not _schema_check_type(data[key], sub["type"]):
+                    reasons.append(
+                        f"property {key!r} expected type {sub['type']!r}, "
+                        f"got {type(data[key]).__name__}"
+                    )
+
+        # additionalProperties:false
+        if schema.get("additionalProperties") is False:
+            allowed = set(props.keys())
+            for key in data.keys():
+                if key not in allowed:
+                    reasons.append(f"unexpected property {key!r} (additionalProperties:false)")
+
+    return reasons
+
+
+# ---------------------------------------------------------------------------
 # Dataclass for verifier stats
 # ---------------------------------------------------------------------------
 
@@ -117,12 +194,22 @@ class VerifierMiddleware:
         self._lock = threading.Lock()
         self._stats = VerifierStats()
         self._state_fingerprints: dict[str, str] = {}
+        self._state_snapshots: dict[str, dict] = {}   # task_id -> last full state (for real diffs + rollback)
+        self._schemas: dict[str, dict] = {}           # tool_name -> JSON Schema (inputSchema)
+        self._active_renudges: dict[str, dict] = {}   # target -> pending renudge signal (enforcement)
         self._renudge_strategies: dict[str, dict[str, Any]] = {
             "incremental": {"description": "Adjust parameters incrementally", "needs_human": False},
             "rollback": {"description": "Revert to previous known-good state", "needs_human": True},
             "override": {"description": "Force a new execution path", "needs_human": True},
             "halt": {"description": "Pause for human review", "needs_human": True},
         }
+
+    def register_schemas(self, schemas: dict[str, dict]) -> int:
+        """Register {tool_name: inputSchema} so pre_verify can enforce contracts.
+        Returns the number of schemas registered."""
+        with self._lock:
+            self._schemas.update(schemas)
+            return len(self._schemas)
 
     # ------------------------------------------------------------------
     # Public API
@@ -298,6 +385,7 @@ class VerifierMiddleware:
 
         with self._lock:
             self._state_fingerprints[task_id] = digest
+            self._state_snapshots[task_id] = copy.deepcopy(state_data)
 
         return digest
 
@@ -323,6 +411,7 @@ class VerifierMiddleware:
             # First time seeing this task — store and report no drift
             with self._lock:
                 self._state_fingerprints[task_id] = current_hash
+                self._state_snapshots[task_id] = copy.deepcopy(current_state)
             return {
                 "drifted": False,
                 "previous_hash": None,
@@ -339,6 +428,7 @@ class VerifierMiddleware:
             with self._lock:
                 self._stats.drifts_detected += 1
                 self._state_fingerprints[task_id] = current_hash
+                self._state_snapshots[task_id] = copy.deepcopy(current_state)
 
         return {
             "drifted": drifted,
@@ -424,6 +514,19 @@ class VerifierMiddleware:
                     "severity": "medium",
                     "match": f"Argument {key!r} uses bytes/bytearray — possible binary injection",
                 })
+
+        # Enforce the registered JSON Schema for this tool (if any).
+        with self._lock:
+            schema = self._schemas.get(tool_name)
+        if schema is not None:
+            for reason in validate_schema(tool_args, schema):
+                is_low = reason.endswith("(additionalProperties:false)")
+                violations.append({
+                    "type": "schema_violation",
+                    "severity": "low" if is_low else "medium",
+                    "match": f"{tool_name}: {reason}",
+                })
+
         return violations
 
     def _compute_severity(self, violations: list[dict]) -> str:
@@ -443,14 +546,26 @@ class VerifierMiddleware:
         task_id: str,
     ) -> list[str]:
         """
-        Best-effort diff of top-level keys between the previous stored state
-        and the current state.  We do not store the full previous state
-        dictionary by default (only the hash), so if you need detailed diffs
-        you must extend this class.  Here we return an empty list and let
-        the hash delta speak for itself.
+        Real top-level per-key diff between the previous stored snapshot and
+        the current state.  Returns only the keys that were added, removed,
+        or whose value differs at the top level.
         """
-        _ = previous_hash
-        return list(current_state.keys())
+        with self._lock:
+            previous_snapshot = self._state_snapshots.get(task_id)
+
+        if previous_snapshot is None:
+            # No prior snapshot — treat everything as changed.
+            return list(current_state.keys())
+
+        changed: list[str] = []
+        for key in set(previous_snapshot) | set(current_state):
+            if key not in previous_snapshot:
+                changed.append(key)          # added
+            elif key not in current_state:
+                changed.append(key)          # removed
+            elif previous_snapshot[key] != current_state[key]:
+                changed.append(key)          # value differs
+        return changed
 
     def _build_suggestion(self, tool_name: str, anomaly: dict) -> dict | None:
         """Map anomaly types to renudge-style suggestions."""
@@ -574,6 +689,43 @@ def _demo() -> None:
         assert False, "Should have raised ValueError"
     except ValueError:
         print("[PASS] renudge — unknown strategy raises ValueError")
+
+    # Schema validation — missing required field must raise a schema_violation
+    v.register_schemas({
+        "create_widget": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+                "name": {"type": "string"},
+                "count": {"type": "integer"},
+                "kind": {"type": "string", "enum": ["a", "b"]},
+            },
+            "additionalProperties": False,
+        }
+    })
+    r_missing = v.pre_verify("create_widget", {"count": 3})
+    sv = [x for x in r_missing["violations"] if x["type"] == "schema_violation"]
+    assert sv, "Missing required field should produce a schema_violation"
+    assert any("missing required property 'name'" in x["match"] for x in sv)
+    print("[PASS] schema — missing required field flagged")
+
+    # Schema validation — valid call produces zero schema_violations
+    r_valid = v.pre_verify("create_widget", {"name": "gizmo", "count": 1, "kind": "a"})
+    sv_valid = [x for x in r_valid["violations"] if x["type"] == "schema_violation"]
+    assert not sv_valid, f"Valid call should have no schema_violations, got {sv_valid}"
+    print("[PASS] schema — valid call clean")
+
+    # Drift diff — changing exactly one key returns only that key
+    drift_id = "demo-drift"
+    v.fingerprint_state(drift_id, {"x": 1, "y": 2, "z": 3})
+    mut = {"x": 1, "y": 2, "z": 3}
+    mut["y"] = 99  # change exactly one top-level key
+    dr_d = v.detect_drift(drift_id, mut)
+    assert dr_d["drifted"] is True
+    assert set(dr_d["changed_keys"]) == {"y"}, (
+        f"Expected only 'y' changed, got {dr_d['changed_keys']}"
+    )
+    print("[PASS] drift — single-key change isolated")
 
     print("\n=== ALL TESTS PASSED ===")
 

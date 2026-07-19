@@ -1157,7 +1157,7 @@ def main():
         return
 
     section(f"TERMINAL BENCH — OpenCode MCP Pipeline Capability Benchmark")
-    print(f"  {DIM}{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | ai-memory-core | Python {sys.version.split()[0]}{N}")
+    print(f"  {DIM}{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | cortex-stratum | Python {sys.version.split()[0]}{N}")
     print(f"  {DIM}{len(PIPELINES)} pipelines registered | {sum(p['tests'] for p in PIPELINES.values())} total tests{N}")
 
     if pipelines_to_run == "all" or pipelines_to_run is None:

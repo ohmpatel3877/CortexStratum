@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# 1-Click Install: ai-memory-core for OpenCode / Claude Code / Cursor
+# 1-Click Install: cortex-stratum for OpenCode / Claude Code / Cursor
 # ====================================================================
 # Usage:
-#   bash <(curl -s https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/plugin-tools/install.sh)
+#   bash <(curl -s https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/plugin-tools/install.sh)
 #   or from local:
-#   bash plugin-tools/install-ai-memory-core.sh
+#   bash plugin-tools/install-cortex-stratum.sh
 
 set -Eeuo pipefail
 
@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "╔══════════════════════════════════════════════════╗"
-echo "║    ai-memory-core — 1-Click Installer           ║"
+echo "║    cortex-stratum — 1-Click Installer           ║"
 echo "║    $PROJECT_DIR"
 echo "╚══════════════════════════════════════════════════╝"
 
@@ -36,7 +36,7 @@ echo "▶ Step 3/5: Configuring mem0 API key..."
 if [ ! -f .env ]; then
   if [ -n "${MEM0_API_KEY:-}" ]; then
     echo "MEM0_API_KEY=$MEM0_API_KEY" > .env
-    echo "MEM0_PROJECT=ai-memory-core" >> .env
+    echo "MEM0_PROJECT=cortex-stratum" >> .env
     echo "  ✓ API key set from environment"
   else
     echo "  ○ No MEM0_API_KEY set. Get one at https://app.mem0.ai"
@@ -56,8 +56,8 @@ case "$HARNESS" in
 {
   "$schema": "https://opencode.ai/config.json",
   "mcpServers": {
-    "ai-memory-core": {
-      "name": "ai-memory-core",
+    "cortex-stratum": {
+      "name": "cortex-stratum",
       "description": "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
@@ -101,7 +101,7 @@ echo ""
 echo "╔══════════════════════════════════════════════════╗"
 echo "║  Installation Complete                           ║"
 echo "╠══════════════════════════════════════════════════╣"
-echo "║  Project: ai-memory-core"
+echo "║  Project: cortex-stratum"
 echo "║  Harness: $HARNESS"
 echo "╚══════════════════════════════════════════════════╝"
 echo ""

@@ -15,13 +15,13 @@
 param(
     [int]$IntervalMinutes = 30,
     [float]$SimilarityThreshold = 0.85,
-    [string]$LogPath = "$env:USERPROFILE\github\ai-memory-core\data\logs"
+    [string]$LogPath = "$env:USERPROFILE\github\cortex-stratum\data\logs"
 )
 
 # Ensure log directory exists
 New-Item -ItemType Directory -Path $LogPath -Force -ErrorAction SilentlyContinue | Out-Null
 
-$ScriptDir = "$env:USERPROFILE\github\ai-memory-core\scripts"
+$ScriptDir = "$env:USERPROFILE\github\cortex-stratum\scripts"
 $MemoryScript = Join-Path $ScriptDir "memory_search.py"
 $DecisionTrace = Join-Path $ScriptDir "decision-trace.ps1"
 $LogFile = Join-Path $LogPath "ne-consolidation.log"

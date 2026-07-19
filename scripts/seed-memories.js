@@ -8,7 +8,7 @@ const MEMORIES = [
   { text: 'Memory retention policy configured in .mem0.md: architecture_decisions and coding_conventions pinned forever, session_state pruned at 90 days.', type: 'architecture_decisions' },
   { text: 'Hybrid search strategy: semantic (0.7 weight) + BM25 keyword (0.3 weight) with cross-encoder reranking for optimal retrieval.', type: 'architecture_decisions' },
   { text: 'User identity: ohmpa. Projects are scoped by MEM0_APP_ID which equals the working directory name.', type: 'architecture_decisions' },
-  { text: 'Active project: ai-memory-core. All memories stored under app_id derived from this project directory.', type: 'architecture_decisions' },
+  { text: 'Active project: cortex-stratum. All memories stored under app_id derived from this project directory.', type: 'architecture_decisions' },
 
   // Coding conventions
   { text: 'Memories stored with infer=false and explicit metadata.type for deterministic categorization.', type: 'coding_conventions' },
@@ -45,7 +45,7 @@ async function main() {
       body: JSON.stringify({
         text: mem.text,
         user_id: process.env.MEM0_USER_ID || 'ohmpa',
-        app_id: process.env.MEM0_APP_ID || 'ai-memory-core',
+        app_id: process.env.MEM0_APP_ID || 'cortex-stratum',
         metadata: {
           type: mem.type,
           confidence: 0.95,

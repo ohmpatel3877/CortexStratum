@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Server: ai-memory-core Toolchain
+MCP Server: cortex-stratum Toolchain
 Exposes xTrace, DTrace, Skill Router, Output Condenser, Goal Registry,
 and Commitment Checker as MCP tools for use by OpenCode and benchmark runners.
 
@@ -27,6 +27,9 @@ def _get_verifier():
         mod = _util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         _verifier = mod.VerifierMiddleware(mode="advisory")
+        # Register all tool input schemas once so pre_verify can enforce contracts.
+        schemata = {tool["name"]: tool["inputSchema"] for tool in TOOLS if "inputSchema" in tool}
+        _verifier.register_schemas(schemata)
     return _verifier
 
 def _get_memory_search():
@@ -50,10 +53,16 @@ def read_exact(n: int) -> bytes:
     return buffer
 
 BASE = Path(__file__).resolve().parent  # scripts/
-PROJECT_ROOT = BASE.parent              # ai-memory-core/
+PROJECT_ROOT = BASE.parent              # cortex-stratum/
 SCRIPTS_DIR = BASE                      # scripts/
 DATA_DIR = PROJECT_ROOT / "data"
 SKILLS_DIR = PROJECT_ROOT / "skills"
+
+# Single source of truth for version — read from VERSION file, never hardcode.
+try:
+    VERSION = (PROJECT_ROOT / "VERSION").read_text(encoding="utf-8").strip()
+except OSError:
+    VERSION = "0.0.0-unknown"
 
 # Lazy-loaded module placeholders (populated on first use)
 _art_module = None
@@ -126,6 +135,17 @@ def _get_gamedev_module():
         _gamedev_module = _util.module_from_spec(spec)
         spec.loader.exec_module(_gamedev_module)
     return _gamedev_module
+
+_task_session = None
+
+def _get_task_session():
+    global _task_session
+    if _task_session is None:
+        import importlib.util as _util
+        spec = _util.spec_from_file_location("task_session", SCRIPTS_DIR / "task_session.py")
+        _task_session = _util.module_from_spec(spec)
+        spec.loader.exec_module(_task_session)
+    return _task_session
 
 def run_powershell(script: str, args: list) -> dict:
     """Run a PowerShell script and return structured output."""
@@ -559,6 +579,7 @@ TOOLS = [
     {"name": "coder_explain", "description": "Educational code explanation at beginner/intermediate/advanced level", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "language": {"type": "string"}, "level": {"type": "string", "default": "intermediate"}}, "required": ["code", "language"]}},
     {"name": "coder_convert", "description": "Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)", "inputSchema": {"type": "object", "properties": {"code": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}}, "required": ["code", "from", "to"]}},
     {"name": "coder_architecture", "description": "Architecture pattern recommendation (MVC, Hexagonal, CQRS, Event-Driven, Microservices, etc.)", "inputSchema": {"type": "object", "properties": {"project_type": {"type": "string"}, "scale": {"type": "string", "default": "medium"}, "requirements": {"type": "array", "items": {"type": "string"}}}, "required": ["project_type"]}},
+    {"name": "coder_gamedev_blueprint", "description": "Game development blueprint for 2D/3D/RPG/roguelike/tower-defense/racing/puzzle/card games with systems breakdown, engine recommendations, and fun/profit factors", "inputSchema": {"type": "object", "properties": {"game_type": {"type": "string", "enum": ["2d-platformer", "3d-fps", "rpg", "roguelike", "tower-defense", "racing", "puzzle", "card-game"]}, "engine": {"type": "string", "enum": ["Unity", "Unreal Engine", "Godot", "GameMaker", "RPG Maker"], "default": "Unity"}}, "required": ["game_type"]}},
 
     # --- DevOps Module tools ---
     {"name": "devops_container_debug", "description": "Diagnose container issues (Podman/Docker) from error logs", "inputSchema": {"type": "object", "properties": {"error_log": {"type": "string"}, "runtime": {"type": "string", "default": "podman"}, "context": {"type": "string", "default": "standalone"}}, "required": ["error_log"]}},
@@ -653,6 +674,12 @@ TOOLS = [
             "required": ["target", "correction"]
         }
     },
+    {"name": "task_session_create", "description": "Create a session todo. Enforces one in_progress at a time.", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string", "description": "Session/channel id"}, "content": {"type": "string", "description": "Task description"}, "status": {"type": "string", "enum": ["pending", "in_progress"], "default": "pending"}}, "required": ["session_id", "content"]}},
+    {"name": "task_session_list", "description": "List session todos with status summary.", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}}, "required": ["session_id"]}},
+    {"name": "task_session_start", "description": "Mark a task in_progress (demotes any prior in_progress).", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}}, "required": ["session_id", "task_id"]}},
+    {"name": "task_session_verify", "description": "Record a verification note for a task (required before completion).", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}, "note": {"type": "string", "description": "What was verified"}}, "required": ["session_id", "task_id", "note"]}},
+    {"name": "task_session_complete", "description": "Mark a task completed. Refuses unless a verification note exists.", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}}, "required": ["session_id", "task_id"]}},
+    {"name": "task_session_cancel", "description": "Cancel a task.", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}}, "required": ["session_id", "task_id"]}},
 ]
 
 # Map MCP tool names to (script_name, action, args_map)
@@ -708,6 +735,35 @@ def handle_tool_call(name: str, args: dict) -> dict:
             "message": "Tool call blocked by verifier middleware"
         }, indent=2)}]}
 
+    # --- Renudge enforcement (active correction signal targeting this tool) ---
+    active = getattr(verifier, "_active_renudges", {}).get(name)
+    if active:
+        strategy = active.get("strategy", "incremental")
+        if strategy == "halt":
+            return {"content": [{"type": "text", "text": json.dumps({
+                "error": "renudge_halt",
+                "signal": active,
+                "message": "Execution halted by active renudge; human review required"
+            }, indent=2)}]}
+        if strategy == "rollback":
+            return {"content": [{"type": "text", "text": json.dumps({
+                "error": "renudge_rollback",
+                "signal": active,
+                "message": "Rollback requested by active renudge; server cannot roll back tool side-effects — human review required"
+            }, indent=2)}]}
+        # override / incremental: merge correction into args, then consume the signal
+        correction = active.get("correction", {})
+        args = {**args, **correction}
+        lock = getattr(verifier, "_lock", None)
+        if lock:
+            with lock:
+                verifier._active_renudges.pop(name, None)
+        else:
+            verifier._active_renudges.pop(name, None)
+        # incremental leaves a breadcrumb in the args for downstream observers
+        if strategy == "incremental":
+            args.setdefault("_renudge_breadcrumb", active.get("signal_id"))
+
     # --- NE-Memory tools ---
     if name == "memory_search":
         mem = _get_memory_search()
@@ -740,6 +796,8 @@ def handle_tool_call(name: str, args: dict) -> dict:
 
     if name == "verifier_renudge":
         result = verifier.renudge(args.get("target", ""), args.get("correction", {}), args.get("strategy", "incremental"))
+        # Arm enforcement: store the signal so the next call to `target` is enforced.
+        getattr(verifier, "_active_renudges", {})[args.get("target", "")] = result
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
 
     # Special tools implemented inline
@@ -880,6 +938,25 @@ def handle_tool_call(name: str, args: dict) -> dict:
         result = gamedev.gamedev_handle_tool_call(name, args)
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
 
+    # Session todo tracking (drift-prevention discipline for the consuming agent)
+    if name.startswith("task_session_"):
+        ts = _get_task_session()
+        if name == "task_session_create":
+            res = ts.task_create(args.get("session_id", "default"), args.get("content", ""), args.get("status", "pending"))
+        elif name == "task_session_list":
+            res = ts.task_list(args.get("session_id", "default"))
+        elif name == "task_session_start":
+            res = ts.task_start(args.get("session_id", "default"), args.get("task_id", ""))
+        elif name == "task_session_verify":
+            res = ts.task_verify(args.get("session_id", "default"), args.get("task_id", ""), args.get("note", ""))
+        elif name == "task_session_complete":
+            res = ts.task_complete(args.get("session_id", "default"), args.get("task_id", ""))
+        elif name == "task_session_cancel":
+            res = ts.task_cancel(args.get("session_id", "default"), args.get("task_id", ""))
+        else:
+            res = {"ok": False, "error": f"unknown task_session op: {name}"}
+        return {"content": [{"type": "text", "text": json.dumps(res, indent=2)}]}
+
     result = {"content": [{"type": "text", "text": f"Unknown tool: {name}"}]}
     _get_verifier().post_verify(name, args, result, 0)
     return result
@@ -957,7 +1034,7 @@ def _process_message(msg: dict) -> bool:
                 "jsonrpc": "2.0", "id": msg_id,
                 "result": {
                     "protocolVersion": "2024-11-05",
-                    "serverInfo": {"name": "ai-memory-core-tools", "version": "1.0.0"},
+                    "serverInfo": {"name": "cortex-stratum-tools", "version": VERSION},
                     "capabilities": {"tools": {"listChanged": True}}
                 }
             })
@@ -1037,7 +1114,7 @@ def _drain_pending():
 
 def main():
     """Main MCP server loop — pulls messages from the reader thread's queue."""
-    print("[mcp-server] ai-memory-core-tools starting...", file=sys.stderr, flush=True)
+    print("[mcp-server] cortex-stratum-tools starting...", file=sys.stderr, flush=True)
 
     reader = threading.Thread(target=_reader_loop, daemon=True)
     reader.start()

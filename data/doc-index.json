@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-07-16T03:12:47.585746+00:00",
-  "project": "ai-memory-core",
+  "project": "cortex-stratum",
   "version": "1.0.0",
   "scripts": [
     {
@@ -185,7 +185,7 @@
     {
       "filename": "dashboard.ps1",
       "language": "powershell",
-      "docstring_preview": ".SYNOPSIS\nai-memory-core Dashboard — usage, memories, goals, commitments, errors, MCP status.\n.DESCRIPTION\nFull-session overview panel pulling from mem0, Goal Registry, Commitment Checker,\nxTrace erro",
+      "docstring_preview": ".SYNOPSIS\ncortex-stratum Dashboard — usage, memories, goals, commitments, errors, MCP status.\n.DESCRIPTION\nFull-session overview panel pulling from mem0, Goal Registry, Commitment Checker,\nxTrace erro",
       "function_count": 0,
       "functions": [],
       "classes": []
@@ -399,7 +399,7 @@
     {
       "filename": "orchestrate-all.ps1",
       "language": "powershell",
-      "docstring_preview": ".SYNOPSIS\nUnified Orchestration Entry Point — Full pipeline orchestrator for ai-memory-core.\n.DESCRIPTION\nOrchestrates the complete pipeline: task analysis → complexity scoring →\nplan generation → dis",
+      "docstring_preview": ".SYNOPSIS\nUnified Orchestration Entry Point — Full pipeline orchestrator for cortex-stratum.\n.DESCRIPTION\nOrchestrates the complete pipeline: task analysis → complexity scoring →\nplan generation → dis",
       "function_count": 0,
       "functions": [],
       "classes": []
@@ -500,7 +500,7 @@
     {
       "filename": "security-scan.py",
       "language": "python",
-      "docstring_preview": "Security Scanner — ai-memory-core toolchain security audit module.\n\nScans a codebase for hardcoded secrets, vulnerable dependencies, security\nanti-patterns, and configuration weaknesses. Integrates wi",
+      "docstring_preview": "Security Scanner — cortex-stratum toolchain security audit module.\n\nScans a codebase for hardcoded secrets, vulnerable dependencies, security\nanti-patterns, and configuration weaknesses. Integrates wi",
       "function_count": 15,
       "functions": [
         "find_target_files",
@@ -688,7 +688,7 @@
     {
       "filename": "tools-mcp-server.py",
       "language": "python",
-      "docstring_preview": "MCP Server: ai-memory-core Toolchain\nExposes xTrace, DTrace, Skill Router, Output Condenser, Goal Registry,\nand Commitment Checker as MCP tools for use by OpenCode and benchmark runners.\n\nProtocol: JS",
+      "docstring_preview": "MCP Server: cortex-stratum Toolchain\nExposes xTrace, DTrace, Skill Router, Output Condenser, Goal Registry,\nand Commitment Checker as MCP tools for use by OpenCode and benchmark runners.\n\nProtocol: JS",
       "function_count": 20,
       "functions": [
         "_get_verifier",
@@ -717,7 +717,7 @@
     {
       "filename": "verifier_middleware.py",
       "language": "python",
-      "docstring_preview": "verifier-middleware.py — Parallel verifier for ai-memory-core MCP pipeline.\n\nCross-checks every tool call for security violations, oversight anomalies,\nstate drift, and generates renudge correction si",
+      "docstring_preview": "verifier-middleware.py — Parallel verifier for cortex-stratum MCP pipeline.\n\nCross-checks every tool call for security violations, oversight anomalies,\nstate drift, and generates renudge correction si",
       "function_count": 1,
       "functions": [
         "_demo"

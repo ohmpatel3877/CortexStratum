@@ -6,7 +6,7 @@
 # Safe to run on systems that already have Docker.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/ai-memory-core/main/docker/install-docker.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/docker/install-docker.sh | bash
 #   # or:
 #   bash docker/install-docker.sh
 # ─────────────────────────────────────────────────────────────────────
