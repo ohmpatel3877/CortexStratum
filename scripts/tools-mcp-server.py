@@ -705,6 +705,10 @@ TOOLS = [
     {"name": "context_compress", "description": "Deterministically compress a list of node/context states (stdlib heuristic: keep decisions/errors/gates + recent window, trim old raw output). No LLM call.", "inputSchema": {"type": "object", "properties": {"history": {"type": "array", "description": "List of node-state dicts"}, "window": {"type": "integer", "default": 3, "description": "Most-recent N nodes kept verbatim"}, "raw_limit": {"type": "integer", "default": 2000, "description": "Byte threshold above which older raw output is trimmed"}}, "required": ["history"]}},
     {"name": "set_model_profile", "description": "Declare the active model capability tier (small/standard/frontier) to adapt orchestration. Honest: declared, not detected.", "inputSchema": {"type": "object", "properties": {"tier": {"type": "string", "enum": ["small", "standard", "frontier"]}}, "required": ["tier"]}},
     {"name": "get_model_profile", "description": "Return the active model capability tier and its behavioral knobs.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "geometry_primitive", "description": "Build a CAD primitive via OpenGeometry (Rust/WASM kernel). kind: cuboid|cylinder|sphere|wedge + dims. Returns B-rep (vertices/edges/faces) + bounds.", "inputSchema": {"type": "object", "properties": {"kind": {"type": "string"}, "width": {"type": "number"}, "height": {"type": "number"}, "depth": {"type": "number"}, "radius": {"type": "number"}}, "required": ["kind"]}},
+    {"name": "geometry_brep", "description": "Return raw B-rep topology (vertices/edges/faces) of a primitive from OpenGeometry.", "inputSchema": {"type": "object", "properties": {"kind": {"type": "string"}, "width": {"type": "number"}, "height": {"type": "number"}, "depth": {"type": "number"}, "radius": {"type": "number"}}, "required": ["kind"]}},
+    {"name": "geometry_boolean", "description": "[WIP] Solid boolean (subtraction|union) of two primitives via OpenGeometry. KNOWN BROKEN: upstream placement quirk ('empty pos matrix') rejects operands in the Node/WASM path — returns honest error, not fake. Future fix (F1). Other geometry ops (primitive/brep/transform) work.", "inputSchema": {"type": "object", "properties": {"mode": {"type": "string"}, "base": {"type": "object"}, "cutter": {"type": "object"}}, "required": ["mode"]}},
+    {"name": "geometry_transform", "description": "Translate/scale a primitive via OpenGeometry placement.", "inputSchema": {"type": "object", "properties": {"shape": {"type": "object"}, "translate": {"type": "array"}, "scale": {"type": "array"}}, "required": []}},
 ]
 
 # Map MCP tool names to (script_name, action, args_map)
@@ -1013,6 +1017,26 @@ def handle_tool_call(name: str, args: dict) -> dict:
         res = {"ok": True, "tier": mp.read_tier(), "profile": mp.profile(),
                "source": "env:CORTEX_MODEL_TIER" if mp.read_tier() == (os.environ.get("CORTEX_MODEL_TIER","").strip().lower()) else "override/default"}
         return {"content": [{"type": "text", "text": json.dumps(res, indent=2)}]}
+
+    # Geometry layer (OpenGeometry Rust/WASM kernel via Node shim)
+    if name.startswith("geometry_"):
+        import importlib.util as _gu
+        _spec = _gu.spec_from_file_location("geometry_module", SCRIPT_DIR / "geometry-module.py")
+        _gm = _gu.module_from_spec(_spec); _spec.loader.exec_module(_gm)
+        try:
+            if name == "geometry_primitive":
+                r = _gm.primitive(args.get("kind", "cuboid"), width=args.get("width"), height=args.get("height"), depth=args.get("depth"), radius=args.get("radius"))
+            elif name == "geometry_brep":
+                r = _gm.brep(args.get("kind", "cuboid"), width=args.get("width"), height=args.get("height"), depth=args.get("depth"), radius=args.get("radius"))
+            elif name == "geometry_boolean":
+                r = _gm.boolean(args.get("mode", "subtraction"), base=args.get("base"), cutter=args.get("cutter"))
+            elif name == "geometry_transform":
+                r = _gm.transform(shape=args.get("shape"), translate=args.get("translate"), scale=args.get("scale"))
+            else:
+                r = {"ok": False, "error": f"unknown geometry op: {name}"}
+        except Exception as e:
+            r = {"ok": False, "error": str(e)}
+        return {"content": [{"type": "text", "text": json.dumps(r, indent=2)}]}
 
     result = {"content": [{"type": "text", "text": f"Unknown tool: {name}"}]}
     _get_verifier().post_verify(name, args, result, 0)
