@@ -1,7 +1,7 @@
 {
   "name": "cortex-stratum",
   "version": "1.0.0",
-  "description": "Central mem0 memory architecture for AI agent persistence — 75-tool MCP server, skill router, task orchestrator, verifier middleware, and cross-session memory continuity for OpenCode and Claude Code.",
+  "description": "Central mem0 memory architecture for AI agent persistence — 78-tool MCP server, skill router, task orchestrator, verifier middleware, and cross-session memory continuity for OpenCode and Claude Code.",
   "author": {
     "name": "Ohm Patel",
     "url": "https://github.com/ohmpatel3877"
@@ -23,7 +23,7 @@
     "mcp_servers": [
       {
         "name": "cortex-stratum",
-        "description": "75-tool MCP server exposing xTrace error tracking, DTrace architecture decisions, Skill Router, Output Condenser, Goal Registry, Commitment Checker, Verifier Middleware, and multi-module AI generation (art, literature, coder, devops, audio, sensory, game-dev)",
+        "description": "78-tool MCP server exposing xTrace error tracking, DTrace architecture decisions, Skill Router, Output Condenser, Goal Registry, Commitment Checker, Verifier Middleware, and multi-module AI generation (art, literature, coder, devops, audio, sensory, game-dev)",
         "command": "python",
         "args": ["scripts/tools-mcp-server.py"],
         "working_dir": "${PROJECT_ROOT}"

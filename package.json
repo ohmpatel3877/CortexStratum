@@ -1,7 +1,7 @@
 {
   "name": "cortex-stratum",
   "version": "1.0.0",
-  "description": "75-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
+  "description": "78-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
   "main": "index.js",
   "scripts": {
     "mem0:seed": "node scripts/seed-memories.js",
@@ -33,7 +33,7 @@
   "mcpServers": {
     "cortex-stratum": {
       "name": "cortex-stratum",
-      "description": "75-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
+      "description": "78-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, multi-module AI generation",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {}

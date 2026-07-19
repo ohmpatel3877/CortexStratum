@@ -2,13 +2,13 @@
   "$schema": "https://opencode.ai/config.json",
   "name": "cortex-stratum",
   "version": "1.0.0",
-  "description": "75-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
+  "description": "78-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
   "icon": "🧠",
 
   "mcpServers": {
     "cortex-stratum": {
       "name": "cortex-stratum",
-      "description": "75-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
+      "description": "78-tool MCP server: memory, trace, simulation, focus, agent orchestration. Pure Python stdlib.",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {},

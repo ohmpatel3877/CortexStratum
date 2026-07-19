@@ -29,12 +29,27 @@
       "name": "tool: memory_search returns real list of results (no <x>_result mock)",
       "passed": true,
       "detail": "type=list, len=3"
+    },
+    {
+      "name": "context_compress: trims old raw output, keeps recent window verbatim",
+      "passed": true,
+      "detail": "compressed=2, trimmed=True, recent=True"
+    },
+    {
+      "name": "model_profile: 'small' tier read from env, forbids halt",
+      "passed": true,
+      "detail": "tier=small, retries=1"
+    },
+    {
+      "name": "model_profile: halt renudge downgraded to override under 'small' (executes)",
+      "passed": true,
+      "detail": ""
     }
   ],
   "overall": {
-    "passed": 6,
+    "passed": 9,
     "failed": 0,
-    "total": 6,
+    "total": 9,
     "status": "passed"
   }
 }

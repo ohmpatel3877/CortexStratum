@@ -17,6 +17,7 @@ import json, sys, os, time, copy, threading, math, re as _re, subprocess
 from datetime import datetime, timezone
 from collections import deque
 from typing import Optional, Any
+import importlib.util as _util
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -381,7 +382,19 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
 
     print(f"\n{B}{BAR}{N}")
     print(f"{B}{BOLD}  DAG PIPELINE: {dag['name']}{N}")
-    print(f"{B}{BAR}{N}")
+
+    # Rolling history for context compression (keeps downstream nodes + model context small)
+    _history: list[dict] = []
+    _compressor = None
+
+    def _get_compressor():
+        nonlocal _compressor
+        if _compressor is None:
+            spec = _util.spec_from_file_location("compress_context", os.path.join(os.path.dirname(__file__), "compress_context.py"))
+            _compressor = _util.module_from_spec(spec)
+            spec.loader.exec_module(_compressor)
+        return _compressor
+
     print(f"  DAG ID:    {dag_id}")
     print(f"  Nodes:     {len(dag['nodes'])}")
     print(f"  Edges:     {len(dag.get('edges', []))}")
@@ -414,6 +427,14 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
     error_mode = dag.get("config", {}).get("error_mode", "abort")
     global_timeout = dag.get("config", {}).get("global_timeout_seconds", 3600)
     dag_max_retries = dag.get("config", {}).get("max_retries", 1)
+    # Model-adaptive: tier overrides the default retry budget unless the DAG sets its own.
+    try:
+        import importlib.util as _mp_util
+        _spec = _mp_util.spec_from_file_location("model_profile", os.path.join(os.path.dirname(__file__), "model_profile.py"))
+        _mp = _mp_util.module_from_spec(_spec); _spec.loader.exec_module(_mp)
+        dag_max_retries = dag.get("config", {}).get("max_retries", _mp.dag_retries(1))
+    except Exception:
+        pass
     start_wall = time.time()
 
     for level_idx, level in enumerate(levels):
@@ -486,6 +507,13 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
             else:
                 mgr.mark_failed(nid, node_result.get("errors", []), elapsed_ms)
                 failed_nodes.append(nid)
+
+            # Context compression: accumulate node state, trim older raw output
+            _history.append({"id": nid, "success": node_result["success"],
+                             "output": node_result.get("output", {}),
+                             "errors": node_result.get("errors", [])})
+            if len(_history) > 1:
+                _history = _get_compressor().compress_history(_history)
 
     wall_elapsed = time.time() - start_wall
     all_states = mgr.list_states()

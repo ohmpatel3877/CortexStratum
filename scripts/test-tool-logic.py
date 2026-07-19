@@ -15,6 +15,7 @@ Exit non-zero on any failure. Output: JSON summary to data/tool-logic-results.js
 
 import importlib.util as _util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -101,6 +102,32 @@ def _main():
     record("tool: memory_search returns real list of results (no <x>_result mock)",
            isinstance(content, list) and not has_mock,
            detail=f"type={type(content).__name__}, len={len(content) if isinstance(content, list) else 'n/a'}")
+
+    # 7) context_compress: older large raw output is trimmed, recent window kept verbatim
+    os.environ["CORTEX_MODEL_TIER"] = "standard"
+    big = "x" * 5000
+    hist = [{"id": "n1", "output": {"stdout": big, "status": "ok"}},
+            {"id": "n2", "output": {"stdout": "y", "status": "ok"}},
+            {"id": "n3", "output": {"stdout": "z", "status": "ok"}}]
+    cc = server.handle_tool_call("context_compress", {"history": hist, "window": 1})
+    ccj = json.loads(cc["content"][0]["text"])
+    trimmed = len(ccj["history"][0]["output"]["stdout"]) < 5000
+    recent_verbatim = ccj["history"][2]["output"]["stdout"] == "z"
+    record("context_compress: trims old raw output, keeps recent window verbatim",
+           ccj["ok"] and ccj["compressed_count"] == 2 and trimmed and recent_verbatim,
+           detail=f"compressed={ccj['compressed_count']}, trimmed={trimmed}, recent={recent_verbatim}")
+
+    # 8) model_profile: tier drives behavior; 'small' forbids halt renudge (downgraded to override)
+    os.environ["CORTEX_MODEL_TIER"] = "small"
+    gp = json.loads(server.handle_tool_call("get_model_profile", {})["content"][0]["text"])
+    record("model_profile: 'small' tier read from env, forbids halt",
+           gp["tier"] == "small" and "halt" not in gp["profile"]["allowed_renudge"],
+           detail=f"tier={gp['tier']}, retries={gp['profile']['dag_max_retries']}")
+    server.handle_tool_call("verifier_renudge", {"target": "memory_status", "correction": {}, "strategy": "halt"})
+    blocked_small = server.handle_tool_call("memory_status", {})
+    record("model_profile: halt renudge downgraded to override under 'small' (executes)",
+           "renudge_halt" not in json.dumps(blocked_small))
+    os.environ.pop("CORTEX_MODEL_TIER", None)
 
     results["overall"]["status"] = "passed" if results["overall"]["failed"] == 0 else "failed"
     RESULTS_PATH.parent.mkdir(parents=True, exist_ok=True)

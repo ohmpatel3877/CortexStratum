@@ -147,6 +147,28 @@ def _get_task_session():
         spec.loader.exec_module(_task_session)
     return _task_session
 
+_compressor = None
+
+def _load_compressor():
+    global _compressor
+    if _compressor is None:
+        import importlib.util as _util
+        spec = _util.spec_from_file_location("compress_context", SCRIPTS_DIR / "compress_context.py")
+        _compressor = _util.module_from_spec(spec)
+        spec.loader.exec_module(_compressor)
+    return _compressor
+
+_model_profile = None
+
+def _load_model_profile():
+    global _model_profile
+    if _model_profile is None:
+        import importlib.util as _util
+        spec = _util.spec_from_file_location("model_profile", SCRIPTS_DIR / "model_profile.py")
+        _model_profile = _util.module_from_spec(spec)
+        spec.loader.exec_module(_model_profile)
+    return _model_profile
+
 def run_powershell(script: str, args: list) -> dict:
     """Run a PowerShell script and return structured output."""
     cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script)] + args
@@ -680,6 +702,9 @@ TOOLS = [
     {"name": "task_session_verify", "description": "Record a verification note for a task (required before completion).", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}, "note": {"type": "string", "description": "What was verified"}}, "required": ["session_id", "task_id", "note"]}},
     {"name": "task_session_complete", "description": "Mark a task completed. Refuses unless a verification note exists.", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}}, "required": ["session_id", "task_id"]}},
     {"name": "task_session_cancel", "description": "Cancel a task.", "inputSchema": {"type": "object", "properties": {"session_id": {"type": "string"}, "task_id": {"type": "string"}}, "required": ["session_id", "task_id"]}},
+    {"name": "context_compress", "description": "Deterministically compress a list of node/context states (stdlib heuristic: keep decisions/errors/gates + recent window, trim old raw output). No LLM call.", "inputSchema": {"type": "object", "properties": {"history": {"type": "array", "description": "List of node-state dicts"}, "window": {"type": "integer", "default": 3, "description": "Most-recent N nodes kept verbatim"}, "raw_limit": {"type": "integer", "default": 2000, "description": "Byte threshold above which older raw output is trimmed"}}, "required": ["history"]}},
+    {"name": "set_model_profile", "description": "Declare the active model capability tier (small/standard/frontier) to adapt orchestration. Honest: declared, not detected.", "inputSchema": {"type": "object", "properties": {"tier": {"type": "string", "enum": ["small", "standard", "frontier"]}}, "required": ["tier"]}},
+    {"name": "get_model_profile", "description": "Return the active model capability tier and its behavioral knobs.", "inputSchema": {"type": "object", "properties": {}}},
 ]
 
 # Map MCP tool names to (script_name, action, args_map)
@@ -739,6 +764,13 @@ def handle_tool_call(name: str, args: dict) -> dict:
     active = getattr(verifier, "_active_renudges", {}).get(name)
     if active:
         strategy = active.get("strategy", "incremental")
+        # Model-adaptive: downgrade strategies the active tier forbids (e.g. halt on 'small')
+        mp = _load_model_profile()
+        if not mp.allows_renudge(strategy):
+            strategy = "override"
+            active = {**active, "strategy": "override",
+                      "_downgraded_from": strategy,
+                      "_reason": f"tier '{mp.read_tier()}' forbids '{strategy}'"}
         if strategy == "halt":
             return {"content": [{"type": "text", "text": json.dumps({
                 "error": "renudge_halt",
@@ -955,6 +987,31 @@ def handle_tool_call(name: str, args: dict) -> dict:
             res = ts.task_cancel(args.get("session_id", "default"), args.get("task_id", ""))
         else:
             res = {"ok": False, "error": f"unknown task_session op: {name}"}
+        return {"content": [{"type": "text", "text": json.dumps(res, indent=2)}]}
+
+    # Context compression (deterministic, stdlib-only)
+    if name == "context_compress":
+        hist = args.get("history", [])
+        comp = _load_compressor()
+        compressed = comp.compress_history(hist, window=args.get("window", 3), raw_limit=args.get("raw_limit", 2000))
+        dropped = sum(1 for n in compressed if n.get("_compressed"))
+        res = {"ok": True, "compressed_count": dropped, "history": compressed}
+        return {"content": [{"type": "text", "text": json.dumps(res, indent=2)}]}
+
+    # Model-adaptive orchestration: declare/inspect capability tier
+    if name == "set_model_profile":
+        mp = _load_model_profile()
+        try:
+            tier = mp.set_tier(args.get("tier", "standard"))
+            res = {"ok": True, "tier": tier, "profile": mp.profile()}
+        except ValueError as e:
+            res = {"ok": False, "error": str(e)}
+        return {"content": [{"type": "text", "text": json.dumps(res, indent=2)}]}
+
+    if name == "get_model_profile":
+        mp = _load_model_profile()
+        res = {"ok": True, "tier": mp.read_tier(), "profile": mp.profile(),
+               "source": "env:CORTEX_MODEL_TIER" if mp.read_tier() == (os.environ.get("CORTEX_MODEL_TIER","").strip().lower()) else "override/default"}
         return {"content": [{"type": "text", "text": json.dumps(res, indent=2)}]}
 
     result = {"content": [{"type": "text", "text": f"Unknown tool: {name}"}]}

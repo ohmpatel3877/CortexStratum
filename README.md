@@ -7,7 +7,7 @@
 
 # cortex-stratum
 
-**Persistent memory infrastructure for AI coding agents.** A 75-tool MCP server that gives OpenCode, Claude Code, and Cursor agents memory that persists across sessions — error tracking, decision logging, skill routing, task orchestration, multi-modal AI generation, and behavioral verification.
+**Persistent memory infrastructure for AI coding agents.** A 78-tool MCP server that gives OpenCode, Claude Code, and Cursor agents memory that persists across sessions — error tracking, decision logging, skill routing, task orchestration, multi-modal AI generation, and behavioral verification.
 
 Built on [mem0](https://mem0.ai) for cloud-backed cross-session memory and agent-memory-mcp for local project-specific conventions.
 
@@ -65,7 +65,7 @@ curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/cortex-stratum/main/do
 ```
 
 ### What they get
-A running container with the 75-tool MCP server. Connect it to OpenCode by adding to `opencode.json`:
+A running container with the 78-tool MCP server. Connect it to OpenCode by adding to `opencode.json`:
 ```json
 {
   "mcpServers": {
@@ -301,7 +301,7 @@ All CLI scripts live in `scripts/`:
 
 | Script | Language | Purpose |
 |--------|----------|---------|
-| `tools-mcp-server.py` | Python | 75-tool MCP server (main entry point) |
+| `tools-mcp-server.py` | Python | 78-tool MCP server (main entry point) |
 | `task-analyzer.py` | Python | Complexity scoring for task orchestration |
 | `task-orchestrator.py` | Python | DAG-based multi-agent pipeline execution |
 | `verifier_middleware.py` | Python | Behavioral correction signal engine |

@@ -13,7 +13,7 @@ unused fields). **That gap was closed this session** — see "Remediation" statu
 
 ## What stands out (genuinely good)
 
-- **Pure-stdlib, zero-dependency core.** 69 tools with no pip requirement is real
+- **Pure-stdlib, zero-dependency core.** 78 tools with no pip requirement is real
   discipline — portable, fast cold-start.
 - **Verifier scaffolding is well-shaped AND now wired.** Single choke point
   (`handle_tool_call` → `pre_verify`/`post_verify`), thread-safe via `threading.Lock`,
@@ -40,7 +40,7 @@ Interfaces existed; wiring didn't. All four now have real backing:
 
 ### 2. Tool-count delusion  *(fixed)*
 The "122-tool" figure was repeated across docs/configs all session — it was **never real**.
-Measured truth: **69 tools** (68 in `TOOLS` + 1 hidden `coder_gamedev_blueprint`, now exposed
+Measured truth: **78 tools** (69 base incl. exposed `coder_gamedev_blueprint` + 6 task_session + context_compress + set/get_model_profile
 so discoverable == dispatchable == 69). AGENTS.md also claimed "133-tool" / "135 tools" / "must
 be 68" in one file. A fabricated "Fresh-Eyes Handoff" section referenced `run-check-gate.py`
 which never existed — purged.
@@ -48,7 +48,7 @@ which never existed — purged.
 ### 3. Version chaos  *(fixed)*
 `v0.3.0` / `v0.5.0` / `v1.0.0` and `68-tool` / `122-tool` scattered everywhere. Now single-
 sourced: `VERSION` file = `0.6.0-dev`, read by the server's `initialize` response. All configs
-and docs reconciled to 69 tools / v0.6.0-dev.
+and docs reconciled to 78 tools / v0.6.0-dev.
 
 ### 4. Multiple uncontrolled checkouts  *(partially fixed)*
 Three diverged copies caused the OpenCode red-timeout. OpenCode was repointed to
@@ -89,9 +89,9 @@ either measured or single-sourced — no human types a number into a doc anymore
 | 4 | Replace `_simulate_node_execution` with real node execution | **done** |
 | 5 | Verify gates + self-healing retry loop in DAG | **done** |
 | 6 | Single-source `VERSION` (`VERSION` file read by server) | **done** |
-| 7 | Reconcile all tool-count / version claims in docs to reality | **done** (69 tools / v0.6.0-dev) |
+| 7 | Reconcile all tool-count / version claims in docs to reality | **done** (78 tools / v0.6.0-dev) |
 | 8 | Collapse to ONE canonical checkout; delete stale clones | **done** (3 clones deleted; only canonical remains) |
 | 9 | Real logic tests (not just protocol handshake) + minimal CI | **done** (test-tool-logic.py 6/6; + verifier PASS + protocol 10/10) |
 | 10 | PS1 scripts: audit revealed they're eval-harness fixtures (not a dead migration); kept, doc corrected | **done** |
-| 11 | Context compression for long pipelines | open |
-| 12 | Model-adaptive orchestration | open |
+| 11 | Context compression for long pipelines | **done** (compress_context.py: rolling window + keep decisions/errors/gates, trim old raw; auto in dag-coordinator + context_compress tool) |
+| 12 | Model-adaptive orchestration | **done** (model_profile.py: declared small/standard/frontier tiers via env/tool; drives DAG retries + renudge strategy gating) |
