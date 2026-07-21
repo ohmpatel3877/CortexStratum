@@ -23,13 +23,13 @@ m.add_memory(
 
 # Dry run
 r = m.consolidate(threshold=0.5, dry_run=True)
-assert r["dry_run"] == True, "dry_run flag not returned"
+assert r["dry_run"], "dry_run flag not returned"
 assert r["removed"] > 0 or r["merged"] > 0, "should find duplicates"
 print(f"DRY-RUN OK: {r['removed']} removed, {r['merged']} merged")
 
 # Real run
 r2 = m.consolidate(threshold=0.5, dry_run=False)
-assert r2["dry_run"] == False
+assert not r2["dry_run"]
 print(f"CONSOLIDATE OK: {r2['remaining']} remaining")
 
 # Permission model test

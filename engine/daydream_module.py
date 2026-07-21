@@ -21,7 +21,6 @@ import json
 import random
 import threading
 import time
-from typing import Any
 
 
 class DaydreamEngine:
@@ -440,11 +439,11 @@ if __name__ == "__main__":
 
     # Test 5: Auto-mode toggle
     a1 = engine.start_auto(interval=120.0)
-    print(f"5. Auto start: ok")
+    print("5. Auto start: ok")
     assert engine._auto_mode is True
     engine.stop_auto()
     assert engine._auto_mode is False
-    print(f"   Stopped: OK")
+    print("   Stopped: OK")
 
     # Test 6: Mock MLM state
     st = mock_mlm.status()
@@ -454,6 +453,6 @@ if __name__ == "__main__":
     print(f"7. Limbic reinforces: {len(mock_limbic.reinforces)}")
     if mock_limbic.reinforces:
         assert mock_limbic.reinforces[0].get("source") == "daydream_module"
-        print(f"   Source verified: daydream_module")
+        print("   Source verified: daydream_module")
 
     print("\nAll self-tests passed.")

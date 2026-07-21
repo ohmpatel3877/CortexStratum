@@ -26,7 +26,6 @@ through explicit promotion and consolidation.
 """
 
 import json
-import math
 import threading
 import time
 import uuid

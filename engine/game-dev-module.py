@@ -1908,7 +1908,6 @@ def _generate_engagement_loops(genre: str) -> str:
 
 def _find_similar_games(concept: str, genre: str) -> list:
     """Return similar notable games based on genre."""
-    similar = []
     genre_lower = genre.lower()
 
     all_notables = []
@@ -2152,7 +2151,7 @@ def gamedev_scaffold_project(
         if features is None:
             features = []
         engine_lower = engine.lower()
-        genre_lower = genre.lower()
+        genre.lower()
 
         setup_instructions = ""
         recommended_assets = []

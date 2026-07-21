@@ -48,3 +48,9 @@ data/suffix-tree.json
 data/prm-ledger.json
 data/beam-runs.json
 data/ttc-corpus.jsonl
+
+# Temp / debug artifacts
+scripts/_repro*.py
+scripts/_smoke_dbg.py
+.hermes-tmp.*
+data/logs/

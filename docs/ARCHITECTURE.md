@@ -1,11 +1,11 @@
 # CortexStratum Architecture
 
-**Version:** 0.6.0-dev | **Tools:** 230 (full) / **~97** (core default)
+**Version:** 0.6.0-dev | **Tools:** 225 (full) / **~87** (core default)
 **Date:** 2026-07-21 | **Stdio-only MCP server**
 
 ## Dynamic Module Registry
 
-Not all 230 tools are exposed by default. The server uses prefix-based filtering:
+Not all 225 tools are exposed by default. The server uses prefix-based filtering:
 
 - **Core (always on, ~95 tools):** memory, MLM, limbic, WM, gate, compute_alloc, compute_exec, DMN, verifier, DAG, hooks, traces, goals, commitment, audit, compact, workstream, agent, skill, tools, phase, consolidation, pedagogy, DB, regex, conversion, module registry, VQ compression, async pool, observability, sleep, plugin engine, structured log, auth/RBAC, connector, lineage
 - **Domain (opt-in, ~114 tools):** sensory, audio, coder, devops, gamedev, art, literature, sim_*, cad, electrical, mutation, plumber

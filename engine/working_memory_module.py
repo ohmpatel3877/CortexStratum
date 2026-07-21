@@ -179,7 +179,7 @@ class WorkingMemory:
     def list_keys(self) -> list[str]:
         """List all active (non-expired) keys."""
         # Purge expired while listing
-        now = time.time()
+        time.time()
         active = [k for k, v in self._store.items() if not self._is_expired(v)]
         expired = [k for k in self._store if k not in active]
         for k in expired:

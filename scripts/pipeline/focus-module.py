@@ -72,7 +72,7 @@ def check_scope(input_text, current_project="CortexStratum"):
     Returns dict with classification, details, and nudge recommendation.
     """
     lines = input_text.strip().split("\n")
-    words = input_text.lower().split()
+    input_text.lower().split()
 
     mentioned_projects = []
     features_requested = []
@@ -323,13 +323,13 @@ def advance_pipeline(next_phase, summary=""):
     pipeline = load_json(_PIPELINE_PATH, {"phases": [], "current_phase": None})
 
     current = pipeline.get("current_phase")
-    next_allowed = VALID_TRANSITIONS.get(current, VALID_TRANSITIONS.get("help", []))
+    VALID_TRANSITIONS.get(current, VALID_TRANSITIONS.get("help", []))
 
     if current is None:
         if next_phase != "help":
-            next_allowed = ["help"]
+            pass
         else:
-            next_allowed = ["help"]
+            pass
 
     if next_phase not in VALID_PHASES:
         return {

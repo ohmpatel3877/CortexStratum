@@ -233,7 +233,6 @@ class CircuitDesigner:
         svg_parts = []
         x_offset = 50
         y_offset = 50
-        spacing = 120
 
         svg_parts.append(f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
   <rect width="800" height="600" fill="#f8f9fa" rx="8"/>

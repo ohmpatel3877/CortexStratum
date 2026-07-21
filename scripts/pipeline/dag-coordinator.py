@@ -358,7 +358,7 @@ def execute_pipeline(dag, dry_run=False, resume=False, task_input=None):
                 break
 
             node_def = nodes_map[nid]
-            temp = node_def.get("temperature", 0.7)
+            node_def.get("temperature", 0.7)
             timeout_s = node_def.get("timeout_seconds", 300)
             deps = dependents_map.get(nid, [])
             upstream_outputs = {}

@@ -861,7 +861,6 @@ def orchestrate(
         time.sleep(1.5)
 
         # Show live results as they come in
-        last_len = 0
         for tick in range(6):
             done = len(analyzer.results["completed_steps"])
             print(

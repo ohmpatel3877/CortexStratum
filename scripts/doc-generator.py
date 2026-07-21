@@ -520,8 +520,8 @@ class DocGenerator:
         """Generate docs/api-docs.html with dark theme and search."""
         self._ensure_docs_dir()
 
-        total_py = sum(1 for s in self.scripts if s["language"] == "python")
-        total_ps = sum(1 for s in self.scripts if s["language"] == "powershell")
+        sum(1 for s in self.scripts if s["language"] == "python")
+        sum(1 for s in self.scripts if s["language"] == "powershell")
         total_funcs = sum(len(s["functions"]) for s in self.scripts)
         modules = sorted(set(t["module"] for t in self.mcp_tools))
 

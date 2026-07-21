@@ -2,10 +2,17 @@
 """
 Test harness for tools-mcp-server.py
 Validates the MCP stdio protocol and all 6 tool categories.
-Sends initialize, tools/list, and tools/call requests, then saves results.
+
+ANTI-FALSE-POSITIVE POLICY:
+A tools/call test passes ONLY if the server returns a well-formed success payload
+whose JSON-RPC envelope carries no 'error' key. An application-level denial
+(e.g. {"error":"permission_denied", ...} returned inside a normal 'result') is
+NOT a crash and is acceptable. A real crash is an envelope-level error, a
+Traceback, or an exception string in the result text. We want REAL errors surfaced.
 """
 
 import json
+import re
 import subprocess
 import sys
 import time
@@ -13,6 +20,12 @@ from pathlib import Path
 
 RESULTS_PATH = (
     Path(__file__).resolve().parent.parent / "data" / "mcp-server-test-results.json"
+)
+
+# Real crash markers inside result text (app-level denial text is excluded).
+CRASH_MARKERS = re.compile(
+    r"\bTraceback\b|\bException\b|\bKeyError\b|\bTypeError\b|"
+    r"\bValueError\b|\bAttributeError\b"
 )
 
 
@@ -29,7 +42,6 @@ def read_mcp_response(proc_stdout, timeout=5) -> dict | None:
     """Read one JSON-RPC response from the server's stdout."""
     content_length = 0
     start = time.time()
-    buf = b""
 
     while True:
         if time.time() - start > timeout:
@@ -52,6 +64,26 @@ def read_mcp_response(proc_stdout, timeout=5) -> dict | None:
     return json.loads(body.decode("utf-8"))
 
 
+def result_text(resp):
+    """Extract the text of a tools/call result, or '' if malformed."""
+    if not resp or "result" not in resp:
+        return ""
+    try:
+        return resp["result"]["content"][0].get("text", "")
+    except (KeyError, IndexError, TypeError):
+        return ""
+
+
+def envelope_is_error(resp):
+    """A REAL failure: the JSON-RPC envelope itself carries an 'error' key."""
+    return bool(resp and "error" in resp)
+
+
+def text_is_crash(text):
+    """Result text contains a real crash traceback/exception (not an app denial)."""
+    return bool(CRASH_MARKERS.search(text))
+
+
 def main():
     results = {
         "test_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -71,6 +103,16 @@ def main():
         print(f"  [{status}] {name}")
         if detail:
             print(f"         {detail}")
+
+    def record_call(name, resp, ok_predicate, detail=""):
+        """Anti-false-positive core: well-formed result, envelope not an error,
+        no crash text, and the predicate holds."""
+        text = result_text(resp)
+        well_formed = resp is not None and "result" in resp
+        not_error = not envelope_is_error(resp)
+        not_crash = not text_is_crash(text)
+        ok = well_formed and not_error and not_crash and ok_predicate(text)
+        record(name, ok, detail or (text[:100] if text else "no response"))
 
     print("Starting MCP server subprocess...")
     proc = subprocess.Popen(
@@ -94,12 +136,14 @@ def main():
         record(
             "initialize",
             resp is not None and resp.get("jsonrpc") == "2.0" and "result" in resp,
-            f"serverInfo={resp.get('result', {}).get('serverInfo', {})}"
-            if resp
-            else "no response",
+            f"serverInfo={resp.get('result', {}).get('serverInfo', {})}" if resp else "no response",
         )
 
-        # ---- Test 2: tools/list ----
+        # ---- Test 2: tools/list — healthy CORE-exposed count ----
+        # NOTE: tools/list returns only ACTIVE (core) modules by default (~87).
+        # The total registered set is larger (see --list-tools / tool-inventory.json).
+        # We assert the exposed core surface is healthy, not an exact match to the
+        # full inventory (that would be wrong — they are different surfaces).
         print("\n--- Test 2: tools/list ---")
         send_mcp_message(
             proc.stdin,
@@ -124,12 +168,13 @@ def main():
             "mutate_commitment_verify",
         ]
         missing = [t for t in expected_tools if t not in tool_names]
+        CORE_MIN = 80
         record(
             "tools/list",
-            resp is not None and "result" in resp and tool_count >= 11,
-            f"{tool_count} tools registered, missing: {missing}"
+            resp is not None and "result" in resp and tool_count >= CORE_MIN and not missing,
+            f"{tool_count} core-exposed tools (total registered is higher), missing={missing}"
             if missing
-            else f"{tool_count} tools: {', '.join(tool_names)}",
+            else f"{tool_count} core-exposed tools",
         )
 
         # ---- Test 3: tools/call - skill_router_match ----
@@ -147,18 +192,19 @@ def main():
             },
         )
         resp = read_mcp_response(proc.stdout)
-        result_text = (
-            resp.get("result", {}).get("content", [{}])[0].get("text", "")
-            if resp
-            else ""
-        )
-        has_skills = (
-            "matched_skills" in result_text or "troubleshooting" in result_text.lower()
-        )
-        record(
+        text = result_text(resp)
+
+        def _has_skills(t):
+            try:
+                return bool(json.loads(t).get("matched_skills"))
+            except Exception:
+                return False
+
+        record_call(
             "tools/call (skill_router_match)",
-            resp is not None and "result" in resp and has_skills,
-            f"result has matched_skills: {has_skills}",
+            resp,
+            _has_skills,
+            str(json.loads(text).get("matched_skills", [])) if text else "",
         )
 
         # ---- Test 4: tools/call - read_xtrace_status ----
@@ -173,15 +219,12 @@ def main():
             },
         )
         resp = read_mcp_response(proc.stdout)
-        result_text = (
-            resp.get("result", {}).get("content", [{}])[0].get("text", "")
-            if resp
-            else ""
-        )
-        record(
+        text = result_text(resp)
+        record_call(
             "tools/call (xtrace_status)",
-            resp is not None and "result" in resp and len(result_text) > 0,
-            f"got {len(result_text)} chars of output",
+            resp,
+            lambda t: len(t) > 0,
+            f"got {len(text)} chars of output",
         )
 
         # ---- Test 5: tools/call - read_goal_registry_status ----
@@ -196,15 +239,12 @@ def main():
             },
         )
         resp = read_mcp_response(proc.stdout)
-        result_text = (
-            resp.get("result", {}).get("content", [{}])[0].get("text", "")
-            if resp
-            else ""
-        )
-        record(
+        text = result_text(resp)
+        record_call(
             "tools/call (goal_registry_status)",
-            resp is not None and "result" in resp and len(result_text) > 0,
-            f"got {len(result_text)} chars of output",
+            resp,
+            lambda t: len(t) > 0,
+            f"got {len(text)} chars of output",
         )
 
         # ---- Test 6: tools/call - read_commitment_checker_list ----
@@ -219,15 +259,12 @@ def main():
             },
         )
         resp = read_mcp_response(proc.stdout)
-        result_text = (
-            resp.get("result", {}).get("content", [{}])[0].get("text", "")
-            if resp
-            else ""
-        )
-        record(
+        text = result_text(resp)
+        record_call(
             "tools/call (commitment_checker_list)",
-            resp is not None and "result" in resp and len(result_text) > 0,
-            f"got {len(result_text)} chars of output",
+            resp,
+            lambda t: len(t) > 0,
+            f"got {len(text)} chars of output",
         )
 
         # ---- Test 7: tools/call - read_memory_status ----
@@ -242,20 +279,16 @@ def main():
             },
         )
         resp = read_mcp_response(proc.stdout)
-        result_text = (
-            resp.get("result", {}).get("content", [{}])[0].get("text", "")
-            if resp
-            else ""
-        )
-        has_key = (
-            "memory_count" in result_text
-            or "entries" in result_text
-            or "status" in result_text
-        )
-        record(
+        text = result_text(resp)
+
+        def _mem_ok(t):
+            return ("memory_count" in t) or ("entries" in t) or ("status" in t)
+
+        record_call(
             "tools/call (read_memory_status)",
-            resp is not None and "result" in resp and has_key,
-            f"got: {result_text[:100]}",
+            resp,
+            _mem_ok,
+            f"got: {text[:100]}",
         )
 
         # ---- Test 8: tools/call - read_dtrace_search ----
@@ -266,22 +299,16 @@ def main():
                 "jsonrpc": "2.0",
                 "id": 8,
                 "method": "tools/call",
-                "params": {
-                    "name": "read_dtrace_search",
-                    "arguments": {"keyword": "test"},
-                },
+                "params": {"name": "read_dtrace_search", "arguments": {"keyword": "test"}},
             },
         )
         resp = read_mcp_response(proc.stdout)
-        result_text = (
-            resp.get("result", {}).get("content", [{}])[0].get("text", "")
-            if resp
-            else ""
-        )
-        record(
+        text = result_text(resp)
+        record_call(
             "tools/call (dtrace_search)",
-            resp is not None and "result" in resp and len(result_text) > 0,
-            f"got {len(result_text)} chars",
+            resp,
+            lambda t: len(t) > 0,
+            f"got {len(text)} chars",
         )
 
         # ---- Test 9: Unknown tool returns error gracefully ----
@@ -296,10 +323,13 @@ def main():
             },
         )
         resp = read_mcp_response(proc.stdout)
+        text = result_text(resp)
+        # Acceptable: a proper denial inside 'result'. Forbidden: a crash that
+        # puts 'error' in the JSON-RPC envelope.
         record(
             "unknown tool handled gracefully",
-            resp is not None and ("result" in resp or "error" in resp),
-            "returned a response (not crash)",
+            resp is not None and "result" in resp and not envelope_is_error(resp),
+            "returned a response (not crash)" if not text else text[:80],
         )
 
         # ---- Test 10: Unknown method returns error ----
@@ -313,9 +343,7 @@ def main():
         record(
             "unknown method returns error",
             has_error,
-            f"error code: {resp.get('error', {}).get('code')}"
-            if has_error
-            else "no error",
+            f"error code: {resp.get('error', {}).get('code')}" if has_error else "no error",
         )
 
     finally:
@@ -323,8 +351,12 @@ def main():
         proc.terminate()
         try:
             proc.wait(timeout=3)
-        except:
+        except Exception:
             proc.kill()
+        # Surface any stderr the server emitted during the run (real errors hide here).
+        err = proc.stderr.read().decode("utf-8", errors="replace").strip()
+        if err:
+            print(f"  [server stderr]\n{err[-800:]}")
 
     # Summary
     total = results["overall"]["total"]

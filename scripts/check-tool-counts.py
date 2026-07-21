@@ -17,7 +17,6 @@ Exit codes:
     2: Script error
 """
 
-import ast
 import json
 import re
 import sys
@@ -278,7 +277,7 @@ def main():
     known_stale = [n for n in known_stale if n != real_count]
 
     if not args.ci:
-        print(f"\n🔍 CortexStratum Tool Count Auditor")
+        print("\n🔍 CortexStratum Tool Count Auditor")
         print(f"{'='*45}")
         print(f"  Real tool count:  {real_count}")
         print(f"  Scanning for stale: {known_stale}")
@@ -300,13 +299,13 @@ def main():
             print()
     else:
         if not args.ci:
-            print(f"  ✅ No stale references found.\n")
+            print("  ✅ No stale references found.\n")
 
     # Auto-fix mode
     fix_results = []
     if args.fix:
         if not args.ci:
-            print(f"  🔧 Fix mode enabled\n")
+            print("  🔧 Fix mode enabled\n")
 
         # Fix files with stale references
         fixed_files = set()
@@ -321,31 +320,31 @@ def main():
 
         # Also fix data/tool-inventory.json by rebuilding it
         if not args.ci:
-            print(f"  🔧 Rebuilding data/tool-inventory.json from TOOLS list...")
+            print("  🔧 Rebuilding data/tool-inventory.json from TOOLS list...")
         rebuild_results = rebuild_tool_inventory(real_count)
         fix_results.extend(rebuild_results)
 
         if fix_results:
             if not args.ci:
-                print(f"  Changes made:\n")
+                print("  Changes made:\n")
                 for r in fix_results:
                     print(f"  {r}")
                 print()
         else:
             if not args.ci:
-                print(f"  No changes needed.\n")
+                print("  No changes needed.\n")
 
     # Exit code
     if findings and not args.fix:
         if not args.ci:
-            print(f"  ❌ Run with --fix to auto-correct, or fix manually.")
+            print("  ❌ Run with --fix to auto-correct, or fix manually.")
         sys.exit(1)
     elif findings and args.fix:
         if not args.ci:
             print(f"  ✅ Fixed {len(findings)} stale reference(s).")
     else:
         if not args.ci:
-            print(f"  ✅ All tool counts match. Good to go!")
+            print("  ✅ All tool counts match. Good to go!")
 
     if not args.ci:
         print()

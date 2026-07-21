@@ -7,11 +7,10 @@ connections via stdlib (urllib + asyncio stubs).
 """
 
 import json
-import urllib.request
+import threading
 import urllib.error
 import urllib.parse
-import threading
-from typing import Any
+import urllib.request
 
 # ---------------------------------------------------------------------------
 # HTTP Connector

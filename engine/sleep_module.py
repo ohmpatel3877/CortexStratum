@@ -14,7 +14,6 @@ Each stage is optional and reports its own stats.
 
 import json
 import time
-from typing import Any
 
 
 class SleepOrchestrator:
@@ -224,7 +223,7 @@ def handle_tool_call(name: str, args: dict) -> dict:
         try:
             from engine.multi_layer_memory import _get_mlm
             mlm = _get_mlm()
-        except Exception as e:
+        except Exception:
             mlm = None
         try:
             from engine.limbic_module import _get_limbic

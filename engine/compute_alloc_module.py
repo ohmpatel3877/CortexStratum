@@ -16,10 +16,6 @@ verifier passes, beam search, and multiple retry attempts.
 import json
 import math
 import time
-import re
-
-from typing import Any
-
 
 # Difficulty heuristics
 _COMPLEXITY_KEYWORDS = {

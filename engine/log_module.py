@@ -10,12 +10,10 @@ Integrated with the server's _log() function and mid.py middleware.
 
 import json
 import os
-import re
 import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-
 
 # Default paths
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -110,7 +108,7 @@ class StructuredLog:
             return results
 
         try:
-            with open(log_path, "r", encoding="utf-8") as f:
+            with open(log_path, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -228,7 +226,6 @@ def handle_tool_call(name: str, args: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    import sys
     import tempfile
 
     print("=== Structured Log Self-Test ===\n")

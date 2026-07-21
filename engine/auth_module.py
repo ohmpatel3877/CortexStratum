@@ -10,13 +10,12 @@ import hashlib
 import hmac
 import json
 import os
-import time
 import threading
-import urllib.request
-import urllib.parse
+import time
 import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
-from typing import Any
 
 # ---------------------------------------------------------------------------
 # Constants

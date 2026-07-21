@@ -191,7 +191,7 @@ if [[ "$HARNESS" != "none" ]]; then
     echo "Step 4/5 - Registering MCP server..."
     MCP_ENTRY='{
       "name": "CortexStratum",
-      "description": "115-tool MCP server: SQLite+FTS5 memory, trace, skill routing, multi-modal AI",
+      "description": "225-tool MCP server: SQLite+FTS5 memory, trace, skill routing, multi-modal AI",
       "command": "'$PY'",
       "args": ["'$REPO_ROOT'/scripts/tools-mcp-server.py"],
       "env": {}
@@ -213,7 +213,7 @@ with open('$path', 'w') as f: json.dump(c, f, indent=2)
   "mcpServers": {
     "CortexStratum": {
       "name": "CortexStratum",
-      "description": "115-tool MCP server: SQLite+FTS5 memory, trace, skill routing, multi-modal AI",
+      "description": "225-tool MCP server: SQLite+FTS5 memory, trace, skill routing, multi-modal AI",
       "command": "'$PY'",
       "args": ["'$REPO_ROOT'/scripts/tools-mcp-server.py"],
       "env": {}
@@ -237,7 +237,7 @@ JSONEOF
 <mcpserver>
 {
   "name": "CortexStratum",
-  "description": "115-tool MCP server for memory, tracing, and orchestration",
+  "description": "225-tool MCP server for memory, tracing, and orchestration",
   "command": "$PY",
   "args": ["$REPO_ROOT/scripts/tools-mcp-server.py"],
   "working_dir": "$REPO_ROOT"

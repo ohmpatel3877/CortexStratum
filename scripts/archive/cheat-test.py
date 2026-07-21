@@ -32,13 +32,13 @@ for qid in sorted(key.keys(), key=lambda x: int(x[1:])):
             q3_analysis = """
 Q3 DEEP DIVE — The answer key claims D (contradictory) but I found A=knight, B=knight, C=knave works:
 
-A=knight → A says "B is knight AND C is knave" = (T ∧ T) = T 
-B=knight → B says "If A is knight then C is knave" = (T → T) = T   
-C=knave → C says "At most one of us is a knight" = FALSE (2 knights) 
+A=knight → A says "B is knight AND C is knave" = (T ∧ T) = T
+B=knight → B says "If A is knight then C is knave" = (T → T) = T
+C=knave → C says "At most one of us is a knight" = FALSE (2 knights)
 
 All consistent. Answer key says two solutions exist but both are actually inconsistent:
-- (A=knight, B=knave, C=knave): A=knight says "B is knight AND C is knave" = F ∧ T = F. A tells falsehood? 
-- (A=knave, B=knight, C=knave): A=knave says "B is knight AND C is knave" = T ∧ T = T. A tells truth? 
+- (A=knight, B=knave, C=knave): A=knight says "B is knight AND C is knave" = F ∧ T = F. A tells falsehood?
+- (A=knave, B=knight, C=knave): A=knave says "B is knight AND C is knave" = T ∧ T = T. A tells truth?
 
 CONCLUSION: The answer key may have a bug. My answer B (C=knave) is logically correct.
 """

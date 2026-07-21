@@ -42,7 +42,6 @@ def verify_scad_file(filepath, spec):
     """Verify a SCAD file against project requirements."""
     content = Path(filepath).read_text(encoding="utf-8", errors="replace")
     name = Path(filepath).stem
-    checks = []
 
     # What does this file contain?
     has_servo = "servo" in content.lower()

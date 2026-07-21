@@ -10,7 +10,6 @@ import json
 import threading
 import time
 from collections import defaultdict
-from typing import Any
 
 # ---------------------------------------------------------------------------
 # Buckets for latency histogram (seconds)

@@ -1108,8 +1108,8 @@ def generate_framework(
             + ", ".join(f"{pt}/{ln}" for pt, ln in sorted(_PROJECT_TEMPLATES.keys())),
         }
 
-    ext = LANGUAGE_EXTENSIONS.get(language, ".txt")
-    comment = LANGUAGE_COMMENTS.get(language, "#")
+    LANGUAGE_EXTENSIONS.get(language, ".txt")
+    LANGUAGE_COMMENTS.get(language, "#")
     name_slug = re.sub(r"[^a-zA-Z0-9_-]", "-", name).strip("-").lower() or "my-project"
 
     files = {}
@@ -1119,7 +1119,7 @@ def generate_framework(
         )
         resolved_path = relative_path.replace("{{project_name}}", name_slug)
 
-        resolved_path_parts = Path(resolved_path).parts
+        Path(resolved_path).parts
         base_src = relative_path.split("/")[0]
         if base_src == "{{project_name}}":
             files[resolved_path] = rendered
@@ -2446,7 +2446,6 @@ def _init_conversion_maps():
     _CONVERSION_MAPS = {
         ("python", "javascript"): {
             "def ": "function ",
-            "def ": "function ",
             "# ": "// ",
             '"""': "/*",
             ":": "",
@@ -2998,12 +2997,12 @@ def recommend_architecture(
         ]
 
     diagram = f"""
-    
-          {best["name"]}     
-    
+
+          {best["name"]}
+
     """
     for i, layer in enumerate(best.get("layers", [])):
-        connector = (
+        (
             "                              " if i < len(best["layers"]) - 1 else ""
         )
         diagram += f"     {layer} \n"

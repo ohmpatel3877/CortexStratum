@@ -22,11 +22,11 @@ print("Total tools:", len(tools))
 print()
 print(f"Merged tools ({len(merged)}):")
 for t in merged:
-    print("  {0}: {1}".format(t["name"], t["description"][:60]))
+    print("  {}: {}".format(t["name"], t["description"][:60]))
 print()
 print(f"Deprecated ({len(deprecated)}):")
 for t in deprecated:
-    print("  {0}".format(t["name"]))
+    print("  {}".format(t["name"]))
 print()
 tool_count_no_dep = len(tools) - len(deprecated)
 print(f"Active (non-deprecated) tools: {tool_count_no_dep}")

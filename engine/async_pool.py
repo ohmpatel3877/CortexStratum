@@ -10,8 +10,9 @@ Default max_workers = 4. Resizable at runtime.
 
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, Future
-from typing import Any, Callable
+from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
+from typing import Any
 
 
 class AsyncPool:

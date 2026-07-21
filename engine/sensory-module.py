@@ -12,15 +12,13 @@ Architecture:
   All external I/O has configurable timeouts and error wrapping.
 """
 
-import asyncio
 import json
 import os
 import re
-import hashlib
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Lazy-loaded dependencies
@@ -378,7 +376,7 @@ def extract_from_image(file_path: str) -> dict:
 # Web Scraping (lightweight, no browser)
 # ---------------------------------------------------------------------------
 
-def scrape_url(url: str, mode: str = "text", headers: Optional[dict] = None) -> dict:
+def scrape_url(url: str, mode: str = "text", headers: dict | None = None) -> dict:
     """
     Fetch URL via requests (no JS) and extract content.
     mode: "text", "html", "links", "tables", "json"
@@ -476,8 +474,8 @@ def scrape_extract_article(url: str) -> dict:
 # API / Data Pipeline Connectors
 # ---------------------------------------------------------------------------
 
-def api_request(url: str, method: str = "GET", data: Optional[dict] = None,
-                headers: Optional[dict] = None, params: Optional[dict] = None, timeout: int = 15) -> dict:
+def api_request(url: str, method: str = "GET", data: dict | None = None,
+                headers: dict | None = None, params: dict | None = None, timeout: int = 15) -> dict:
     """
     General-purpose HTTP request. Returns structured response.
     method: GET, POST, PUT, DELETE, PATCH

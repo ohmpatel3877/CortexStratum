@@ -20,26 +20,27 @@ from pathlib import Path
 
 # Add project root to sys.path for engine module imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from engine.conflict_resolver import get_gate, GATE_TOOLS
-from engine.working_memory_module import WM_TOOLS
-from engine.compute_alloc_module import COMPUTE_ALLOC_TOOLS
-from engine.limbic_module import LIMBIC_TOOLS
-from engine.compute_exec_module import COMPUTE_EXEC_TOOLS
-from engine.daydream_module import DMN_TOOLS
-from engine.observability import OBSERVABILITY_TOOLS, get_metrics, MetricsCollector
-from engine.sleep_module import SLEEP_TOOLS
 from engine.async_pool import ASYNC_POOL_TOOLS, get_pool
-from engine.plugin_engine import PLUGIN_TOOLS as PLUGIN_MGMT_TOOLS, get_manager as get_plugin_manager
-from engine.log_module import LOG_TOOLS
 from engine.auth_module import AUTH_TOOLS
-from engine.connector_module import CONNECTOR_TOOLS
-from engine.lineage_module import LINEAGE_TOOLS
-from engine.mid import run_post, run_pre
-from engine.vector_quantizer import VectorQuantizer, quantize_score, dequantize_score
-from engine.suffix_decode_module import SUFFIX_DECODE_TOOLS
-from engine.prm_module import PRM_TOOLS
 from engine.beam_search_module import BEAM_SEARCH_TOOLS
+from engine.compute_alloc_module import COMPUTE_ALLOC_TOOLS
+from engine.compute_exec_module import COMPUTE_EXEC_TOOLS
+from engine.conflict_resolver import GATE_TOOLS
+from engine.connector_module import CONNECTOR_TOOLS
+from engine.daydream_module import DMN_TOOLS
+from engine.limbic_module import LIMBIC_TOOLS
+from engine.lineage_module import LINEAGE_TOOLS
+from engine.log_module import LOG_TOOLS
+from engine.mid import run_post, run_pre
+from engine.observability import OBSERVABILITY_TOOLS, get_metrics
+from engine.plugin_engine import PLUGIN_TOOLS as PLUGIN_MGMT_TOOLS
+from engine.plugin_engine import get_manager as get_plugin_manager
+from engine.prm_module import PRM_TOOLS
+from engine.sleep_module import SLEEP_TOOLS
+from engine.suffix_decode_module import SUFFIX_DECODE_TOOLS
 from engine.ttc_train_module import TTC_TRAIN_TOOLS
+from engine.vector_quantizer import VectorQuantizer
+from engine.working_memory_module import WM_TOOLS
 
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
@@ -3934,8 +3935,8 @@ def main():
 
 if __name__ == "__main__":
     # Register middleware hooks
-    from engine.mid import set_limbic_getter
     from engine.limbic_module import _get_limbic
+    from engine.mid import set_limbic_getter
     set_limbic_getter(_get_limbic)
 
     import sys as _sys

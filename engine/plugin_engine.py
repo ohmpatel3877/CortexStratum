@@ -11,14 +11,10 @@ Hot-reload: file mtime polling + importlib.reload().
 """
 
 import importlib
-import inspect
 import json
-import os
 import sys
 import threading
-import time
 from pathlib import Path
-from typing import Any
 
 # Default plugin directory (relative to this file's location)
 _DEFAULT_PLUGIN_DIR = Path(__file__).resolve().parent.parent / "plugins"

@@ -624,7 +624,7 @@ def score_gpqa(question: Dict, user_answer: str) -> Tuple[bool, float]:
 
 
 def score_humaneval(question: Dict, user_code: str) -> Tuple[bool, float]:
-    entry = question["entry_point"]
+    question["entry_point"]
     combined = user_code.strip() + "\n\n"
     for tc in question["test_cases"]:
         combined += tc + "\n"
@@ -1178,7 +1178,7 @@ def main():
     result_path = DATA_DIR / "benchmark-results.json"
     existing = safe_json_load(result_path)
     if existing and isinstance(existing.get("results"), list):
-        existing_benches = {r["bench"] for r in existing["results"]}
+        {r["bench"] for r in existing["results"]}
         merged_results = [
             r
             for r in existing["results"]

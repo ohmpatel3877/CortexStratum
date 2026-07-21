@@ -12,7 +12,6 @@ All stdlib, zero dependencies.
 
 import hashlib
 import json
-import math
 from typing import Any
 
 # ---------------------------------------------------------------------------

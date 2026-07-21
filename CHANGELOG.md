@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Phase 4 Beam Search + PRM** — `engine/beam_search_module.py`: top-k trajectory search; `read_search_beam`, `read_search_best_of_n`, `read_search_beam_read`, `read_search_beam_list`
   - **Phase 5 Internal TTC Training** — `engine/ttc_train_module.py`: extracts resolved cases from memory/traces to a JSONL corpus; `read_ttc_train`, `read_ttc_corpus_status`
 - All four engine modules self-test green and wire into `scripts/tools-mcp-server.py` (TOOLS + dispatch)
-- Tool count 211 → 230
+- Tool count 211 → 225 (14 TTC tools; note: `tools/list` exposes ~87 core by default, `--list-tools` shows all 225)
 
 ---
 

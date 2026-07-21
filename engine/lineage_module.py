@@ -12,7 +12,6 @@ import json
 import threading
 import time
 from pathlib import Path
-from typing import Any
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 LINEAGE_FILE = DATA_DIR / "lineage.json"
@@ -201,7 +200,6 @@ def handle_tool_call(name: str, args: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    import os
     print("=== Data Lineage Self-Test ===\n")
 
     # Use a temp file

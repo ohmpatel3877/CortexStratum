@@ -16,7 +16,6 @@ import json
 import math
 import sys
 import threading
-import time
 import traceback
 from typing import Any
 
@@ -164,7 +163,6 @@ class ComputeExecutor:
         # __import__ in the builtins scope so exec can find it
         safe_builtins["__import__"] = _safe_import
 
-        output_lines: list[str] = []
         original_write = sys.stdout.write
         original_flush = sys.stdout.flush
         buf: list[str] = []

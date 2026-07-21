@@ -291,7 +291,7 @@ class ParameterVirtualizer:
             elif stripped.startswith("<context>") and "</context>" in stripped:
                 stable_boundaries.append(i)
 
-        budget = self.profile.get("token_budget", 8192)
+        self.profile.get("token_budget", 8192)
         estimated_total = self._estimate_token_count(prompt)
 
         if stable_boundaries and estimated_total >= 1024:

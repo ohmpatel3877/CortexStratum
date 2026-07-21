@@ -961,14 +961,12 @@ def dockerfile_analyze(dockerfile: str) -> dict:
     stages = []
 
     has_multistage = False
-    copy_all_found = False
     install_saw = False
     user_found = False
     expose_found = False
     healthcheck_found = False
     specific_copy_found = False
     apt_clean_found = False
-    npm_ci_found = False
     from_image = ""
     from_count = 0
 
@@ -986,7 +984,6 @@ def dockerfile_analyze(dockerfile: str) -> dict:
                 stages.append({"line": i, "stage": from_count, "image": from_image})
 
         if re.match(r"copy\s+\.\s+\.", lower) and not specific_copy_found:
-            copy_all_found = True
             if i > 1:
                 prev_line = lines[i - 2].strip().lower() if i >= 2 else ""
                 if "package" not in prev_line and "lock" not in prev_line:
@@ -1044,7 +1041,7 @@ def dockerfile_analyze(dockerfile: str) -> dict:
             )
 
         if "npm ci" in lower:
-            npm_ci_found = True
+            pass
 
         if "chown" in lower and ":" in lower.split("chown", 1)[-1].split()[0]:
             user_found = True

@@ -17,8 +17,8 @@ Pure Python stdlib numerical mathematics:
   - LaTeX generation with derivation steps
 """
 
-import math
 import cmath
+import math
 import random
 from pathlib import Path
 
@@ -216,7 +216,6 @@ def numeric_derivative(f_expr, x, h=1e-6):
         "latex": f"f'({x:g}) \\approx {fp:g}",
     }
 
-
 def numeric_integrate(f_expr, a, b, n=100, method="simpson"):
     """Numerical integration using Simpson's or trapezoidal rule."""
 
@@ -246,7 +245,6 @@ def numeric_integrate(f_expr, a, b, n=100, method="simpson"):
         "method": method,
         "latex": f"\\int_{{{a:g}}}^{{{b:g}}} f(x)\\,dx \\approx {integral:g}",
     }
-
 
 def taylor_series(f_expr, x0, order=4, at_x=0):
     """Taylor series expansion using forward difference approximations."""

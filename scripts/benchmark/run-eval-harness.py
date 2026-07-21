@@ -806,7 +806,6 @@ def test_performance():
 # MAIN
 # ============================================================
 def main():
-    verbose = "--verbose" in sys.argv
     tool_filter = None
 
     for arg in sys.argv[1:]:

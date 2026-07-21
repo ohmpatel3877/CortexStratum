@@ -789,7 +789,7 @@ def _demo() -> None:
 
     # fingerprint & drift
     t_id = "demo-task"
-    fp1 = v.fingerprint_state(t_id, {"a": 1, "b": 2})
+    v.fingerprint_state(t_id, {"a": 1, "b": 2})
     dr1 = v.detect_drift(t_id, {"a": 1, "b": 2})
     assert dr1["drifted"] is False, "Identical state should not drift"
     dr2 = v.detect_drift(t_id, {"a": 42, "b": 2})

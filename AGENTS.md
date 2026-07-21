@@ -1,6 +1,6 @@
 # CortexStratum - Agent Instructions
 
-**209-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.5.0.
+**225-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.6.0-dev.
 
 [CLAUDE.md](CLAUDE.md) covers basic MCP tool usage. This file covers everything an agent would likely miss without help.
 
@@ -26,7 +26,7 @@ The toolchain runs over standard input/output (stdio). Use it proactively before
 5. **Halt on Failure:** If tests do not pass, rollback or correct the implementation immediately.
 
 ### Build Stabilization (plumber)
-`read_plumber_verify_build` scans installer scripts and docs for stale tool-count references against current project state. `write_plumber_stabilize_build` auto-fixes them (dry-run by default). Run both before any commit that changes tool counts or installer files. Current count: 230.
+`read_plumber_verify_build` scans installer scripts and docs for stale tool-count references against current project state. `write_plumber_stabilize_build` auto-fixes them (dry-run by default). Run both before any commit that changes tool counts or installer files. Current count: 225.
 
 ## Quick Reference
 
@@ -36,7 +36,7 @@ python scripts/tools-mcp-server.py
 python scripts/tools-mcp-server.py --permissive   # bypass all permission checks
 python scripts/tools-mcp-server.py --debug        # verbose logging
 
-# List all 209 tools (verify registration)
+# List all 225 tools (verify registration)
 python scripts/tools-mcp-server.py --list-tools
 
 # Run full test suite (each script is self-validating, exit non-zero on failure)
@@ -144,7 +144,7 @@ All runtime data is local JSON in `data/` and `.memory/`. **Not git-tracked** (e
 | `data/goal-registry.json` | Current goal with sub-goal decomposition |
 | `data/commitments.json` | Session promises with cross-session verification |
 | `data/synonyms.json` | BM25 synonym expansion map (**git-tracked**) |
-|| `data/tool-inventory.json` | All 209 tool definitions (for verification) |
+|| `data/tool-inventory.json` | All 225 tool definitions (for verification) |
 | `.memory/ne/` | BM25 index files |
 | `.memory/profiles/` | Agent identity profiles |
 
@@ -174,7 +174,7 @@ The `previous_task` parameter is accepted by the `read_skill_router_match` MCP t
 `scripts/tools-mcp-server.py` (3929 lines) is the single entrypoint. It owns:
 ||- Permission guard (`can_call_tool`, line 37)
 ||- Module factory (`_get_module`, line 85)
-||- All 230 tool definitions (`TOOLS` list, starts ~line 250)
+||- All 225 tool definitions (`TOOLS` list, starts ~line 250)
 |- Tool dispatch (`handle_tool_call`, line ~750)
 |- CLI flags (`--permissive`, `--debug`, `--list-tools`, `--version`)
 |- stdio JSON-RPC loop (`main()`, ~line 3520)

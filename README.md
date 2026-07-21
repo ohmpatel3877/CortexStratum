@@ -1,9 +1,9 @@
 # CortexStratum
 
-Memory that works the way agents actually use it. 209 MCP tools for cross-session search, scope management, engineering math, and context compaction. All stdio, all Python stdlib, zero API keys.
+Memory that works the way agents actually use it. 225 MCP tools for cross-session search, scope management, engineering math, and context compaction. All stdio, all Python stdlib, zero API keys.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Tools-209-blue?style=for-the-badge" alt="Tools"/>
+  <img src="https://img.shields.io/badge/Tools-225-blue?style=for-the-badge" alt="Tools"/>
   <img src="https://img.shields.io/badge/Memory-SQLite%20%2B%20FTS5-blue?style=for-the-badge" alt="Memory"/>
   <img src="https://img.shields.io/badge/Local-Pure%20Python%2C%20Zero%20GPU-brightgreen?style=for-the-badge" alt="Local"/>
   <img src="https://img.shields.io/badge/Zero%20API%20Keys-3776AB?style=for-the-badge" alt="Zero API Keys"/>
@@ -50,7 +50,7 @@ Zero cloud dependencies. Zero GPU. Zero API keys. Pure Python stdlib core.
 - No auth, no encryption, no sandboxing ([see constraints](#hard-constraints)).
 
 ### Version
-**0.5.x.** 209 tools across 18+ engine modules, 4 simulation engines, and 14 skills. Full changelog in [`CHANGELOG.md`](CHANGELOG.md).
+**0.6.0-dev.** 225 tools across 18+ engine modules, 4 simulation engines, and 14 skills. Full changelog in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
@@ -328,7 +328,7 @@ Layer 5: Orchestration
   pipeline/dag-coordinator.py → Topological sort, conditional branching, fan-in merge
   phase-verify-full.py  → Cross-phase integration tests
 ### What they get
-A running container with the 209-tool MCP server. Connect it to OpenCode:
+A running container with the 225-tool MCP server. Connect it to OpenCode:
 ```json
 {
   "mcpServers": {
@@ -378,7 +378,7 @@ The installer will:
 > If the installer prompts for a MEM0_API_KEY, skip it. Memory works fully offline without one.
 
 ---
-## MCP Server / 209 Tools
+## MCP Server / 225 Tools
 
 The MCP server runs on the standard JSON-RPC protocol over stdio. OpenCode and Claude Code auto-discover it from `opencode.json`. Tools use a consistent naming convention: `read_*` (safe queries), `write_*` (state mutations), `mutate_*` (destructive operations, all accept `dry_run=true`).
 
@@ -590,7 +590,7 @@ All CLI scripts live in `scripts/`:
 
 | Script | Language | Purpose |
 |--------|----------|---------|
-| `tools-mcp-server.py` | Python | 209-tool MCP server (main entry point) |
+| `tools-mcp-server.py` | Python | 225-tool MCP server (main entry point) |
 | `task-analyzer.py` | Python | Complexity scoring for task orchestration |
 | `task-orchestrator.py` | Python | DAG-based multi-agent pipeline execution |
 | `verifier_middleware.py` | Python | Behavioral correction signal engine |
@@ -652,7 +652,7 @@ Edit `package.json` → `mcpServers` or `opencode.json` to change server args:
 ---
 ## Tool Inventory
 
-209 tools across 30+ domains:
+225 tools across 30+ domains:
 
 | Domain | Tools | Category |
 |--------|-------|----------|
@@ -714,7 +714,7 @@ CortexStratum/
     sim-mechanics-module.py    # Mechanics (stress, buckling, fatigue)
     sim-math-module.py         # Stdlib numerical math engine (19 tools)
   scripts/                     # Utility scripts & pipeline orchestration
-    tools-mcp-server.py        # MCP server entrypoint (209 tools)
+    tools-mcp-server.py        # MCP server entrypoint (225 tools)
     memory_search.py           # SQLite+FTS5 memory engine
     hooks.py                   # Lifecycle hooks
     pipeline/                  # Pipeline orchestration
@@ -735,7 +735,7 @@ CortexStratum/
 
 | Feature | CortexStratum | Basic MCP memory servers |
 |---------|---------------|--------------------------|
-| Total tools | **209** | 5-15 |
+| Total tools | **225** | 5-15 |
 | Permission model | 3-tier (read/write/mutate) | None |
 | Search | BM25 + vector + reranker | Naive substring |
 | Simulation engines | CFD, FEA, Mechanics, Stdlib Math (36 tools) | None |
@@ -750,7 +750,7 @@ CortexStratum/
 
 ### Market Comparison / Gap Analysis
 
-CortexStratum has 209 tools across 30+ domains. No other single MCP server covers that range. But it's missing production features that Desktop Commander and others provide: security sandbox, hot-reload, web UI, enterprise RBAC. Those are roadmap items.
+CortexStratum has 225 tools across 30+ domains. No other single MCP server covers that range. But it's missing production features that Desktop Commander and others provide: security sandbox, hot-reload, web UI, enterprise RBAC. Those are roadmap items.
 
 | Feature | Market Leaders | CortexStratum |
 |---------|---------------|---------------|
@@ -760,7 +760,7 @@ CortexStratum has 209 tools across 30+ domains. No other single MCP server cover
 | Hot-reload | Some support (UTCP bridge) | ❌ Missing |
 | Web UI | mcpknife can generate | ❌ Missing |
 | Enterprise security | Desktop Commander (RBAC, SBOM, signing) | ❌ Missing |
-| **209 tools across 30+ domains** | Fragmented across dozens of single-purpose servers | ✅ Single server, unified |
+| **225 tools across 30+ domains** | Fragmented across dozens of single-purpose servers | ✅ Single server, unified |
 | **Cross-session memory** | Few have it | ✅ BM25 + FTS5 + optional vector |
 | **Engineering simulation** | None | ✅ 36 tools (CFD, FEA, Mechanics, Math) |
 | **Cognitive pipeline** | None | ✅ DAG orchestration, compaction, focus management |

@@ -4930,6 +4930,323 @@
     }
   },
   {
+    "name": "read_suffix_predict",
+    "description": " READ — Predict the most likely next tool(s) given a recent call-context tail using the learned n-gram model. Returns ranked candidates with probability. Use to pre-warm or shortcut repetitive workflows.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordered list of recent tool names (most recent LAST)"
+        },
+        "next_n": {
+          "type": "integer",
+          "description": "How many future steps to project (1 = immediate next)",
+          "default": 1
+        },
+        "top_k": {
+          "type": "integer",
+          "description": "Number of candidate predictions to return",
+          "default": 5
+        }
+      },
+      "required": [
+        "context"
+      ]
+    }
+  },
+  {
+    "name": "mutate_suffix_update",
+    "description": " WRITE — Record a completed tool-call sequence into the n-gram model so future predictions improve. Pass the full ordered tool list.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordered list of tool names (>=2) observed in one workflow"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Optional: task type, source harness, etc."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "If true, simulate the insert without persisting",
+          "default": false
+        }
+      },
+      "required": [
+        "tools"
+      ]
+    }
+  },
+  {
+    "name": "read_suffix_stats",
+    "description": " READ — Show suffix-model stats: total sequences learned, gram-pair counts, last update time.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_suffix_prune",
+    "description": " WRITE — Prune low-frequency pairs (forgetting) to bound model size.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "min_count": {
+          "type": "integer",
+          "description": "Pairs with count below this are dropped",
+          "default": 1
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "If true, simulate without persisting",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_prm_score_step",
+    "description": " READ — Score a single reasoning step (0..1) with an explainable heuristic: clarity, tool-fit, progress toward goal, no-contradiction.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The reasoning step text"
+        },
+        "tool": {
+          "type": "string",
+          "description": "Tool used in this step (optional)"
+        },
+        "goal": {
+          "type": "string",
+          "description": "Stated goal for progress scoring (optional)"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "write_prm_score_trajectory",
+    "description": " WRITE — Score an ordered list of reasoning steps as one trajectory; store mean/cumulative reward in the PRM ledger.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "traj_id": {
+          "type": "string",
+          "description": "Trajectory identifier"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Ordered reasoning steps"
+        },
+        "goal": {
+          "type": "string",
+          "description": "Stated goal (optional)"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "traj_id",
+        "steps"
+      ]
+    }
+  },
+  {
+    "name": "read_prm_status",
+    "description": " READ — Show PRM ledger status: top trajectories by mean reward, count, last update.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "traj_id": {
+          "type": "string",
+          "description": "If set, show only this trajectory"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_prm_prune",
+    "description": " WRITE — Drop trajectories whose mean reward is below a threshold (search-space shrink for beam search).",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "min_mean_reward": {
+          "type": "number",
+          "default": 0.4
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_search_beam",
+    "description": " READ — Run beam search over a candidate step space, keeping the top-k partial trajectories scored by the PRM. Returns the best path and per-layer kept states.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "initial_state": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Starting partial trajectory (list of steps)"
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Candidate next-step dicts (text, tool)"
+        },
+        "beam_width": {
+          "type": "integer",
+          "default": 3,
+          "description": "k: states kept per layer"
+        },
+        "max_depth": {
+          "type": "integer",
+          "default": 4,
+          "description": "Max expansions"
+        },
+        "goal": {
+          "type": "string",
+          "description": "Goal for PRM scoring"
+        },
+        "run_id": {
+          "type": "string",
+          "description": "Persist key for the run"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "candidates"
+      ]
+    }
+  },
+  {
+    "name": "read_search_best_of_n",
+    "description": " READ — Score N candidate steps with PRM and return the highest-scoring one with full ranking.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "goal": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidates"
+      ]
+    }
+  },
+  {
+    "name": "read_search_beam_read",
+    "description": " READ — Recall a persisted beam-search run by id.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id"
+      ]
+    }
+  },
+  {
+    "name": "read_search_beam_list",
+    "description": " READ — List all persisted beam-search run ids.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "read_ttc_train",
+    "description": " WRITE — Extract resolved cases (successful trajectories + final answers) from persistent memory and DAG traces, write them as a JSONL reasoning-trajectory corpus for future distillation.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "min_confirmations": {
+          "type": "integer",
+          "default": 2,
+          "description": "Min confirmation_count for a memory item to count as resolved"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_ttc_corpus_status",
+    "description": " READ — Show TTC corpus stats: exists, line count, path.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
     "name": "read_wm_status",
     "description": " READ — Show working memory stats: item count, capacity, oldest item, most active key, expired items purged.",
     "permission": "read",

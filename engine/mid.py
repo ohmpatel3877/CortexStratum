@@ -21,8 +21,7 @@ Current registered hooks:
 """
 
 import json
-import time
-from typing import Any, Callable
+from collections.abc import Callable
 
 # ---------------------------------------------------------------------------
 # Registry
@@ -108,7 +107,7 @@ def _auto_reinforce(name: str, args: dict, result: dict):
     # Only reinforce if the key exists in tags
     try:
         # Check if this key is already tagged
-        status = limbic.status()
+        limbic.status()
         # Try reinforcing — if not tagged, the module returns an error silently
         limbic.reinforce(
             key=key,
@@ -137,7 +136,6 @@ def register_server_hooks(
     in a post-hook that only fires if the fn is not None.
     """
     if skill_inject_fn:
-        from functools import partial
         def _skill_post(name, args, result):
             try:
                 ctx = skill_inject_fn(
