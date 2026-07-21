@@ -6,9 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 **prior to 1.0.0**: minor versions (0.x.0) can include breaking changes.
 
-## Current Milestone: v0.3.0 — Polish & Stability
+## Current Milestone: v0.6.0-dev — Test-Time Compute
 
-**Target**: v1.0.0 after 2-3 more milestones (installer hardening, full test coverage, production docs)
+**Target**: v1.0.0 after installer hardening, full test coverage, production docs.
+
+### [0.6.0-dev] — 2026-07-21
+
+#### Added
+- **Test-Time Compute (TTC) pipeline** — 14 new tools across 5 phases, zero-GPU / stdlib-only:
+  - **Phase 1 (Compute-Optimal Allocation)** — already landed (`read_focus_difficulty_estimate`, `read_focus_compute_budget`, `read_focus_allocate_depth`)
+  - **Phase 2 SuffixDecoding** — `engine/suffix_decode_module.py`: n-gram model over tool-call sequences; `read_suffix_predict`, `mutate_suffix_update`, `read_suffix_stats`, `mutate_suffix_prune`
+  - **Phase 3 Process Reward Model (PRM)** — `engine/prm_module.py`: step-level reward scorer; `read_prm_score_step`, `write_prm_score_trajectory`, `read_prm_status`, `mutate_prm_prune`
+  - **Phase 4 Beam Search + PRM** — `engine/beam_search_module.py`: top-k trajectory search; `read_search_beam`, `read_search_best_of_n`, `read_search_beam_read`, `read_search_beam_list`
+  - **Phase 5 Internal TTC Training** — `engine/ttc_train_module.py`: extracts resolved cases from memory/traces to a JSONL corpus; `read_ttc_train`, `read_ttc_corpus_status`
+- All four engine modules self-test green and wire into `scripts/tools-mcp-server.py` (TOOLS + dispatch)
+- Tool count 211 → 230
+
+---
+
+### [0.5.1-dev] — 2026-07-21
 
 ### [0.3.0] — 2026-07-16
 

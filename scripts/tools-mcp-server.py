@@ -36,6 +36,10 @@ from engine.connector_module import CONNECTOR_TOOLS
 from engine.lineage_module import LINEAGE_TOOLS
 from engine.mid import run_post, run_pre
 from engine.vector_quantizer import VectorQuantizer, quantize_score, dequantize_score
+from engine.suffix_decode_module import SUFFIX_DECODE_TOOLS
+from engine.prm_module import PRM_TOOLS
+from engine.beam_search_module import BEAM_SEARCH_TOOLS
+from engine.ttc_train_module import TTC_TRAIN_TOOLS
 
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
@@ -132,7 +136,7 @@ _VERSION_FILE = _SCRIPT_DIR.parent / "VERSION"
 try:
     VERSION = _VERSION_FILE.read_text(encoding="utf-8").strip()
 except Exception:
-    VERSION = "0.5.1-dev"  # fallback
+    VERSION = "0.6.0-dev"  # fallback
 
 
 def _log(level, msg):
@@ -2693,6 +2697,14 @@ TOOLS = [
     *GATE_TOOLS,
     #  Compute-Optimal Allocation (TTC Phase 1)
     *COMPUTE_ALLOC_TOOLS,
+    #  SuffixDecoding Engine (TTC Phase 2)
+    *SUFFIX_DECODE_TOOLS,
+    #  Process Reward Model (TTC Phase 3)
+    *PRM_TOOLS,
+    #  Beam Search + PRM (TTC Phase 4)
+    *BEAM_SEARCH_TOOLS,
+    #  Internal TTC Training (TTC Phase 5)
+    *TTC_TRAIN_TOOLS,
     #  Working Memory (Prefrontal Cortex analog)
     *WM_TOOLS,
     #  Cortex Module Registry
@@ -3215,6 +3227,26 @@ def handle_tool_call(name, args):
     # Compute-Optimal Allocation (TTC Phase 1) — dispatched before general focus
     if name.startswith("read_focus_compute_") or name.startswith("read_focus_difficulty_") or name.startswith("read_focus_allocate_"):
         mod = _get_module("compute_alloc_module", "../engine/compute_alloc_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # SuffixDecoding Engine (TTC Phase 2)
+    if name.startswith("read_suffix_") or name.startswith("mutate_suffix_"):
+        mod = _get_module("suffix_decode_module", "../engine/suffix_decode_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # Process Reward Model (TTC Phase 3)
+    if name.startswith("read_prm_") or name.startswith("write_prm_") or name.startswith("mutate_prm_"):
+        mod = _get_module("prm_module", "../engine/prm_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # Beam Search + PRM (TTC Phase 4)
+    if name.startswith("read_search_") or name.startswith("mutate_search_") or name.startswith("write_search_"):
+        mod = _get_module("beam_search_module", "../engine/beam_search_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # Internal TTC Training (TTC Phase 5)
+    if name.startswith("read_ttc_") or name.startswith("write_ttc_") or name.startswith("mutate_ttc_"):
+        mod = _get_module("ttc_train_module", "../engine/ttc_train_module.py")
         return mod.handle_tool_call(name, args)
 
     # Focus Module (Scope & Session Management)

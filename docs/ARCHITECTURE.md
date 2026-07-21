@@ -1,11 +1,11 @@
 # CortexStratum Architecture
 
-**Version:** 0.5.1-dev | **Tools:** 209 (full) / **~95** (core default)
+**Version:** 0.6.0-dev | **Tools:** 230 (full) / **~97** (core default)
 **Date:** 2026-07-21 | **Stdio-only MCP server**
 
 ## Dynamic Module Registry
 
-Not all 209 tools are exposed by default. The server uses prefix-based filtering:
+Not all 230 tools are exposed by default. The server uses prefix-based filtering:
 
 - **Core (always on, ~95 tools):** memory, MLM, limbic, WM, gate, compute_alloc, compute_exec, DMN, verifier, DAG, hooks, traces, goals, commitment, audit, compact, workstream, agent, skill, tools, phase, consolidation, pedagogy, DB, regex, conversion, module registry, VQ compression, async pool, observability, sleep, plugin engine, structured log, auth/RBAC, connector, lineage
 - **Domain (opt-in, ~114 tools):** sensory, audio, coder, devops, gamedev, art, literature, sim_*, cad, electrical, mutation, plumber
@@ -42,6 +42,10 @@ handle_tool_call(name, args)
 | `compact-module.py` | 428 | 3 | `read_compact_*`, `write_compact_*` | Context compression |
 | `pedagogy-module.py` | 147 | 3 | `read_pedagogy_*`, `write_pedagogy_*` | Adaptive learning |
 | `plumber-module.py` | 281 | 3 | `read_plumber_*`, `write_plumber_*` | Pipe/trace inspection |
+| `suffix_decode_module.py` | ~270 | 4 | `read_suffix_*`, `mutate_suffix_*` | TTC Phase 2: n-gram next-tool prediction |
+| `prm_module.py` | ~200 | 4 | `read_prm_*`, `write_prm_*`, `mutate_prm_*` | TTC Phase 3: process reward model (step scores) |
+| `beam_search_module.py` | ~210 | 4 | `read_search_*` | TTC Phase 4: beam search + best-of-N over PRM |
+| `ttc_train_module.py` | ~190 | 2 | `read_ttc_*` | TTC Phase 5: extract resolved cases to corpus |
 | `mutation-module.py` | 357 | ? | — | Code mutation |
 | **New this session** | | | | |
 | `working_memory_module.py` | 397 | 5 | `read_wm_*`, `write_wm_*`, `mutate_wm_*` | Volatile PFC scratchpad (TTL decay, LRU eviction) |

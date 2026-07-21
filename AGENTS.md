@@ -26,7 +26,7 @@ The toolchain runs over standard input/output (stdio). Use it proactively before
 5. **Halt on Failure:** If tests do not pass, rollback or correct the implementation immediately.
 
 ### Build Stabilization (plumber)
-`read_plumber_verify_build` scans installer scripts and docs for stale tool-count references against current project state. `write_plumber_stabilize_build` auto-fixes them (dry-run by default). Run both before any commit that changes tool counts or installer files. Current count: 211.
+`read_plumber_verify_build` scans installer scripts and docs for stale tool-count references against current project state. `write_plumber_stabilize_build` auto-fixes them (dry-run by default). Run both before any commit that changes tool counts or installer files. Current count: 230.
 
 ## Quick Reference
 
@@ -174,7 +174,7 @@ The `previous_task` parameter is accepted by the `read_skill_router_match` MCP t
 `scripts/tools-mcp-server.py` (3929 lines) is the single entrypoint. It owns:
 ||- Permission guard (`can_call_tool`, line 37)
 ||- Module factory (`_get_module`, line 85)
-||- All 211 tool definitions (`TOOLS` list, starts ~line 250)
+||- All 230 tool definitions (`TOOLS` list, starts ~line 250)
 |- Tool dispatch (`handle_tool_call`, line ~750)
 |- CLI flags (`--permissive`, `--debug`, `--list-tools`, `--version`)
 |- stdio JSON-RPC loop (`main()`, ~line 3520)

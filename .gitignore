@@ -44,3 +44,7 @@ build/
 # Runtime state files
 data/rbac-roles.json
 data/.hmac_key
+data/suffix-tree.json
+data/prm-ledger.json
+data/beam-runs.json
+data/ttc-corpus.jsonl
