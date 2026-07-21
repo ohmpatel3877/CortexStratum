@@ -4,7 +4,7 @@
 .DESCRIPTION
     Installs the cortex-stratum plugin into an AI coding harness (OpenCode by default).
     Sets up:
-      - MCP server registration (68 tools via tools-mcp-server.py)
+      - MCP server registration (176 tools via tools-mcp-server.py)
       - Skills linking (task-orchestrator, etc.)
       - npm dependencies
       - mem0 API key configuration
@@ -208,7 +208,7 @@ function Register-McpForOpenCode {
     param([string]$ConfigPath)
     $mcpEntry = @{
         "name" = "cortex-stratum"
-        "description" = "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, and multi-module AI"
+        "description" = "176-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, and multi-module AI"
         "command" = "python"
         "args" = @("scripts/tools-mcp-server.py")
         "env" = @{
@@ -245,7 +245,7 @@ switch ($Harness) {
 <mcpserver>
 {
   "name": "cortex-stratum",
-  "description": "68-tool MCP server for memory, tracing, and orchestration",
+  "description": "176-tool MCP server for memory, tracing, and orchestration",
   "command": "python",
   "args": ["scripts/tools-mcp-server.py"],
   "working_dir": "$ProjectDir"

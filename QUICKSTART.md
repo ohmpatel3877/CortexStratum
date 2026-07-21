@@ -83,7 +83,7 @@ Open a new terminal and run:
 # Check version
 python scripts/tools-mcp-server.py --version
 
-# List all 122 tools
+# List all 176 tools
 python scripts/tools-mcp-server.py --list-tools
 
 # Run the test suite

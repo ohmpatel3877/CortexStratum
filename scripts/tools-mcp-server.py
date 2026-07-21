@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 MCP Server: CortexStratum Toolchain
-122 tools: memory, trace, compact, mutation,
+176 tools: memory, trace, compact, mutation,
 plumber, focus, pedagogy, consolidation, sensory, audio, coder, devops, gamedev,
 art, lit, verifier, hooks, skill router, goal registry, commitment checker,
 dag, workstream, skills, agents.
@@ -18,6 +18,25 @@ import threading
 import time
 from pathlib import Path
 
+# Add project root to sys.path for engine module imports
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from engine.conflict_resolver import get_gate, GATE_TOOLS
+from engine.working_memory_module import WM_TOOLS
+from engine.compute_alloc_module import COMPUTE_ALLOC_TOOLS
+from engine.limbic_module import LIMBIC_TOOLS
+from engine.compute_exec_module import COMPUTE_EXEC_TOOLS
+from engine.daydream_module import DMN_TOOLS
+from engine.observability import OBSERVABILITY_TOOLS, get_metrics, MetricsCollector
+from engine.sleep_module import SLEEP_TOOLS
+from engine.async_pool import ASYNC_POOL_TOOLS, get_pool
+from engine.plugin_engine import PLUGIN_TOOLS as PLUGIN_MGMT_TOOLS, get_manager as get_plugin_manager
+from engine.log_module import LOG_TOOLS
+from engine.auth_module import AUTH_TOOLS
+from engine.connector_module import CONNECTOR_TOOLS
+from engine.lineage_module import LINEAGE_TOOLS
+from engine.mid import run_post, run_pre
+from engine.vector_quantizer import VectorQuantizer, quantize_score, dequantize_score
+
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 
@@ -30,6 +49,84 @@ PERMISSION_MUTATE = "mutate"
 
 PERMISSIVE_MODE = False
 DEBUG_MODE = False
+
+# ---------------------------------------------------------------------------
+# Dynamic Module Registry — only active modules export tools via tools/list
+# ---------------------------------------------------------------------------
+
+_ACTIVE_MODULES: set[str] | None = None  # None = all tools visible
+
+# Default-active prefixes (core cognition — always on)
+_CORE_PREFIXES = {
+    "read_memory_", "write_memory_", "mutate_memory_",
+    "read_limbic_", "write_limbic_", "mutate_limbic_",
+    "read_wm_", "write_wm_", "mutate_wm_",
+    "read_gate_", "write_gate_", "mutate_gate_",
+    "read_focus_", "write_focus_", "mutate_focus_",
+    "write_compute_execute",
+    "read_dmn_", "write_dmn_", "mutate_dmn_",
+    "read_verifier_", "write_verifier_", "mutate_verify_",
+    "read_dag_", "write_dag_",
+    "read_hooks_", "write_hooks_",
+    "read_xtrace_", "write_xtrace_",
+    "read_dtrace_", "write_dtrace_",
+    "read_goal_registry_", "write_goal_registry_",
+    "read_commitment_", "mutate_commitment_",
+    "read_audit_", "mutate_audit_",
+    "read_compact_", "write_compact_",
+    "read_workstream_",
+    "read_agent_",
+    "read_skill_", "read_skill_router_",
+    "read_tools_",
+    "read_phase_",
+    "read_consolidation_", "mutate_consolidation_",
+    "read_pedagogy_", "write_pedagogy_",
+    "read_db_", "write_db_",
+    "read_regex_", "read_convert_",
+}
+
+# Heavy domain prefixes (off by default — opt in)
+_DOMAIN_PREFIXES = {
+    "read_sensory_", "write_sensory_", "mutate_sensory_",
+    "read_audio_",
+    "read_coder_",
+    "read_devops_",
+    "read_gamedev_",
+    "read_art_",
+    "read_lit_",
+    "read_sim_",
+    "read_cad_",
+    "read_electrical_",
+    "read_mutate_",
+    "read_plumber_", "write_plumber_",
+}
+
+
+def _filter_tools(all_tools: list[dict]) -> list[dict]:
+    """Filter TOOLS to only those matching active prefixes.
+    When _ACTIVE_MODULES is None, return all tools (fallback)."""
+    if _ACTIVE_MODULES is None:
+        return all_tools
+    result = []
+    for t in all_tools:
+        name = t["name"]
+        for prefix in _ACTIVE_MODULES:
+            if name == prefix or name.startswith(prefix):
+                result.append(t)
+                break
+    return result
+
+
+def _init_active_modules():
+    """Initialize active modules to CORE only."""
+    global _ACTIVE_MODULES
+    _ACTIVE_MODULES = set(_CORE_PREFIXES)
+
+
+def _set_active_modules(prefixes: set[str]):
+    """Replace active module set."""
+    global _ACTIVE_MODULES
+    _ACTIVE_MODULES = set(prefixes)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _VERSION_FILE = _SCRIPT_DIR.parent / "VERSION"
 try:
@@ -41,6 +138,12 @@ except Exception:
 def _log(level, msg):
     if DEBUG_MODE or level in ("ERROR", "WARN"):
         print(f"[mcp-server] [{level}] {msg}", file=sys.stderr, flush=True)
+    # Also pipe to structured logger
+    try:
+        from engine.log_module import get_log
+        get_log().log(level, msg)
+    except Exception:
+        pass
 
 
 def can_call_tool(tool_name, context=None):
@@ -115,6 +218,12 @@ def _is_permission(name, permissions):
 
 def _get_audit():
     return _get_module("permission_audit", "permission_audit.py")._get_audit()
+
+
+def _get_gate_dispatch():
+    """Lazy-load the Conflict Resolver gate module and return its dispatch."""
+    mod = _get_module("conflict_resolver", "../engine/conflict-resolver.py")
+    return mod
 
 
 BASE = Path(__file__).resolve().parent
@@ -197,49 +306,30 @@ def _auto_log_tool_error(name, args, result):
 
 def execute_tool_async(name, args, result_queue):
     try:
-        result = handle_tool_call(name, args)
-        # Cross-pipeline post-processing
-        skill_ctx = _inject_skill_context(
-            result.get("content", [{}])[0].get("text", ""), name
-        )
-        if skill_ctx:
-            # Append skill context to the result content
-            existing = result.get("content", [])
-            existing.append({"type": "text", "text": json.dumps(skill_ctx, indent=2)})
-            result["content"] = existing
-        # Auto-log errors to trace system
-        _auto_log_tool_error(name, args, result)
-        # Broadcast phase transitions to trace
-        if name == "write_focus_pipeline_advance" and not args.get("dry_run"):
-            try:
-                trace = _get_trace()
-                trace.handle_tool_call(
-                    "write_dtrace_add",
-                    {
-                        "title": f"Phase transition: {args.get('next_phase', '?')}",
-                        "decision": f"Session pipeline advanced to {args.get('next_phase', '?')}",
-                        "rationale": args.get("summary", "Phase completed"),
-                        "context": f"tool={name}",
-                        "alternatives": "",
-                        "category": "process",
-                    },
-                )
-            except Exception:
-                pass
-        # Trigger consolidation after memory writes
-        if name == "write_memory_add" and not args.get("dry_run"):
-            try:
-                mem = _get_memory_search()
-                mem.consolidate(threshold=0.92, dry_run=False)
-            except Exception:
-                pass
+        # Pre-hooks (gate, limbic_prime, etc.)
+        pre_result = run_pre(name, args)
+        if pre_result is not None:
+            result_queue.put(("result", pre_result))
+            return
+
+        # Core dispatch with observability
+        metrics = get_metrics()
+        with metrics.observe(name) as obs_ctx:
+            result = handle_tool_call(name, args)
+            text = result.get("content", [{}])[0].get("text", "")
+            if text.startswith("{\"error") or text.startswith('{"error'):
+                obs_ctx.error = True
+
+        # Post-hooks (skill_context, trace, consolidation, limbic, etc.)
+        run_post(name, args, result)
+
         result_queue.put(("result", result))
     except Exception as e:
         result_queue.put(("error", str(e)))
 
 
 #
-# TOOL DEFINITIONS (159 tools, all annotated)
+# TOOL DEFINITIONS (176 tools, all annotated)
 #
 
 
@@ -1387,7 +1477,7 @@ TOOLS = [
     },
     {
         "name": "write_compact_execute",
-        "description": " WRITE — Execute context compaction cycle. Use dry_run=true to preview.",
+        "description": " WRITE — Execute context compaction cycle. Use dry_run=true to preview. NOTE: For full pre-refresh pipeline (DMN→VQ→MLM→compact→persist), use write_cortex_sleep instead — this tool only handles content compaction.",
         "permission": "write",
         "annotations": A(False),
         "inputSchema": {
@@ -1471,6 +1561,28 @@ TOOLS = [
         "inputSchema": {
             "type": "object",
             "properties": {"limit": {"type": "integer", "default": 5}},
+            "required": [],
+        },
+    },
+    {
+        "name": "read_plumber_verify_build",
+        "description": "Scan installer scripts and docs for stale references (tool counts, paths) against current project state.",
+        "permission": "read",
+        "annotations": A(False),
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    },
+    {
+        "name": "write_plumber_stabilize_build",
+        "description": " WRITE — Auto-fix stale tool count references in installers and docs. Use dry_run=true to preview.",
+        "permission": "write",
+        "annotations": A(False),
+        "inputSchema": {
+            "type": "object",
+            "properties": {"dry_run": DR()},
             "required": [],
         },
     },
@@ -2571,7 +2683,83 @@ TOOLS = [
         "annotations": A(False),
         "inputSchema": {"type": "object", "properties": {}},
     },
+    #  Limbic Emotional Tagging (Amygdala analog)
+    *LIMBIC_TOOLS,
+    #  Compute Execution (code sandbox)
+    *COMPUTE_EXEC_TOOLS,
+    #  DMN Daydreaming (Default Mode Network)
+    *DMN_TOOLS,
+    #  Conflict Resolver Gate
+    *GATE_TOOLS,
+    #  Compute-Optimal Allocation (TTC Phase 1)
+    *COMPUTE_ALLOC_TOOLS,
+    #  Working Memory (Prefrontal Cortex analog)
+    *WM_TOOLS,
+    #  Cortex Module Registry
+    {
+        "name": "write_cortex_activemodules",
+        "description": " WRITE — Enable or disable tool modules dynamically. Pass a list of module prefixes to activate (e.g. ['read_sensory_', 'read_coder_']). Only active modules' tools appear in tools/list. Call with empty list to show core only; omit to see current state.",
+        "permission": "write",
+        "annotations": A(False),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "modules": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Module prefixes to activate (e.g. ['read_sensory_', 'read_coder_']). Empty list = core only. Omit to just view current state.",
+                },
+                "mode": {
+                    "type": "string",
+                    "enum": ["replace", "add", "remove"],
+                    "description": "replace (default): set exact list of active modules. add: append to current. remove: remove from current.",
+                    "default": "replace",
+                },
+                "dry_run": DR(),
+            },
+            "required": [],
+        },
+    },
+    #  Cortex Vector Quantization
+    {
+        "name": "write_cortex_compress_memory",
+        "description": " WRITE — Compress MLM memory using vector quantization: deduplicate content by hash and encode tags to compact integer IDs. Set mode='stats' to preview savings without changes.",
+        "permission": "write",
+        "annotations": A(False),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "type": "string",
+                    "enum": ["compress", "stats", "reset"],
+                    "description": "compress: apply quantization to all MLM items. stats: view current savings. reset: clear codebook.",
+                    "default": "stats",
+                },
+                "dry_run": DR(),
+            },
+            "required": [],
+        },
+    },
+    #  Cortex Observability
+    *OBSERVABILITY_TOOLS,
+    #  Cortex Sleep Cycle
+    *SLEEP_TOOLS,
+    #  Cortex Async Pool
+    *ASYNC_POOL_TOOLS,
+    #  Plugin Engine (management tools only — plugin tools loaded dynamically)
+    *PLUGIN_MGMT_TOOLS,
+    #  Structured Logging
+    *LOG_TOOLS,
+    #  Auth, OAuth2, RBAC, Encryption
+    *AUTH_TOOLS,
+    #  Connector Framework
+    *CONNECTOR_TOOLS,
+    #  Data Lineage & Quality
+    *LINEAGE_TOOLS,
 ]
+
+# Initialize dynamic module registry to CORE only
+_init_active_modules()
 
 #
 # HANDLE TOOL CALL
@@ -3024,6 +3212,11 @@ def handle_tool_call(name, args):
             ]
         }
 
+    # Compute-Optimal Allocation (TTC Phase 1) — dispatched before general focus
+    if name.startswith("read_focus_compute_") or name.startswith("read_focus_difficulty_") or name.startswith("read_focus_allocate_"):
+        mod = _get_module("compute_alloc_module", "../engine/compute_alloc_module.py")
+        return mod.handle_tool_call(name, args)
+
     # Focus Module (Scope & Session Management)
     if name.startswith("read_focus_") or name.startswith("write_focus_"):
         return {
@@ -3358,6 +3551,146 @@ def handle_tool_call(name, args):
             ]
         }
 
+    # Limbic Emotional Tagging
+    if name.startswith('read_limbic_') or name.startswith('write_limbic_') or name.startswith('mutate_limbic_'):
+        mod = _get_module("limbic_module", "../engine/limbic_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # Dynamic Module Registry
+    if name == "write_cortex_activemodules":
+        modules = args.get("modules")
+        mode = args.get("mode", "replace")
+        dry_run = args.get("dry_run", False)
+        if modules is None or dry_run:
+            cur = sorted(_ACTIVE_MODULES) if _ACTIVE_MODULES is not None else sorted(_CORE_PREFIXES)
+            return {"content": [{"type": "text", "text": json.dumps({
+                "status": "ok",
+                "dry_run": True if modules is None else dry_run,
+                "active_modules": cur,
+                "active_count": len(cur),
+                "domain_modules": sorted(_DOMAIN_PREFIXES),
+                "note": "Pass modules=[...] to change. Empty array = core only.",
+            }, indent=2)}]}
+        target = set(modules)
+        if mode == "add":
+            _ACTIVE_MODULES |= target
+        elif mode == "remove":
+            _ACTIVE_MODULES -= target
+        else:  # replace
+            _ACTIVE_MODULES = target if target else set(_CORE_PREFIXES)
+        return {"content": [{"type": "text", "text": json.dumps({
+            "status": "ok",
+            "active_modules": sorted(_ACTIVE_MODULES),
+            "active_count": len(_ACTIVE_MODULES),
+            "note": "tools/list will now reflect active modules only.",
+        }, indent=2)}]}
+
+    # Vector Quantization
+    if name == "write_cortex_compress_memory":
+        from engine.multi_layer_memory import _get_mlm
+        vq = VectorQuantizer()
+        mlm = _get_mlm()
+        mode = args.get("mode", "stats")
+        if mode == "stats":
+            # Compute stats without modifying
+            total_chars = 0
+            total_tags = 0
+            for store in (mlm._episodic, mlm._semantic):
+                for item in store.values():
+                    content = str(item.get("content", ""))
+                    total_chars += len(content)
+                    total_tags += len(item.get("tags", []))
+            return {"content": [{"type": "text", "text": json.dumps({
+                "status": "ok",
+                "episodic_count": len(mlm._episodic),
+                "semantic_count": len(mlm._semantic),
+                "total_content_chars": total_chars,
+                "total_tags": total_tags,
+                "note": "Use mode='compress' to apply VQ deduplication.",
+            }, indent=2)}]}
+        elif mode == "reset":
+            vq = VectorQuantizer()
+            return {"content": [{"type": "text", "text": json.dumps({"status": "ok", "note": "New VQ instance created."})}]}
+        else:  # compress
+            count = 0
+            for store in (mlm._episodic, mlm._semantic):
+                for mid, item in list(store.items()):
+                    encoded = vq.encode_memory(item)
+                    store[mid] = encoded
+                    count += 1
+            return {"content": [{"type": "text", "text": json.dumps({
+                "status": "ok",
+                "items_compressed": count,
+                "codebook_size": vq.tags.stats()["size"],
+                "unique_content": vq.content.stats()["unique_items"],
+            }, indent=2)}]}
+
+    # Observability
+    if name in ("read_cortex_metrics", "write_cortex_metrics_reset"):
+        from engine.observability import handle_tool_call as obs_handle
+        return obs_handle(name, args)
+
+    # Sleep Cycle
+    if name in ("write_cortex_sleep", "read_cortex_sleep_status"):
+        from engine.sleep_module import handle_tool_call as sleep_handle
+        return sleep_handle(name, args)
+
+    # Async Pool
+    if name in ("read_cortex_pool_status", "write_cortex_pool_resize"):
+        from engine.async_pool import handle_tool_call as pool_handle
+        return pool_handle(name, args)
+
+    # Compute Execution
+    if name == "write_compute_execute":
+        mod = _get_module("compute_exec_module", "../engine/compute_exec_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # DMN Daydreaming
+    if name.startswith('read_dmn_') or name.startswith('write_dmn_') or name.startswith('mutate_dmn_'):
+        mod = _get_module("daydream_module", "../engine/daydream_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # Working Memory
+    if name.startswith('read_wm_') or name.startswith('write_wm_') or name.startswith('mutate_wm_'):
+        mod = _get_module("working_memory_module", "../engine/working_memory_module.py")
+        return mod.handle_tool_call(name, args)
+
+    # Conflict Resolver Gate
+    if name.startswith('read_gate_') or name.startswith('write_gate_') or name.startswith('mutate_gate_'):
+        return _get_gate_dispatch().handle_tool_call(name, args)
+
+    # Plugin management tools
+    if name in ("read_plugin_list", "write_plugin_reload", "write_plugin_scan"):
+        from engine.plugin_engine import handle_tool_call as plugin_mgmt_handle
+        return plugin_mgmt_handle(name, args)
+
+    # Structured Logging
+    if name.startswith("read_log_") or name.startswith("mutate_log_"):
+        from engine.log_module import handle_tool_call as log_handle
+        return log_handle(name, args)
+
+    # Auth / OAuth2 / RBAC / Encryption
+    if name.startswith("write_oauth_") or name.startswith("read_oauth_") or \
+       name.startswith("write_rbac_") or name.startswith("read_rbac_") or \
+       name.startswith("write_aes_"):
+        from engine.auth_module import handle_tool_call as auth_handle
+        return auth_handle(name, args)
+
+    # Connector Framework
+    if name.startswith("write_connector_") or name.startswith("read_connector_"):
+        from engine.connector_module import handle_tool_call as conn_handle
+        return conn_handle(name, args)
+
+    # Data Lineage & Quality
+    if name.startswith("read_lineage_") or name.startswith("write_lineage_"):
+        from engine.lineage_module import handle_tool_call as lineage_handle
+        return lineage_handle(name, args)
+
+    # Plugin dispatch (fallback — any tool not handled by built-in dispatch)
+    plugin_result = get_plugin_manager().dispatch(name, args)
+    if plugin_result is not None:
+        return plugin_result
+
     return {"content": [{"type": "text", "text": f"Unknown tool: {name}"}]}
 
 
@@ -3419,16 +3752,13 @@ def _process_message(msg):
         if method == "notifications/initialized":
             return True
         if method == "tools/list":
-            send_message({"jsonrpc": "2.0", "id": mid, "result": {"tools": TOOLS}})
+            send_message({"jsonrpc": "2.0", "id": mid, "result": {"tools": _filter_tools(TOOLS)}})
             return True
         if method == "tools/call":
             tname = params.get("name", "")
             targs = params.get("arguments", {})
             q = queue.Queue()
-            t = threading.Thread(
-                target=execute_tool_async, args=(tname, targs, q), daemon=True
-            )
-            t.start()
+            get_pool().submit(execute_tool_async, tname, targs, q)
             deadline = time.monotonic() + 65
             while time.monotonic() < deadline:
                 try:
@@ -3501,6 +3831,14 @@ def _drain_pending():
 
 
 def main():
+    # Register server hooks into middleware pipeline
+    from engine.mid import register_server_hooks
+    register_server_hooks(
+        skill_inject_fn=_inject_skill_context,
+        trace_log_fn=_auto_log_tool_error,
+        memory_consolidate_fn=lambda: _get_memory_search().consolidate(threshold=0.92, dry_run=False),
+        trace_getter=_get_trace,
+    )
     _log("INFO", f"CortexStratum v{VERSION} starting ({len(TOOLS)} tools)...")
     reads = sum(1 for t in TOOLS if t.get("permission") == "read")
     writes = sum(1 for t in TOOLS if t.get("permission") == "write")
@@ -3526,6 +3864,32 @@ def main():
         )
     except Exception as e:
         _log("WARN", f"Could not export memory summary: {e}")
+
+    # Auto-recovery: detect interrupted session from previous crash
+    try:
+        pipeline_path = DATA_DIR / "session-pipeline.json"
+        if pipeline_path.exists():
+            _data = json.loads(pipeline_path.read_text(encoding="utf-8"))
+            phase = _data.get("current_phase")
+            if phase and phase != "end":
+                _log(
+                    "WARN",
+                    f"Previous session interrupted (phase='{phase}'). "
+                    f"Run read_hooks_prefetch to restore context. "
+                    f"Run write_focus_pipeline_advance('end') to clear.",
+                )
+        goal_path = DATA_DIR / "goal-registry.json"
+        if goal_path.exists():
+            _data = json.loads(goal_path.read_text(encoding="utf-8"))
+            if _data.get("original_goal") and not _data.get("completed_at"):
+                _log(
+                    "INFO",
+                    f"Uncompleted goal found: '{_data['original_goal'][:80]}'. "
+                    f"Use read_goal_registry_status to review.",
+                )
+    except Exception as e:
+        _log("DEBUG", f"Auto-recovery check skipped: {e}")
+
     reader = threading.Thread(target=_reader_loop, daemon=True)
     reader.start()
     while not _reader_shutdown.is_set():
@@ -3537,6 +3901,11 @@ def main():
 
 
 if __name__ == "__main__":
+    # Register middleware hooks
+    from engine.mid import set_limbic_getter
+    from engine.limbic_module import _get_limbic
+    set_limbic_getter(_get_limbic)
+
     import sys as _sys
 
     args = [a.lower() for a in _sys.argv[1:]]

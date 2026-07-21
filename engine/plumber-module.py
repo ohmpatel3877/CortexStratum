@@ -9,6 +9,7 @@ Master Spec:
 """
 
 import os
+import re
 import socket
 import time
 from pathlib import Path
@@ -259,6 +260,186 @@ def list_checkpoints(limit=5):
 # Handler Dispatch
 #
 
+# Known pattern: installer files that tend to drift from project state
+INSTALLER_PATTERNS = [
+    # (glob, description, [ (old_text_pattern, replacement_template) ] )
+    {
+        "glob": "install-tools/install.sh",
+        "desc": "Linux/macOS installer",
+        "checks": [
+            # Tool count references
+            {"pattern": r"(\d+)-tool MCP server", "label": "tool count"},
+            {"pattern": r"(\d+) tools", "label": "tool count"},
+        ],
+    },
+    {
+        "glob": "install-tools/install.ps1",
+        "desc": "Windows PowerShell installer",
+        "checks": [
+            {"pattern": r"(\d+)-tool MCP server", "label": "tool count"},
+            {"pattern": r"(\d+) tools", "label": "tool count"},
+        ],
+    },
+    {
+        "glob": "README.md",
+        "desc": "Project README",
+        "checks": [
+            {"pattern": r"(\d+)-tool MCP server", "label": "tool count"},
+        ],
+    },
+    {
+        "glob": "AGENTS.md",
+        "desc": "Agent instructions",
+        "checks": [
+            {"pattern": r"(\d+)-tool MCP server", "label": "tool count"},
+            {"pattern": r"(\d+) tool definitions", "label": "tool count"},
+        ],
+    },
+    {
+        "glob": "BUILD.md",
+        "desc": "Build documentation",
+        "checks": [
+            {"pattern": r"(\d+) tools", "label": "tool count"},
+        ],
+    },
+]
+
+PROJECT_ROOT = BASE.parent
+
+
+def _get_real_tool_count():
+    """Try to get the real tool count from the server or inventory."""
+    inv_path = DATA_DIR / "tool-inventory.json"
+    if inv_path.exists():
+        data = load_json(inv_path, {})
+        if isinstance(data, list):
+            return len(data)
+        if isinstance(data, dict) and "tools" in data:
+            return len(data["tools"])
+    return None
+
+
+def verify_build():
+    """
+    Scan installer scripts and docs for stale references against current project state.
+    Returns a report of all mismatches found.
+    """
+    real_count = _get_real_tool_count()
+    issues = []
+    checked = 0
+
+    for entry in INSTALLER_PATTERNS:
+        fpath = PROJECT_ROOT / entry["glob"]
+        if not fpath.exists():
+            issues.append({
+                "file": entry["glob"],
+                "status": "MISSING",
+                "desc": entry["desc"],
+                "issues": ["File not found"],
+            })
+            continue
+
+        text = fpath.read_text(encoding="utf-8", errors="replace")
+        file_issues = []
+
+        for check in entry["checks"]:
+            for match in re.finditer(check["pattern"], text):
+                checked += 1
+                val = match.group(1)
+                try:
+                    val_int = int(val)
+                except ValueError:
+                    continue
+                if real_count is not None and val_int != real_count:
+                    file_issues.append(
+                        f"Stale {check['label']}: found '{val}', expected {real_count} "
+                        f"(at '{match.group(0)[:50]}')"
+                    )
+
+        if file_issues:
+            issues.append({
+                "file": entry["glob"],
+                "status": "DRIFT",
+                "desc": entry["desc"],
+                "issues": file_issues,
+            })
+        else:
+            issues.append({
+                "file": entry["glob"],
+                "status": "CLEAN",
+                "desc": entry["desc"],
+                "issues": [],
+            })
+
+    return {
+        "real_tool_count": real_count,
+        "files_checked": len(INSTALLER_PATTERNS),
+        "patterns_matched": checked,
+        "drifted": sum(1 for i in issues if i["status"] == "DRIFT"),
+        "missing": sum(1 for i in issues if i["status"] == "MISSING"),
+        "files": issues,
+        "recommendation": "Run write_plumber_stabilize_build to fix drift" if any(
+            i["status"] == "DRIFT" for i in issues
+        ) else "All installer files match project state",
+    }
+
+
+def stabilize_build(dry_run=True):
+    """
+    Auto-fix stale tool count references in installer scripts and docs.
+    Replaces outdated numbers with the current project tool count.
+    """
+    real_count = _get_real_tool_count()
+    if real_count is None:
+        return {"error": "Cannot determine real tool count. Run check-tool-counts.py first."}
+
+    changes = []
+    for entry in INSTALLER_PATTERNS:
+        fpath = PROJECT_ROOT / entry["glob"]
+        if not fpath.exists():
+            continue
+
+        text = fpath.read_text(encoding="utf-8", errors="replace")
+        original = text
+
+        for check in entry["checks"]:
+            def _replace_count(m):
+                old = m.group(0)
+                try:
+                    old_val = int(m.group(1))
+                except (ValueError, IndexError):
+                    return old
+                if old_val == real_count:
+                    return old
+                return old.replace(m.group(1), str(real_count))
+
+            text = re.sub(check["pattern"], _replace_count, text)
+
+        if text != original:
+            if not dry_run:
+                fpath.write_text(text, encoding="utf-8")
+            changes.append({
+                "file": entry["glob"],
+                "desc": entry["desc"],
+                "fixed": True,
+                "dry_run": dry_run,
+            })
+        else:
+            changes.append({
+                "file": entry["glob"],
+                "desc": entry["desc"],
+                "fixed": False,
+                "dry_run": dry_run,
+            })
+
+    return {
+        "real_tool_count": real_count,
+        "files_scanned": len(INSTALLER_PATTERNS),
+        "files_fixed": sum(1 for c in changes if c["fixed"]),
+        "changes": changes,
+        "status": "simulated" if dry_run else "applied",
+    }
+
 
 def handle_tool_call(name, args):
     if name == "read_plumber_inspect_socket":
@@ -278,4 +459,8 @@ def handle_tool_call(name, args):
         )
     elif name == "read_plumber_checkpoints":
         return list_checkpoints(args.get("limit", 5))
+    elif name == "read_plumber_verify_build":
+        return verify_build()
+    elif name == "write_plumber_stabilize_build":
+        return stabilize_build(args.get("dry_run", True))
     return {"error": f"Unknown plumber tool: {name}"}

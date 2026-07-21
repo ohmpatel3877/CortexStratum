@@ -1,8 +1,32 @@
 # CortexStratum - Agent Instructions
 
-**122-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.5.0.
+**209-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.5.0.
 
 [CLAUDE.md](CLAUDE.md) covers basic MCP tool usage. This file covers everything an agent would likely miss without help.
+
+## CortexStratum Ecosystem Constraints
+
+### Architectural Boundaries
+The system is a distinct, local-first architecture.
+
+**CortexStratum (Executive Memory Layer):**
+- **Language:** Python standard library strictly.
+- **Dependencies:** Zero `pip` installations permitted in the core server.
+- **Integration:** External engines (Node/WASM, OpenGeometry, etc.) are bridged via `subprocess` execution, not imported.
+- **Search Engine:** BM25 via a local standard-library implementation.
+
+### Tools and Skills Utilization Protocol
+The toolchain runs over standard input/output (stdio). Use it proactively before guessing syntax or state. Check the current `VERSION` and existing test coverage with filesystem tools before writing code.
+
+### Development & Execution Loop
+1. **Read:** Check `VERSION` and read existing test coverage.
+2. **Code:** Implement logic adhering to the project's language and dependency constraints.
+3. **Test:** Run relevant verification scripts (`test-tool-logic.py`, `verifier_middleware.py`). End-to-end validation is required, not just green unit mocks.
+4. **Validate Behavior:** Assert behavior contracts and invariants (how two pieces of data must relate), not frozen snapshot values.
+5. **Halt on Failure:** If tests do not pass, rollback or correct the implementation immediately.
+
+### Build Stabilization (plumber)
+`read_plumber_verify_build` scans installer scripts and docs for stale tool-count references against current project state. `write_plumber_stabilize_build` auto-fixes them (dry-run by default). Run both before any commit that changes tool counts or installer files. Current count: 211.
 
 ## Quick Reference
 
@@ -12,7 +36,7 @@ python scripts/tools-mcp-server.py
 python scripts/tools-mcp-server.py --permissive   # bypass all permission checks
 python scripts/tools-mcp-server.py --debug        # verbose logging
 
-# List all 122 tools (verify registration)
+# List all 209 tools (verify registration)
 python scripts/tools-mcp-server.py --list-tools
 
 # Run full test suite (each script is self-validating, exit non-zero on failure)
@@ -101,7 +125,7 @@ All test scripts are self-validating (exit 0 on pass, non-zero on failure). No p
 | Gotcha | Detail |
 |--------|--------|
 | **Version in 2 places** | `VERSION` file AND `VERSION = "..."` constant in `tools-mcp-server.py` (line 28). Update both on release. |
-| **No CI** | `.github/workflows/` does not exist despite BUILD.md referencing it. |
+|| **No GH Actions CI properly configured** | `.github/workflows/` exists (`ci.yml`, `release.yml`) but CI may not trigger automatically. Verify with `git push` test. |
 | **PS1 scripts are legacy** | `scripts/*.ps1` files have Python equivalents in `scripts/`. Don't extend PS1; migrate to Python. |
 | **requirements.txt is a no-op** | Lists zero packages. Core must stay stdlib-only. Optional deps go in `requirements-full.txt`. |
 | **stdio transport** | JSON-RPC over stdin/stdout, not HTTP. Cannot curl directly. Use MCP client (OpenCode, Claude Code). |
@@ -120,7 +144,7 @@ All runtime data is local JSON in `data/` and `.memory/`. **Not git-tracked** (e
 | `data/goal-registry.json` | Current goal with sub-goal decomposition |
 | `data/commitments.json` | Session promises with cross-session verification |
 | `data/synonyms.json` | BM25 synonym expansion map (**git-tracked**) |
-| `data/tool-inventory.json` | All 122 tool definitions (for verification) |
+|| `data/tool-inventory.json` | All 209 tool definitions (for verification) |
 | `.memory/ne/` | BM25 index files |
 | `.memory/profiles/` | Agent identity profiles |
 
@@ -147,12 +171,12 @@ The `previous_task` parameter is accepted by the `read_skill_router_match` MCP t
 
 ## MCP Server Entrypoint
 
-`scripts/tools-mcp-server.py` (1238 lines) is the single entrypoint. It owns:
-- Permission guard (`can_call_tool`, line 37)
-- Module factory (`_get_module`, line 85)
-- All 122 tool definitions (`TOOLS` list, starts ~line 150)
-- Tool dispatch (`handle_tool_call`, line 748)
-- CLI flags (`--permissive`, `--debug`, `--list-tools`, `--version`)
-- stdio JSON-RPC loop (`main()`, ~line 1100)
+`scripts/tools-mcp-server.py` (3929 lines) is the single entrypoint. It owns:
+||- Permission guard (`can_call_tool`, line 37)
+||- Module factory (`_get_module`, line 85)
+||- All 211 tool definitions (`TOOLS` list, starts ~line 250)
+|- Tool dispatch (`handle_tool_call`, line ~750)
+|- CLI flags (`--permissive`, `--debug`, `--list-tools`, `--version`)
+|- stdio JSON-RPC loop (`main()`, ~line 3520)
 
 Do not split this file without explicit approval.

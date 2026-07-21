@@ -81,7 +81,7 @@ state — no partial writes, no silent failures, no hangs.
 ```
 --help         Show usage information
 --version      Show version string (current: 0.5.0)
---list-tools   List all 122 tools as JSON
+--list-tools   List all 176 tools as JSON
 --permissive   Bypass all permission checks
 --debug        Enable verbose logging
 ```

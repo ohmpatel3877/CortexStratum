@@ -1,9 +1,9 @@
 # CortexStratum
 
-**Persistent memory infrastructure for AI coding agents.** A 159-tool MCP server giving OpenCode, Claude Code, and Cursor agents cross-session memory, cognitive pipelines, engineering simulation, and Wolfram-class mathematics — all offline, zero API keys, pure Python stdlib core.
+Memory that works the way agents actually use it. 209 MCP tools for cross-session search, scope management, engineering math, and context compaction. All stdio, all Python stdlib, zero API keys.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Tools-159-blue?style=for-the-badge" alt="Tools"/>
+  <img src="https://img.shields.io/badge/Tools-209-blue?style=for-the-badge" alt="Tools"/>
   <img src="https://img.shields.io/badge/Memory-SQLite%20%2B%20FTS5-blue?style=for-the-badge" alt="Memory"/>
   <img src="https://img.shields.io/badge/Local-Pure%20Python%2C%20Zero%20GPU-brightgreen?style=for-the-badge" alt="Local"/>
   <img src="https://img.shields.io/badge/Zero%20API%20Keys-3776AB?style=for-the-badge" alt="Zero API Keys"/>
@@ -11,52 +11,52 @@
 
 Zero cloud dependencies. Zero GPU. Zero API keys. Pure Python stdlib core.
 
-> **Honest Engineering** — This README calls out limitations and constraints alongside features. Every tool has documented edges; knowing them saves debugging time.
-
+> **Limitations documented alongside features.** Callouts flag scope edges so you don't discover them mid-session.
 ### Hard Constraints
+
 | Constraint | Implication |
 |:---|---:|
-| **Single-threaded stdio** | One JSON-RPC request at a time. No concurrent tool execution. |
-| **No authentication** | No users, roles, or API keys. Any process reaching stdin calls any tool. |
-| **No encryption at rest** | Memory, registries, and logs are plain files. |
+| **Stdio transport** | JSON-RPC over standard streams. No HTTP, WebSocket, or Unix socket transports. |
+| **No authentication** | No users, roles, or API keys. Any process reaching stdin can call any tool. |
+| **No encryption at rest** | Memory, registries, and logs are plain files. AES-GCM encryption available via `write_aes_encrypt` but not transparent. |
 | **No web UI** | MCP protocol only — no dashboard, REST API, or graphical interface. |
-| **No hot-reload** | Module code loaded once; changes require server restart. |
 | **Single machine** | No clustering, failover, or shared state across processes. |
-| **No plugin system** | Adding a tool requires editing `tools-mcp-server.py` and wiring dispatch. |
+| **No crash recovery** | Session state persists to JSON on every mutation, but mid-session crashes require manual `read_hooks_prefetch` to restore context. |
 
 ---
 
-## About
+## Example Use Cases
 
-CortexStratum exists because AI agents deserve better than amnesia.
+**Cross-session error memory:** An agent hits `ModuleNotFoundError: No module named 'xyz'`, logs it via `write_xtrace_log_error`. In a later session, a different agent searches `read_xtrace_search("ModuleNotFoundError")` and retrieves the resolution. No repeated debugging..
 
-Every session starts fresh. Agents don't remember yesterday's bugs, the architecture decisions they made last week, or the fix they already tried three times. CortexStratum fixes that. It's an **MCP server** that layers persistent memory, structured cognition, and numerical computation onto any LLM-powered coding agent — without a single cloud call, API key, or GPU.
+**Scope enforcement during prompts:** A user asks for "a full-stack chat app, also make it into a desktop app, and write the docs." `read_focus_decompose` splits this into 3 tasks, `read_focus_prioritize` orders them by dependency, and `read_focus_scope_check` flags scope-creep before the agent wastes time on the desktop variant.
 
-**The problem:** LLM agents are stateless by design. They have no hippocampus, no prefrontal cortex, no ability to learn from past mistakes. Every conversation is Groundhog Day.
+**Engineering computation without licensing a CAS:** `read_sim_math_matrix_solve(A=[[3,1],[1,2]], b=[5,5])` returns the solution `[1.0, 2.0]` with LaTeX derivation. `read_sim_cfd_pipe` computes pressure drop via Darcy-Weisbach. All stdlib, no MATLAB license needed.
 
-**The solution:** A 159-tool digital nervous system that runs locally, covering everything from cross-session error tracking (learn from past debugging) to Wolfram-class mathematics (solve `Ax = b` with full LaTeX derivation) to engineering-grade CFD (pipe flow via Darcy-Weisbach with Colebrook friction). No cloud. No API keys. Pure Python stdlib.
+**Automated context compaction mid-session:** When context approaches the token limit, `read_compact_token_velocity` detects the spike and `write_compact_execute` condenses verbose session content into a summary, preserving the agent's working set without losing prior decisions.
+
+**Memory consolidation across related work:** After 50+ memory entries accumulate, `mutate_consolidation_run` discovers links between related entries (e.g., "fix: npm install" linked to "error: module not found"). `read_consolidation_links` surfaces these relationships, turning isolated notes into a knowledge graph.
 
 **Who it's for:**
-- **Agent developers** who want their agents to actually remember things — error signatures, decisions, preferences, commitments
-- **Engineers** who need CFD, FEA, or mechanical analysis without licensing MATLAB or Ansys
-- **Mathematicians and scientists** who want quick numerical computation — matrix solve, FFT, root finding, integration — with LaTeX-formatted output, without firing up a CAS
-- **OpenCode / Claude Code / Cursor users** who want scope management, behavioral guardrails, and prompt decomposition built into their agent
+- **Agent developers** needing persistent memory (error signatures, decisions, preferences, commitments)
+- **Engineers** requiring CFD, FEA, or mechanical analysis without commercial solvers
+- **Mathematicians and scientists** needing numerical computation (matrix solve, FFT, root finding, integration) with LaTeX formatted output, no CAS license
+- **OpenCode / Claude Code / Cursor users** needing scope management, behavioral guardrails, and prompt decomposition
 
-**What it's not:**
-- A Wolfram Alpha or MATLAB replacement — the math engine is stdlib-only, covering the 80% use case, but won't handle symbolic integration or sparse matrices
-- A cloud service — everything runs on your machine, zero telemetry, zero API keys
-- A vector database — memory primarily uses BM25+FTS5; vector search is optional and needs extra dependencies
-- A security boundary — no auth, no encryption, no sandboxing ([see constraints](#hard-constraints))
+**Limitations:**
+- Stdlib math covers the 80% case. No symbolic integration, sparse matrices, or arbitrary precision.
+- Runs locally. Zero telemetry, zero API keys.
+- Memory uses BM25+FTS5 by default. Vector search is optional and needs `sentence-transformers`.
+- No auth, no encryption, no sandboxing ([see constraints](#hard-constraints)).
 
 ### Version
-**0.5.x** — 159 tools across 18 engine modules, 4 simulation engines, and 14 skills.  
-Full changelog in [`CHANGELOG.md`](CHANGELOG.md).
+**0.5.x.** 209 tools across 18+ engine modules, 4 simulation engines, and 14 skills. Full changelog in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
-## Cortical Architecture — A Brain-Inspired Design
+## Architecture / Cortical Mapping
 
-*CortexStratum* maps modules to mammalian brain circuits — each engine mimics a cortical pathway:
+CortexStratum modules map to mammalian brain analogs. Each module pairs with a cortical pathway by function, not by implementation. The naming gives a mental model for dispatch behavior:
 
 | Engine / Module | Cortical Analog | Function |
 |:---|---:|:---|
@@ -75,7 +75,7 @@ Full changelog in [`CHANGELOG.md`](CHANGELOG.md).
 | **CFD Engine** | **Parietal Lobe (spatial reasoning)** | Pipe flow (Darcy-Weisbach, Colebrook), boundary layer, drag, Bernoulli solver, pump sizing |
 | **FEA Engine** | **Parietal Lobe (numerical computation)** | Beam stiffness matrix, truss elements, modal analysis, heat conduction, stress recovery |
 | **Mechanics Engine** | **Parietal Lobe (applied physics)** | Beam stress/shear/deflection, column buckling (Euler+Johnson), fatigue (S-N/Goodman/Miner), fasteners |
-| **Math Engine** | **Parietal Lobe (symbolic mathematics)** | 19 Wolfram-class tools: linear algebra, calculus, FFT, root finding, statistics, complex numbers, number theory, unit conversion, ODE solving |
+| **Math Engine** | **Parietal Lobe (symbolic mathematics)** | 19 numerical tools: linear algebra, calculus, FFT, root finding, statistics, complex numbers, number theory, unit conversion, ODE solving |
 | **Mutation Module** | **Motor Cortex** — action planning & execution | Plans file/state changes, audits before executing |
 | **Compaction Module** | **Default Mode Network** — reflection, summarization | Condenses verbose context — active during "idle" compaction cycles |
 | **Plumber Module** | **Corpus Callosum** — inter-hemisphere communication | Inspects sockets, traces cross-module handoffs, checkpoints state between pipelines |
@@ -143,7 +143,7 @@ write_compact_execute(content="[session content...]")
 # → {"status": "compacted", "compression_ratio": 0.12}
 ```
 
-> **Compaction limits:** Compression is **extractive** — scores sentences and keeps top ones. Does NOT generate new summaries. Important details can be silently dropped. Token velocity detection assumes steady prompt/response flow; bursty workloads trigger false positives.
+> Compaction is extractive. It scores sentences and keeps the top ones, but it doesn't generate new summaries. Important details can get dropped. Token velocity detection assumes steady flow; bursty workloads give false positives.
 
 ### 3. Engineering Simulation
 
@@ -181,7 +181,7 @@ read_sim_math_factor(n=123456)
 # → {"factors": [2, 2, 2, 2, 2, 2, 3, 643], "latex": "123456 = 2 × 2 × 2 × 2 × 2 × 2 × 3 × 643"}
 ```
 
-### 4. Mathematics Engine (Wolfram-class)
+### 4. Mathematics Engine (stdlib numerical)
 
 The math engine provides 19 tools covering the full computational mathematics spectrum:
 
@@ -200,6 +200,25 @@ The math engine provides 19 tools covering the full computational mathematics sp
 | **LaTeX** | `latex` | Template-based derivation step generation |
 | **Plotting** | `plot` | ASCII line plot from x/y data |
 
+> Compared to Wolfram Alpha, this is stdlib-only numerical computation. It won't do symbolic integration, sparse matrices, or arbitrary precision. The table below is the exact gap.
+>
+> | Capability | Wolfram | CortexStratum |
+> |---|---|---|
+> | Symbolic differentiation | Yes | ❌ Numerical only (central difference) |
+> | Symbolic integration | Yes | ❌ Numerical only (Simpson's rule) |
+> | Arbitrary precision | Yes | ❌ Double precision only |
+> | Sparse matrix support | Yes | ❌ 2x2/3x3 only |
+> | Pattern matching | Yes | ❌ None |
+> | Rule-based rewriting | Yes | ❌ None |
+> | Special functions | Yes | ❌ None |
+> | Full symbolic algebra | Yes | ❌ None |
+> | Multivariate calculus | Yes | ❌ Single variable only |
+> | Equation solving (symbolic) | Yes | ❌ Numerical only |
+> | DSolve (symbolic ODEs) | Yes | ❌ Numerical only (RK4) |
+> | Full 2D/3D plotting | Yes | ❌ ASCII line plots only |
+>
+> What it can do: solve `Ax=b`, compute determinants and eigenvalues, differentiate and integrate numerically, find roots, fit curves, handle complex numbers. All pure stdlib, no installs.
+
 ### 5. Code Analysis & Review
 
 ```python
@@ -216,7 +235,7 @@ read_coder_debug(error="TypeError: unsupported operand", code_context="...", lan
 # → {"root_cause": "str + int concatenation", "fix": "Cast to str(): str(value)"}
 ```
 
-> **Coder limits:** Analysis is **regex/heuristic-based** — it does NOT parse code into ASTs. Deep structural issues (type mismatches across files, race conditions) are invisible. Debug tool doesn't execute code — it pattern-matches error messages. Language conversion is literal syntax mapping, not idiomatic.
+> Coder analysis is regex and heuristic based. It does not parse code into ASTs. Deep structural issues like type mismatches across files or race conditions are invisible. The debug tool pattern-matches error messages, it doesn't execute code. Language conversion is literal syntax mapping, not idiomatic translation.
 
 ### 6. Web Browsing & Data Extraction
 
@@ -234,7 +253,7 @@ read_sensory_screenshot(url="https://example.com")
 # → {"screenshot_path": "...", "resolution": "1024x1024"}
 ```
 
-> **Sensory limits:** Playwright + Firefox is **optional** — browser tools error gracefully if not installed. Screenshots need a display server (X11/Wayland). Some sites block automation. DuckDuckGo search is rate-limited (~1 req/sec). OCR is English-only by default.
+> Playwright and Firefox are optional. Browser tools error gracefully if not installed. Screenshots need a display server (X11/Wayland). Some sites block automation. DuckDuckGo search is rate limited to about 1 request per second. OCR is English only by default.
 
 ### 7. Memory Consolidation & Cross-Pollination
 
@@ -256,16 +275,16 @@ read_consolidation_links(limit=5, min_similarity=0.3)
 # → {"links": [{"source": "error: module not found", "target": "fix: npm install", "similarity": 0.85}]}
 ```
 
-> **Memory limits:** BM25 is **keyword-only** — finds documents sharing exact words, not meaning. Searching "how to fix slow queries" won't return "indexing strategy for PostgreSQL" unless terms overlap. Vector search (semantic) fixes this but requires `sentence-transformers` and `numpy`. Consolidation uses **lexical Jaccard overlap** — "fix bug" and "patch bug" are NOT duplicates. Memory grows unbounded without manual consolidation.
+> BM25 is keyword only. It finds documents that share the same words, not documents that share the same meaning. Searching "how to fix slow queries" won't return "indexing strategy for PostgreSQL" unless the terms overlap. Vector search fixes this but requires `sentence-transformers` and `numpy`. Consolidation uses lexical Jaccard overlap, so "fix bug" and "patch bug" are not treated as duplicates. Memory grows unbounded without manual consolidation.
 
 ---
 
-## For Non-Technical Users
+## Docker Only Setup
 
-**You only need Docker. Nothing else. No Node.js, no Python, no npm, no pip.**
+You only need Docker. No Node.js, no Python, no npm, no pip.
 
 ### Windows
-Send your friend this link — it downloads the file, then they double-click it:
+Send your friend this link. The browser downloads it, then they double-click to run:
 ```
 https://github.com/ohmpatel3877/cortex-stratum/releases/download/v0.6.0-dev/ONE-CLICK.cmd
 ```
@@ -293,7 +312,7 @@ Layer 3: Engineering Simulation
   /sim-cfd       → Pipe flow, drag, Bernoulli, pump sizing (5 tools)
   /sim-fea       → Beam/truss FEA, modal analysis, heat conduction (5 tools)
   /sim-mechanics → Beam stress, buckling, fatigue, fasteners (7 tools)
-  /sim-math      → Wolfram-class math engine (19 tools)
+  /sim-math      → stdlib numerical math engine (19 tools)
 
 Layer 4: Agent Skills
   sensory   → Web browsing (Playwright), scraping, PDF/OCR, RSS
@@ -309,7 +328,7 @@ Layer 5: Orchestration
   pipeline/dag-coordinator.py → Topological sort, conditional branching, fan-in merge
   phase-verify-full.py  → Cross-phase integration tests
 ### What they get
-A running container with the 159-tool MCP server. Connect it to OpenCode by adding to `opencode.json`:
+A running container with the 209-tool MCP server. Connect it to OpenCode:
 ```json
 {
   "mcpServers": {
@@ -356,12 +375,12 @@ The installer will:
 4.  Link skills to `~/.config/opencode/skills/`
 5.  Run verification checks
 
-> **Note:** The installer may prompt for a `MEM0_API_KEY`. This is a legacy template step — you can skip it. All memory features work fully offline without any API key.
+> If the installer prompts for a MEM0_API_KEY, skip it. Memory works fully offline without one.
 
 ---
-## MCP Server — 159 Tools
+## MCP Server / 209 Tools
 
-The MCP server runs on the standard JSON-RPC protocol over stdio. OpenCode and Claude Code auto-discover it from `opencode.json`. Tools use a consistent naming convention: `read_*` (safe queries), `write_*` (state mutations), `mutate_*` (destructive operations — all accept `dry_run=true`).
+The MCP server runs on the standard JSON-RPC protocol over stdio. OpenCode and Claude Code auto-discover it from `opencode.json`. Tools use a consistent naming convention: `read_*` (safe queries), `write_*` (state mutations), `mutate_*` (destructive operations, all accept `dry_run=true`).
 
 ### Core Infrastructure (13 tools)
 
@@ -400,7 +419,7 @@ Supports: Python, JavaScript, TypeScript, Rust, Go, Java, C#, C++, Swift, Kotlin
 
 `read_sensory_fetch` (merged browse+scrape+article), `read_sensory_screenshot`, `mutate_sensory_interact`, `read_sensory_extract_pdf`, `read_sensory_extract_html`, `read_sensory_extract_image`, `read_sensory_api_request`, `read_sensory_fetch_rss`, `read_sensory_read_file`, `read_sensory_search`, `read_sensory_set_browser_type`
 
-Headless Firefox via Playwright. DuckDuckGo search — no API key required.
+Headless Firefox via Playwright. DuckDuckGo search, no API key required.
 
 ### Cognitive Pipeline (20 tools)
 
@@ -522,7 +541,7 @@ The router auto-loads skills based on keywords in your task description:
 
 ### One-Click Install (Windows)
 
-Double-click `ONE-CLICK.cmd` — it downloads Docker, builds the container, and prints your MCP config.
+Double-click `ONE-CLICK.cmd`. It downloads Docker, builds the container, and prints your MCP config.
 
 ### Manual Install
 
@@ -571,7 +590,7 @@ All CLI scripts live in `scripts/`:
 
 | Script | Language | Purpose |
 |--------|----------|---------|
-| `tools-mcp-server.py` | Python | 159-tool MCP server (main entry point) |
+| `tools-mcp-server.py` | Python | 209-tool MCP server (main entry point) |
 | `task-analyzer.py` | Python | Complexity scoring for task orchestration |
 | `task-orchestrator.py` | Python | DAG-based multi-agent pipeline execution |
 | `verifier_middleware.py` | Python | Behavioral correction signal engine |
@@ -633,7 +652,7 @@ Edit `package.json` → `mcpServers` or `opencode.json` to change server args:
 ---
 ## Tool Inventory
 
-159 tools across 30+ domains:
+209 tools across 30+ domains:
 
 | Domain | Tools | Category |
 |--------|-------|----------|
@@ -693,9 +712,9 @@ CortexStratum/
     sim-cfd-module.py          # CFD simulation (pipe, drag, Bernoulli)
     sim-fea-module.py          # FEA simulation (beam, truss, modal, heat)
     sim-mechanics-module.py    # Mechanics (stress, buckling, fatigue)
-    sim-math-module.py         # Wolfram-class math engine (19 tools)
+    sim-math-module.py         # Stdlib numerical math engine (19 tools)
   scripts/                     # Utility scripts & pipeline orchestration
-    tools-mcp-server.py        # MCP server entrypoint (159 tools)
+    tools-mcp-server.py        # MCP server entrypoint (209 tools)
     memory_search.py           # SQLite+FTS5 memory engine
     hooks.py                   # Lifecycle hooks
     pipeline/                  # Pipeline orchestration
@@ -716,10 +735,10 @@ CortexStratum/
 
 | Feature | CortexStratum | Basic MCP memory servers |
 |---------|---------------|--------------------------|
-| Total tools | **159** | 5-15 |
+| Total tools | **209** | 5-15 |
 | Permission model | 3-tier (read/write/mutate) | None |
 | Search | BM25 + vector + reranker | Naive substring |
-| Simulation engines | CFD, FEA, Mechanics, Wolfram-class Math (36 tools) | None |
+| Simulation engines | CFD, FEA, Mechanics, Stdlib Math (36 tools) | None |
 | Cognitive pipeline | Compact, mutate, focus, plumber | None |
 | Session lifecycle | /help → context → execute → /end | None |
 | Scope management | Prompt decomposition, prioritizer | None |
@@ -728,3 +747,22 @@ CortexStratum/
 | Checkpoint/undo | All mutations | None |
 | GPU required | Zero | Varies |
 | API keys | Zero | Often required |
+
+### Market Comparison / Gap Analysis
+
+CortexStratum has 209 tools across 30+ domains. No other single MCP server covers that range. But it's missing production features that Desktop Commander and others provide: security sandbox, hot-reload, web UI, enterprise RBAC. Those are roadmap items.
+
+| Feature | Market Leaders | CortexStratum |
+|---------|---------------|---------------|
+| Security sandbox | SecOps-MCP, Desktop Commander | ❌ Missing |
+| Runtime guardrails | Desktop Commander (covert instruction detection, secrets redaction) | ❌ Missing |
+| Docker deployment | Most support it | ✅ Supported |
+| Hot-reload | Some support (UTCP bridge) | ❌ Missing |
+| Web UI | mcpknife can generate | ❌ Missing |
+| Enterprise security | Desktop Commander (RBAC, SBOM, signing) | ❌ Missing |
+| **209 tools across 30+ domains** | Fragmented across dozens of single-purpose servers | ✅ Single server, unified |
+| **Cross-session memory** | Few have it | ✅ BM25 + FTS5 + optional vector |
+| **Engineering simulation** | None | ✅ 36 tools (CFD, FEA, Mechanics, Math) |
+| **Cognitive pipeline** | None | ✅ DAG orchestration, compaction, focus management |
+
+CortexStratum wins on breadth and integration. No other single MCP server covers memory, simulation, code analysis, art, audio, skill routing, and DAG orchestration in one package. It's missing production features like security sandbox, hot-reload, and web UI that Desktop Commander provides. Those are roadmap items.

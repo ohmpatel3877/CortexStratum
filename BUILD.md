@@ -84,7 +84,7 @@ All Python source code is in `scripts/`. The core structure:
 
 | File | Purpose | Dependencies |
 |------|---------|-------------|
-| `tools-mcp-server.py` | MCP server (122 tools, permission guard, CLI flags) | stdlib only |
+| `tools-mcp-server.py` | MCP server (176 tools, permission guard, CLI flags) | stdlib only |
 | `memory_search.py` | SQLite+FTS5 engine (add, search, synthesize, consolidate) | stdlib only (sqlite3) |
 | `trace.py` | Error/decision/goal/commitment registry | stdlib only |
 | `verifier_middleware.py` | Pre/post tool verification + renudge signals | guardrails.py |
@@ -131,7 +131,7 @@ Get-ChildItem scripts/*.py | ForEach-Object {
   2. Router structure (52 rules, schema, defaults)
   3. End-to-end matching (10 task descriptions)
   4. Dud skill detection (77 skill references cross-checked)
-  5. MCP tool inventory (122 tools, naming conventions, permissions)
+  5. MCP tool inventory (176 tools, naming conventions, permissions)
 - **Expected: 157/157 pass, 0 dud skills**
 
 #### Suite 5: Smoke Test (`test-smoke-server.py`)

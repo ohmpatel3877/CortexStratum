@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-sim-math-module.py — Math Engine (Wolfram Alpha-class)
+sim-math-module.py — Math Engine (stdlib numerical)
 
 Pure Python stdlib numerical mathematics:
   - Linear algebra: solve, determinant, eigenvalues, inverse, LU

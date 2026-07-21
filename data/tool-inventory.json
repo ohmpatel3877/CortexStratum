@@ -35,6 +35,7 @@
   },
   {
     "name": "read_xtrace_search",
+    "description": " READ — Search the error registry by keyword.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -56,6 +57,7 @@
   },
   {
     "name": "read_xtrace_status",
+    "description": " READ — Get error tracking summary statistics.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -120,6 +122,7 @@
   },
   {
     "name": "read_dtrace_search",
+    "description": " READ — Search the decision registry by keyword.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -141,6 +144,7 @@
   },
   {
     "name": "read_skill_router_match",
+    "description": " READ — Match a task to registered skills by intent.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -162,6 +166,7 @@
   },
   {
     "name": "read_tools_suggest",
+    "description": " READ — Suggest MCP tools for a given task.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -242,6 +247,7 @@
   },
   {
     "name": "read_goal_registry_status",
+    "description": " READ — View current goal stack state.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -256,6 +262,7 @@
   },
   {
     "name": "read_goal_registry_check_alignment",
+    "description": " READ — Check if an action aligns with the active goal.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -277,6 +284,7 @@
   },
   {
     "name": "read_commitment_checker_list",
+    "description": " READ — List all pending session commitments.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -318,6 +326,7 @@
   },
   {
     "name": "read_hooks_prefetch",
+    "description": " READ — Prefetch session context (memories, decisions, errors).",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -406,6 +415,7 @@
   },
   {
     "name": "read_hooks_session_status",
+    "description": " READ — Get current session lifecycle status.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -483,6 +493,7 @@
   },
   {
     "name": "read_audit_status",
+    "description": " READ — View mutation checkpoint history.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -670,6 +681,7 @@
   },
   {
     "name": "read_memory_status",
+    "description": "Memory engine status — entry count, storage backend, FTS index, vector availability, query cache.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -684,6 +696,7 @@
   },
   {
     "name": "read_verifier_status",
+    "description": " READ — Get verifier middleware status and drift state.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -766,6 +779,7 @@
   },
   {
     "name": "read_art_generate_svg",
+    "description": " READ — Generate an SVG from a text description.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -793,6 +807,7 @@
   },
   {
     "name": "read_art_generate_theme",
+    "description": " READ — Generate a WCAG color theme from a description.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -815,6 +830,7 @@
   },
   {
     "name": "read_art_extract_palette",
+    "description": " READ — Extract a palette from a hex color.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -836,6 +852,7 @@
   },
   {
     "name": "read_art_design_concept",
+    "description": " READ — Generate a design concept from requirements.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -857,6 +874,7 @@
   },
   {
     "name": "read_lit_analyze_text",
+    "description": " READ — Analyze text for readability and structure.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -878,6 +896,7 @@
   },
   {
     "name": "read_lit_extract_concepts",
+    "description": " READ — Extract key concepts from a text passage.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -899,6 +918,7 @@
   },
   {
     "name": "read_lit_generate_study_guide",
+    "description": " READ — Generate a study guide from content.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -971,6 +991,7 @@
   },
   {
     "name": "read_sensory_screenshot",
+    "description": " READ — Capture a screenshot of a URL.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1050,6 +1071,7 @@
   },
   {
     "name": "read_sensory_extract_pdf",
+    "description": " READ — Extract text content from a PDF file.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1075,6 +1097,7 @@
   },
   {
     "name": "read_sensory_extract_html",
+    "description": " READ — Extract clean text from raw HTML.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1105,6 +1128,7 @@
   },
   {
     "name": "read_sensory_extract_image",
+    "description": " READ — Extract text from an image via OCR.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1126,6 +1150,7 @@
   },
   {
     "name": "read_sensory_scrape",
+    "description": " READ — Scrape a URL for structured data.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1161,6 +1186,7 @@
   },
   {
     "name": "read_sensory_extract_article",
+    "description": " READ — Extract article content from a URL.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1182,6 +1208,7 @@
   },
   {
     "name": "read_sensory_api_request",
+    "description": " READ — Make an HTTP request to any API.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1227,6 +1254,7 @@
   },
   {
     "name": "read_sensory_fetch_rss",
+    "description": " READ — Fetch and parse an RSS/Atom feed.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1252,6 +1280,7 @@
   },
   {
     "name": "read_sensory_read_file",
+    "description": " READ — Read a local file within allowed roots.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1277,6 +1306,7 @@
   },
   {
     "name": "read_sensory_search",
+    "description": " READ — Search the web via DuckDuckGo.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1302,6 +1332,7 @@
   },
   {
     "name": "read_sensory_set_browser_type",
+    "description": " READ — Set the Playwright browser engine.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1327,6 +1358,7 @@
   },
   {
     "name": "read_audio_analyze_file",
+    "description": " READ — Analyze a WAV file properties and RMS.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1346,6 +1378,7 @@
   },
   {
     "name": "read_audio_waveform",
+    "description": " READ — Generate ASCII waveform from a WAV file.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1375,6 +1408,7 @@
   },
   {
     "name": "read_audio_frequency_analysis",
+    "description": " READ — FFT frequency analysis of a WAV file.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1454,6 +1488,7 @@
   },
   {
     "name": "read_audio_speech_analysis",
+    "description": " READ — Analyze speech metrics from a transcript.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1479,6 +1514,7 @@
   },
   {
     "name": "read_audio_convert_guide",
+    "description": " READ — Get audio format conversion guidance.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1504,6 +1540,7 @@
   },
   {
     "name": "read_coder_analyze_code",
+    "description": " READ — Analyze code for complexity and style issues.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1529,6 +1566,7 @@
   },
   {
     "name": "read_coder_generate_framework",
+    "description": " READ — Generate project scaffold/boilerplate.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1560,6 +1598,7 @@
   },
   {
     "name": "read_coder_debug",
+    "description": " READ — Debug an error with code context analysis.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1589,6 +1628,7 @@
   },
   {
     "name": "read_coder_review",
+    "description": " READ — Review code quality and security.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1618,6 +1658,7 @@
   },
   {
     "name": "read_coder_explain",
+    "description": " READ — Explain code at a specified depth.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1647,6 +1688,7 @@
   },
   {
     "name": "read_coder_convert",
+    "description": " READ — Convert code between programming languages.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1676,6 +1718,7 @@
   },
   {
     "name": "read_coder_architecture",
+    "description": " READ — Generate architecture recommendations.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1707,6 +1750,7 @@
   },
   {
     "name": "read_devops_container_debug",
+    "description": " READ — Debug a failing container from logs.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1732,6 +1776,7 @@
   },
   {
     "name": "read_devops_permissions_analyze",
+    "description": " READ — Analyze container permission issues.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1760,6 +1805,7 @@
   },
   {
     "name": "read_devops_compose_generator",
+    "description": " READ — Generate a docker-compose file.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1788,6 +1834,7 @@
   },
   {
     "name": "read_devops_mergerfs_setup",
+    "description": " READ — Generate mergerfs pool configuration.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1817,6 +1864,7 @@
   },
   {
     "name": "read_devops_dockerfile_analyze",
+    "description": " READ — Analyze a Dockerfile for best practices.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1838,6 +1886,7 @@
   },
   {
     "name": "read_devops_network_troubleshoot",
+    "description": " READ — Troubleshoot container network issues.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1859,6 +1908,7 @@
   },
   {
     "name": "read_gamedev_design_analyze",
+    "description": " READ — Analyze a game concept for feasibility.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1884,6 +1934,7 @@
   },
   {
     "name": "read_gamedev_scaffold_project",
+    "description": " READ — Scaffold a game project directory.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1913,6 +1964,7 @@
   },
   {
     "name": "read_gamedev_mechanics_guide",
+    "description": " READ — Generate game mechanics implementation guide.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1934,6 +1986,7 @@
   },
   {
     "name": "read_gamedev_optimization",
+    "description": " READ — Suggest game performance optimizations.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1959,6 +2012,7 @@
   },
   {
     "name": "read_gamedev_compare_engines",
+    "description": " READ — Compare game engines for a project.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -1988,6 +2042,7 @@
   },
   {
     "name": "read_gamedev_level_design",
+    "description": " READ — Generate level design principles.",
     "permission": "read",
     "annotations": {
       "destructiveHint": false,
@@ -2009,353 +2064,6 @@
         "genre",
         "level_type"
       ]
-    }
-  },
-  {
-    "name": "read_sim_mech_beam_analysis",
-    "description": "MERGED - Beam analysis: calculate=[stress,shear,deflection,all]. Replaces 3 tools.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "calculate": {
-          "type": "string",
-          "default": "all",
-          "enum": [
-            "stress",
-            "shear",
-            "deflection",
-            "all"
-          ]
-        },
-        "moment": {
-          "type": "number"
-        },
-        "distance_neutral": {
-          "type": "number"
-        },
-        "I": {
-          "type": "number"
-        },
-        "shear_force": {
-          "type": "number"
-        },
-        "Q": {
-          "type": "number"
-        },
-        "width": {
-          "type": "number"
-        },
-        "load": {
-          "type": "number"
-        },
-        "length": {
-          "type": "number"
-        },
-        "E": {
-          "type": "number"
-        }
-      },
-      "required": []
-    }
-  },
-  {
-    "name": "read_sim_mech_buckle",
-    "description": "MERGED — Column buckling: Euler (E,I) or Johnson (sigma_y,A,r). Auto-selects based on params.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "E": {
-          "type": "number"
-        },
-        "I": {
-          "type": "number",
-          "description": "Moment of inertia (m^4) — for Euler"
-        },
-        "K": {
-          "type": "number",
-          "default": 1.0
-        },
-        "L": {
-          "type": "number"
-        },
-        "sigma_y": {
-          "type": "number",
-          "description": "Yield strength (Pa) — for Johnson"
-        },
-        "A": {
-          "type": "number",
-          "description": "Area (m^2) — for Johnson"
-        },
-        "r": {
-          "type": "number",
-          "description": "Radius of gyration (m) — for Johnson"
-        }
-      },
-      "required": [
-        "E",
-        "L"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_mech_buckle_johnson",
-    "description": "Johnson column buckling for intermediate columns.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "E": {
-          "type": "number"
-        },
-        "sigma_y": {
-          "type": "number",
-          "description": "Yield strength (Pa)"
-        },
-        "A": {
-          "type": "number",
-          "description": "Cross-sectional area (m^2)"
-        },
-        "K": {
-          "type": "number",
-          "default": 1.0
-        },
-        "L": {
-          "type": "number"
-        },
-        "r": {
-          "type": "number",
-          "description": "Radius of gyration (m)"
-        }
-      },
-      "required": [
-        "E",
-        "sigma_y",
-        "A",
-        "L",
-        "r"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_mech_fatigue",
-    "description": "MERGED — S-N fatigue: solve for 'stress' or 'cycles'. Replaces sn + cycles.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "Sf_prime": {
-          "type": "number",
-          "description": "Fatigue strength coefficient (Pa)"
-        },
-        "b": {
-          "type": "number",
-          "default": -0.1
-        },
-        "N": {
-          "type": "integer",
-          "default": 1000
-        },
-        "stress_amplitude": {
-          "type": "number"
-        },
-        "solve_for": {
-          "type": "string",
-          "default": "stress",
-          "enum": [
-            "stress",
-            "cycles"
-          ]
-        }
-      },
-      "required": [
-        "Sf_prime"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_mech_fatigue_goodman",
-    "description": "Goodman mean stress correction. Checks (S_alt/S_e)+(S_mean/S_ut) <= 1.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "S_alt": {
-          "type": "number"
-        },
-        "S_mean": {
-          "type": "number"
-        },
-        "S_ut": {
-          "type": "number",
-          "description": "Ultimate tensile strength"
-        },
-        "S_e": {
-          "type": "number",
-          "description": "Endurance limit"
-        }
-      },
-      "required": [
-        "S_alt",
-        "S_mean",
-        "S_ut",
-        "S_e"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_mech_fatigue_miner",
-    "description": "Miner's cumulative damage: D = Σ(n_i/N_i).",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "blocks": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "cycles": {
-                "type": "integer"
-              },
-              "cycles_to_failure": {
-                "type": "integer"
-              }
-            }
-          },
-          "description": "Load blocks"
-        }
-      },
-      "required": [
-        "blocks"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_mech_joint",
-    "description": "MERGED - Joint analysis: type=[fastener,bolt,bonded]. Replaces 3 tools.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "fastener",
-            "bolt",
-            "bonded"
-          ]
-        },
-        "force": {
-          "type": "number"
-        },
-        "area": {
-          "type": "number"
-        },
-        "num_fasteners": {
-          "type": "integer",
-          "default": 1
-        },
-        "K": {
-          "type": "number",
-          "default": 0.2
-        },
-        "D": {
-          "type": "number"
-        },
-        "F": {
-          "type": "number"
-        },
-        "width": {
-          "type": "number"
-        },
-        "overlap_length": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "type"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_mech_moi",
-    "description": "MERGED — Moment of inertia: shape=[rect|circle]. Replaces moi_rect + moi_circle.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "shape": {
-          "type": "string",
-          "default": "rect",
-          "enum": [
-            "rect",
-            "circle"
-          ]
-        },
-        "width": {
-          "type": "number",
-          "description": "For rect"
-        },
-        "height": {
-          "type": "number",
-          "description": "For rect"
-        },
-        "diameter": {
-          "type": "number",
-          "description": "For circle"
-        }
-      },
-      "required": []
     }
   },
   {
@@ -2475,7 +2183,7 @@
   },
   {
     "name": "write_compact_execute",
-    "description": " WRITE — Execute context compaction cycle. Use dry_run=true to preview.",
+    "description": " WRITE — Execute context compaction cycle. Use dry_run=true to preview. NOTE: For full pre-refresh pipeline (DMN→VQ→MLM→compact→persist), use write_cortex_sleep instead — this tool only handles content compaction.",
     "permission": "write",
     "annotations": {
       "destructiveHint": false,
@@ -2625,6 +2333,44 @@
         "limit": {
           "type": "integer",
           "default": 5
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_plumber_verify_build",
+    "description": "Scan installer scripts and docs for stale references (tool counts, paths) against current project state.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_plumber_stabilize_build",
+    "description": " WRITE — Auto-fix stale tool count references in installers and docs. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
         }
       },
       "required": []
@@ -3003,453 +2749,6 @@
       },
       "required": [
         "session_id"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_fea_beam",
-    "description": "1D beam element stiffness matrix (4x4). Returns K, LaTeX.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "E": {
-          "type": "number",
-          "description": "Young's modulus (Pa)"
-        },
-        "I": {
-          "type": "number",
-          "description": "Moment of inertia (m^4)"
-        },
-        "L": {
-          "type": "number",
-          "description": "Element length (m)"
-        }
-      },
-      "required": [
-        "E",
-        "I",
-        "L"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_fea_truss",
-    "description": "1D truss element axial stiffness k=EA/L. Returns stiffness and stress.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "E": {
-          "type": "number"
-        },
-        "A": {
-          "type": "number",
-          "description": "Cross-section (m^2)"
-        },
-        "L": {
-          "type": "number"
-        },
-        "force": {
-          "type": "number",
-          "description": "Axial force (N)"
-        }
-      },
-      "required": [
-        "E",
-        "A",
-        "L",
-        "force"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_fea_modal",
-    "description": "Cantilever beam 1st natural frequency: f1 = (1.875²/2πL²)·√(EI/ρA).",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "E": {
-          "type": "number"
-        },
-        "I": {
-          "type": "number"
-        },
-        "rho": {
-          "type": "number",
-          "description": "Density (kg/m³)"
-        },
-        "A": {
-          "type": "number"
-        },
-        "L": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "E",
-        "I",
-        "rho",
-        "A",
-        "L"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_fea_heat",
-    "description": "1D steady-state heat conduction: q = -k·A·(T2-T1)/L.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "k": {
-          "type": "number",
-          "description": "Thermal conductivity (W/mK)"
-        },
-        "A": {
-          "type": "number",
-          "description": "Area (m²)"
-        },
-        "T1": {
-          "type": "number",
-          "description": "Temperature 1 (°C)"
-        },
-        "T2": {
-          "type": "number",
-          "description": "Temperature 2 (°C)"
-        },
-        "L": {
-          "type": "number",
-          "description": "Length (m)"
-        }
-      },
-      "required": [
-        "k",
-        "A",
-        "T1",
-        "T2",
-        "L"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_cfd_pipe",
-    "description": "Pipe flow: Darcy-Weisbach ΔP, Reynolds number, friction factor.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "rho": {
-          "type": "number",
-          "description": "Density (kg/m³)"
-        },
-        "v": {
-          "type": "number",
-          "description": "Velocity (m/s)"
-        },
-        "D": {
-          "type": "number",
-          "description": "Pipe diameter (m)"
-        },
-        "mu": {
-          "type": "number",
-          "description": "Dynamic viscosity (Pa·s)"
-        },
-        "L": {
-          "type": "number",
-          "description": "Pipe length (m)"
-        }
-      },
-      "required": [
-        "rho",
-        "v",
-        "D",
-        "mu",
-        "L"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_cfd_boundary",
-    "description": "Boundary layer thickness (laminar/turbulent) on flat plate.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "rho": {
-          "type": "number"
-        },
-        "v": {
-          "type": "number"
-        },
-        "x": {
-          "type": "number",
-          "description": "Position along plate (m)"
-        },
-        "mu": {
-          "type": "number"
-        },
-        "regime": {
-          "type": "string",
-          "default": "auto",
-          "enum": [
-            "auto",
-            "laminar",
-            "turbulent"
-          ]
-        }
-      },
-      "required": [
-        "rho",
-        "v",
-        "x",
-        "mu"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_cfd_drag",
-    "description": "Drag force: Fd = 0.5·ρ·v²·Cd·A.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "rho": {
-          "type": "number"
-        },
-        "v": {
-          "type": "number"
-        },
-        "Cd": {
-          "type": "number",
-          "description": "Drag coefficient"
-        },
-        "A": {
-          "type": "number",
-          "description": "Reference area (m²)"
-        }
-      },
-      "required": [
-        "rho",
-        "v",
-        "Cd",
-        "A"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_cfd_bernoulli",
-    "description": "Bernoulli: solve for any one unknown from P, v, h.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "P1": {
-          "type": "number",
-          "description": "Pressure 1 (Pa)"
-        },
-        "v1": {
-          "type": "number",
-          "description": "Velocity 1 (m/s)"
-        },
-        "h1": {
-          "type": "number",
-          "description": "Height 1 (m)"
-        },
-        "P2": {
-          "type": "number"
-        },
-        "v2": {
-          "type": "number"
-        },
-        "h2": {
-          "type": "number"
-        },
-        "rho": {
-          "type": "number",
-          "description": "Fluid density (kg/m³)"
-        },
-        "solve_for": {
-          "type": "string",
-          "enum": [
-            "P1",
-            "v1",
-            "h1",
-            "P2",
-            "v2",
-            "h2"
-          ]
-        }
-      },
-      "required": [
-        "rho",
-        "solve_for"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_matrix_solve",
-    "description": "Solve Ax = b via Gaussian elimination. Returns solution + LaTeX derivation.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "A": {
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          }
-        },
-        "b": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
-        }
-      },
-      "required": [
-        "A",
-        "b"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_ode",
-    "description": "Solve ODE system (RK4 or Euler). Returns trajectory + LaTeX system.",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "derivatives": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "y0": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
-        },
-        "t_start": {
-          "type": "number",
-          "default": 0
-        },
-        "t_end": {
-          "type": "number",
-          "default": 10
-        },
-        "steps": {
-          "type": "integer",
-          "default": 100
-        },
-        "method": {
-          "type": "string",
-          "default": "rk4",
-          "enum": [
-            "rk4",
-            "euler"
-          ]
-        }
-      },
-      "required": [
-        "derivatives",
-        "y0"
-      ]
-    }
-  },
-  {
-    "name": "read_sim_latex",
-    "description": "Generate LaTeX from common expressions (quadratic, buckling, bending, integral, derivative).",
-    "permission": "read",
-    "annotations": {
-      "destructiveHint": false,
-      "readOnlyHint": true,
-      "idempotentHint": true,
-      "openWorldHint": false
-    },
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "expression": {
-          "type": "string"
-        },
-        "notation": {
-          "type": "string",
-          "default": "aligned",
-          "enum": [
-            "aligned",
-            "derivation"
-          ]
-        }
-      },
-      "required": [
-        "expression"
       ]
     }
   },
@@ -3900,6 +3199,2415 @@
         }
       },
       "required": []
+    }
+  },
+  {
+    "name": "read_sim_cfd_pipe",
+    "description": " READ — Pipe flow pressure drop via Darcy-Weisbach. Returns ΔP, Re, friction factor, regime.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "rho": {
+          "type": "number"
+        },
+        "mu": {
+          "type": "number"
+        },
+        "v": {
+          "type": "number"
+        },
+        "D": {
+          "type": "number"
+        },
+        "L": {
+          "type": "number"
+        },
+        "roughness": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "rho",
+        "mu",
+        "v",
+        "D",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_boundary",
+    "description": " READ — Boundary layer thickness on flat plate (laminar/turbulent).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number"
+        },
+        "x": {
+          "type": "number"
+        },
+        "rho": {
+          "type": "number"
+        },
+        "mu": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "v",
+        "x",
+        "rho",
+        "mu"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_drag",
+    "description": " READ — Drag force on immersed body: F_d = 0.5·ρ·v²·Cd·A.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "rho": {
+          "type": "number"
+        },
+        "v": {
+          "type": "number"
+        },
+        "Cd": {
+          "type": "number"
+        },
+        "A": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "rho",
+        "v",
+        "Cd",
+        "A"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_bernoulli",
+    "description": " READ — Bernoulli's equation solver. Supply 5 of 6 variables, leave 1 as None.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "P1": {
+          "type": "number"
+        },
+        "v1": {
+          "type": "number"
+        },
+        "h1": {
+          "type": "number"
+        },
+        "P2": {
+          "type": "number"
+        },
+        "v2": {
+          "type": "number"
+        },
+        "h2": {
+          "type": "number"
+        },
+        "rho": {
+          "type": "number",
+          "default": 1000
+        },
+        "g": {
+          "type": "number",
+          "default": 9.81
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_sim_cfd_pump",
+    "description": " READ — Pump sizing: flow rate from power, efficiency, head.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "power_W": {
+          "type": "number"
+        },
+        "eta": {
+          "type": "number",
+          "default": 0.7
+        },
+        "rho": {
+          "type": "number",
+          "default": 1000
+        },
+        "g": {
+          "type": "number",
+          "default": 9.81
+        },
+        "H": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "power_W",
+        "H"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_beam",
+    "description": " READ — 1D Euler-Bernoulli beam element stiffness matrix (4x4).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "L": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "E",
+        "I",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_truss",
+    "description": " READ — Truss element axial stiffness k = EA/L with optional stress.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "A": {
+          "type": "number"
+        },
+        "L": {
+          "type": "number"
+        },
+        "F": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "E",
+        "A",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_modal",
+    "description": " READ — First natural frequency of cantilever beam.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "rho": {
+          "type": "number"
+        },
+        "A": {
+          "type": "number"
+        },
+        "L": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "E",
+        "I",
+        "rho",
+        "A",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_heat",
+    "description": " READ — 1D steady-state heat conduction via Fourier's law.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "k": {
+          "type": "number"
+        },
+        "A": {
+          "type": "number"
+        },
+        "T1": {
+          "type": "number"
+        },
+        "T2": {
+          "type": "number"
+        },
+        "L": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "k",
+        "A",
+        "T1",
+        "T2",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_stress_recovery",
+    "description": " READ — Stress recovery from strain: σ = E·ε.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "strain": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "E",
+        "strain"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_stress",
+    "description": " READ — Beam bending stress: σ = M·y / I.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "moment": {
+          "type": "number"
+        },
+        "distance_neutral": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "moment",
+        "distance_neutral",
+        "I"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_shear",
+    "description": " READ — Beam shear stress: τ = V·Q / (I·b).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "shear_force": {
+          "type": "number"
+        },
+        "Q": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "shear_force",
+        "Q",
+        "I",
+        "width"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_deflection",
+    "description": " READ — Beam deflection (center or off-center point load).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "load": {
+          "type": "number"
+        },
+        "length": {
+          "type": "number"
+        },
+        "E": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "position": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "load",
+        "length",
+        "E",
+        "I"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_moi",
+    "description": " READ — Moment of inertia for rectangular or circular sections.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "shape": {
+          "type": "string",
+          "enum": [
+            "rect",
+            "circle"
+          ]
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "diameter": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "shape"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_buckle",
+    "description": " READ — Column buckling (Euler or Johnson, auto-selected).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "K": {
+          "type": "number",
+          "default": 1.0
+        },
+        "L": {
+          "type": "number"
+        },
+        "sigma_y": {
+          "type": "number"
+        },
+        "A": {
+          "type": "number"
+        },
+        "r": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "E",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_fatigue",
+    "description": " READ — Fatigue analysis (S-N curve, Goodman correction, Miner's rule).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "Sf_prime": {
+          "type": "number"
+        },
+        "b": {
+          "type": "number",
+          "default": -0.1
+        },
+        "N": {
+          "type": "number",
+          "default": 1000
+        },
+        "stress_amplitude": {
+          "type": "number"
+        },
+        "solve_for": {
+          "type": "string",
+          "enum": [
+            "stress",
+            "cycles"
+          ]
+        }
+      },
+      "required": [
+        "Sf_prime"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_fastener",
+    "description": " READ — Fastener shear stress and bolt torque-preload.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "force": {
+          "type": "number"
+        },
+        "area": {
+          "type": "number"
+        },
+        "num_fasteners": {
+          "type": "integer",
+          "default": 1
+        },
+        "K": {
+          "type": "number"
+        },
+        "D": {
+          "type": "number"
+        },
+        "F": {
+          "type": "number"
+        },
+        "solve_for": {
+          "type": "string",
+          "enum": [
+            "shear",
+            "torque"
+          ]
+        }
+      },
+      "required": [
+        "solve_for"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_matrix_solve",
+    "description": " READ — Solve Ax = b with LaTeX derivation.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "A": {
+          "type": "array"
+        },
+        "b": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "A",
+        "b"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_determinant",
+    "description": " READ — Matrix determinant via LU decomposition.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "A": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "A"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_inverse",
+    "description": " READ — Matrix inverse via Gaussian elimination.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "A": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "A"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_eigenvalue",
+    "description": " READ — Dominant eigenvalue via power iteration.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "A": {
+          "type": "array"
+        },
+        "iterations": {
+          "type": "integer",
+          "default": 100
+        }
+      },
+      "required": [
+        "A"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_derivative",
+    "description": " READ — Numerical derivative (central difference).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expr": {
+          "type": "string"
+        },
+        "x": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "expr",
+        "x"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_integrate",
+    "description": " READ — Numerical integration (Simpson/trapezoidal).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expr": {
+          "type": "string"
+        },
+        "a": {
+          "type": "number"
+        },
+        "b": {
+          "type": "number"
+        },
+        "n": {
+          "type": "integer",
+          "default": 100
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "simpson",
+            "trapezoidal"
+          ],
+          "default": "simpson"
+        }
+      },
+      "required": [
+        "expr",
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_taylor",
+    "description": " READ — Taylor series expansion (numerical derivatives).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expr": {
+          "type": "string"
+        },
+        "x0": {
+          "type": "number",
+          "default": 0
+        },
+        "order": {
+          "type": "integer",
+          "default": 4
+        },
+        "at_x": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "required": [
+        "expr"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_root",
+    "description": " READ — Root finding (Newton/bisection/secant).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expr": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "newton",
+            "bisection",
+            "secant"
+          ],
+          "default": "newton"
+        },
+        "guess": {
+          "type": "number",
+          "default": 0
+        },
+        "a": {
+          "type": "number",
+          "default": 0
+        },
+        "b": {
+          "type": "number",
+          "default": 1
+        }
+      },
+      "required": [
+        "expr"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_stats",
+    "description": " READ — Descriptive statistics (mean, median, std, variance).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "data"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_regression",
+    "description": " READ — Linear regression: y = mx + b with R².",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "x_data": {
+          "type": "array"
+        },
+        "y_data": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "x_data",
+        "y_data"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_fft",
+    "description": " READ — Radix-2 Cooley-Tukey FFT (pads to power of 2).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "samples": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "samples"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_complex",
+    "description": " READ — Complex number arithmetic (add/sub/mul/div/pow).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "z1_real": {
+          "type": "number"
+        },
+        "z1_imag": {
+          "type": "number"
+        },
+        "z2_real": {
+          "type": "number"
+        },
+        "z2_imag": {
+          "type": "number"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "power"
+          ],
+          "default": "add"
+        }
+      },
+      "required": [
+        "z1_real",
+        "z1_imag"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_factor",
+    "description": " READ — Prime factorization of an integer.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "n"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_gcdiv",
+    "description": " READ — GCD and LCM of two integers.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "integer"
+        },
+        "b": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_polynomial",
+    "description": " READ — Evaluate polynomial via Horner's method.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "coeffs": {
+          "type": "array"
+        },
+        "x": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "coeffs",
+        "x"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_convert",
+    "description": " READ — Unit conversion (SI/imperial, temperature, pressure).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "from",
+        "to"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_ode",
+    "description": " READ — ODE solver (RK4/Euler) with LaTeX output.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "derivatives": {
+          "type": "array"
+        },
+        "y0": {
+          "type": "array"
+        },
+        "t_start": {
+          "type": "number",
+          "default": 0
+        },
+        "t_end": {
+          "type": "number",
+          "default": 10
+        },
+        "steps": {
+          "type": "integer",
+          "default": 100
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "rk4",
+            "euler"
+          ],
+          "default": "rk4"
+        }
+      },
+      "required": [
+        "derivatives",
+        "y0"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_latex",
+    "description": " READ — Generate LaTeX from a mathematical expression.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "type": "string"
+        },
+        "notation": {
+          "type": "string",
+          "enum": [
+            "aligned",
+            "derivation"
+          ],
+          "default": "aligned"
+        }
+      },
+      "required": [
+        "expression"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_math_plot",
+    "description": " READ — ASCII line plot from x/y data arrays.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "x_data": {
+          "type": "array"
+        },
+        "y_data": {
+          "type": "array"
+        },
+        "width": {
+          "type": "integer",
+          "default": 50
+        },
+        "height": {
+          "type": "integer",
+          "default": 15
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "required": [
+        "x_data",
+        "y_data"
+      ]
+    }
+  },
+  {
+    "name": "read_dag_status",
+    "description": "List available DAG definitions or show info for a specific DAG.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dag_path": {
+          "type": "string",
+          "description": "Optional path to a specific DAG file for detailed info"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_dag_execute",
+    "description": " WRITE — Execute a DAG pipeline. Use dry_run=true to preview the execution plan.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dag_path": {
+          "type": "string",
+          "description": "Path to DAG definition JSON (under data/dag-definitions/)"
+        },
+        "task_input": {
+          "type": "string",
+          "description": "Optional JSON string of root task input"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "dag_path"
+      ]
+    }
+  },
+  {
+    "name": "write_dag_resume",
+    "description": " WRITE — Resume a previously failed DAG pipeline, skipping completed nodes.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dag_path": {
+          "type": "string",
+          "description": "Path to DAG definition JSON"
+        },
+        "task_input": {
+          "type": "string",
+          "description": "Optional JSON string of root task input"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "dag_path"
+      ]
+    }
+  },
+  {
+    "name": "read_workstream_list",
+    "description": "List all resumable workstreams from previous sessions.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "read_workstream_status",
+    "description": "Show details for a specific workstream.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "workstream_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "workstream_id"
+      ]
+    }
+  },
+  {
+    "name": "read_skill_list",
+    "description": "List all active skills from the skills directory.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "read_agent_list",
+    "description": "List all available agent personas from .opencode/agents.md.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "read_limbic_status",
+    "description": " READ — Show emotional tagging stats: tagged keys, total tags, valence distribution (positive/negative/neutral), most salient key.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_limbic_tag",
+    "description": " WRITE — Tag a memory with emotional valence and intensity. Valence -1.0 to +1.0 (negative→positive), intensity 0.0 to 1.0. Accepts dry_run=true.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Memory key / path / identifier to tag"
+        },
+        "valence": {
+          "type": "number",
+          "description": "-1.0 (negative) to +1.0 (positive). 0 = neutral.",
+          "default": 0.5
+        },
+        "intensity": {
+          "type": "number",
+          "description": "0.0–1.0 how strongly felt.",
+          "default": 0.5
+        },
+        "context": {
+          "type": "string",
+          "description": "Optional context on why tagged"
+        },
+        "source": {
+          "type": "string",
+          "description": "Who created this tag",
+          "default": "user"
+        },
+        "dry_run": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  {
+    "name": "read_limbic_retrieve",
+    "description": " READ — Retrieve tagged memories by emotional filter. Returns entries sorted by salience (emotional charge × recency). Filter by valence range, minimum intensity, or source.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "min_valence": {
+          "type": "number",
+          "description": "Minimum valence filter",
+          "default": -1.0
+        },
+        "max_valence": {
+          "type": "number",
+          "description": "Maximum valence filter",
+          "default": 1.0
+        },
+        "min_intensity": {
+          "type": "number",
+          "description": "Minimum intensity filter",
+          "default": 0.0
+        },
+        "source": {
+          "type": "string",
+          "description": "Only tags from this source"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Max results",
+          "default": 20
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_limbic_reinforce",
+    "description": " WRITE — Reinforce or weaken a memory's emotional tag based on outcome (success/failure). Creates a feedback loop: success → positive valence shift + intensity boost, failure → negative shift + decay.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Tagged memory key to reinforce"
+        },
+        "outcome": {
+          "type": "string",
+          "description": "\"success\" or \"failure\"",
+          "default": "success"
+        },
+        "delta": {
+          "type": "number",
+          "description": "Shift magnitude (0.0–1.0)",
+          "default": 0.15
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this reinforcement happened"
+        },
+        "source": {
+          "type": "string",
+          "description": "Who triggered it",
+          "default": "system"
+        },
+        "dry_run": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  {
+    "name": "read_limbic_reinforcements",
+    "description": " READ — View reinforcement event history. Optionally filter by key. Shows outcome, delta, reason, and timestamp for each reinforcement event.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Filter by memory key (omit for all)"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Max events to return",
+          "default": 20
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_limbic_forget",
+    "description": " MUTATE — Remove emotional tags. Can target a specific key, all tags older than N hours, or tags from a specific source. Accepts dry_run=true.",
+    "permission": "mutate",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Remove tags only for this key (omitting removes all)"
+        },
+        "older_than_hours": {
+          "type": "number",
+          "description": "Only remove tags older than this many hours"
+        },
+        "source": {
+          "type": "string",
+          "description": "Only remove tags from this source"
+        },
+        "dry_run": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_compute_execute",
+    "description": " WRITE — Execute Python code server-side and return compact results. Instead of shipping raw data (expensive tokens), send a small script to compute summaries, stats, transformations. Sandboxed: safe modules only, 10s timeout, 10KB output limit. Supports dry_run=true to validate syntax.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Python code to execute. Use `result = ...` to capture a return value."
+        },
+        "context": {
+          "description": "Optional dict or JSON string of variables to inject into execution scope (kept small — this is for data, not large payloads).",
+          "default": {}
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Max execution seconds",
+          "default": 10
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Validate syntax without executing",
+          "default": false
+        }
+      },
+      "required": [
+        "code"
+      ]
+    }
+  },
+  {
+    "name": "read_dmn_status",
+    "description": " READ — View DMN state: cycle count, auto-mode, last run, insight count.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_dmn_daydream",
+    "description": " WRITE — Trigger one DMN consolidation cycle. Samples MLM, scores insights, promotes frequent patterns, reinforces in limbic.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_dmn_autonomode",
+    "description": " MUTATE — Enable/disable automatic periodic DMN daydreaming. Background daemon runs at configurable interval (default 60s).",
+    "permission": "mutate",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true
+        },
+        "interval": {
+          "type": "number",
+          "description": "Seconds between cycles"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_dmn_insights",
+    "description": " READ — View recent insights generated by DMN cycles.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_gate_status",
+    "description": " READ — Show current gate state: strategy, conflict history, recent calls.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_gate_strategy",
+    "description": " WRITE — Change conflict resolution strategy. Options: priority, conservative, permissive.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "priority",
+            "conservative",
+            "permissive"
+          ],
+          "description": "Resolution strategy"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Preview without changing"
+        }
+      },
+      "required": [
+        "strategy"
+      ]
+    }
+  },
+  {
+    "name": "mutate_gate_reset",
+    "description": " MUTATE — Clear gate history and conflict log. Resets all counters.",
+    "permission": "mutate",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dry_run": {
+          "type": "boolean",
+          "description": "Preview without resetting"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_focus_difficulty_estimate",
+    "description": " READ — Estimate task difficulty (0.0–1.0) using keyword heuristics, input size, domain, and tool type. Returns breakdown for explainability.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_description": {
+          "type": "string",
+          "description": "Task description or prompt text"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain: general, simulation, cad, electrical, gamedev, devops, research, etc."
+        },
+        "tool_name": {
+          "type": "string",
+          "description": "Name of the tool being called"
+        },
+        "input_size": {
+          "type": "integer",
+          "description": "Size of the input/payload in characters"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_focus_compute_budget",
+    "description": " READ — Map a difficulty score (0.0–1.0) to a compute budget tier (0-5). Returns label, description, and budget level for use in resource allocation.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "difficulty": {
+          "type": "number",
+          "description": "Difficulty score (0.0–1.0)"
+        },
+        "max_budget": {
+          "type": "integer",
+          "description": "Maximum budget tier to allow (0-5)",
+          "default": 5
+        }
+      },
+      "required": [
+        "difficulty"
+      ]
+    }
+  },
+  {
+    "name": "read_focus_allocate_depth",
+    "description": " READ — Full pipeline: estimate difficulty → map to budget → distribute across reasoning phases (plan/research/implement/verify). Returns recommended strategy.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_description": {
+          "type": "string",
+          "description": "Task description or prompt text"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain for difficulty estimation"
+        },
+        "tool_name": {
+          "type": "string",
+          "description": "Tool name"
+        },
+        "input_size": {
+          "type": "integer",
+          "description": "Input size in characters"
+        },
+        "max_budget": {
+          "type": "integer",
+          "description": "Maximum budget tier (0-5)",
+          "default": 5
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_wm_status",
+    "description": " READ — Show working memory stats: item count, capacity, oldest item, most active key, expired items purged.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "read_wm_recall",
+    "description": " READ — Fetch an item from working memory by key. Returns null (not error) if key missing or expired. Set detailed=true for full metadata.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Item key to retrieve"
+        },
+        "detailed": {
+          "type": "boolean",
+          "description": "Return full metadata including TTL, access count, importance"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  {
+    "name": "write_wm_store",
+    "description": " WRITE — Store an item in working memory. Displaces oldest/lowest-importance item if at capacity. Accepts dry_run=true.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique identifier within session"
+        },
+        "value": {
+          "description": "Content to store (any JSON type)"
+        },
+        "importance": {
+          "type": "number",
+          "description": "0.0–1.0. Higher = slower decay.",
+          "default": 0.5
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "description": "Time-to-live in seconds. Default 300 (5 min).",
+          "default": 300
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Preview eviction without storing"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ]
+    }
+  },
+  {
+    "name": "write_wm_importance",
+    "description": " WRITE — Adjust an item's importance mid-session. Higher importance = slower decay.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Item key"
+        },
+        "importance": {
+          "type": "number",
+          "description": "New importance value (0.0–1.0)"
+        },
+        "dry_run": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "importance"
+      ]
+    }
+  },
+  {
+    "name": "mutate_wm_clear",
+    "description": " MUTATE — Flush working memory. If keep_keys provided, only those survive. Accepts dry_run=true.",
+    "permission": "mutate",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keep_keys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional keys to preserve (selective reset)"
+        },
+        "dry_run": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_cortex_activemodules",
+    "description": " WRITE — Enable or disable tool modules dynamically. Pass a list of module prefixes to activate (e.g. ['read_sensory_', 'read_coder_']). Only active modules' tools appear in tools/list. Call with empty list to show core only; omit to see current state.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Module prefixes to activate (e.g. ['read_sensory_', 'read_coder_']). Empty list = core only. Omit to just view current state."
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "replace",
+            "add",
+            "remove"
+          ],
+          "description": "replace (default): set exact list of active modules. add: append to current. remove: remove from current.",
+          "default": "replace"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_cortex_compress_memory",
+    "description": " WRITE — Compress MLM memory using vector quantization: deduplicate content by hash and encode tags to compact integer IDs. Set mode='stats' to preview savings without changes.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "compress",
+            "stats",
+            "reset"
+          ],
+          "description": "compress: apply quantization to all MLM items. stats: view current savings. reset: clear codebook.",
+          "default": "stats"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_cortex_metrics",
+    "description": " READ — View observability metrics: call counts, latency histograms, error rates per tool, peak concurrency.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_cortex_metrics_reset",
+    "description": " WRITE — Reset all accumulated observability metrics to zero.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_cortex_sleep",
+    "description": " WRITE — Full CortexStratum sleep cycle. Runs DMN daydream, VQ compress, MLM consolidate, and persist all in one coordinated phase. Call before context refresh. Use dry_run for preview.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "dmn",
+              "vq",
+              "mlm",
+              "persist",
+              "all"
+            ]
+          },
+          "description": "Which phases to run. Default: ['all']",
+          "default": [
+            "all"
+          ]
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_cortex_sleep_status",
+    "description": " READ — View last sleep cycle report and orchestrator state.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "read_cortex_pool_status",
+    "description": " READ — View async pool state: active/pending/completed/errors, max workers, queue depth.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_cortex_pool_resize",
+    "description": " WRITE — Resize the thread pool. Default 4 workers. Min 1.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "max_workers": {
+          "type": "integer",
+          "default": 4,
+          "description": "New pool size (min 1)"
+        }
+      },
+      "required": [
+        "max_workers"
+      ]
+    }
+  },
+  {
+    "name": "read_plugin_list",
+    "description": " READ — List all loaded plugins, their versions, and exported tools.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_plugin_reload",
+    "description": " WRITE — Reload a plugin (or all if name omitted). Checks file mtime and re-imports.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Plugin name to reload. Omit to reload all changed."
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_plugin_scan",
+    "description": " WRITE — Scan the plugins/ directory for new .py files and load them.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "read_log_search",
+    "description": " READ — Search structured logs by keyword, level, or tool. Returns newest first.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Keyword search across all log fields"
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR"
+          ]
+        },
+        "tool": {
+          "type": "string",
+          "description": "Filter by tool name (substring match)"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_log_level",
+    "description": " MUTATE — Change the minimum log level. Only entries at or above this level are written.",
+    "permission": "mutate",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR"
+          ],
+          "description": "Minimum log level"
+        }
+      },
+      "required": [
+        "level"
+      ]
+    }
+  },
+  {
+    "name": "read_log_status",
+    "description": " READ — View log session status: level, entries logged, file size.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_oauth_configure",
+    "description": " WRITE — Configure OAuth2 client (client_id, token_url, scopes).",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "client_id": {
+          "type": "string"
+        },
+        "client_secret": {
+          "type": "string"
+        },
+        "token_url": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "client_id",
+        "token_url"
+      ]
+    }
+  },
+  {
+    "name": "write_oauth_exchange",
+    "description": " WRITE — Exchange authorization code for tokens.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "redirect_uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "redirect_uri"
+      ]
+    }
+  },
+  {
+    "name": "write_oauth_refresh",
+    "description": " WRITE — Refresh the access token using refresh_token.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_oauth_request",
+    "description": " WRITE — Make an authenticated HTTP request using the OAuth2 token.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH"
+          ]
+        },
+        "headers": {
+          "type": "object"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "read_oauth_status",
+    "description": " READ — View OAuth2 client configuration and token status.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_rbac_set_role",
+    "description": " WRITE — Set the current RBAC role.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "role"
+      ]
+    }
+  },
+  {
+    "name": "write_rbac_define_role",
+    "description": " WRITE — Define a new RBAC role with permissions.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write",
+              "mutate"
+            ]
+          }
+        }
+      },
+      "required": [
+        "name",
+        "permissions"
+      ]
+    }
+  },
+  {
+    "name": "read_rbac_status",
+    "description": " READ — View RBAC roles and current role assignment.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_aes_encrypt",
+    "description": " WRITE — Encrypt a string with AES-GCM-like cipher (stdlib-only). Returns IV, ciphertext, integrity tag.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "plaintext": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "plaintext"
+      ]
+    }
+  },
+  {
+    "name": "write_aes_decrypt",
+    "description": " WRITE — Decrypt data encrypted with write_aes_encrypt.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "iv": {
+          "type": "string"
+        },
+        "ciphertext": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "iv",
+        "ciphertext",
+        "tag"
+      ]
+    }
+  },
+  {
+    "name": "write_connector_request",
+    "description": " WRITE — Make an HTTP request to an external service. Returns status code, headers, body.",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Full URL (https://...)"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "HEAD"
+          ]
+        },
+        "headers": {
+          "type": "object",
+          "description": "Optional HTTP headers"
+        },
+        "body": {
+          "type": "string",
+          "description": "Request body (for POST/PUT/PATCH)"
+        },
+        "timeout": {
+          "type": "integer",
+          "default": 15
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "read_connector_status",
+    "description": " READ — View active connections and connector stats.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "read_lineage_query",
+    "description": " READ — Query data lineage by source tool, session, or minimum quality score.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tool": {
+          "type": "string",
+          "description": "Filter by source tool"
+        },
+        "session": {
+          "type": "string",
+          "description": "Filter by source session"
+        },
+        "min_quality": {
+          "type": "number",
+          "description": "Minimum quality score (0-1)"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_lineage_status",
+    "description": " READ — View lineage tracker status: entries, quality stats, tracked tools.",
+    "permission": "read",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "write_lineage_track",
+    "description": " WRITE — Manually track a memory entry's lineage (used by middleware auto-track).",
+    "permission": "write",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mem_id": {
+          "type": "string"
+        },
+        "source_tool": {
+          "type": "string"
+        },
+        "source_session": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mem_id",
+        "source_tool"
+      ]
     }
   }
 ]

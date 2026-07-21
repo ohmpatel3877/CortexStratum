@@ -188,7 +188,7 @@ function Register-McpForOpenCode {
     param([string]$ConfigPath)
     $mcpEntry = @{
         "name" = "CortexStratum"
-        "description" = "68-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, and multi-module AI"
+        "description" = "176-tool MCP server: xTrace, DTrace, Skill Router, Verifier, Goal Registry, and multi-module AI"
         "command" = "python"
         "args" = @("scripts/tools-mcp-server.py")
         "env" = @{
@@ -224,7 +224,7 @@ switch ($Harness) {
 <mcpserver>
 {
   "name": "CortexStratum",
-  "description": "68-tool MCP server for memory, tracing, and orchestration",
+  "description": "176-tool MCP server for memory, tracing, and orchestration",
   "command": "python",
   "args": ["scripts/tools-mcp-server.py"],
   "working_dir": "$ProjectDir"

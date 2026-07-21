@@ -9,7 +9,7 @@ Central registry of every CLI command available in CortexStratum.
 | `python scripts/tools-mcp-server.py` | Start MCP server (stdio transport) |
 | `python scripts/tools-mcp-server.py --help` | Show usage information |
 | `python scripts/tools-mcp-server.py --version` | Show version string |
-| `python scripts/tools-mcp-server.py --list-tools` | List all 122 tools as JSON |
+| `python scripts/tools-mcp-server.py --list-tools` | List all 176 tools as JSON |
 | `python scripts/tools-mcp-server.py --permissive` | Start in permissive mode (no permission checks) |
 | `python scripts/tools-mcp-server.py --debug` | Start with verbose debug logging |
 
