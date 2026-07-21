@@ -12,8 +12,8 @@
 | PowerShell scripts | 17 |
 | Total functions | 286 |
 | Total classes | 13 |
-| MCP tools | 68 |
-| MCP tool modules | 10 |
+| MCP tools | 122 |
+| MCP tool modules | 26 |
 | Data files | 30 |
 
 ---
@@ -74,7 +74,7 @@
 ---
 ## MCP Tools
 
-Total: **68** tools across **10** modules.
+Total: **122** tools across **26** modules.
 
 ### Art
 
@@ -902,7 +902,7 @@ _2 tools_
 
 ### MCP Server
 - Entry point: `scripts/tools-mcp-server.py` — JSON-RPC over stdio
-- Exposes 68 tools across 10 modules
+- Exposes 122 tools across 26 modules
 - Protocol: Model Context Protocol (MCP) v2024-11-05
 
 ### Data Flow

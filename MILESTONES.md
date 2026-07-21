@@ -8,8 +8,8 @@
 | Expansion | v0.2.0 |  Done | Debug-samba expansion, Debian coverage, recurring error detection |
 | Polish & Stability | **v0.3.0** |  Done | Installer polish, permission model, 52-rule router, CI pipeline, agents, wiki |
 | Installer Hardening | v0.4.0 |  Next | VM testing, code signing, silent install, clean-room validation |
-| Full Test Coverage | v0.5.0 | ⏳ Planned | Module unit tests, >90% coverage, integration tests |
-| Production Docs | v0.6.0 | ⏳ Planned | API reference, deployment guide, troubleshooting, architecture docs |
+| Full Test Coverage | v0.5.0 |  Planned | Module unit tests, >90% coverage, integration tests |
+| Production Docs | v0.6.0 |  Planned | API reference, deployment guide, troubleshooting, architecture docs |
 | **Stable Release** | **v1.0.0** |  Target | All modules tested, documented, hardened |
 
 ## GitHub Milestones (to create via `gh`)

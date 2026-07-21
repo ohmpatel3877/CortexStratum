@@ -15,24 +15,26 @@ Usage:
     strategies = opt.generate_strategies()
 """
 
-import json, os, sys, time, hashlib, statistics, re
-from dataclasses import dataclass, field, asdict
-from typing import Optional
+import hashlib
+import json
+import statistics
+import time
 from collections import defaultdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
-
-#  Event Schema 
+#  Event Schema
 # Each slowdown is logged as a memory event with this structure:
+
 
 @dataclass
 class SpeedEvent:
-    category: str        # tool_call, file_read, build, network, model_inference, etc.
-    operation: str       # Specific operation name (docker_build, pip_install, etc.)
-    duration_ms: int     # How long it took
-    expected_ms: int     # What it should be (baseline)
-    threshold_ms: int    # What's considered "too slow" 
-    context: str = ""    # Additional context (file path, URL, etc.)
+    category: str  # tool_call, file_read, build, network, model_inference, etc.
+    operation: str  # Specific operation name (docker_build, pip_install, etc.)
+    duration_ms: int  # How long it took
+    expected_ms: int  # What it should be (baseline)
+    threshold_ms: int  # What's considered "too slow"
+    context: str = ""  # Additional context (file path, URL, etc.)
     timestamp: float = 0
     fingerprint: str = ""
 
@@ -42,7 +44,7 @@ class SpeedEvent:
         self.fingerprint = hashlib.md5(raw.encode()).hexdigest()[:12]
 
 
-#  Known Bottleneck Patterns 
+#  Known Bottleneck Patterns
 # These are cross-session learnings stored as resolution strategies.
 
 BOTTLENECK_PATTERNS = {
@@ -51,10 +53,30 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 30000,
         "threshold_ms": 15000,
         "strategies": [
-            {"name": "uv", "description": "Replace pip with uv (10-100x faster)", "effort": "low", "impact": "high"},
-            {"name": "wheels", "description": "Use pre-built wheels, skip source compilation", "effort": "low", "impact": "medium"},
-            {"name": "cache", "description": "Use --cache-dir on persistent volume", "effort": "low", "impact": "medium"},
-            {"name": "no-deps", "description": "Skip dependency resolution with --no-deps if already satisfied", "effort": "medium", "impact": "high"},
+            {
+                "name": "uv",
+                "description": "Replace pip with uv (10-100x faster)",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "wheels",
+                "description": "Use pre-built wheels, skip source compilation",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "cache",
+                "description": "Use --cache-dir on persistent volume",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "no-deps",
+                "description": "Skip dependency resolution with --no-deps if already satisfied",
+                "effort": "medium",
+                "impact": "high",
+            },
         ],
         "recommended": "uv",
     },
@@ -63,10 +85,30 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 120000,
         "threshold_ms": 30000,
         "strategies": [
-            {"name": "layer_cache", "description": "Reorder Dockerfile for cache efficiency (frequent changes last)", "effort": "medium", "impact": "high"},
-            {"name": "multi_stage", "description": "Use multi-stage builds to separate build deps from runtime", "effort": "medium", "impact": "high"},
-            {"name": "deps_bundled", "description": "Pre-bundle base image with dependencies", "effort": "high", "impact": "very_high"},
-            {"name": "cache_from", "description": "Use --cache-from to reuse remote cache", "effort": "low", "impact": "medium"},
+            {
+                "name": "layer_cache",
+                "description": "Reorder Dockerfile for cache efficiency (frequent changes last)",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "multi_stage",
+                "description": "Use multi-stage builds to separate build deps from runtime",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "deps_bundled",
+                "description": "Pre-bundle base image with dependencies",
+                "effort": "high",
+                "impact": "very_high",
+            },
+            {
+                "name": "cache_from",
+                "description": "Use --cache-from to reuse remote cache",
+                "effort": "low",
+                "impact": "medium",
+            },
         ],
         "recommended": "layer_cache",
     },
@@ -75,10 +117,30 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 45000,
         "threshold_ms": 15000,
         "strategies": [
-            {"name": "pnpm", "description": "Replace npm with pnpm (faster, disk-efficient)", "effort": "low", "impact": "high"},
-            {"name": "ci", "description": "Use npm ci instead of npm install (skips resolution)", "effort": "low", "impact": "high"},
-            {"name": "cache", "description": "Use npm cache with persistent volume", "effort": "low", "impact": "medium"},
-            {"name": "lockfile", "description": "Ensure package-lock.json is committed", "effort": "low", "impact": "medium"},
+            {
+                "name": "pnpm",
+                "description": "Replace npm with pnpm (faster, disk-efficient)",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "ci",
+                "description": "Use npm ci instead of npm install (skips resolution)",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "cache",
+                "description": "Use npm cache with persistent volume",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "lockfile",
+                "description": "Ensure package-lock.json is committed",
+                "effort": "low",
+                "impact": "medium",
+            },
         ],
         "recommended": "ci",
     },
@@ -87,22 +149,80 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 15000,
         "threshold_ms": 5000,
         "strategies": [
-            {"name": "prompt_compression", "description": "Compress prompts, remove redundant context", "effort": "medium", "impact": "high"},
-            {"name": "parameter_virtualizer", "description": "Use parameter virtualizer to get better output from smaller model", "effort": "low", "impact": "medium"},
-            {"name": "caching", "description": "Cache common inference results in memory", "effort": "low", "impact": "medium"},
-            {"name": "batching", "description": "Batch multiple inference requests into one", "effort": "medium", "impact": "high"},
+            {
+                "name": "prompt_compression",
+                "description": "Compress prompts, remove redundant context",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "parameter_virtualizer",
+                "description": "Use parameter virtualizer to get better output from smaller model",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "caching",
+                "description": "Cache common inference results in memory",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "batching",
+                "description": "Batch multiple inference requests into one",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "prompt_caching",
+                "description": "Use API prompt caching with cache_control breakpoints — reads cost 0.1x, writes 1.25x, 5-min TTL auto-refreshed",
+                "effort": "low",
+                "impact": "very_high",
+            },
+            {
+                "name": "pre_warming",
+                "description": "Pre-warm cache with max_tokens=0 before user traffic to eliminate cold-start TTFT",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "multi_breakpoint",
+                "description": "Use up to 4 cache breakpoints for independent caching of tools, system, context, and conversation",
+                "effort": "medium",
+                "impact": "high",
+            },
         ],
-        "recommended": "prompt_compression",
+        "recommended": "prompt_caching",
     },
     "file_read": {
         "description": "Reading large files is slow",
         "typical_ms": 2000,
         "threshold_ms": 500,
         "strategies": [
-            {"name": "head_only", "description": "Read only first N lines instead of entire file", "effort": "low", "impact": "high"},
-            {"name": "grep", "description": "Use grep to find specific content instead of full read", "effort": "low", "impact": "high"},
-            {"name": "binary", "description": "Skip binary/large files, use metadata instead", "effort": "low", "impact": "medium"},
-            {"name": "mmap", "description": "Use memory-mapped files for very large files", "effort": "high", "impact": "medium"},
+            {
+                "name": "head_only",
+                "description": "Read only first N lines instead of entire file",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "grep",
+                "description": "Use grep to find specific content instead of full read",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "binary",
+                "description": "Skip binary/large files, use metadata instead",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "mmap",
+                "description": "Use memory-mapped files for very large files",
+                "effort": "high",
+                "impact": "medium",
+            },
         ],
         "recommended": "head_only",
     },
@@ -111,10 +231,30 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 5000,
         "threshold_ms": 2000,
         "strategies": [
-            {"name": "shallow", "description": "Use --depth 1 for clones/fetches", "effort": "low", "impact": "high"},
-            {"name": "filter_blob", "description": "Use --filter=blob:none for partial clones", "effort": "low", "impact": "high"},
-            {"name": "sparse_checkout", "description": "Use sparse checkout to only get needed directories", "effort": "medium", "impact": "high"},
-            {"name": "worktree", "description": "Use git worktree instead of switching branches", "effort": "medium", "impact": "high"},
+            {
+                "name": "shallow",
+                "description": "Use --depth 1 for clones/fetches",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "filter_blob",
+                "description": "Use --filter=blob:none for partial clones",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "sparse_checkout",
+                "description": "Use sparse checkout to only get needed directories",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "worktree",
+                "description": "Use git worktree instead of switching branches",
+                "effort": "medium",
+                "impact": "high",
+            },
         ],
         "recommended": "shallow",
     },
@@ -123,10 +263,30 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 5000,
         "threshold_ms": 2000,
         "strategies": [
-            {"name": "timeout", "description": "Reduce timeout from default 60s to 10s", "effort": "low", "impact": "medium"},
-            {"name": "retry", "description": "Add exponential backoff retry, fail fast after 3 attempts", "effort": "low", "impact": "high"},
-            {"name": "parallel", "description": "Parallelize independent network requests", "effort": "medium", "impact": "high"},
-            {"name": "caching", "description": "Cache responses with TTL to avoid repeat requests", "effort": "low", "impact": "high"},
+            {
+                "name": "timeout",
+                "description": "Reduce timeout from default 60s to 10s",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "retry",
+                "description": "Add exponential backoff retry, fail fast after 3 attempts",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "parallel",
+                "description": "Parallelize independent network requests",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "caching",
+                "description": "Cache responses with TTL to avoid repeat requests",
+                "effort": "low",
+                "impact": "high",
+            },
         ],
         "recommended": "retry",
     },
@@ -135,10 +295,30 @@ BOTTLENECK_PATTERNS = {
         "typical_ms": 30000,
         "threshold_ms": 10000,
         "strategies": [
-            {"name": "incremental", "description": "Use incremental compilation (sccache, turbopack)", "effort": "medium", "impact": "high"},
-            {"name": "parallel", "description": "Parallelize compilation across cores", "effort": "low", "impact": "high"},
-            {"name": "skip_test", "description": "Skip test compilation in dev builds", "effort": "low", "impact": "medium"},
-            {"name": "codegen_units", "description": "Reduce codegen units for Rust, enable LTO only for release", "effort": "medium", "impact": "medium"},
+            {
+                "name": "incremental",
+                "description": "Use incremental compilation (sccache, turbopack)",
+                "effort": "medium",
+                "impact": "high",
+            },
+            {
+                "name": "parallel",
+                "description": "Parallelize compilation across cores",
+                "effort": "low",
+                "impact": "high",
+            },
+            {
+                "name": "skip_test",
+                "description": "Skip test compilation in dev builds",
+                "effort": "low",
+                "impact": "medium",
+            },
+            {
+                "name": "codegen_units",
+                "description": "Reduce codegen units for Rust, enable LTO only for release",
+                "effort": "medium",
+                "impact": "medium",
+            },
         ],
         "recommended": "incremental",
     },
@@ -149,15 +329,54 @@ class SpeedOptimizer:
     """
     Monitors slowdown events, analyzes patterns, and generates
     optimization strategies. Stores learnings in memory for cross-session use.
+
+    Persistence: call save() after recording events; call load() to restore.
+    Without persistence the in-memory store is lost on object destruction.
     """
 
-    def __init__(self, memory_store: Optional[list] = None):
+    _PERSIST_PATH = (
+        Path(__file__).resolve().parent.parent / "data" / "speed-optimizer-events.json"
+    )
+
+    def __init__(self, memory_store: list | None = None):
         self.events: list[SpeedEvent] = []
-        self.memory_store = memory_store or []  # Simulated memory backend
+        self.memory_store = memory_store or []
         self._load_from_memory()
 
-    def log_slowdown(self, category: str, operation: str, duration_ms: int,
-                     expected_ms: int, context: str = "") -> SpeedEvent:
+    def save(self, path: Path | None = None) -> dict:
+        """Persist all events to a JSON file."""
+        path = path or self._PERSIST_PATH
+        path.parent.mkdir(parents=True, exist_ok=True)
+        data = {
+            "events": [asdict(e) for e in self.events],
+            "memory_store": self.memory_store,
+        }
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, default=str)
+        return {"saved": True, "path": str(path), "events": len(self.events)}
+
+    def load(self, path: Path | None = None) -> dict:
+        """Load events from a JSON file."""
+        path = path or self._PERSIST_PATH
+        if not path.exists():
+            return {"loaded": False, "events": 0}
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            self.events = [SpeedEvent(**e) for e in data.get("events", [])]
+            self.memory_store = data.get("memory_store", [])
+            return {"loaded": True, "events": len(self.events)}
+        except (json.JSONDecodeError, OSError, TypeError) as e:
+            return {"loaded": False, "error": str(e)}
+
+    def log_slowdown(
+        self,
+        category: str,
+        operation: str,
+        duration_ms: int,
+        expected_ms: int,
+        context: str = "",
+    ) -> SpeedEvent:
         """Log a slowdown event. Call this after any operation that took too long."""
         threshold_ms = int(expected_ms * 1.5)
         event = SpeedEvent(
@@ -192,15 +411,19 @@ class SpeedOptimizer:
         """Load past events from memory store."""
         for entry in self.memory_store:
             if entry.get("type") == "speed_event":
-                self.events.append(SpeedEvent(
-                    category=entry["category"],
-                    operation=entry["operation"],
-                    duration_ms=entry["duration_ms"],
-                    expected_ms=entry["expected_ms"],
-                    threshold_ms=entry.get("threshold_ms", int(entry["expected_ms"] * 1.5)),
-                    context=entry.get("context", ""),
-                    timestamp=entry.get("timestamp", 0),
-                ))
+                self.events.append(
+                    SpeedEvent(
+                        category=entry["category"],
+                        operation=entry["operation"],
+                        duration_ms=entry["duration_ms"],
+                        expected_ms=entry["expected_ms"],
+                        threshold_ms=entry.get(
+                            "threshold_ms", int(entry["expected_ms"] * 1.5)
+                        ),
+                        context=entry.get("context", ""),
+                        timestamp=entry.get("timestamp", 0),
+                    )
+                )
 
     def analyze(self) -> dict:
         """
@@ -218,7 +441,9 @@ class SpeedOptimizer:
 
         report = {
             "total_events": len(self.events),
-            "total_slowdowns": sum(1 for e in self.events if e.duration_ms > e.threshold_ms),
+            "total_slowdowns": sum(
+                1 for e in self.events if e.duration_ms > e.threshold_ms
+            ),
             "bottlenecks": [],
             "clock_consumers": [],
         }
@@ -264,7 +489,12 @@ class SpeedOptimizer:
         """
         report = self.analyze()
         if report.get("status") == "no_data":
-            return [{"status": "no_data", "message": "Log slowdowns first with log_slowdown()"}]
+            return [
+                {
+                    "status": "no_data",
+                    "message": "Log slowdowns first with log_slowdown()",
+                }
+            ]
 
         strategies = []
 
@@ -273,29 +503,45 @@ class SpeedOptimizer:
             pattern = BOTTLENECK_PATTERNS.get(op)
 
             if pattern:
-                strategies.append({
-                    "operation": op,
-                    "description": pattern["description"],
-                    "severity": "critical" if bottleneck["slowdown_ratio"] > 3 else "warning",
-                    "current_avg_ms": bottleneck["avg_duration_ms"],
-                    "recommended_strategy": pattern["recommended"],
-                    "options": pattern["strategies"],
-                    "applied": pattern["recommended"],
-                })
+                strategies.append(
+                    {
+                        "operation": op,
+                        "description": pattern["description"],
+                        "severity": "critical"
+                        if bottleneck["slowdown_ratio"] > 3
+                        else "warning",
+                        "current_avg_ms": bottleneck["avg_duration_ms"],
+                        "recommended_strategy": pattern["recommended"],
+                        "options": pattern["strategies"],
+                        "applied": pattern["recommended"],
+                    }
+                )
             else:
                 # Unknown pattern — suggest investigation
-                strategies.append({
-                    "operation": op,
-                    "description": f"Unrecognized slowdown pattern in {op}",
-                    "severity": "info",
-                    "current_avg_ms": bottleneck["avg_duration_ms"],
-                    "recommended_strategy": "investigate",
-                    "options": [
-                        {"name": "investigate", "description": "Profile the operation to identify root cause", "effort": "medium", "impact": "high"},
-                        {"name": "threshold", "description": "Increase timeout/threshold if this is expected", "effort": "low", "impact": "low"},
-                    ],
-                    "applied": "investigate",
-                })
+                strategies.append(
+                    {
+                        "operation": op,
+                        "description": f"Unrecognized slowdown pattern in {op}",
+                        "severity": "info",
+                        "current_avg_ms": bottleneck["avg_duration_ms"],
+                        "recommended_strategy": "investigate",
+                        "options": [
+                            {
+                                "name": "investigate",
+                                "description": "Profile the operation to identify root cause",
+                                "effort": "medium",
+                                "impact": "high",
+                            },
+                            {
+                                "name": "threshold",
+                                "description": "Increase timeout/threshold if this is expected",
+                                "effort": "low",
+                                "impact": "low",
+                            },
+                        ],
+                        "applied": "investigate",
+                    }
+                )
 
         # Apply strategies (record what was recommended)
         self._record_strategies(strategies)
@@ -304,13 +550,15 @@ class SpeedOptimizer:
     def _record_strategies(self, strategies: list):
         """Store the applied strategies in memory for future reference."""
         for s in strategies:
-            self.memory_store.append({
-                "type": "speed_strategy",
-                "operation": s["operation"],
-                "recommended": s["recommended_strategy"],
-                "timestamp": time.time(),
-                "severity": s["severity"],
-            })
+            self.memory_store.append(
+                {
+                    "type": "speed_strategy",
+                    "operation": s["operation"],
+                    "recommended": s["recommended_strategy"],
+                    "timestamp": time.time(),
+                    "severity": s["severity"],
+                }
+            )
 
     def get_learned_patterns(self) -> list:
         """Return all previously recorded strategy learnings from memory."""
@@ -323,43 +571,56 @@ class SpeedOptimizer:
             return "No speed data collected yet."
 
         lines = [
-            f"Speed Optimizer Report",
-            f"{'='*50}",
+            "Speed Optimizer Report",
+            f"{'=' * 50}",
             f"Total events logged: {report['total_events']}",
             f"Total slowdowns: {report['total_slowdowns']}",
-            f"",
-            f"Top time consumers:",
+            "",
+            "Top time consumers:",
         ]
         for b in report["clock_consumers"][:5]:
-            lines.append(f"  {b['key']}: {b['total_time_ms']/1000:.1f}s ({b['pct_of_total']}%)")
+            lines.append(
+                f"  {b['key']}: {b['total_time_ms'] / 1000:.1f}s ({b['pct_of_total']}%)"
+            )
 
         bottlenecks = report["bottlenecks"]
         if bottlenecks:
             lines.append(f"\nBottlenecks detected ({len(bottlenecks)}):")
             for b in bottlenecks[:5]:
-                lines.append(f"   {b['key']}: {b['slowdown_ratio']}x slower than expected")
+                lines.append(
+                    f"   {b['key']}: {b['slowdown_ratio']}x slower than expected"
+                )
 
         strategies = self.generate_strategies()
         if strategies:
-            lines.append(f"\nRecommended optimizations:")
+            lines.append("\nRecommended optimizations:")
             for s in strategies:
                 lines.append(f"  → {s['operation']}: {s['recommended_strategy']}")
 
         return "\n".join(lines)
 
 
-#  CLI 
+#  CLI
+
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Speed Optimizer")
-    parser.add_argument("--log", nargs=3, metavar=("CATEGORY", "OPERATION", "DURATION_MS"),
-                        help="Log a slowdown event")
-    parser.add_argument("--expected", type=int, default=1000,
-                        help="Expected duration in ms (for --log)")
+    parser.add_argument(
+        "--log",
+        nargs=3,
+        metavar=("CATEGORY", "OPERATION", "DURATION_MS"),
+        help="Log a slowdown event",
+    )
+    parser.add_argument(
+        "--expected", type=int, default=1000, help="Expected duration in ms (for --log)"
+    )
     parser.add_argument("--context", default="", help="Context string")
     parser.add_argument("--analyze", action="store_true", help="Analyze logged events")
-    parser.add_argument("--strategies", action="store_true", help="Generate optimization strategies")
+    parser.add_argument(
+        "--strategies", action="store_true", help="Generate optimization strategies"
+    )
     parser.add_argument("--summary", action="store_true", help="Print summary")
     parser.add_argument("--json", action="store_true", help="JSON output")
 
@@ -370,7 +631,9 @@ def main():
     if args.log:
         cat, op, dur = args.log
         event = opt.log_slowdown(cat, op, int(dur), args.expected, args.context)
-        print(f"Logged: {event.category}/{event.operation} = {event.duration_ms}ms (expected {event.expected_ms}ms)")
+        print(
+            f"Logged: {event.category}/{event.operation} = {event.duration_ms}ms (expected {event.expected_ms}ms)"
+        )
 
     if args.analyze:
         report = opt.analyze()
@@ -378,7 +641,11 @@ def main():
 
     if args.strategies:
         strategies = opt.generate_strategies()
-        print(json.dumps(strategies, indent=2) if args.json else json.dumps(strategies, indent=2))
+        print(
+            json.dumps(strategies, indent=2)
+            if args.json
+            else json.dumps(strategies, indent=2)
+        )
 
     if args.summary:
         print(opt.summary())

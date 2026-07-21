@@ -1,6 +1,8 @@
-# Memory Evaluation & Gap Analysis
+# Memory Evaluation & Gap Analysis Skill
 
 **One-shot command**: `/mem eval [project]`
+
+Use when auditing session memory for gaps, running end-of-session memory sync, or identifying missing procedural knowledge entries.
 
 Automates the catalog → gap analysis → registration pipeline that previously
 required 15+ manual steps. Run at session end to ensure procedural memory

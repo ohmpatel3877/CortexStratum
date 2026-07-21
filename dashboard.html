@@ -20,6 +20,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0b1120;color:#e2
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .btn{background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 14px;border-radius:6px;font-size:.78rem;cursor:pointer;transition:all .15s}
 .btn:hover{background:#334155;border-color:#475569}
+.btn.active{background:#0f172a;border-color:#38bdf8;color:#38bdf8}
 .last-updated{color:#475569;font-size:.72rem}
 
 /*  Stats Bar  */
@@ -124,22 +125,31 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 <body>
 
 <div class="header">
-  <h1>CortexStratum <span>· MCP Server</span></h1>
-  <div class="header-right">
-    <div class="status-dot" id="statusDot"></div>
-    <span class="last-updated" id="lastUpdated">—</span>
-    <button class="btn" onclick="loadAll()">↻ Refresh</button>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <h1>CortexStratum <span>· MCP Server</span> <span id="versionBadge" style="font-size:0.65rem;background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:999px;font-weight:400">v—</span></h1>
+      <div id="activeTask" class="last-updated">Active task: —</div>
+    </div>
+    <div class="header-right">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="last-updated" id="lastUpdated">—</span>
+      <button class="btn" onclick="loadAll()">↻ Refresh</button>
+      <button class="btn" id="autoRefreshBtn" onclick="toggleAutoRefresh()">Auto-refresh off</button>
+    </div>
   </div>
-</div>
-
 <div class="stats" id="statsRow">
   <div class="stat"><div class="num" id="toolCount">—</div><div class="lbl">Tools</div><div class="sub" id="toolBreakdown"></div></div>
-  <div class="stat"><div class="num purple" id="memoryCount">—</div><div class="lbl">Memory</div><div class="sub" id="memorySub">local BM25</div></div>
+  <div class="stat"><div class="num" id="groupCount">—</div><div class="lbl">Skill groups</div><div class="sub" id="groupSub"></div></div>
+  <div class="stat"><div class="num purple" id="memoryCount">—</div><div class="lbl">Memory</div><div class="sub" id="memorySub">SQLite+FTS5</div></div>
   <div class="stat"><div class="num amber" id="errorCount">—</div><div class="lbl">Errors</div><div class="sub" id="errorSub"></div></div>
   <div class="stat"><div class="num teal" id="decisionCount">—</div><div class="lbl">Decisions</div><div class="sub" id="decisionSub"></div></div>
   <div class="stat"><div class="num rose" id="commitmentCount">—</div><div class="lbl">Commitments</div><div class="sub" id="commitmentSub"></div></div>
+  <div class="stat"><div class="num teal" id="phaseState">—</div><div class="lbl">Phase</div><div class="sub" id="phaseSub"></div></div>
+  <div class="stat"><div class="num purple" id="futureCount">—</div><div class="lbl">Future specs</div><div class="sub" id="futureSub"></div></div>
   <div class="stat"><div class="num green" id="goalPct">—</div><div class="lbl">Goal</div><div class="sub" id="goalSub"></div></div>
   <div class="stat"><div class="num" id="openCodeStatus" style="color:#a78bfa">—</div><div class="lbl">OpenCode</div><div class="sub" id="openCodeSub"></div></div>
+  <div class="stat"><div class="num amber" id="securityCount">—</div><div class="lbl">Security</div><div class="sub" id="securitySub"></div></div>
+  <div class="stat"><div class="num" id="sandboxCount" style="color:#7dd3fc">—</div><div class="lbl">Sandbox</div><div class="sub" id="sandboxSub"></div></div>
+  <div class="stat"><div class="num" id="identityVersion" style="color:#c084fc">—</div><div class="lbl">Identity</div><div class="sub" id="identitySub"></div></div>
 </div>
 
 <div class="tabs" id="tabBar">
@@ -162,6 +172,8 @@ pre{background:transparent !important;padding:0 !important;margin:0 !important}
 //  Data 
 const DATA = {};
 let TOOLS_CACHE = null;
+let autoRefresh = false;
+let autoRefreshHandle = null;
 
 async function loadJSON(path) {
   try {
@@ -169,6 +181,82 @@ async function loadJSON(path) {
     if (!r.ok) return null;
     return await r.json();
   } catch { return null; }
+}
+
+async function loadText(path) {
+  try {
+    const r = await fetch(path + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return null;
+    return await r.text();
+  } catch { return null; }
+}
+
+function parseIssueBacklog(raw) {
+  if (!raw) return [];
+  const lines = raw.split(/\r?\n/);
+  const issues = [];
+  let current = null;
+  lines.forEach(line => {
+    const header = line.match(/^##\s+Issue\s+(\d+):\s*(.+)$/i);
+    if (header) {
+      if (current) issues.push(current);
+      current = {id: header[1], title: header[2].trim(), priority: '', area: '', description: ''};
+      return;
+    }
+    if (!current) return;
+    const priority = line.match(/^\*\*Priority\*\*:\s*(.+)$/i);
+    if (priority) { current.priority = priority[1].trim(); return; }
+    const area = line.match(/^\*\*Area\*\*:\s*(.+)$/i);
+    if (area) { current.area = area[1].trim(); return; }
+    if (!current.description && line.trim() && !line.startsWith('---') && !line.startsWith('*') && !line.startsWith('#')) {
+      current.description = line.trim();
+    }
+  });
+  if (current) issues.push(current);
+  return issues;
+}
+
+function parseFutureSpecsFromReadme(text) {
+  if (!text) return [];
+  const specs = [];
+  // Parse the markdown table in future/README.md
+  const tableSection = text.split('## Active Specs')[1];
+  if (!tableSection) return [];
+  const lines = tableSection.split(/\r?\n/);
+  let inTable = false;
+  for (const line of lines) {
+    if (line.trim().startsWith('|') && line.includes('---')) { inTable = true; continue; }
+    if (!inTable || !line.trim().startsWith('|')) continue;
+    const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+    if (cells.length >= 2) {
+      const title = cells[0].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // strip links
+      const category = cells[1] || 'general';
+      const status = cells[2] || 'spec';
+      specs.push({ title, category, status });
+    }
+  }
+  return specs;
+}
+
+function getActiveTask() {
+  const goal = DATA.goal;
+  if (goal) {
+    const pending = (goal.sub_goals || []).filter(s => s.status !== 'completed');
+    if (pending.length) {
+      return pending[0].description || 'Pending goal task';
+    }
+  }
+  if (DATA.pipeline?.current_phase) {
+    const phase = DATA.pipeline.current_phase;
+    const next = (DATA.pipeline.phases || []).slice(-1)[0]?.phase || phase;
+    const historyLen = (DATA.pipeline.phase_history || DATA.pipeline.phases || []).length;
+    return `Phase: ${phase}${historyLen > 1 ? ' · ' + historyLen + ' phases so far' : ''}`;
+  }
+  const mem = DATA.globalMemory?.entries?.find(e => e.status === 'pending');
+  if (mem) {
+    return `Future task: ${mem.task}`;
+  }
+  return 'No active task found';
 }
 
 function pBadge(p) {
@@ -190,6 +278,18 @@ function priorityClass(e) {
   if (e.status === 'unresolved') return 'priority-open';
   return '';
 }
+function toggleAutoRefresh() {
+  autoRefresh = !autoRefresh;
+  const btn = document.getElementById('autoRefreshBtn');
+  btn.textContent = autoRefresh ? 'Auto-refresh on' : 'Auto-refresh off';
+  btn.classList.toggle('active', autoRefresh);
+  if (autoRefresh) {
+    autoRefreshHandle = setInterval(loadAll, 15000);
+  } else if (autoRefreshHandle) {
+    clearInterval(autoRefreshHandle);
+    autoRefreshHandle = null;
+  }
+}
 
 //  Load 
 async function loadAll() {
@@ -199,15 +299,28 @@ async function loadAll() {
   DATA.tools = await loadJSON('./data/tool-inventory.json');
   DATA.errors = await loadJSON('./data/error-registry.json');
   DATA.decisions = await loadJSON('./data/decision-registry.json');
-  DATA.commitments = await loadJSON('./data/commitments.json');
+  DATA.commitments = await loadJSON('./data/commitment-registry.json');
   DATA.goal = await loadJSON('./data/goal-registry.json');
   DATA.router = await loadJSON('./skills/skill-router.json');
   DATA.activeSkills = await loadJSON('./.opencode/active-skills.json');
+  DATA.opencode = await loadJSON('./opencode.json');
+  DATA.opencodeExtra = await loadJSON('./.opencode/opencode.jsonc');
+  DATA.pipeline = await loadJSON('./data/session-pipeline.json');
+  DATA.issueBacklogText = await loadText('./docs/issue-backlog.md');
+  const futureReadme = await loadText('./future/README.md');
+  DATA.futureSpecs = parseFutureSpecsFromReadme(futureReadme);
+  DATA.sessionOverview = await loadJSON('./data/session-overview.json');
+  DATA.globalMemory = await loadJSON('./data/global-projects-memory.json');
+  DATA.versionText = await loadText('./VERSION');
+  DATA.securityScan = await loadJSON('./data/security-scan-report.json');
+  DATA.sessionLearning = await loadJSON('./data/session-learning.json');
+  DATA.sandboxLog = await loadJSON('./data/sandbox-log.json');
+  DATA.identityEvolution = await loadJSON('./data/identity-evolution-log.json');
 
-  // Try memory store
+  // Try memory store (SQLite+FTS5)
   let memCount = 0;
-  const ms = await loadJSON('./data/memory_store.json');
-  if (ms) memCount = Array.isArray(ms) ? ms.length : (ms.entries || ms.memories || []).length;
+  const memSummary = await loadJSON('./data/memory-summary.json');
+  if (memSummary) memCount = memSummary.memory_count || 0;
 
   // Stats
   if (DATA.tools) {
@@ -215,9 +328,17 @@ async function loadAll() {
     const w = DATA.tools.filter(t => t.permission === 'write').length;
     const m = DATA.tools.filter(t => t.permission === 'mutate').length;
     document.getElementById('toolCount').textContent = DATA.tools.length;
-    document.getElementById('toolBreakdown').textContent = r + 'r / ' + w + 'w / ' + m + 'm';
+    let toolSubText = r + 'r / ' + w + 'w / ' + m + 'm';
+    if (DATA.sessionOverview?.tool_count_after && DATA.sessionOverview.tool_count_after !== DATA.tools.length) {
+      toolSubText += ' · planned ' + DATA.sessionOverview.tool_count_after;
+    }
+    document.getElementById('toolBreakdown').textContent = toolSubText;
     TOOLS_CACHE = DATA.tools;
   }
+
+  const groupCount = DATA.opencode?.skillGroups?.length || 0;
+  document.getElementById('groupCount').textContent = groupCount || '0';
+  document.getElementById('groupSub').textContent = DATA.opencode?.skillGroups?.map(g => g.title).join(' · ') || 'no groups';
 
   document.getElementById('memoryCount').textContent = memCount || '0';
 
@@ -248,13 +369,63 @@ document.getElementById('errorSub').textContent = resolved + ' resolved' + (recu
     document.getElementById('goalSub').textContent = 'no active goal';
   }
 
+  // Version
+  document.getElementById('versionBadge').textContent = 'v' + (DATA.versionText || '').trim() || 'v—';
+
+  // Phase
+  const phaseHistory = DATA.pipeline?.phases || DATA.pipeline?.phase_history || [];
+  document.getElementById('phaseState').textContent = DATA.pipeline?.current_phase || 'help';
+  document.getElementById('phaseSub').textContent = phaseHistory.length ? phaseHistory.length + ' phases' : 'no phase history';
+
+  // Future specs
+  document.getElementById('futureCount').textContent = DATA.futureSpecs?.length || 0;
+  document.getElementById('futureSub').textContent = DATA.futureSpecs?.length ? DATA.futureSpecs.map(s => s.title).slice(0,2).join(' · ') : 'no future specs';
+
+  // Active task
+  document.getElementById('activeTask').textContent = 'Active task: ' + getActiveTask();
+
   // OpenCode stat
   if (DATA.router) {
-    document.getElementById('openCodeStatus').textContent = DATA.router.rules.length + 'R';
+    document.getElementById('openCodeStatus').textContent = DATA.router.rules.length + ' rules';
     document.getElementById('openCodeSub').textContent = (DATA.activeSkills || []).length + ' skills';
   } else {
     document.getElementById('openCodeStatus').textContent = '-';
     document.getElementById('openCodeSub').textContent = 'no router';
+  }
+
+  // Security scan
+  const sec = DATA.securityScan?.summary;
+  if (sec) {
+    document.getElementById('securityCount').textContent = sec.total_findings || '0';
+    const high = sec.findings_by_severity?.high || 0;
+    const med = sec.findings_by_severity?.medium || 0;
+    document.getElementById('securitySub').textContent = high + ' high, ' + med + ' medium';
+  } else {
+    document.getElementById('securityCount').textContent = '—';
+    document.getElementById('securitySub').textContent = 'no scan data';
+  }
+
+  // Sandbox
+  const sandboxEntries = DATA.sandboxLog || [];
+  if (Array.isArray(sandboxEntries) && sandboxEntries.length) {
+    const successful = sandboxEntries.filter(e => e.success).length;
+    document.getElementById('sandboxCount').textContent = sandboxEntries.length;
+    document.getElementById('sandboxSub').textContent = successful + '/' + sandboxEntries.length + ' passed';
+  } else {
+    document.getElementById('sandboxCount').textContent = '0';
+    document.getElementById('sandboxSub').textContent = 'no sandbox runs';
+  }
+
+  // Identity
+  const identityVersions = DATA.identityEvolution?.versions || [];
+  if (identityVersions.length) {
+    document.getElementById('identityVersion').textContent = identityVersions.length;
+    const latest = identityVersions[identityVersions.length - 1];
+    const lastChange = latest.changes_made?.[0] || '';
+    document.getElementById('identitySub').textContent = lastChange ? lastChange.slice(0, 30) : (latest.version || '');
+  } else {
+    document.getElementById('identityVersion').textContent = '—';
+    document.getElementById('identitySub').textContent = 'no identity data';
   }
 
   renderTools();
@@ -266,6 +437,28 @@ document.getElementById('errorSub').textContent = resolved + ' resolved' + (recu
 
   document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
   document.getElementById('statusDot').className = 'status-dot ok';
+}
+
+function renderSkillGroups() {
+  const groups = DATA.opencode?.skillGroups || [];
+  if (!groups.length) return '';
+  return '<div class="card"><div class="card-hdr">Skill Group Overview</div><div class="card-body"><div style="display:grid;gap:10px">' +
+    groups.map(g => `<div style="padding:12px;border:1px solid #1e293b;border-radius:10px;"><strong style="color:#e2e8f0">${g.title}</strong><div style="color:#94a3b8;font-size:.78rem;margin-top:6px">${g.description}</div><div style="color:#7dd3fc;font-size:.72rem;margin-top:8px">${(g.skills||[]).join(', ')}</div></div>`).join('') +
+    '</div></div></div>';
+}
+
+function renderOpencodeExtras() {
+  const opencode = DATA.opencode;
+  if (!opencode) return '<div class="empty"><div class="icon"></div>No opencode.json data available.</div>';
+  const server = opencode.mcpServers?.CortexStratum || {};
+  const env = server.env ? Object.keys(server.env).map(k => `${k}=${server.env[k]}`).join(' · ') : 'none';
+  return `<div class="card"><div class="card-hdr">Project Metadata</div><div class="card-body"><table><tbody>` +
+    `<tr><td style="color:#64748b">Name</td><td style="color:#e2e8f0">${opencode.name || 'CortexStratum'}</td></tr>` +
+    `<tr><td style="color:#64748b">Version</td><td style="color:#e2e8f0">${opencode.version || 'unknown'}</td></tr>` +
+    `<tr><td style="color:#64748b">Description</td><td style="color:#94a3b8">${opencode.description || 'No description'}</td></tr>` +
+    `<tr><td style="color:#64748b">Default Env</td><td style="color:#94a3b8">${env}</td></tr>` +
+    `<tr><td style="color:#64748b">Skill groups</td><td style="color:#94a3b8">${(opencode.skillGroups||[]).length}</td></tr>` +
+    `</tbody></table></div></div>`;
 }
 
 //  Tab switching 
@@ -281,7 +474,12 @@ function renderTools() {
   const tools = DATA.tools;
   if (!tools) { document.getElementById('toolsTab').innerHTML = '<div class="empty"><div class="icon"></div>Tool inventory not found. Run the MCP server first.</div>'; return; }
 
-  const modules = [...new Set(tools.map(t => t.module || 'core'))].sort();
+  // Infer module from tool name: {permission}_{module}_{action}
+  const inferModule = (name) => {
+    const parts = (name || '').split('_');
+    return parts.length >= 3 ? parts[1] : 'core';
+  };
+  const modules = [...new Set(tools.map(t => inferModule(t.name)))].sort();
 
   let html = `
     <div class="filters">
@@ -301,15 +499,18 @@ function renderTools() {
     <table><thead><tr>
       <th>Tool</th><th>Permission</th><th>Module</th><th>Description</th><th>Params</th>
     </tr></thead><tbody>
-    ${tools.map(t => `
-      <tr class="trow" data-name="${t.name}" data-perm="${t.permission}" data-mod="${t.module||'core'}">
+    ${tools.map(t => {
+      const mod = inferModule(t.name);
+      const paramCount = t.inputSchema?.properties ? Object.keys(t.inputSchema.properties).length : 0;
+      return `
+      <tr class="trow" data-name="${t.name}" data-perm="${t.permission}" data-mod="${mod}">
         <td style="font-family:monospace;font-size:.75rem;color:#7dd3fc">${t.name}</td>
         <td>${pBadge(t.permission)}</td>
-        <td style="color:#94a3b8">${t.module||'core'}</td>
+        <td style="color:#94a3b8">${mod}</td>
         <td style="color:#94a3b8;max-width:280px">${(t.description||'').slice(0,110)}</td>
-        <td style="color:#475569;font-size:.72rem">${t.param_count||'?'}</td>
+        <td style="color:#475569;font-size:.72rem">${paramCount||'?'}</td>
       </tr>
-    `).join('')}
+    `}).join('')}
     </tbody></table></div>
   `;
   document.getElementById('toolsTab').innerHTML = html;
@@ -330,10 +531,19 @@ function renderTrace() {
   const list = DATA.errors.errors || [];
   if (list.length === 0) { document.getElementById('traceTab').innerHTML = '<div class="empty"><div class="icon"></div>No errors logged. Clean run.</div>'; return; }
 
+  const issues = parseIssueBacklog(DATA.issueBacklogText);
   const sorted = [...list].sort((a,b) => (b.occurrence_count||0) - (a.occurrence_count||0));
   const maxOcc = Math.max(...sorted.map(e => e.occurrence_count||0), 1);
 
-  let html = '<div class="card"><div class="card-hdr">Error Registry <span>'+list.length+' entries · '+list.filter(e=>e.status==='resolved').length+' resolved</span></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Signature</th><th>Status</th><th>Freq</th><th>Seen</th><th>Cause</th></tr></thead><tbody>';
+  let html = '';
+  if (issues.length) {
+    html += '<div class="card"><div class="card-hdr">Issue Backlog <span>'+issues.length+' documented</span></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>Issue</th><th>Priority</th><th>Area</th></tr></thead><tbody>';
+    issues.slice(0,6).forEach(i => {
+      html += `<tr><td style="color:#e2e8f0">${i.title}</td><td style="color:#94a3b8">${i.priority||'unknown'}</td><td style="color:#94a3b8">${i.area||'general'}</td></tr>`;
+    });
+    html += '</tbody></table></div></div></div>';
+  }
+  html += '<div class="card"><div class="card-hdr">Error Registry <span>'+list.length+' entries · '+list.filter(e=>e.status==='resolved').length+' resolved</span></div><div class="card-body"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Signature</th><th>Status</th><th>Freq</th><th>Seen</th><th>Cause</th></tr></thead><tbody>';
   sorted.forEach(e => {
     const pct = Math.min(100, ((e.occurrence_count||1)/maxOcc*100).toFixed(0));
     const pri = priorityClass(e);
@@ -400,7 +610,7 @@ function renderGoals() {
     html += '<div style="margin-top:10px">';
     subs.forEach(s => {
       const d = s.status === 'completed';
-      html += `<div class="goal-sub"><span>${s.description||'Untitled'}</span><span class="perm ${d?'perm-read':'perm-write'}">${d?' done':'⏳ '+s.status}</span></div>`;
+      html += `<div class="goal-sub"><span>${s.description||'Untitled'}</span><span class="perm ${d?'perm-read':'perm-write'}">${d?' done':' '+s.status}</span></div>`;
     });
     html += '</div>';
   } else {
@@ -526,13 +736,14 @@ function renderOpenCode() {
   // Commands
   html += '<div style="background:#0f172a;border-radius:6px;padding:10px">';
   html += '<div style="color:#64748b;margin-bottom:4px">CLI Commands</div>';
+  const verText = (DATA.versionText || '').trim() || '0.5.0';
   html += '<pre style="margin:0;color:#4ade80;font-family:monospace;line-height:1.5">' +
-    '--version     v0.3.0\n--list-tools  ' + totalTools + ' tools\n--permissive  bypass guard\n--debug       verbose logs' +
+    '--version     v' + verText + '\n--list-tools  ' + totalTools + ' tools\n--permissive  bypass guard\n--debug       verbose logs' +
     '</pre></div>';
 
   html += '</div></div></div>';
-  html += '</div></div>';
-
+  html += '</div></div>';  html += renderSkillGroups();
+  html += renderOpencodeExtras();
   document.getElementById('opencodeTab').innerHTML = html;
 }
 

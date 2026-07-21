@@ -1,8 +1,8 @@
 {
   "session": "2026-07-17-ai-core-overhaul",
   "date": "2026-07-17",
-  "tool_count_before": 68,
-  "tool_count_after": 79,
+  "tool_count_before": 115,
+  "tool_count_after": 115,
   "new_tools": [
     "read_memory_vector_search",
     "read_memory_hybrid_search",
@@ -20,15 +20,15 @@
     "scripts/hooks.py",
     "scripts/permission_audit.py",
     "scripts/tool_router.py",
-    "hermes-plugin/__init__.py",
-    "hermes-plugin/provider.py",
-    "hermes-plugin/plugin.yaml",
-    "hermes-plugin/README.md"
+    "plugins/hermes-plugin/__init__.py",
+    "plugins/hermes-plugin/provider.py",
+    "plugins/hermes-plugin/plugin.yaml",
+    "plugins/hermes-plugin/README.md"
   ],
   "optimizations": [
-    "inverted_index — BM25 O(n) to O(query_terms × matches)",
-    "LRU query cache — 128 entries",
-    "cross-encoder reranker — +15-25% relevance",
+    "inverted_index \u00e2\u20ac\u201d BM25 O(n) to O(query_terms \u00c3\u2014 matches)",
+    "LRU query cache \u00e2\u20ac\u201d 128 entries",
+    "cross-encoder reranker \u00e2\u20ac\u201d +15-25% relevance",
     "threading.Lock on inverted index"
   ],
   "bugs_fixed": [

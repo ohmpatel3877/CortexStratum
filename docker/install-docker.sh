@@ -6,19 +6,19 @@
 # Safe to run on systems that already have Docker.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/install-docker.sh | bash
-#   # or:
-#   bash docker/install-docker.sh
+# curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/install-docker.sh | bash
+# # or:
+# bash docker/install-docker.sh
 # ─────────────────────────────────────────────────────────────────────
 
 set -Eeuo pipefail
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; NC='\033[0m'
-info()  { echo -e "${CYAN}▶${NC} $1"; }
-ok()    { echo -e "${GREEN}✓${NC} $1"; }
-warn()  { echo -e "${YELLOW}⚠${NC} $1"; }
-fail()  { echo -e "${RED}✗${NC} $1"; exit 1; }
+info()  { echo -e "${CYAN}${NC} $1"; }
+ok()    { echo -e "${GREEN}${NC} $1"; }
+warn()  { echo -e "${YELLOW}${NC} $1"; }
+fail()  { echo -e "${RED}${NC} $1"; exit 1; }
 
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"

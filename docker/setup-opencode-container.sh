@@ -3,25 +3,25 @@
 # opencode-container-server — 1-Click Setup
 # ═══════════════════════════════════════════════════════════════
 #
-#  ⚡ You only need Docker (or Podman). That's it.
-#  ⚡ No Node.js. No Python. No npm. No pip.
-#  ⚡ Everything runs inside the container.
+# You only need Docker (or Podman). That's it.
+# No Node.js. No Python. No npm. No pip.
+# Everything runs inside the container.
 #
 # Deploys the opencode-container-server: CortexStratum MCP
 # server + OpenCode CLI + local memory + OpenCode Zen config.
 # Fully local — no cloud services required.
 #
 # Usage (recommended — clone first):
-#   git clone https://github.com/ohmpatel3877/CortexStratum.git
-#   cd CortexStratum
-#   bash docker/setup-opencode-container.sh
+# git clone https://github.com/ohmpatel3877/CortexStratum.git
+# cd CortexStratum
+# bash docker/setup-opencode-container.sh
 #
 # Usage (pipe-to-shell — not recommended, but available):
-#   curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/setup-opencode-container.sh | bash
+# curl -fsSL https://raw.githubusercontent.com/ohmpatel3877/CortexStratum/main/docker/setup-opencode-container.sh | bash
 #
 # Options:
-#   OPENCODE_ZEN_API_KEY=xxx bash ...                     # pass OpenCode Zen key inline
-#   bash setup-opencode-container.sh --engine podman      # force Podman over Docker
+# OPENCODE_ZEN_API_KEY=xxx bash ...                     # pass OpenCode Zen key inline
+# bash setup-opencode-container.sh --engine podman      # force Podman over Docker
 # ═══════════════════════════════════════════════════════════════
 
 set -Eeuo pipefail
@@ -32,10 +32,10 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 # ─── Colors ──────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; NC='\033[0m'
-info()  { echo -e "${CYAN}▶${NC} $1"; }
-ok()    { echo -e "${GREEN}✓${NC} $1"; }
-warn()  { echo -e "${YELLOW}⚠${NC} $1"; }
-fail()  { echo -e "${RED}✗${NC} $1"; exit 1; }
+info()  { echo -e "${CYAN}${NC} $1"; }
+ok()    { echo -e "${GREEN}${NC} $1"; }
+warn()  { echo -e "${YELLOW}${NC} $1"; }
+fail()  { echo -e "${RED}${NC} $1"; exit 1; }
 
 # ─── Header ──────────────────────────────────────────────────────
 echo ""

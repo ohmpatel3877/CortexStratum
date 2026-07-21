@@ -177,18 +177,18 @@ New agents follow the standard review process.
 |--------|--------|
 | **Role** | Proactive scope management — intercepts scope creep, nudges focus, enforces session pipeline |
 | **Skills** | task-orchestrator, brainstorm, concise-filter, anti-ai-pattern |
-| **Tools** | `read_focus_scope_check` — detect when the task exceeds declared scope<br>`read_focus_nudge` — send a focus reminder to the main agent<br>`read_focus_decompose` — split oversized prompts into atomic steps<br>`read_focus_prioritize` — rank sub-tasks by urgency/importance<br>`read_focus_pipeline_status` — current pipeline stage and progress<br>`write_focus_pipeline_advance` — move to next pipeline stage<br>`read_focus_global` — read cross-session state from ADHD global store<br>`write_focus_store_global` — persist data in ADHD global store<br>`write_focus_learn` — update ADHD behavioral model from outcomes |
+| **Tools** | `read_focus_scope_check` — detect when the task exceeds declared scope<br>`read_focus_nudge` — send a focus reminder to the main agent<br>`read_focus_decompose` — split oversized prompts into atomic steps<br>`read_focus_prioritize` — rank sub-tasks by urgency/importance<br>`read_focus_pipeline_status` — current pipeline stage and progress<br>`write_focus_pipeline_advance` — move to next pipeline stage<br>`read_focus_global` — read cross-session state from ADHD global store<br>`write_focus_store_global` — persist data in ADHD global store<br>`mutate_focus_learn` — update ADHD behavioral model from outcomes |
 | **Behavior** | Proactive, constantly evaluating whether the current trajectory is on-track. Interjects when scope drifts. |
 
-### @sim-engineer
-**Engineering simulation agent** — performs FEA, CFD, mechanics, and math computation with physical constraint validation.
+### @orchestrator
+**Pipeline orchestration agent** — runs multi-step DAG pipelines, manages background workstreams.
 
 | Aspect | Detail |
 |--------|--------|
-| **Role** | Analytical simulation — validates physical constraints, computes engineering quantities |
-| **Skills** | educate, brainstorm, framework-builder |
-| **Tools** | `read_sim_mech_stress` — compute stress from force/cross-section<br>`read_sim_mech_buckle` — Euler buckling critical load<br>`read_sim_mech_fatigue_goodman` — Goodman fatigue analysis<br>`read_sim_fea_beam` — 1D beam element FEA solver<br>`read_sim_fea_modal` — modal analysis (natural frequencies)<br>`read_sim_cfd_pipe` — pipe flow (Darcy-Weisbach, Moody)<br>`read_sim_cfd_drag` — drag force on a body<br>`read_sim_cfd_bernoulli` — Bernoulli pressure/velocity<br>`read_sim_matrix_solve` — solve linear system Ax=b<br>`read_sim_ode` — solve initial-value ODEs<br>`read_sim_plot` — generate ASCII/matplotlib plots |
-| **Behavior** | Analytical, precise. Cross-validates results against physical bounds. Refuses unphysical inputs. |
+| **Role** | Coordinates complex multi-phase workflows across agents |
+| **Skills** | task-orchestrator, brainstorm, framework-builder |
+| **Tools** | `read_dag_status` — list available DAG definitions<br>`write_dag_execute` — run a DAG pipeline<br>`write_dag_resume` — resume a failed DAG<br>`read_workstream_list` — list active workstreams<br>`read_workstream_status` — inspect a workstream's state |
+| **Behavior** | Systematic, manages multi-step execution, handles failures gracefully |
 
 ### @compact-operator
 **Context compaction and memory optimization agent** — manages token budgets, synthesizes context, runs consolidation cycles.
@@ -197,7 +197,7 @@ New agents follow the standard review process.
 |--------|--------|
 | **Role** | Efficiency-focused — proactively manages context window and memory health |
 | **Skills** | concise-filter, speed-optimizer |
-| **Tools** | `read_compact_token_velocity` — measure token consumption rate<br>`read_compact_synthesize` — produce compressed summary of a conversation chunk<br>`write_compact_execute` — execute a compaction (flush non-critical context)<br>`read_compact_status` — current compaction state and memory pressure<br>`read_consolidation_status` — health of memory consolidation<br>`write_consolidation_run` — trigger memory consolidation cycle<br>`write_mutate_execute` — general-purpose state mutation<br>`read_mutate_audit` — audit trail of recent mutations |
+| **Tools** | `read_compact_token_velocity` — measure token consumption rate<br>`read_compact_synthesize` — produce compressed summary of a conversation chunk<br>`write_compact_execute` — execute a compaction (flush non-critical context)<br>`read_compact_status` — current compaction state and memory pressure<br>`read_consolidation_status` — health of memory consolidation<br>`mutate_consolidation_run` — trigger memory consolidation cycle<br>`mutate_execute` — general-purpose state mutation<br>`read_mutate_audit` — audit trail of recent mutations |
 | **Behavior** | Efficiency-first. Monitors token usage and proactively suggests or performs context compaction when approaching budget limits. |
 
 ---
@@ -249,7 +249,7 @@ ENTER → SCOPE → DECOMPOSE → PRIORITIZE → EXECUTE → REVIEW → CLOSE
 | **PRIORITIZE** | Rank sub-tasks by urgency/importance | `read_focus_prioritize` |
 | **EXECUTE** | Advance pipeline as sub-tasks complete | `write_focus_pipeline_advance`, `read_focus_pipeline_status` |
 | **REVIEW** | Verify completion, check for scope drift | `read_focus_scope_check` |
-| **CLOSE** | Persist learnings, store cross-session state | `write_focus_store_global`, `write_focus_learn` |
+| **CLOSE** | Persist learnings, store cross-session state | `write_focus_store_global`, `mutate_focus_learn` |
 
 ### Scope Creep Detection
 
@@ -263,7 +263,7 @@ Suggest: deferring schema work to @architect in a follow-up session.
 
 ### Cross-Session Learning
 
-`@focus` persists behavioral data via `write_focus_store_global` and `write_focus_learn`. This data informs future sessions:
+`@focus` persists behavioral data via `write_focus_store_global` and `mutate_focus_learn`. This data informs future sessions:
 
 - **Session patterns**: which agents are used together, typical session durations
 - **Scope drift history**: recurring scope-creep patterns to watch for

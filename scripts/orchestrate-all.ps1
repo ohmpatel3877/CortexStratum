@@ -90,10 +90,10 @@ Write-Host "`n$Y  [1/6] Analyzing task complexity...$N"
 try {
     $analysisOutput = & $PythonCmd "$ProjectRoot\scripts\task-analyzer.py" --task "$Task" --json 2>&1
     $analysis = $analysisOutput | ConvertFrom-Json
-    Write-Step -color $G -label "✓" -message "Score: $($analysis.score)/100 ($($analysis.threshold))"
+    Write-Step -color $G -label "" -message "Score: $($analysis.score)/100 ($($analysis.threshold))"
     Add-StepResult -stepName "analyze" -success $true -output $analysis
 } catch {
-    Write-Step -color $R -label "✗" -message "Analysis failed: $_"
+    Write-Step -color $R -label "" -message "Analysis failed: $_"
     Add-StepResult -stepName "analyze" -success $false -error "$_"
     $Result.status = "failed"
     $Result.error = "Analysis failed"
@@ -108,7 +108,7 @@ if ($score -ge 25) {
     $planMode = "plan"
     try {
         $planOutput = & $PythonCmd "$ProjectRoot\scripts\task-orchestrator.py" --task "$Task" --plan 2>&1
-        Write-Step -color $G -label "✓" -message "Plan generated for complexity $score"
+        Write-Step -color $G -label "" -message "Plan generated for complexity $score"
         Add-StepResult -stepName "plan" -success $true -output $planOutput
     } catch {
         Write-Step -color $Y -label "~" -message "Plan skipped (orchestrator note)"
@@ -127,19 +127,19 @@ if ($Mode -eq "dag" -or ($Mode -eq "full" -and $score -ge 45)) {
         Write-Step -color $C -label "i" -message "No DagFile specified, using seed: $DagFile"
     }
     if (-not (Test-Path $DagFile)) {
-        Write-Step -color $R -label "✗" -message "DAG file not found: $DagFile"
+        Write-Step -color $R -label "" -message "DAG file not found: $DagFile"
         Add-StepResult -stepName "dispatch" -success $false -error "DAG file not found: $DagFile"
     } else {
         try {
             $dagOutput = & $PythonCmd "$ProjectRoot\scripts\dag-coordinator.py" --dag "$DagFile" --dry-run 2>&1
-            Write-Step -color $G -label "✓" -message "DAG plan generated"
+            Write-Step -color $G -label "" -message "DAG plan generated"
             Add-StepResult -stepName "dispatch" -success $true -output ($dagOutput | Out-String)
             if ($Mode -eq "dag" -or $Mode -eq "full") {
                 $dagExecOutput = & $PythonCmd "$ProjectRoot\scripts\dag-coordinator.py" --dag "$DagFile" 2>&1
-                Write-Step -color $G -label "✓" -message "DAG execution complete"
+                Write-Step -color $G -label "" -message "DAG execution complete"
             }
         } catch {
-            Write-Step -color $R -label "✗" -message "DAG dispatch failed: $_"
+            Write-Step -color $R -label "" -message "DAG dispatch failed: $_"
             Add-StepResult -stepName "dispatch" -success $false -error "$_"
         }
     }
@@ -148,10 +148,10 @@ if ($Mode -eq "dag" -or ($Mode -eq "full" -and $score -ge 45)) {
     $orchMode = if ($Mode -eq "full") { "orchestrate" } else { $Mode }
     try {
         $orchOutput = & $PythonCmd "$ProjectRoot\scripts\task-orchestrator.py" --task "$Task" "--$orchMode" 2>&1
-        Write-Step -color $G -label "✓" -message "Standard dispatch ($orchMode)"
+        Write-Step -color $G -label "" -message "Standard dispatch ($orchMode)"
         Add-StepResult -stepName "dispatch" -success $true -output ($orchOutput | Out-String)
     } catch {
-        Write-Step -color $R -label "✗" -message "Standard dispatch failed: $_"
+        Write-Step -color $R -label "" -message "Standard dispatch failed: $_"
         Add-StepResult -stepName "dispatch" -success $false -error "$_"
     }
 }
@@ -170,7 +170,7 @@ try {
         -Decision "Auto-orchestrated via orchestrate-all.ps1 in $Mode mode" `
         -Rationale "Complexity $score/100 ($($analysis.threshold))" `
         -Category process
-    Write-Step -color $G -label "✓" -message "Decision logged"
+    Write-Step -color $G -label "" -message "Decision logged"
     Add-StepResult -stepName "log-decision" -success $true -output "Logged to decision-registry.json"
 } catch {
     Write-Step -color $Y -label "~" -message "Decision log skipped: $_"
@@ -183,7 +183,7 @@ $Result.status = "completed"
 Add-StepResult -stepName "finalize" -success $true -output @{ status = "completed" }
 
 Write-Host "`n$G$BAR$N"
-Write-Host "$G  ✅ ORCHESTRATION COMPLETE$N"
+Write-Host "$G   ORCHESTRATION COMPLETE$N"
 Write-Host "$G$BAR$N"
 Write-Host "  Task:    $Task"
 Write-Host "  Mode:    $Mode"

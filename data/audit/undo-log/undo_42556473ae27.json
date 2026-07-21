@@ -1,0 +1,10 @@
+{
+  "checkpoint_id": "undo_42556473ae27",
+  "tool": "write_memory_add",
+  "args": {
+    "text": "SQLite+FTS5 migration complete",
+    "source": "test-migration"
+  },
+  "timestamp": "2026-07-21T00:00:37.514933+00:00",
+  "restored": false
+}

@@ -14,13 +14,11 @@ Usage:
 """
 
 import json
-import os
 import re
-import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 BASE = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE.parent
@@ -93,13 +91,17 @@ class DocGenerator:
             if m:
                 return m.group(1).strip()
         else:
-            m = re.search(r'<#(.+?)#>', raw, re.DOTALL)
+            m = re.search(r"<#(.+?)#>", raw, re.DOTALL)
             if m:
                 block = m.group(1).strip()
                 lines = [l.strip() for l in block.split("\n") if l.strip()]
                 parts = []
                 for l in lines:
-                    if re.match(r'^\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE)\s', l, re.IGNORECASE):
+                    if re.match(
+                        r"^\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE)\s",
+                        l,
+                        re.IGNORECASE,
+                    ):
                         parts.append("")
                     parts.append(l)
                 return "\n".join(p.strip() for p in parts if p.strip())
@@ -108,15 +110,17 @@ class DocGenerator:
     def _extract_py_functions(self, raw: str) -> List[Dict[str, str]]:
         funcs = []
         for m in re.finditer(
-            r'^def\s+(\w+)\s*\((.*?)\)\s*(->\s*(\w+(?:\[.*?\])?)\s*)?:',
+            r"^def\s+(\w+)\s*\((.*?)\)\s*(->\s*(\w+(?:\[.*?\])?)\s*)?:",
             raw,
             re.MULTILINE,
         ):
-            funcs.append({
-                "name": m.group(1),
-                "args": self._parse_args(m.group(2)),
-                "return_type": (m.group(4) or "").strip(),
-            })
+            funcs.append(
+                {
+                    "name": m.group(1),
+                    "args": self._parse_args(m.group(2)),
+                    "return_type": (m.group(4) or "").strip(),
+                }
+            )
         return funcs
 
     def _parse_args(self, args_str: str) -> List[Dict[str, str]]:
@@ -142,8 +146,12 @@ class DocGenerator:
         for p in parts:
             if not p or p == "self" or p == "cls":
                 continue
-            p = re.sub(r':\s*(?:list|dict|str|int|float|bool|Any|Optional|List|Dict|Tuple|Set)\[.*?\]', '', p)
-            p = re.sub(r':\s*\w+', '', p)
+            p = re.sub(
+                r":\s*(?:list|dict|str|int|float|bool|Any|Optional|List|Dict|Tuple|Set)\[.*?\]",
+                "",
+                p,
+            )
+            p = re.sub(r":\s*\w+", "", p)
             p = p.split("=")[0].strip()
             if p and p not in ("self", "cls", "*", "**kwargs", "**args"):
                 result.append({"name": p})
@@ -151,31 +159,27 @@ class DocGenerator:
 
     def _extract_py_classes(self, raw: str) -> List[Dict[str, Any]]:
         classes = []
-        for m in re.finditer(r'^class\s+(\w+)\s*(?:\(.*?\))?\s*:', raw, re.MULTILINE):
+        for m in re.finditer(r"^class\s+(\w+)\s*(?:\(.*?\))?\s*:", raw, re.MULTILINE):
             classes.append({"name": m.group(1)})
         return classes
 
     def _extract_py_cli_args(self, raw: str) -> List[Dict[str, str]]:
         args = []
-        for m in re.finditer(
-            r"""add_argument\s*\(['"]([-]{1,2}\w[\w-]*)['"]""", raw
-        ):
+        for m in re.finditer(r"""add_argument\s*\(['"]([-]{1,2}\w[\w-]*)['"]""", raw):
             args.append({"flag": m.group(1)})
         return args
 
     def _extract_ps_functions(self, raw: str) -> List[Dict[str, str]]:
         funcs = []
-        for m in re.finditer(
-            r'^function\s+(\w[\w-]*)\s*{', raw, re.MULTILINE
-        ):
+        for m in re.finditer(r"^function\s+(\w[\w-]*)\s*{", raw, re.MULTILINE):
             funcs.append({"name": m.group(1), "args": [], "return_type": ""})
         return funcs
 
     def _extract_ps_params(self, raw: str) -> List[Dict[str, str]]:
         params = []
-        for m in re.finditer(r'^\s*\[string\]\$(\w+)', raw, re.MULTILINE):
+        for m in re.finditer(r"^\s*\[string\]\$(\w+)", raw, re.MULTILINE):
             params.append({"flag": f"-{m.group(1)}", "type": "string"})
-        for m in re.finditer(r'^\s*\[string\[\]\]\$(\w+)', raw, re.MULTILINE):
+        for m in re.finditer(r"^\s*\[string\[\]\]\$(\w+)", raw, re.MULTILINE):
             params.append({"flag": f"-{m.group(1)}", "type": "string[]"})
         return params
 
@@ -213,9 +217,11 @@ class DocGenerator:
         }
 
         for line in raw.split("\n"):
-            mm = re.search(r'# --- (.+?) tools?\b', line)
+            mm = re.search(r"# --- (.+?) tools?\b", line)
             if mm:
-                current_module = module_map.get(mm.group(1).strip(), mm.group(1).strip())
+                current_module = module_map.get(
+                    mm.group(1).strip(), mm.group(1).strip()
+                )
 
             if not in_tools:
                 if "TOOLS = [" in line:
@@ -224,11 +230,17 @@ class DocGenerator:
                 continue
 
             stripped = line.strip()
-            delta = line.count("{") + line.count("[") - line.count("}") - line.count("]")
+            delta = (
+                line.count("{") + line.count("[") - line.count("}") - line.count("]")
+            )
             old_depth = top_depth
             top_depth += delta
 
-            is_single_line_tool = bool(re.search(r'"name"\s*:\s*"', stripped)) and stripped.startswith("{") and stripped.rstrip().endswith("},")
+            is_single_line_tool = (
+                bool(re.search(r'"name"\s*:\s*"', stripped))
+                and stripped.startswith("{")
+                and stripped.rstrip().endswith("},")
+            )
 
             if is_single_line_tool:
                 tool = self._parse_tool_block(stripped, current_module)
@@ -250,7 +262,7 @@ class DocGenerator:
         self.mcp_tools = tools
         return tools
 
-    def _parse_tool_block(self, block: str, module: str) -> Optional[Dict[str, Any]]:
+    def _parse_tool_block(self, block: str, module: str) -> Dict[str, Any] | None:
         name = ""
         desc = ""
         params: List[Dict[str, Any]] = []
@@ -269,7 +281,15 @@ class DocGenerator:
             block,
         ):
             pname = pm.group(1)
-            if pname in ("type", "required", "items", "inputSchema", "properties", "object", "array"):
+            if pname in (
+                "type",
+                "required",
+                "items",
+                "inputSchema",
+                "properties",
+                "object",
+                "array",
+            ):
                 continue
             ptype = pm.group(2)
             pdesc = ""
@@ -322,14 +342,16 @@ class DocGenerator:
                 category = "config"
 
             rel_path = fpath.relative_to(self.project_root)
-            results.append({
-                "filename": str(rel_path),
-                "file_size": len(raw),
-                "keys": keys[:20],
-                "record_count": record_count,
-                "category": category,
-                "has_schema": "$schema" in raw,
-            })
+            results.append(
+                {
+                    "filename": str(rel_path),
+                    "file_size": len(raw),
+                    "keys": keys[:20],
+                    "record_count": record_count,
+                    "category": category,
+                    "has_schema": "$schema" in raw,
+                }
+            )
         self.data_files = results
         return results
 
@@ -347,7 +369,15 @@ class DocGenerator:
 
     def _count_records(self, obj: Any) -> int:
         if isinstance(obj, dict):
-            for key in ("results", "records", "items", "entries", "decisions", "commitments", "tools"):
+            for key in (
+                "results",
+                "records",
+                "items",
+                "entries",
+                "decisions",
+                "commitments",
+                "tools",
+            ):
                 if key in obj and isinstance(obj[key], list):
                     return len(obj[key])
             for v in obj.values():
@@ -382,8 +412,8 @@ class DocGenerator:
             "",
             "## Project Overview",
             "",
-            f"| Metric | Count |",
-            f"|--------|-------|",
+            "| Metric | Count |",
+            "|--------|-------|",
             f"| Python scripts | {total_py} |",
             f"| PowerShell scripts | {total_ps} |",
             f"| Total functions | {total_funcs} |",
@@ -401,10 +431,14 @@ class DocGenerator:
         ]
 
         for s in self.scripts:
-            purpose = s["docstring"][:80].replace("\n", " ") if s["docstring"] else "*No docstring*"
+            purpose = (
+                s["docstring"][:80].replace("\n", " ")
+                if s["docstring"]
+                else "*No docstring*"
+            )
             funcs = ", ".join(f["name"] for f in s["functions"][:5])
             if len(s["functions"]) > 5:
-                funcs += f" +{len(s['functions'])-5} more"
+                funcs += f" +{len(s['functions']) - 5} more"
             lang = "py" if s["language"] == "python" else "ps1"
             lines.append(f"| `{s['filename']}` | {lang} | {purpose} | `{funcs}` |")
 
@@ -464,7 +498,7 @@ class DocGenerator:
             "## Integration Points",
             "",
             "### MCP Server",
-            f"- Entry point: `scripts/tools-mcp-server.py` — JSON-RPC over stdio",
+            "- Entry point: `scripts/tools-mcp-server.py` — JSON-RPC over stdio",
             f"- Exposes {len(self.mcp_tools)} tools across {len(modules)} modules",
             "- Protocol: Model Context Protocol (MCP) v2024-11-05",
             "",
@@ -494,10 +528,10 @@ class DocGenerator:
         scripts_rows = "".join(
             f"""
             <tr>
-                <td><code>{s['filename']}</code></td>
-                <td><span class="badge badge-{'py' if s['language'] == 'python' else 'ps'}">{'py' if s['language'] == 'python' else 'ps1'}</span></td>
-                <td>{self._html_escape(s['docstring'][:120])}</td>
-                <td><code>{', '.join(f['name'] for f in s['functions'][:3])}</code></td>
+                <td><code>{s["filename"]}</code></td>
+                <td><span class="badge badge-{"py" if s["language"] == "python" else "ps"}">{"py" if s["language"] == "python" else "ps1"}</span></td>
+                <td>{self._html_escape(s["docstring"][:120])}</td>
+                <td><code>{", ".join(f["name"] for f in s["functions"][:3])}</code></td>
             </tr>"""
             for s in self.scripts
         )
@@ -511,26 +545,30 @@ class DocGenerator:
                     f"<tr><td><code>{p['name']}</code></td><td><code>{p['type']}</code></td><td>{self._html_escape(p['description'])}</td></tr>"
                     for p in t["parameters"]
                 )
-                req = ", ".join(f"<code>{r}</code>" for r in t["required"]) if t["required"] else "<em>None</em>"
+                req = (
+                    ", ".join(f"<code>{r}</code>" for r in t["required"])
+                    if t["required"]
+                    else "<em>None</em>"
+                )
                 tool_cards += f"""
                 <div class="tool-card">
                     <div class="tool-header" onclick="this.parentElement.classList.toggle('expanded')">
-                        <span class="tool-name">{t['name']}</span>
-                        <span class="tool-params">{t['param_count']} params</span>
+                        <span class="tool-name">{t["name"]}</span>
+                        <span class="tool-params">{t["param_count"]} params</span>
                         <span class="expand-icon">&#9654;</span>
                     </div>
                     <div class="tool-body">
-                        <p class="tool-desc">{self._html_escape(t['description'])}</p>
+                        <p class="tool-desc">{self._html_escape(t["description"])}</p>
                         <p><strong>Required:</strong> {req}</p>
-                        {f'<table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody>{params_rows}</tbody></table>' if t['parameters'] else '<p><em>No parameters</em></p>'}
+                        {f'<table class="param-table"><thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead><tbody>{params_rows}</tbody></table>' if t["parameters"] else "<p><em>No parameters</em></p>"}
                     </div>
                 </div>"""
             tools_by_mod[mod] = tool_cards
 
         mod_sections = "".join(
             f"""
-            <div class="module-section" id="module-{mod.lower().replace(' ', '-')}">
-                <h3>{mod} <span class="tool-count">{len([t for t in self.mcp_tools if t['module'] == mod])} tools</span></h3>
+            <div class="module-section" id="module-{mod.lower().replace(" ", "-")}">
+                <h3>{mod} <span class="tool-count">{len([t for t in self.mcp_tools if t["module"] == mod])} tools</span></h3>
                 {tools_by_mod[mod]}
             </div>"""
             for mod in modules
@@ -539,72 +577,72 @@ class DocGenerator:
         data_rows = "".join(
             f"""
             <tr>
-                <td><code>{d['filename']}</code></td>
-                <td><span class="badge badge-{d['category']}">{d['category']}</span></td>
-                <td><code>{', '.join(d['keys'][:4])}</code></td>
-                <td>{d['record_count']}</td>
+                <td><code>{d["filename"]}</code></td>
+                <td><span class="badge badge-{d["category"]}">{d["category"]}</span></td>
+                <td><code>{", ".join(d["keys"][:4])}</code></td>
+                <td>{d["record_count"]}</td>
             </tr>"""
             for d in self.data_files
         )
 
-        html = f"""<!DOCTYPE html>
+        html = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CortexStratum API Documentation</title>
 <style>
-  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; }}
-  .layout {{ display: flex; min-height: 100vh; }}
-  .sidebar {{ width: 280px; background: #161b22; border-right: 1px solid #30363d; padding: 24px 16px; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; }}
-  .sidebar h2 {{ font-size: 14px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 8px; }}
-  .sidebar h2:first-child {{ margin-top: 0; }}
-  .sidebar a {{ display: block; padding: 4px 8px; color: #c9d1d9; text-decoration: none; font-size: 13px; border-radius: 6px; }}
-  .sidebar a:hover {{ background: #21262d; color: #58a6ff; }}
-  .sidebar .mod-link {{ padding-left: 16px; font-size: 12px; }}
-  .main {{ flex: 1; margin-left: 280px; padding: 32px 48px; max-width: 960px; }}
-  h1 {{ font-size: 28px; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }}
-  h2 {{ font-size: 20px; font-weight: 600; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; color: #f0f6fc; }}
-  h3 {{ font-size: 16px; font-weight: 600; margin: 24px 0 12px; color: #f0f6fc; display: flex; align-items: center; gap: 12px; }}
-  .subtitle {{ color: #8b949e; font-size: 14px; margin-bottom: 24px; }}
-  .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 24px; }}
-  .stat-card {{ background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-align: center; }}
-  .stat-card .num {{ font-size: 28px; font-weight: 700; color: #58a6ff; }}
-  .stat-card .label {{ font-size: 12px; color: #8b949e; margin-top: 4px; }}
-  table {{ width: 100%; border-collapse: collapse; margin: 12px 0 24px; font-size: 13px; }}
-  th, td {{ text-align: left; padding: 8px 12px; border-bottom: 1px solid #21262d; }}
-  th {{ background: #161b22; color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }}
-  tr:hover td {{ background: #161b22; }}
-  code {{ background: #21262d; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; color: #ffa657; }}
-  .badge {{ display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }}
-  .badge-py {{ background: #1a3a2b; color: #7ee787; }}
-  .badge-ps {{ background: #1a2d4a; color: #79c0ff; }}
-  .badge-config {{ background: #1a2d4a; color: #79c0ff; }}
-  .badge-results {{ background: #2d1a3a; color: #d2a8ff; }}
-  .badge-trace {{ background: #3a2a1a; color: #ffa657; }}
-  .badge-registry {{ background: #1a3a2b; color: #7ee787; }}
-  .tool-card {{ background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin: 8px 0; overflow: hidden; }}
-  .tool-header {{ display: flex; align-items: center; padding: 12px 16px; cursor: pointer; gap: 12px; user-select: none; }}
-  .tool-header:hover {{ background: #1c2128; }}
-  .tool-name {{ font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: #58a6ff; flex: 1; }}
-  .tool-params {{ font-size: 11px; color: #8b949e; background: #21262d; padding: 2px 8px; border-radius: 8px; }}
-  .expand-icon {{ color: #8b949e; font-size: 10px; transition: transform 0.2s; }}
-  .tool-card.expanded .expand-icon {{ transform: rotate(90deg); }}
-  .tool-body {{ display: none; padding: 0 16px 16px; }}
-  .tool-card.expanded .tool-body {{ display: block; }}
-  .tool-desc {{ color: #c9d1d9; margin-bottom: 8px; }}
-  .param-table {{ font-size: 12px; }}
-  .param-table th {{ background: #0d1117; }}
-  .module-section {{ margin-bottom: 16px; }}
-  .tool-count {{ font-size: 13px; font-weight: 400; color: #8b949e; }}
-  .gen-info {{ font-size: 12px; color: #484f58; margin-top: 40px; text-align: center; padding: 16px; border-top: 1px solid #21262d; }}
-  #search {{ width: 100%; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; margin-bottom: 16px; outline: none; }}
-  #search:focus {{ border-color: #58a6ff; }}
-  ::-webkit-scrollbar {{ width: 8px; }}
-  ::-webkit-scrollbar-track {{ background: #0d1117; }}
-  ::-webkit-scrollbar-thumb {{ background: #30363d; border-radius: 4px; }}
-  @media (max-width: 768px) {{ .sidebar {{ display: none; }} .main {{ margin-left: 0; padding: 16px; }} }}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.6; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 280px; background: #161b22; border-right: 1px solid #30363d; padding: 24px 16px; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; }
+  .sidebar h2 { font-size: 14px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin: 20px 0 8px; }
+  .sidebar h2:first-child { margin-top: 0; }
+  .sidebar a { display: block; padding: 4px 8px; color: #c9d1d9; text-decoration: none; font-size: 13px; border-radius: 6px; }
+  .sidebar a:hover { background: #21262d; color: #58a6ff; }
+  .sidebar .mod-link { padding-left: 16px; font-size: 12px; }
+  .main { flex: 1; margin-left: 280px; padding: 32px 48px; max-width: 960px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: 20px; font-weight: 600; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d; color: #f0f6fc; }
+  h3 { font-size: 16px; font-weight: 600; margin: 24px 0 12px; color: #f0f6fc; display: flex; align-items: center; gap: 12px; }
+  .subtitle { color: #8b949e; font-size: 14px; margin-bottom: 24px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+  .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-card .num { font-size: 28px; font-weight: 700; color: #58a6ff; }
+  .stat-card .label { font-size: 12px; color: #8b949e; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #21262d; }
+  th { background: #161b22; color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+  tr:hover td { background: #161b22; }
+  code { background: #21262d; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px; color: #ffa657; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-py { background: #1a3a2b; color: #7ee787; }
+  .badge-ps { background: #1a2d4a; color: #79c0ff; }
+  .badge-config { background: #1a2d4a; color: #79c0ff; }
+  .badge-results { background: #2d1a3a; color: #d2a8ff; }
+  .badge-trace { background: #3a2a1a; color: #ffa657; }
+  .badge-registry { background: #1a3a2b; color: #7ee787; }
+  .tool-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin: 8px 0; overflow: hidden; }
+  .tool-header { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; gap: 12px; user-select: none; }
+  .tool-header:hover { background: #1c2128; }
+  .tool-name { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: #58a6ff; flex: 1; }
+  .tool-params { font-size: 11px; color: #8b949e; background: #21262d; padding: 2px 8px; border-radius: 8px; }
+  .expand-icon { color: #8b949e; font-size: 10px; transition: transform 0.2s; }
+  .tool-card.expanded .expand-icon { transform: rotate(90deg); }
+  .tool-body { display: none; padding: 0 16px 16px; }
+  .tool-card.expanded .tool-body { display: block; }
+  .tool-desc { color: #c9d1d9; margin-bottom: 8px; }
+  .param-table { font-size: 12px; }
+  .param-table th { background: #0d1117; }
+  .module-section { margin-bottom: 16px; }
+  .tool-count { font-size: 13px; font-weight: 400; color: #8b949e; }
+  .gen-info { font-size: 12px; color: #484f58; margin-top: 40px; text-align: center; padding: 16px; border-top: 1px solid #21262d; }
+  #search { width: 100%; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; margin-bottom: 16px; outline: none; }
+  #search:focus { border-color: #58a6ff; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0d1117; }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+  @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; padding: 16px; } }
 </style>
 </head>
 <body>
@@ -622,7 +660,7 @@ class DocGenerator:
   </nav>
   <div class="main">
     <h1>CortexStratum</h1>
-    <p class="subtitle">API Documentation &mdash; {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+    <p class="subtitle">API Documentation &mdash; {datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")}</p>
 
     <section id="overview">
       <h2>Project Overview</h2>
@@ -719,15 +757,21 @@ function filterDocs(q) {{
             ],
             "summary": {
                 "total_scripts": len(self.scripts),
-                "total_python": sum(1 for s in self.scripts if s["language"] == "python"),
-                "total_powershell": sum(1 for s in self.scripts if s["language"] == "powershell"),
+                "total_python": sum(
+                    1 for s in self.scripts if s["language"] == "python"
+                ),
+                "total_powershell": sum(
+                    1 for s in self.scripts if s["language"] == "powershell"
+                ),
                 "total_mcp_tools": len(self.mcp_tools),
                 "total_mcp_modules": len(set(t["module"] for t in self.mcp_tools)),
                 "total_data_files": len(self.data_files),
             },
         }
         path = self.data_dir / "doc-index.json"
-        path.write_text(json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8")
+        path.write_text(
+            json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
         return str(path)
 
     def generate_tool_inventory(self) -> str:
@@ -766,9 +810,9 @@ function filterDocs(q) {{
     # ------------------------------------------------------------------
 
     def print_summary(self):
-        print(f"\n{B}{'='*60}{N}")
+        print(f"\n{B}{'=' * 60}{N}")
         print(f"{BOLD}CortexStratum Documentation Summary{N}")
-        print(f"{B}{'='*60}{N}")
+        print(f"{B}{'=' * 60}{N}")
 
         total_py = sum(1 for s in self.scripts if s["language"] == "python")
         total_ps = sum(1 for s in self.scripts if s["language"] == "powershell")
@@ -776,10 +820,14 @@ function filterDocs(q) {{
         total_classes = sum(len(s["classes"]) for s in self.scripts)
         modules = sorted(set(t["module"] for t in self.mcp_tools))
 
-        print(f"\n  {G}Scripts{N}:    {total_py} Python, {total_ps} PowerShell ({len(self.scripts)} total)")
+        print(
+            f"\n  {G}Scripts{N}:    {total_py} Python, {total_ps} PowerShell ({len(self.scripts)} total)"
+        )
         print(f"  {G}Functions{N}:  {total_funcs}")
         print(f"  {G}Classes{N}:    {total_classes}")
-        print(f"  {G}MCP Tools{N}:  {len(self.mcp_tools)} across {len(modules)} modules")
+        print(
+            f"  {G}MCP Tools{N}:  {len(self.mcp_tools)} across {len(modules)} modules"
+        )
         print(f"  {G}Data Files{N}: {len(self.data_files)}")
 
         print(f"\n  {BOLD}Scripts:{N}")
@@ -825,9 +873,9 @@ function filterDocs(q) {{
         inv_path = self.generate_tool_inventory()
         print(f"  {G}ok{N} {inv_path}")
 
-        print(f"\n{G}{'='*60}{N}")
+        print(f"\n{G}{'=' * 60}{N}")
         print(f"{G}Documentation generated successfully.{N}")
-        print(f"{G}{'='*60}{N}")
+        print(f"{G}{'=' * 60}{N}")
 
 
 def watch_mode(dg: DocGenerator):
@@ -860,11 +908,19 @@ def watch_mode(dg: DocGenerator):
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="CortexStratum Documentation Generator")
+    parser = argparse.ArgumentParser(
+        description="CortexStratum Documentation Generator"
+    )
     parser.add_argument("--scan", action="store_true", help="Quick scan, print summary")
-    parser.add_argument("--generate-md", action="store_true", help="Generate markdown docs")
-    parser.add_argument("--generate-html", action="store_true", help="Generate HTML docs")
-    parser.add_argument("--generate-all", action="store_true", help="Generate everything")
+    parser.add_argument(
+        "--generate-md", action="store_true", help="Generate markdown docs"
+    )
+    parser.add_argument(
+        "--generate-html", action="store_true", help="Generate HTML docs"
+    )
+    parser.add_argument(
+        "--generate-all", action="store_true", help="Generate everything"
+    )
     parser.add_argument("--watch", action="store_true", help="Watch mode")
 
     args = parser.parse_args()

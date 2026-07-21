@@ -89,14 +89,14 @@ echo "╠═══ PERMISSION DIAGNOSIS ═══╣"
 
 # Detect common issues
 if [ -r "$FILE" ]; then
-  echo "  ✓ World-readable"
+  echo "   World-readable"
 else
-  echo "  ✗ NOT world-readable — check group/other permissions"
+  echo "   NOT world-readable — check group/other permissions"
 fi
 
 OWNER=$(stat -c '%u' "$FILE" 2>/dev/null || stat -f '%u' "$FILE" 2>/dev/null)
 SMB_UID=$(id "$SMB_USER" 2>/dev/null | grep -oP 'uid=\K[0-9]+' || echo "")
 if [ -n "$SMB_UID" ] && [ "$OWNER" != "$SMB_UID" ]; then
-  echo "  ⚠ File owner ($OWNER) ≠ SMB user ($SMB_USER/$SMB_UID)"
+  echo "   File owner ($OWNER) ≠ SMB user ($SMB_USER/$SMB_UID)"
   echo "    Fix: chown $SMB_USER '$FILE'"
 fi

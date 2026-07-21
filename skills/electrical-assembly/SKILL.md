@@ -8,7 +8,7 @@ Use when designing circuits, wiring diagrams, Arduino pin assignments, power bud
 
 ## Module Location
 
-`C:\Users\ohmpa\github\CortexStratum\electrical-module\`
+`C:\Users\ohmpa\CortexStratum\engine\electrical-module\`
 
 ## Tools
 
@@ -23,7 +23,7 @@ Complete circuit design system with:
 ### Usage
 
 ```bash
-python electrical-module/circuit_designer.py
+python engine/electrical-module/circuit_designer.py
 ```
 
 Output: circuit validation, power budget, pin map, and SVG wiring diagram generated in Downloads.

@@ -17,7 +17,6 @@ Design:
 
 import json
 import os
-import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -56,7 +55,11 @@ class HookManager:
     ):
         self._memory_search = memory_search_fn
         self._trace_handle = trace_handle_fn
-        self._data_dir = Path(data_dir) if data_dir else Path(__file__).resolve().parent.parent / "data"
+        self._data_dir = (
+            Path(data_dir)
+            if data_dir
+            else Path(__file__).resolve().parent.parent / "data"
+        )
         self._session_log_dir = self._data_dir / "session-logs"
         self._session_log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -290,24 +293,32 @@ class HookManager:
         # If it's a decision, also push to decision registry
         if event_type == "decision" and self._trace_handle:
             try:
-                self._trace_handle("write_dtrace_add", {
-                    "title": description[:80],
-                    "decision": description,
-                    "rationale": (metadata or {}).get("rationale", ""),
-                    "context": (metadata or {}).get("context", "Session observation"),
-                    "category": (metadata or {}).get("category", "process"),
-                })
+                self._trace_handle(
+                    "write_dtrace_add",
+                    {
+                        "title": description[:80],
+                        "decision": description,
+                        "rationale": (metadata or {}).get("rationale", ""),
+                        "context": (metadata or {}).get(
+                            "context", "Session observation"
+                        ),
+                        "category": (metadata or {}).get("category", "process"),
+                    },
+                )
             except Exception:
                 pass
 
         # If it's an error, also push to error registry
         if event_type == "error" and self._trace_handle:
             try:
-                self._trace_handle("write_xtrace_log_error", {
-                    "command": (metadata or {}).get("command", "unknown"),
-                    "error_output": description,
-                    "exit_code": (metadata or {}).get("exit_code", -1),
-                })
+                self._trace_handle(
+                    "write_xtrace_log_error",
+                    {
+                        "command": (metadata or {}).get("command", "unknown"),
+                        "error_output": description,
+                        "exit_code": (metadata or {}).get("exit_code", -1),
+                    },
+                )
             except Exception:
                 pass
 
@@ -319,7 +330,7 @@ class HookManager:
         try:
             with open(log_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(obs) + "\n")
-        except (OSError, IOError):
+        except OSError:
             pass  # fail silently for transient filesystem issues
 
     # ------------------------------------------------------------------
@@ -408,7 +419,7 @@ class HookManager:
         try:
             with open(log_file, "w", encoding="utf-8") as f:
                 json.dump(record, f, indent=2, ensure_ascii=False)
-        except (OSError, IOError):
+        except OSError:
             pass
 
         # If requested and we have a memory search, persist key observations
@@ -454,14 +465,21 @@ def _check_compaction_needed():
     """Auto-check if compaction is needed after session events."""
     try:
         import importlib.util
-        spec = importlib.util.spec_from_file_location("compact_module",
-            os.path.join(os.path.dirname(__file__), "compact-module.py"))
+
+        spec = importlib.util.spec_from_file_location(
+            "compact_module",
+            os.path.join(os.path.dirname(__file__), "../engine/compact-module.py"),
+        )
         if spec and spec.loader:
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
             velocity = mod.get_token_velocity()
             if velocity.get("spike_detected"):
-                return {"compaction_recommended": True, "velocity": velocity["velocity_5min"], "message": "Token velocity spike detected. Run write_compact_execute to condense."}
+                return {
+                    "compaction_recommended": True,
+                    "velocity": velocity["velocity_5min"],
+                    "message": "Token velocity spike detected. Run write_compact_execute to condense.",
+                }
     except Exception:
         pass
     return {"compaction_recommended": False}
@@ -550,17 +568,21 @@ if __name__ == "__main__":
     print(f"  Decisions: {len(ctx['decisions'])}")
     print(f"  Errors: {len(ctx['errors'])}")
 
-    obs = hm.observe("test-session-001", "milestone", "Hooks module implemented and tested")
-    print(f"\n=== OBSERVE ===")
+    obs = hm.observe(
+        "test-session-001", "milestone", "Hooks module implemented and tested"
+    )
+    print("\n=== OBSERVE ===")
     print(f"  Observation: {obs['id']} — {obs['description']}")
 
     status = hm.session_status("test-session-001")
-    print(f"\n=== STATUS ===")
+    print("\n=== STATUS ===")
     print(f"  Found: {status['found']}")
     print(f"  Observations: {status['observation_count']}")
 
-    end = hm.session_end("test-session-001", "Hooks module complete", persist_observations=False)
-    print(f"\n=== SESSION END ===")
+    end = hm.session_end(
+        "test-session-001", "Hooks module complete", persist_observations=False
+    )
+    print("\n=== SESSION END ===")
     print(f"  Status: {end['status']}")
     print(f"  Observations finalized: {end['observation_count']}")
 

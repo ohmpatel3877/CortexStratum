@@ -1,17 +1,11 @@
 {
   "phases": [
     {
-      "phase": "help",
-      "start_time": "2026-07-18T15:43:55.073022+00:00",
-      "summary": "",
-      "tool_count": 0
-    },
-    {
-      "phase": "context",
-      "start_time": "2026-07-18T15:43:55.088286+00:00",
-      "summary": "",
-      "tool_count": 0
+      "phase": "setup",
+      "start_time": "2026-07-20T00:00:00",
+      "summary": "v0.5.0 release prep",
+      "tool_count": 115
     }
   ],
-  "current_phase": "context"
+  "current_phase": "setup"
 }

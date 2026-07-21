@@ -1,3 +1,0 @@
-# Core dependencies — zero pip packages needed
-# CortexStratum runs entirely on Python stdlib.
-# This file exists for compatibility; no packages are required.

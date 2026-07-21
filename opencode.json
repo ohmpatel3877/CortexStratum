@@ -1,14 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "name": "CortexStratum",
-  "version": "0.4.0",
-  "description": "124-tool MCP server: BM25+SQLite memory, trace system, skill routing, 13 multi-modal modules, simulation engines, compaction/mutation/pedagogy cognitive architecture.",
+  "version": "0.5.0",
+  "description": "115-tool MCP server: SQLite+FTS5 memory, trace system, skill routing, 13 multi-modal modules, CAD, electrical, compaction/mutation/pedagogy cognitive architecture.",
   "icon": "",
 
   "mcpServers": {
     "CortexStratum": {
       "name": "CortexStratum",
-      "description": "124-tool MCP server: BM25+SQLite memory, simulation, cognitive pipeline",
+      "description": "115-tool MCP server: SQLite+FTS5 memory, cognitive pipeline",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {
@@ -142,7 +142,7 @@
     "CortexStratum": {
       "path": "~/github/CortexStratum",
       "repository": "ohmpatel3877/CortexStratum",
-      "description": "124-tool MCP server: BM25+SQLite memory, simulation engines, orchestration. v0.4.0."
+      "description": "115-tool MCP server: SQLite+FTS5 memory, CAD/electrical, orchestration. v0.5.0."
     }
   },
 

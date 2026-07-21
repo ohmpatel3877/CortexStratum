@@ -32,7 +32,6 @@ $warn    = [char]::ConvertFromUtf32(0x26A0) + [char]::ConvertFromUtf32(0xFE0F)
 # ---- Path derivation (never rely on $PSScriptRoot) ----
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDir  = Split-Path -Parent $ScriptPath
-$RuleFile   = Join-Path (Join-Path $ScriptDir '..') 'rules\logic_puzzle_module.md'
 
 # Required reasoning headers for the DCP pipeline
 $RequiredHeaders = @('LOGIC DRAFT', 'EDGE-CASE CRITIC', 'AST PROOF')
@@ -74,29 +73,38 @@ function Get-LogicPrompt {
         [string]$Task
     )
 
+    # Load verification rules from verifier_middleware.py
     $ruleContent = ''
-    if (Test-Path -LiteralPath $RuleFile) {
-        try {
-            $ruleContent = Get-Content -LiteralPath $RuleFile -Raw -Encoding UTF8
-        } catch {
-            $ruleContent = ''
-        }
+    try {
+        $verifierPath = Join-Path $ScriptDir 'verifier_middleware.py'
+        $code = @'
+import sys, json
+sys.path.insert(0, r'SCRIPTS_DIR')
+from verifier_middleware import SECURITY_PATTERNS
+rules = {
+    'patterns': [{'type': p['type'], 'severity': p['severity']} for p in SECURITY_PATTERNS],
+    'count': len(SECURITY_PATTERNS)
+}
+print(json.dumps(rules))
+'@ -replace 'SCRIPTS_DIR', $ScriptDir
+        $ruleContent = python -c $code 2>$null
+    } catch {
+        $ruleContent = ''
     }
 
     if ([string]::IsNullOrWhiteSpace($ruleContent)) {
-        $ruleContent = @"
-EXECUTION MATRIX (default):
-1. LOGIC DRAFT      - State the problem, define invariants, sketch the solution path.
-2. EDGE-CASE CRITIC - Enumerate boundary conditions, failure modes, and counterexamples.
-3. AST PROOF        - Provide a formal/structured proof that the solution is correct.
-"@
+        $ruleContent = '{"patterns":[],"count":0}'
     }
 
-    $prompt = @"
-You are operating inside the Logic Puzzle Module's Draft, Critic, Prove (DCP) pipeline.
+    $parsed = ConvertFrom-Json $ruleContent
+    $patternCount = $parsed.count
+    $types = ($parsed.patterns | ForEach-Object { $_.type }) -join ', '
 
-RULE FILE CONTEXT:
-$ruleContent
+    $prompt = @"
+You are operating inside the CortexStratum verified reasoning pipeline.
+
+VERIFIER RULES LOADED:
+The verifier middleware has $patternCount security patterns: $types
 
 TASK:
 $Task

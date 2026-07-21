@@ -6,8 +6,8 @@ User signs up manually, then pastes API keys into a collected file.
 
 import asyncio
 import json
-import os
 from pathlib import Path
+
 from playwright.async_api import async_playwright
 
 PROVIDERS = [
@@ -87,19 +87,19 @@ async def main():
 
         for i, provider in enumerate(PROVIDERS):
             name = provider["name"]
-            print(f"\n{'='*60}")
-            print(f"[{i+1}/{len(PROVIDERS)}] {name}")
+            print(f"\n{'=' * 60}")
+            print(f"[{i + 1}/{len(PROVIDERS)}] {name}")
             print(f"  Signup: {provider['signup_url']}")
             print(f"  Notes:  {provider['notes']}")
             print(f"  Env:    {provider['env_var']}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
 
             page = await context.new_page()
             await page.goto(provider["signup_url"], wait_until="domcontentloaded")
 
             # Wait for user to sign up and get key
             print(f"\n  -> Sign up at {provider['signup_url']} and get your API key.")
-            print(f"  -> Paste your API key below (or press Enter to skip):")
+            print("  -> Paste your API key below (or press Enter to skip):")
 
             user_input = input(f"  API Key for {name}: ").strip()
             if user_input:

@@ -9,7 +9,7 @@ Central registry of every CLI command available in CortexStratum.
 | `python scripts/tools-mcp-server.py` | Start MCP server (stdio transport) |
 | `python scripts/tools-mcp-server.py --help` | Show usage information |
 | `python scripts/tools-mcp-server.py --version` | Show version string |
-| `python scripts/tools-mcp-server.py --list-tools` | List all 68 tools as JSON |
+| `python scripts/tools-mcp-server.py --list-tools` | List all 122 tools as JSON |
 | `python scripts/tools-mcp-server.py --permissive` | Start in permissive mode (no permission checks) |
 | `python scripts/tools-mcp-server.py --debug` | Start with verbose debug logging |
 
@@ -21,7 +21,7 @@ Central registry of every CLI command available in CortexStratum.
 | `python scripts/test-skill-pipeline.py` | Skill pipeline integrity | 157 |
 | `python scripts/test-smoke-server.py` | Server health checks | 8 |
 | `python scripts/verifier_middleware.py` | Verifier module tests | 15 |
-| `python scripts/memory_search.py` | BM25 engine smoke test | -- |
+| `python scripts/memory_search.py` | SQLite+FTS5 memory smoke test | -- |
 | `python scripts/trace.py error-status` | Error registry status | -- |
 | `python scripts/trace.py decision-status` | Decision registry status | -- |
 | `python scripts/trace.py goal-status` | Goal registry status | -- |
@@ -73,7 +73,7 @@ Central registry of every CLI command available in CortexStratum.
 
 | Command | Description |
 |---------|-------------|
-| `python scripts/memory_search.py` | BM25 engine smoke test |
+| `python scripts/memory_search.py` | SQLite+FTS5 engine smoke test |
 | View `.memory/ne/memories.json` | Direct memory store inspection |
 | View `data/synonyms.json` | Synonym expansion map |
 

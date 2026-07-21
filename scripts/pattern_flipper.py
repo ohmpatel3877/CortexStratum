@@ -10,23 +10,25 @@ Usage:
     result = flipper.process("Design a distributed system", strategy="auto")
 """
 
-import json, sys, os, re, time, hashlib, itertools
-from dataclasses import dataclass, field, asdict
-from typing import Optional, Callable, Any
+import json
+import re
+import time
+from collections.abc import Callable
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from pathlib import Path
+from typing import Any
 
+#  Strategy Definitions
 
-#  Strategy Definitions 
 
 class Strategy(Enum):
-    COT = "chain-of-thought"         # Step-by-step linear reasoning
-    TOT = "tree-of-thoughts"         # Parallel exploration + pruning
-    REFLEXION = "reflexion"          # Generate → evaluate → refine loop
-    CONSTITUTIONAL = "constitutional" # Self-check against principles
-    MOA = "mixture-of-agents"        # Multiple specialized agents collaborate
-    SELF_REWARDING = "self-rewarding" # Self-generated critique + improvement
-    AUTO = "auto"                    # Router decides
+    COT = "chain-of-thought"  # Step-by-step linear reasoning
+    TOT = "tree-of-thoughts"  # Parallel exploration + pruning
+    REFLEXION = "reflexion"  # Generate → evaluate → refine loop
+    CONSTITUTIONAL = "constitutional"  # Self-check against principles
+    MOA = "mixture-of-agents"  # Multiple specialized agents collaborate
+    SELF_REWARDING = "self-rewarding"  # Self-generated critique + improvement
+    AUTO = "auto"  # Router decides
 
 
 STRATEGY_DESCRIPTIONS = {
@@ -53,21 +55,36 @@ STRATEGY_DESCRIPTIONS = {
     },
     Strategy.CONSTITUTIONAL: {
         "description": "Output constrained by a set of principles with self-checks",
-        "best_for": ["content moderation", "safety-critical", "policy compliance", "ethical decisions"],
+        "best_for": [
+            "content moderation",
+            "safety-critical",
+            "policy compliance",
+            "ethical decisions",
+        ],
         "tokens": "medium",
         "strength": "Safe, principled, auditable",
         "weakness": "Can be overly cautious, rigid",
     },
     Strategy.MOA: {
         "description": "Multiple specialist agents collaborate via debate or voting",
-        "best_for": ["architecture", "security audit", "complex decisions", "consensus problems"],
+        "best_for": [
+            "architecture",
+            "security audit",
+            "complex decisions",
+            "consensus problems",
+        ],
         "tokens": "very high",
         "strength": "Diverse perspectives, reduces blind spots",
         "weakness": "Expensive, coordination overhead",
     },
     Strategy.SELF_REWARDING: {
         "description": "Model generates its own critique and reward signal, self-improves",
-        "best_for": ["code optimization", "prompt engineering", "system design", "iterative tasks"],
+        "best_for": [
+            "code optimization",
+            "prompt engineering",
+            "system design",
+            "iterative tasks",
+        ],
         "tokens": "medium-high",
         "strength": "Autonomous improvement, no external judge needed",
         "weakness": "Reward hacking, can reinforce bad patterns",
@@ -75,7 +92,7 @@ STRATEGY_DESCRIPTIONS = {
 }
 
 
-#  Prompt Templates per Strategy 
+#  Prompt Templates per Strategy
 
 STRATEGY_PROMPTS = {
     Strategy.COT: """<strategy>chain-of-thought</strategy>
@@ -91,7 +108,6 @@ Work through this step-by-step:
 For each step, show your reasoning explicitly before moving to the next.
 </protocol>
 <task>{prompt}</task>""",
-
     Strategy.TOT: """<strategy>tree-of-thoughts</strategy>
 <protocol>
 Instead of a single chain, explore MULTIPLE reasoning paths:
@@ -108,7 +124,6 @@ Format each branch as:
   Branch C: [approach] → [step 2] → [step 3] → [verdict]
 </protocol>
 <task>{prompt}</task>""",
-
     Strategy.REFLEXION: """<strategy>reflexion</strategy>
 <protocol>
 Use the reflexion loop — generate, evaluate, reflect, improve:
@@ -122,7 +137,6 @@ PASS 5 — Final evaluation. Is it good enough? If not, flag remaining issues.
 Label each pass clearly with [PASS 1], [PASS 2], etc.
 </protocol>
 <task>{prompt}</task>""",
-
     Strategy.CONSTITUTIONAL: """<strategy>constitutional</strategy>
 <constitution>
 Your output MUST satisfy these principles:
@@ -139,7 +153,6 @@ Your output MUST satisfy these principles:
 4. Output the FINAL version with a note of what changed
 </protocol>
 <task>{prompt}</task>""",
-
     Strategy.MOA: """<strategy>mixture-of-agents</strategy>
 <protocol>
 Role-play multiple experts collaborating on this task:
@@ -152,7 +165,6 @@ EXPERT 4 — Skeptic: Focus on what could go wrong, hidden assumptions
 Each expert provides their analysis independently, then a moderator synthesizes.
 </protocol>
 <task>{prompt}</task>""",
-
     Strategy.SELF_REWARDING: """<strategy>self-rewarding</strategy>
 <protocol>
 You will improve your own output through self-critique:
@@ -188,8 +200,12 @@ class PatternFlipper:
         self.default_strategy = default_strategy
         self.history = []
 
-    def process(self, prompt: str, strategy: Optional[Strategy] = None,
-                inference_fn: Optional[Callable] = None) -> PatternResult:
+    def process(
+        self,
+        prompt: str,
+        strategy: Strategy | None = None,
+        inference_fn: Callable | None = None,
+    ) -> PatternResult:
         """Process a prompt through the selected or auto-detected strategy."""
         strategy = strategy or self.default_strategy
         if strategy == Strategy.AUTO:
@@ -286,19 +302,28 @@ class PatternFlipper:
         return results
 
 
-#  CLI 
+#  CLI
+
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Pattern Flipper")
     parser.add_argument("--prompt", "-p", help="The prompt to process")
-    parser.add_argument("--strategy", "-s", choices=[s.value for s in Strategy] + ["auto"], default="auto")
-    parser.add_argument("--compare", action="store_true", help="Run all strategies and compare")
+    parser.add_argument(
+        "--strategy",
+        "-s",
+        choices=[s.value for s in Strategy] + ["auto"],
+        default="auto",
+    )
+    parser.add_argument(
+        "--compare", action="store_true", help="Run all strategies and compare"
+    )
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--list", action="store_true", help="List available strategies")
-    
+
     args = parser.parse_args()
-    
+
     if args.list:
         print("Available Strategies:")
         print("=" * 60)
@@ -314,28 +339,34 @@ def main():
         args.prompt = input("Enter your prompt: ")
 
     flipper = PatternFlipper()
-    
+
     if args.compare:
-        results = flipper.compare_strategies(args.prompt, lambda p: f"[SIMULATED: {len(p)} chars]")
+        results = flipper.compare_strategies(
+            args.prompt, lambda p: f"[SIMULATED: {len(p)} chars]"
+        )
         if args.json:
-            print(json.dumps({k: asdict(v) for k, v in results.items()}, indent=2, default=str))
+            print(
+                json.dumps(
+                    {k: asdict(v) for k, v in results.items()}, indent=2, default=str
+                )
+            )
         else:
             for name, result in results.items():
-                print(f"\n{'='*50}")
+                print(f"\n{'=' * 50}")
                 print(f"  {name.upper()}")
-                print(f"{'='*50}")
+                print(f"{'=' * 50}")
                 print(f"  Best for: {', '.join(result.metadata['best_for'])}")
                 print(f"  Token cost: {result.metadata['token_cost']}")
     else:
         strategy = Strategy(args.strategy) if args.strategy != "auto" else Strategy.AUTO
         result = flipper.process(args.prompt, strategy=strategy)
-        
+
         if args.json:
             print(json.dumps(asdict(result), indent=2, default=str))
         else:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f" Pattern Flipper — Strategy: {result.strategy.value}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             print(f" {STRATEGY_DESCRIPTIONS[result.strategy]['description']}")
             print(f"\n Augmented Prompt ({len(result.prompt.split())} tokens):")
             print("-" * 40)

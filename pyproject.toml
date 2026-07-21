@@ -1,9 +1,42 @@
-[tool.pytest.ini_options]
-minversion = "7.0"
-testpaths = ["scripts"]
-python_files = ["test-*.py"]
-addopts = "-v --tb=short"
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "network: marks tests that require network access",
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "cortexstratum"
+version = "0.5.0"
+description = "115-tool MCP server for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI"
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+exclude = [
+    ".build-venv",
+    "build",
+    "dist",
+    ".memory",
 ]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "N", "UP"]
+ignore = [
+    "E501",    # line too long — many long strings in tool definitions
+    "E402",    # module import not at top — sys.path manipulation needed
+    "N802",    # function name should be lowercase — some legacy names
+    "N803",    # argument name should be lowercase
+    "N806",    # variable in function should be lowercase
+    "N815",    # mixedCase variable in class scope
+    "UP007",   # use X | Y for unions — Python 3.10+ but many Optional[T] patterns
+    "UP006",   # use X instead of Optional[X] for type annotation
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cortexstratum"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"scripts/test-*.py" = ["F811", "F841"]
+
+[tool.pytest]
+addopts = "-v --tb=short"
+testpaths = ["scripts"]

@@ -41,6 +41,12 @@
 git clone https://github.com/ohmpatel3877/CortexStratum.git
 cd CortexStratum
 
+# Install dev tools (optional)
+pip install ruff
+
+# Lint all Python files
+ruff check . --exclude .build-venv --exclude build --exclude dist
+
 # Verify Python syntax
 python -m py_compile scripts/tools-mcp-server.py
 python -m py_compile scripts/memory_search.py
@@ -50,7 +56,7 @@ python -m py_compile scripts/sensory-module.py
 
 # Run all test suites
 python scripts/test-mcp-server.py           # 10 MCP protocol tests
-python scripts/memory_search.py             # BM25 engine smoke test
+python scripts/memory_search.py             # SQLite+FTS5 memory engine smoke test
 python scripts/verifier_middleware.py       # 15 verifier tests
 python scripts/test-skill-pipeline.py       # 157 skill pipeline tests
 python scripts/test-smoke-server.py         # 8 server health checks
@@ -78,8 +84,8 @@ All Python source code is in `scripts/`. The core structure:
 
 | File | Purpose | Dependencies |
 |------|---------|-------------|
-| `tools-mcp-server.py` | MCP server (68 tools, permission guard, CLI flags) | stdlib only |
-| `memory_search.py` | BM25 engine (add, search, synthesize, consolidate) | stdlib only |
+| `tools-mcp-server.py` | MCP server (122 tools, permission guard, CLI flags) | stdlib only |
+| `memory_search.py` | SQLite+FTS5 engine (add, search, synthesize, consolidate) | stdlib only (sqlite3) |
 | `trace.py` | Error/decision/goal/commitment registry | stdlib only |
 | `verifier_middleware.py` | Pre/post tool verification + renudge signals | guardrails.py |
 | `guardrails.py` | Prompt injection, PII redaction, provenance | stdlib only |
@@ -125,7 +131,7 @@ Get-ChildItem scripts/*.py | ForEach-Object {
   2. Router structure (52 rules, schema, defaults)
   3. End-to-end matching (10 task descriptions)
   4. Dud skill detection (77 skill references cross-checked)
-  5. MCP tool inventory (68 tools, naming conventions, permissions)
+  5. MCP tool inventory (122 tools, naming conventions, permissions)
 - **Expected: 157/157 pass, 0 dud skills**
 
 #### Suite 5: Smoke Test (`test-smoke-server.py`)

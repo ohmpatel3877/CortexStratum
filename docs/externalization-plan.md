@@ -2,7 +2,7 @@
 
 **Status:** Draft · **Target:** v0.5.0–v0.7.0
 
-Move 7 largest non-core modules from the monolithic `tools-mcp-server.py` into standalone MCP servers. This shrinks the core server from ~133 tools to ~86, reduces startup risk from optional dependencies, and enables independent release cycles.
+Move 7 largest non-core modules from the monolithic `tools-mcp-server.py` into standalone MCP servers. This shrinks the core server from ~122 tools to ~86, reduces startup risk from optional dependencies, and enables independent release cycles.
 
 ---
 
@@ -43,7 +43,7 @@ Move 7 largest non-core modules from the monolithic `tools-mcp-server.py` into s
 │  │  requests  │  │          │  │          │  │           │  │
 │  └─────┬─────┘  └───┬──────┘  └───┬──────┘  └─────┬─────┘  │
 │        │            │             │               │         │
-│  ┌─────▼─────┐  ┌───▼──────┐  ┌──▼───────┐  ┌────▼──────┐ │
+│  ┌──────────┐  ┌─────────┐  ┌─────────┐  ┌──────────┐ │
 │  │ gamedev   │  │ art      │  │ lit      │  │ (core)   │ │
 │  │ 1848 L    │  │ 306 L    │  │ 310 L    │  │ ~86 tools│ │
 │  │──stdlib   │  │──stdlib  │  │──stdlib  │  │          │ │
@@ -207,7 +207,7 @@ Core server retains tools AND dispatch. External servers are registered alongsid
 
 ```python
 # In tools-mcp-server.py — unchanged during Phase 1
-TOOLS = [...]  # still includes all 133 tools
+TOOLS = [...]  # includes all 122 tools (sim engines removed to future/)
 # Dispatch retains all module branches
 ```
 
@@ -316,9 +316,10 @@ Add to the `"mcpServers"` section of `CortexStratum/opencode.json`:
 | Phase | Version | Action | Core Tools | External Servers |
 |-------|---------|--------|-----------|-----------------|
 | **Phase 0** | v0.4.x | Audit & plan | 133 | 0 |
-| **Phase 1** | v0.5.0 | Extract all 7 → external servers. Core retains tools (dual registration). Update `opencode.json`. | 133 | 7 |
-| **Phase 1.5** | v0.5.1 | Test each server independently. `pip install -r external/*/requirements.txt`. Run `--list-tools` on each. | 133 | 7 |
-| **Phase 2** | v0.6.0 | Add `[DEPRECATED — use <server-name>]` tags in core tool descriptions. Update docs. | 133 (deprecated) | 7 |
+| **Phase 0.5** | v0.5.0 | Remove sim engines (19 tools) → future/ | 122 | 0 |
+| **Phase 1** | v0.5.x | Extract modules → external servers. Core retains tools (dual registration). | 122 | 7 |
+| **Phase 1.5** | v0.5.x | Test each server independently. `pip install -r external/*/requirements.txt`. Run `--list-tools` on each. | 122 | 7 |
+| **Phase 2** | v0.6.0 | Add `[DEPRECATED — use <server-name>]` tags in core tool descriptions. Update docs. | 122 (deprecated) | 7 |
 | **Phase 3** | v0.7.0 | Remove from core. Delete tool defs + dispatch lines. Core drops to ~86 tools. Update AGENTS.md, tests, version. | 86 | 7 |
 
 ---

@@ -84,7 +84,7 @@
 | **Inverse fatigue formulas** | `read_sim_mech_fatigue_sn` (stress at N cycles), `read_sim_mech_fatigue_cycles` (cycles at stress) | Same equation, just solving for different variables. **Merge into 1 tool with a `solve_for` parameter.** |
 | **Overlapping buckling formulas** | `read_sim_mech_buckle` (Euler), `read_sim_mech_buckle_johnson` (Johnson) | Both column buckling. Johnson is only needed when Euler gives non-physical results. **Merge into 1 tool that auto-selects based on slenderness ratio.** |
 | **Moment of inertia tools** | `read_sim_mech_moi_rect`, `read_sim_mech_moi_circle` | Each is a single formula. **Merge into 1 tool with a `shape` parameter, or inline them.** |
-| **Consolidation overlap with memory** | `read_consolidation_status`, `write_consolidation_run`, `read_consolidation_links` | These duplicate `read_memory_status` and `write_memory_consolidate`. The "consolidation daemon" is just a TF-IDF similarity linker built on top of the same memory store. **Merge into the memory module.** |
+| **Consolidation overlap with memory** | `read_consolidation_status`, `mutate_consolidation_run`, `read_consolidation_links` | These duplicate `read_memory_status` and `write_memory_consolidate`. The "consolidation daemon" is just a TF-IDF similarity linker built on top of the same memory store. **Merge into the memory module.** |
 | **2 status-only tools with empty schemas** | `read_compact_status`, `read_mutation_status` | Both return a status dict with no input parameters. Could be a single `read_phase_status` tool. |
 
 ### Moderate Overlaps

@@ -80,8 +80,8 @@ state — no partial writes, no silent failures, no hangs.
 
 ```
 --help         Show usage information
---version      Show version string (current: 0.3.0)
---list-tools   List all 68 tools as JSON
+--version      Show version string (current: 0.5.0)
+--list-tools   List all 122 tools as JSON
 --permissive   Bypass all permission checks
 --debug        Enable verbose logging
 ```
@@ -95,9 +95,9 @@ Request Flow:
     → JSON-RPC response
 
 Memory Flow:
-  write_memory_add → BM25 tokenize → index rebuild → save to .memory/ne/memories.json
-  read_memory_search → tokenize → synonym expand → fuzzy match → BM25 score → rank → return
-  mutate_memory_consolidate → Jaccard similarity → confidence-based merge → save
+  write_memory_add → INSERT into SQLite → FTS5 trigger auto-indexes
+  read_memory_search → synonym expand → fuzzy match → FTS5 MATCH query → BM25 rank → return
+  mutate_memory_consolidate → Jaccard similarity → confidence-based merge → DELETE from SQLite
 
 Trace Flow:
   write_xtrace_log_error → normalize signature → increment or create → save
@@ -139,7 +139,7 @@ The skill router (`skills/skill-router.json`) maps task keywords to skills:
 Current: **0.3.0** (pre-1.0). All version references synced across:
 - `VERSION` file
 - `scripts/tools-mcp-server.py` (VERSION constant)
-- `package.json`, `opencode.json`, `.claude-plugin/plugin.json`
+- `package.json`, `opencode.json`
 - `opencode-container-server.iss` (installer)
 
 ## Related

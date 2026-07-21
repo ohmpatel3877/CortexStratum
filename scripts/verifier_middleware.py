@@ -25,55 +25,142 @@ from typing import Any
 
 from guardrails import SafetyPipeline
 
-
 # ---------------------------------------------------------------------------
 # Constants — security patterns, thresholds, oversight rules
 # ---------------------------------------------------------------------------
 
 SECURITY_PATTERNS: list[dict[str, Any]] = [
     # Code injection
-    {"type": "code_injection", "severity": "high", "pattern": re.compile(r"\beval\s*\(")},
-    {"type": "code_injection", "severity": "high", "pattern": re.compile(r"\bexec\s*\(")},
-    {"type": "code_injection", "severity": "high", "pattern": re.compile(r"\b__import__\s*\(")},
-    {"type": "code_injection", "severity": "high", "pattern": re.compile(r"\bcompile\s*\(")},
+    {
+        "type": "code_injection",
+        "severity": "high",
+        "pattern": re.compile(r"\beval\s*\("),
+    },
+    {
+        "type": "code_injection",
+        "severity": "high",
+        "pattern": re.compile(r"\bexec\s*\("),
+    },
+    {
+        "type": "code_injection",
+        "severity": "high",
+        "pattern": re.compile(r"\b__import__\s*\("),
+    },
+    {
+        "type": "code_injection",
+        "severity": "high",
+        "pattern": re.compile(r"\bcompile\s*\("),
+    },
     # Prototype pollution
-    {"type": "prototype_pollution", "severity": "high", "pattern": re.compile(r"__proto__")},
-    {"type": "prototype_pollution", "severity": "high", "pattern": re.compile(r"constructor")},
+    {
+        "type": "prototype_pollution",
+        "severity": "high",
+        "pattern": re.compile(r"__proto__"),
+    },
+    {
+        "type": "prototype_pollution",
+        "severity": "high",
+        "pattern": re.compile(r"constructor"),
+    },
     # Path traversal
-    {"type": "path_traversal", "severity": "high", "pattern": re.compile(r"(?:^|[\"'`])\.\.\/")},
-    # Shell injection
-    {"type": "shell_injection", "severity": "high", "pattern": re.compile(r"[`$|;&]" )},
+    {
+        "type": "path_traversal",
+        "severity": "high",
+        "pattern": re.compile(r"(?:^|[\"'`])\.\.\/"),
+    },
+    # Shell injection — requires multiple shell metacharacters to reduce false positives
+    {
+        "type": "shell_injection",
+        "severity": "high",
+        "pattern": re.compile(
+            r"(?:`[^`]+`|\$\([^)]+\)|;\s*(?:rm|wget|curl|bash|sh|powershell))"
+        ),
+    },
     # API keys & secrets
-    {"type": "secret_leak", "severity": "high", "pattern": re.compile(r"\bsk-[a-zA-Z0-9]{10,}\b")},
-    {"type": "secret_leak", "severity": "high", "pattern": re.compile(r"\bapi_key\s*[=:]\s*['\"][^'\"]+['\"]")},
-    {"type": "secret_leak", "severity": "high", "pattern": re.compile(r"\btoken\s*[=:]\s*['\"][a-zA-Z0-9_\-]{16,}['\"]")},
-    {"type": "secret_leak", "severity": "high", "pattern": re.compile(r"\bsecret\s*[=:]\s*['\"][^'\"]+['\"]")},
+    {
+        "type": "secret_leak",
+        "severity": "high",
+        "pattern": re.compile(r"\bsk-[a-zA-Z0-9]{10,}\b"),
+    },
+    {
+        "type": "secret_leak",
+        "severity": "high",
+        "pattern": re.compile(r"\bapi_key\s*[=:]\s*['\"][^'\"]+['\"]"),
+    },
+    {
+        "type": "secret_leak",
+        "severity": "high",
+        "pattern": re.compile(r"\btoken\s*[=:]\s*['\"][a-zA-Z0-9_\-]{16,}['\"]"),
+    },
+    {
+        "type": "secret_leak",
+        "severity": "high",
+        "pattern": re.compile(r"\bsecret\s*[=:]\s*['\"][^'\"]+['\"]"),
+    },
     # SQL injection
-    {"type": "sql_injection", "severity": "high", "pattern": re.compile(r"'\s*OR\s*'", re.IGNORECASE)},
-    {"type": "sql_injection", "severity": "high", "pattern": re.compile(r"'\s*--", re.IGNORECASE)},
-    {"type": "sql_injection", "severity": "high", "pattern": re.compile(r"\bDROP\s+TABLE", re.IGNORECASE)},
-    {"type": "sql_injection", "severity": "high", "pattern": re.compile(r"\bUNION\s+SELECT", re.IGNORECASE)},
+    {
+        "type": "sql_injection",
+        "severity": "high",
+        "pattern": re.compile(r"'\s*OR\s*'", re.IGNORECASE),
+    },
+    {
+        "type": "sql_injection",
+        "severity": "high",
+        "pattern": re.compile(r"'\s*--", re.IGNORECASE),
+    },
+    {
+        "type": "sql_injection",
+        "severity": "high",
+        "pattern": re.compile(r"\bDROP\s+TABLE", re.IGNORECASE),
+    },
+    {
+        "type": "sql_injection",
+        "severity": "high",
+        "pattern": re.compile(r"\bUNION\s+SELECT", re.IGNORECASE),
+    },
 ]
 
 DURATION_WARN_MS: float = 30_000.0
 
 LIMBIC_DB_PATH: str = os.path.join(
     os.path.dirname(__file__),  # fallback: adjacent to this script
-    "..", "..", "agent-memory-mcp", "data", "knowledge-graph", "knowledge.db",
+    "..",
+    "..",
+    "agent-memory-mcp",
+    "data",
+    "knowledge-graph",
+    "knowledge.db",
 )
 # Resolve relative to known absolute path
-_known_agent_mcp = r"C:\Users\ohmpa\github\agent-memory-mcp\data\knowledge-graph\knowledge.db"
+_known_agent_mcp = (
+    r"C:\Users\ohmpa\github\agent-memory-mcp\data\knowledge-graph\knowledge.db"
+)
 if os.path.exists(_known_agent_mcp):
     LIMBIC_DB_PATH = _known_agent_mcp
 elif not os.path.exists(LIMBIC_DB_PATH):
     # Try resolving relative to project root
-    LIMBIC_DB_PATH = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), "..", "..", "agent-memory-mcp", "data", "knowledge-graph", "knowledge.db",
-    ))
+    LIMBIC_DB_PATH = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "agent-memory-mcp",
+            "data",
+            "knowledge-graph",
+            "knowledge.db",
+        )
+    )
 
 OVERSIGHT_EMPTY_RESULT_TOOLS: set[str] = {
-    "search_memories", "get_memories", "list_mcp_resources", "list_mcp_resource_templates",
-    "list_entities", "list_events", "glob", "grep", "read",
+    "search_memories",
+    "get_memories",
+    "list_mcp_resources",
+    "list_mcp_resource_templates",
+    "list_entities",
+    "list_events",
+    "glob",
+    "grep",
+    "read",
 }
 
 OVERSIGHT_REQUIRED_KEYS: dict[str, set[str]] = {
@@ -137,9 +224,18 @@ class VerifierMiddleware:
         self._state_fingerprints: dict[str, str] = {}
         self._active_renudges: dict[str, dict] = {}
         self._renudge_strategies: dict[str, dict[str, Any]] = {
-            "incremental": {"description": "Adjust parameters incrementally", "needs_human": False},
-            "rollback": {"description": "Revert to previous known-good state", "needs_human": True},
-            "override": {"description": "Force a new execution path", "needs_human": True},
+            "incremental": {
+                "description": "Adjust parameters incrementally",
+                "needs_human": False,
+            },
+            "rollback": {
+                "description": "Revert to previous known-good state",
+                "needs_human": True,
+            },
+            "override": {
+                "description": "Force a new execution path",
+                "needs_human": True,
+            },
             "halt": {"description": "Pause for human review", "needs_human": True},
         }
 
@@ -174,13 +270,15 @@ class VerifierMiddleware:
                 if strategy == "halt":
                     return {
                         "passed": False,
-                        "violations": [{
-                            "type": "renudge_halt",
-                            "severity": "high",
-                            "message": f"Tool '{tool_name}' halted by renudge signal",
-                            "signal_id": nudge["signal_id"],
-                            "strategy": "halt",
-                        }],
+                        "violations": [
+                            {
+                                "type": "renudge_halt",
+                                "severity": "high",
+                                "message": f"Tool '{tool_name}' halted by renudge signal",
+                                "signal_id": nudge["signal_id"],
+                                "strategy": "halt",
+                            }
+                        ],
                         "severity": "high",
                     }
                 elif strategy == "override":
@@ -189,11 +287,13 @@ class VerifierMiddleware:
 
         # 0. Limbic inhibition check — before all other checks
         if self.check_limbic_inhibition(tool_name):
-            violations.append({
-                "type": "limbic_inhibition",
-                "severity": "high",
-                "match": f"Tool {tool_name!r} blocked by Limbic behavioral rule",
-            })
+            violations.append(
+                {
+                    "type": "limbic_inhibition",
+                    "severity": "high",
+                    "match": f"Tool {tool_name!r} blocked by Limbic behavioral rule",
+                }
+            )
 
         # 1. Security scan on serialized args
         serialized = json.dumps(tool_args, default=str)
@@ -204,22 +304,28 @@ class VerifierMiddleware:
             if isinstance(value, str) and len(value) > 20:
                 inj_result = SafetyPipeline.detect_prompt_injection(value)
                 if inj_result["injection_detected"]:
-                    violations.append({
-                        "type": "prompt_injection",
-                        "severity": "high" if inj_result["risk_score"] >= 0.8 else "medium",
-                        "match": f"Argument {key!r}: {inj_result['pattern']} (risk={inj_result['risk_score']})",
-                    })
+                    violations.append(
+                        {
+                            "type": "prompt_injection",
+                            "severity": "high"
+                            if inj_result["risk_score"] >= 0.8
+                            else "medium",
+                            "match": f"Argument {key!r}: {inj_result['pattern']} (risk={inj_result['risk_score']})",
+                        }
+                    )
 
         # 3. PII redaction pass — log but don't modify
         for key, value in tool_args.items():
             if isinstance(value, str):
                 _, redacted_types = SafetyPipeline.redact_pii(value)
                 if redacted_types:
-                    violations.append({
-                        "type": "pii_in_args",
-                        "severity": "medium",
-                        "match": f"Argument {key!r} contains PII types: {redacted_types}",
-                    })
+                    violations.append(
+                        {
+                            "type": "pii_in_args",
+                            "severity": "medium",
+                            "match": f"Argument {key!r} contains PII types: {redacted_types}",
+                        }
+                    )
 
         # 4. Argument validation — detect unexpected types / missing critical fields
         violations.extend(self._validate_args(tool_name, tool_args))
@@ -262,22 +368,26 @@ class VerifierMiddleware:
 
         # 2. Duration warning
         if duration_ms > DURATION_WARN_MS:
-            anomalies.append({
-                "type": "duration_warning",
-                "severity": "medium",
-                "detail": f"Execution took {duration_ms:.0f}ms (threshold {DURATION_WARN_MS:.0f}ms)",
-            })
+            anomalies.append(
+                {
+                    "type": "duration_warning",
+                    "severity": "medium",
+                    "detail": f"Execution took {duration_ms:.0f}ms (threshold {DURATION_WARN_MS:.0f}ms)",
+                }
+            )
 
         # 3. Data leak check on output
         serialized_result = json.dumps(result, default=str)
         leak_violations = self.check_security(serialized_result)
         if leak_violations:
-            anomalies.append({
-                "type": "potential_data_leak",
-                "severity": "high",
-                "detail": "Result contains patterns matching secret/injection signatures",
-                "violations": leak_violations,
-            })
+            anomalies.append(
+                {
+                    "type": "potential_data_leak",
+                    "severity": "high",
+                    "detail": "Result contains patterns matching secret/injection signatures",
+                    "violations": leak_violations,
+                }
+            )
 
         # 4. Generate renudge suggestions for anomalies
         if anomalies:
@@ -309,11 +419,13 @@ class VerifierMiddleware:
                 snippet = match.group()
                 if snippet not in seen:
                     seen.add(snippet)
-                    violations.append({
-                        "type": entry["type"],
-                        "severity": entry["severity"],
-                        "match": snippet,
-                    })
+                    violations.append(
+                        {
+                            "type": entry["type"],
+                            "severity": entry["severity"],
+                            "match": snippet,
+                        }
+                    )
 
         return violations
 
@@ -328,24 +440,29 @@ class VerifierMiddleware:
 
         # Empty result for tools that usually return data
         if tool_name in OVERSIGHT_EMPTY_RESULT_TOOLS:
-            if not result or (isinstance(result, dict) and all(
-                isinstance(v, (list, dict)) and not v for v in result.values()
-            )):
-                anomalies.append({
-                    "type": "empty_result",
-                    "severity": "medium",
-                    "detail": f"Tool {tool_name!r} returned empty or all-empty data",
-                })
+            if not result or (
+                isinstance(result, dict)
+                and all(isinstance(v, (list, dict)) and not v for v in result.values())
+            ):
+                anomalies.append(
+                    {
+                        "type": "empty_result",
+                        "severity": "medium",
+                        "detail": f"Tool {tool_name!r} returned empty or all-empty data",
+                    }
+                )
 
         # Error strings in content
         content = json.dumps(result, default=str)
         for pattern in ERROR_INDICATORS:
             if pattern.search(content):
-                anomalies.append({
-                    "type": "error_string_in_result",
-                    "severity": "medium",
-                    "detail": f"Result contains indicator: {pattern.pattern!r}",
-                })
+                anomalies.append(
+                    {
+                        "type": "error_string_in_result",
+                        "severity": "medium",
+                        "detail": f"Result contains indicator: {pattern.pattern!r}",
+                    }
+                )
                 break  # one flag per result
 
         # Missing required keys — only when tool_name matches a verifier method
@@ -353,11 +470,13 @@ class VerifierMiddleware:
         if required is not None:
             missing = required - set(result.keys())
             if missing:
-                anomalies.append({
-                    "type": "missing_required_keys",
-                    "severity": "low",
-                    "detail": f"Missing keys: {sorted(missing)}",
-                })
+                anomalies.append(
+                    {
+                        "type": "missing_required_keys",
+                        "severity": "low",
+                        "detail": f"Missing keys: {sorted(missing)}",
+                    }
+                )
 
         return anomalies
 
@@ -405,7 +524,9 @@ class VerifierMiddleware:
 
         drifted = previous_hash != current_hash
         changed_keys = self._compute_changed_keys(
-            previous_hash, current_state, task_id,
+            previous_hash,
+            current_state,
+            task_id,
         )
 
         if drifted:
@@ -494,7 +615,10 @@ class VerifierMiddleware:
             uptime = time.time() - self._stats.start_time
             now = time.time()
             active = {
-                target: {"strategy": n["strategy"], "expires_in": round(n["expires_at"] - now, 1)}
+                target: {
+                    "strategy": n["strategy"],
+                    "expires_in": round(n["expires_at"] - now, 1),
+                }
                 for target, n in self._active_renudges.items()
                 if now < n["expires_at"]
             }
@@ -551,11 +675,13 @@ class VerifierMiddleware:
         violations: list[dict] = []
         for key, value in tool_args.items():
             if isinstance(value, (bytes, bytearray)):
-                violations.append({
-                    "type": "invalid_arg_type",
-                    "severity": "medium",
-                    "match": f"Argument {key!r} uses bytes/bytearray — possible binary injection",
-                })
+                violations.append(
+                    {
+                        "type": "invalid_arg_type",
+                        "severity": "medium",
+                        "match": f"Argument {key!r} uses bytes/bytearray — possible binary injection",
+                    }
+                )
         return violations
 
     def _compute_severity(self, violations: list[dict]) -> str:
@@ -607,6 +733,7 @@ class VerifierMiddleware:
 # Standalone test
 # ---------------------------------------------------------------------------
 
+
 def _demo() -> None:
     """Run a quick smoke test of all major paths."""
     v = VerifierMiddleware(mode="advisory")
@@ -656,7 +783,9 @@ def _demo() -> None:
     assert "shell_injection" in types_found
     assert "secret_leak" in types_found
     assert "sql_injection" in types_found
-    print(f"[PASS] check_security — {len(segs)} violations across {len(types_found)} categories")
+    print(
+        f"[PASS] check_security — {len(segs)} violations across {len(types_found)} categories"
+    )
 
     # fingerprint & drift
     t_id = "demo-task"
@@ -690,15 +819,19 @@ def _demo() -> None:
 
     # Thread safety smoke
     import concurrent.futures
+
     def _parallel_check(n: int) -> None:
         for _ in range(n):
             v.pre_verify("read", {"filePath": f"/tmp/{uuid.uuid4()}.txt"})
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
         futures = [pool.submit(_parallel_check, 50) for _ in range(4)]
         concurrent.futures.wait(futures)
     status2 = v.get_status()
     assert status2["checks_run"] >= 200 + 3  # previous checks + parallel
-    print(f"[PASS] thread safety — {status2['checks_run']} total checks (expected >= 203)")
+    print(
+        f"[PASS] thread safety — {status2['checks_run']} total checks (expected >= 203)"
+    )
 
     # Limbic inhibition — tool blocked by behavioral rule
     r_limbic = v.pre_verify("bash", {"command": "echo hello"})
@@ -709,7 +842,9 @@ def _demo() -> None:
 
     # Limbic inhibition — non-blocked tool
     r_allow = v.pre_verify("search_memories", {"query": "test"})
-    limbic_violations = [v for v in r_allow["violations"] if v["type"] == "limbic_inhibition"]
+    limbic_violations = [
+        v for v in r_allow["violations"] if v["type"] == "limbic_inhibition"
+    ]
     assert len(limbic_violations) == 0, (
         f"Expected no limbic_inhibition for 'search_memories', got {limbic_violations}"
     )

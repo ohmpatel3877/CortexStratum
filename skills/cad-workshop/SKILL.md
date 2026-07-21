@@ -1,6 +1,6 @@
 # CAD Workshop Skill
 
-Integrates the CortexStratum cad-module for mechanical design validation, STL export, FEA analysis, and OpenSCAD project verification.
+Integrates the CortexStratum cad-module (in `engine/`) for mechanical design validation, STL export, FEA analysis, and OpenSCAD project verification.
 
 ## When to use
 
@@ -13,7 +13,7 @@ Use when designing, validating, debugging, or exporting mechanical CAD files in 
 Run the validator on all SCAD files:
 
 ```bash
-python <cad-module>/cad_validator.py <path>
+python engine/cad-module/cad_validator.py <path>
 ```
 
 Checks: brace balance, unused vars, undefined modules, OpenSCAD pitfalls, $fn setting.
@@ -23,7 +23,7 @@ Checks: brace balance, unused vars, undefined modules, OpenSCAD pitfalls, $fn se
 Run the FEA analyzer to verify structural adequacy:
 
 ```bash
-python <cad-module>/fea_analyzer.py --all
+python engine/cad-module/fea_analyzer.py --all
 ```
 
 Checks: beam bending stress, column buckling, bolt shear, servo torque, safety factors.
@@ -33,7 +33,7 @@ Checks: beam bending stress, column buckling, bolt shear, servo torque, safety f
 Verify all SCAD files collectively meet project requirements:
 
 ```bash
-python <cad-module>/project_verifier.py <path>
+python engine/cad-module/project_verifier.py <path>
 ```
 
 Checks: mandatory subsystem coverage, dimensional sanity, mounting provisions.
@@ -47,9 +47,9 @@ Generate an assembly.scad that positions all parts relative to each other using 
 Batch export all SCAD files to STL for 3D printing:
 
 ```bash
-python <cad-module>/cad_exporter.py <path> -q high
+python engine/cad-module/cad_exporter.py <path> -q high
 ```
 
 ## Base directory
 
-`C:\Users\ohmpa\github\CortexStratum\cad-module\`
+`C:\Users\ohmpa\CortexStratum\engine\cad-module\`

@@ -27,9 +27,12 @@ CLI usage:
   python trace.py commitment-verify <id> [--dry-run]
 """
 
-import json, os, re, uuid
+import json
+import os
+import re
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -38,6 +41,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -79,8 +83,8 @@ ERROR_REGISTRY_PATH = DATA_DIR / "error-registry.json"
 
 
 def _normalize_signature(text: str) -> str:
-    normalized = re.sub(r'\s+', ' ', text)
-    normalized = normalized.replace('"', '').replace("'", '').replace('`', '')
+    normalized = re.sub(r"\s+", " ", text)
+    normalized = normalized.replace('"', "").replace("'", "").replace("`", "")
     return normalized.strip()[:100]
 
 
@@ -101,7 +105,7 @@ def _save_error_registry(data):
 def _next_error_id(data):
     max_num = 0
     for e in data.get("errors", []):
-        m = re.match(r'err-(\d+)', e.get("id", ""))
+        m = re.match(r"err-(\d+)", e.get("id", ""))
         if m:
             max_num = max(max_num, int(m.group(1)))
     return f"err-{max_num + 1:03d}"
@@ -124,11 +128,16 @@ def error_log_error(command: str, error_output: str, exit_code: int = None) -> d
                 entry["status"] = "recurring"
                 entry.setdefault("recurrences", []).append(now)
             _save_error_registry(data)
-            return _result(True, {
-                "action": "LogError", "id": entry["id"],
-                "status": "recurring" if was_resolved else "incremented",
-                "signature": sig, "occurrence_count": entry["occurrence_count"],
-            })
+            return _result(
+                True,
+                {
+                    "action": "LogError",
+                    "id": entry["id"],
+                    "status": "recurring" if was_resolved else "incremented",
+                    "signature": sig,
+                    "occurrence_count": entry["occurrence_count"],
+                },
+            )
 
     entry = {
         "id": _next_error_id(data),
@@ -145,15 +154,22 @@ def error_log_error(command: str, error_output: str, exit_code: int = None) -> d
     }
     data.setdefault("errors", []).append(entry)
     _save_error_registry(data)
-    return _result(True, {
-        "action": "LogError", "id": entry["id"],
-        "status": "created", "signature": sig,
-    })
+    return _result(
+        True,
+        {
+            "action": "LogError",
+            "id": entry["id"],
+            "status": "created",
+            "signature": sig,
+        },
+    )
 
 
 def error_log_attempt(error_signature: str, fix: str, result: str = "unknown") -> dict:
     if not error_signature or not fix:
-        return _result(False, error="error_log_attempt requires error_signature and fix")
+        return _result(
+            False, error="error_log_attempt requires error_signature and fix"
+        )
     data = _load_error_registry()
     for entry in data.get("errors", []):
         if error_signature.lower() in entry.get("error_signature", "").lower():
@@ -161,16 +177,26 @@ def error_log_attempt(error_signature: str, fix: str, result: str = "unknown") -
             entry.setdefault("attempts", []).append(attempt)
             entry["last_seen"] = attempt["timestamp"]
             _save_error_registry(data)
-            return _result(True, {
-                "action": "LogAttempt", "id": entry["id"],
-                "fix": fix, "result": result,
-            })
-    return _result(False, error="Error signature not found", data={"signature": error_signature})
+            return _result(
+                True,
+                {
+                    "action": "LogAttempt",
+                    "id": entry["id"],
+                    "fix": fix,
+                    "result": result,
+                },
+            )
+    return _result(
+        False, error="Error signature not found", data={"signature": error_signature}
+    )
 
 
 def error_resolve(error_signature: str, root_cause: str, resolution: str) -> dict:
     if not error_signature or not root_cause or not resolution:
-        return _result(False, error="error_resolve requires error_signature, root_cause, and resolution")
+        return _result(
+            False,
+            error="error_resolve requires error_signature, root_cause, and resolution",
+        )
     data = _load_error_registry()
     for entry in data.get("errors", []):
         if error_signature.lower() in entry.get("error_signature", "").lower():
@@ -179,10 +205,17 @@ def error_resolve(error_signature: str, root_cause: str, resolution: str) -> dic
             entry["resolution"] = resolution
             entry["last_seen"] = _now_iso()
             _save_error_registry(data)
-            return _result(True, {
-                "action": "Resolve", "id": entry["id"], "status": "resolved",
-            })
-    return _result(False, error="Error signature not found", data={"signature": error_signature})
+            return _result(
+                True,
+                {
+                    "action": "Resolve",
+                    "id": entry["id"],
+                    "status": "resolved",
+                },
+            )
+    return _result(
+        False, error="Error signature not found", data={"signature": error_signature}
+    )
 
 
 def error_search(keyword: str) -> dict:
@@ -192,12 +225,22 @@ def error_search(keyword: str) -> dict:
     kw = keyword.lower()
     results = []
     for entry in data.get("errors", []):
-        if (kw in entry.get("error_signature", "").lower()
-                or kw in entry.get("root_cause", "").lower()
-                or any(kw in a.get("fix", "").lower() for a in entry.get("attempts", []))):
+        if (
+            kw in entry.get("error_signature", "").lower()
+            or kw in entry.get("root_cause", "").lower()
+            or any(kw in a.get("fix", "").lower() for a in entry.get("attempts", []))
+        ):
             results.append(entry)
     results.sort(key=lambda e: e.get("last_seen", ""), reverse=True)
-    return _result(True, {"action": "Search", "keyword": keyword, "count": len(results), "results": results})
+    return _result(
+        True,
+        {
+            "action": "Search",
+            "keyword": keyword,
+            "count": len(results),
+            "results": results,
+        },
+    )
 
 
 def error_status() -> dict:
@@ -208,25 +251,34 @@ def error_status() -> dict:
     recurring = sum(1 for e in errors if e.get("status") == "recurring")
     unresolved = total - resolved - recurring
 
-    sorted_by_count = sorted(errors, key=lambda e: e.get("occurrence_count", 0), reverse=True)
+    sorted_by_count = sorted(
+        errors, key=lambda e: e.get("occurrence_count", 0), reverse=True
+    )
     top_3 = [
-        {"id": e["id"], "signature": e.get("error_signature", ""), "count": e.get("occurrence_count", 0),
-         "status": e.get("status", "")}
+        {
+            "id": e["id"],
+            "signature": e.get("error_signature", ""),
+            "count": e.get("occurrence_count", 0),
+            "status": e.get("status", ""),
+        }
         for e in sorted_by_count[:3]
     ]
 
     total_attempts = sum(len(e.get("attempts", [])) for e in errors)
     avg_attempts = round(total_attempts / total, 2) if total else 0.0
 
-    return _result(True, {
-        "action": "Status",
-        "total": total,
-        "resolved": resolved,
-        "recurring": recurring,
-        "unresolved": unresolved,
-        "top_3_most_frequent": top_3,
-        "avg_attempts_to_resolve": avg_attempts,
-    })
+    return _result(
+        True,
+        {
+            "action": "Status",
+            "total": total,
+            "resolved": resolved,
+            "recurring": recurring,
+            "unresolved": unresolved,
+            "top_3_most_frequent": top_3,
+            "avg_attempts_to_resolve": avg_attempts,
+        },
+    )
 
 
 # ===========================================================================
@@ -245,9 +297,15 @@ _SEED_DECISIONS = [
         "title": "Store behavioral fixes as code_preference not task_learning",
         "context": "Memory categorization was inconsistent; task_learning had too much noise",
         "decision": "Use metadata.type='code_preferences' for behavioral/process fixes, task_learning only for factual domain learnings",
-        "alternatives": ["Keep everything in task_learning", "Create a separate rule_preferences type"],
+        "alternatives": [
+            "Keep everything in task_learning",
+            "Create a separate rule_preferences type",
+        ],
         "rationale": "Separates actionable behavioral rules from passive knowledge, enabling targeted retrieval",
-        "consequences": ["Must set metadata.type explicitly on every memory write", "May need migration of existing mixed entries"],
+        "consequences": [
+            "Must set metadata.type explicitly on every memory write",
+            "May need migration of existing mixed entries",
+        ],
         "category": "architecture",
         "files": ["scripts\\decision-trace.ps1", "AGENTS.md"],
         "status": "active",
@@ -261,9 +319,15 @@ _SEED_DECISIONS = [
         "title": "Limit parallel memory searches to 2 queries max per round",
         "context": "Parallel memory searches were spawning 5+ simultaneous calls, wasting tokens and hitting rate limits",
         "decision": "Cap parallel memory queries to 2 per round; use broader queries with more results instead of narrow queries",
-        "alternatives": ["No limit (parallelism handles it)", "Single query per round with rerank"],
+        "alternatives": [
+            "No limit (parallelism handles it)",
+            "Single query per round with rerank",
+        ],
         "rationale": "Reduces token waste by 60% while maintaining recall quality through broader result windows",
-        "consequences": ["Slightly higher latency per query from larger top_k", "Rare edge cases may need manual re-query"],
+        "consequences": [
+            "Slightly higher latency per query from larger top_k",
+            "Rare edge cases may need manual re-query",
+        ],
         "category": "process",
         "files": ["AGENTS.md"],
         "status": "active",
@@ -277,11 +341,21 @@ _SEED_DECISIONS = [
         "title": "Centralize meta-cognitive artifacts in CortexStratum",
         "context": "Model study guides, behavioral fix lists, and process docs were scattered across multiple repos and local paths",
         "decision": "All meta-cognitive artifacts live under CortexStratum",
-        "alternatives": ["Keep artifacts co-located with each project", "Use a separate meta-knowledge repo"],
+        "alternatives": [
+            "Keep artifacts co-located with each project",
+            "Use a separate meta-knowledge repo",
+        ],
         "rationale": "Single source of truth for agent improvement artifacts; accessible from any project context via reference",
-        "consequences": ["CortexStratum becomes a dependency for all agent sessions", "Must maintain consistent cross-references"],
+        "consequences": [
+            "CortexStratum becomes a dependency for all agent sessions",
+            "Must maintain consistent cross-references",
+        ],
         "category": "architecture",
-        "files": ["model-study-guide.md", "data\\decision-registry.json", "data\\error-registry.json"],
+        "files": [
+            "model-study-guide.md",
+            "data\\decision-registry.json",
+            "data\\error-registry.json",
+        ],
         "status": "active",
         "superseded_by": None,
         "created_at": "2026-07-15T11:00:00Z",
@@ -295,7 +369,9 @@ _VALID_DECISION_STATUSES = {"active", "superseded", "deprecated", "reverted"}
 
 def _ensure_decision_registry():
     if not DECISION_REGISTRY_PATH.exists():
-        save_json(DECISION_REGISTRY_PATH, {"version": 1, "decisions": list(_SEED_DECISIONS)})
+        save_json(
+            DECISION_REGISTRY_PATH, {"version": 1, "decisions": list(_SEED_DECISIONS)}
+        )
 
 
 def _load_decision_registry():
@@ -310,21 +386,30 @@ def _save_decision_registry(data):
 def _next_decision_id(data):
     max_num = 0
     for d in data.get("decisions", []):
-        m = re.match(r'dt-\d{8}-(\d+)', d.get("id", ""))
+        m = re.match(r"dt-\d{8}-(\d+)", d.get("id", ""))
         if m:
             max_num = max(max_num, int(m.group(1)))
     today = _today_compact()
     return f"dt-{today}-{max_num + 1:03d}"
 
 
-def decision_add(title: str, decision: str, rationale: str = "",
-                 context: str = "", alternatives: str = "",
-                 category: str = "architecture") -> dict:
+def decision_add(
+    title: str,
+    decision: str,
+    rationale: str = "",
+    context: str = "",
+    alternatives: str = "",
+    category: str = "architecture",
+) -> dict:
     if not title or not decision:
         return _result(False, error="decision_add requires title and decision")
     data = _load_decision_registry()
     now = _now_iso()
-    alts = [a.strip() for a in alternatives.split(",") if a.strip()] if isinstance(alternatives, str) and alternatives else []
+    alts = (
+        [a.strip() for a in alternatives.split(",") if a.strip()]
+        if isinstance(alternatives, str) and alternatives
+        else []
+    )
     entry = {
         "id": _next_decision_id(data),
         "title": title,
@@ -343,11 +428,14 @@ def decision_add(title: str, decision: str, rationale: str = "",
     }
     data.setdefault("decisions", []).append(entry)
     _save_decision_registry(data)
-    return _result(True, {"action": "Add", "id": entry["id"], "title": title, "status": "created"})
+    return _result(
+        True, {"action": "Add", "id": entry["id"], "title": title, "status": "created"}
+    )
 
 
-def decision_update(decision_id: str, status: str = None,
-                    notes: str = None, superseded_by: str = None) -> dict:
+def decision_update(
+    decision_id: str, status: str = None, notes: str = None, superseded_by: str = None
+) -> dict:
     if not decision_id:
         return _result(False, error="decision_update requires decision_id")
     data = _load_decision_registry()
@@ -355,7 +443,11 @@ def decision_update(decision_id: str, status: str = None,
         if entry.get("id") == decision_id:
             if status:
                 if status not in _VALID_DECISION_STATUSES:
-                    return _result(False, error=f"Status must be one of: {', '.join(sorted(_VALID_DECISION_STATUSES))}", data={"id": decision_id})
+                    return _result(
+                        False,
+                        error=f"Status must be one of: {', '.join(sorted(_VALID_DECISION_STATUSES))}",
+                        data={"id": decision_id},
+                    )
                 entry["status"] = status
             if notes is not None:
                 entry["notes"] = notes
@@ -363,8 +455,17 @@ def decision_update(decision_id: str, status: str = None,
                 entry["superseded_by"] = superseded_by
             entry["updated_at"] = _now_iso()
             _save_decision_registry(data)
-            return _result(True, {"action": "Update", "id": decision_id, "status": status or "unchanged"})
-    return _result(False, error=f"Decision not found: {decision_id}", data={"id": decision_id})
+            return _result(
+                True,
+                {
+                    "action": "Update",
+                    "id": decision_id,
+                    "status": status or "unchanged",
+                },
+            )
+    return _result(
+        False, error=f"Decision not found: {decision_id}", data={"id": decision_id}
+    )
 
 
 def decision_search(keyword: str) -> dict:
@@ -374,14 +475,24 @@ def decision_search(keyword: str) -> dict:
     kw = keyword.lower()
     results = []
     for d in data.get("decisions", []):
-        if (kw in d.get("title", "").lower()
-                or kw in d.get("context", "").lower()
-                or kw in d.get("decision", "").lower()
-                or kw in d.get("rationale", "").lower()
-                or kw in d.get("category", "").lower()):
+        if (
+            kw in d.get("title", "").lower()
+            or kw in d.get("context", "").lower()
+            or kw in d.get("decision", "").lower()
+            or kw in d.get("rationale", "").lower()
+            or kw in d.get("category", "").lower()
+        ):
             results.append(d)
     results.sort(key=lambda d: d.get("created_at", ""), reverse=True)
-    return _result(True, {"action": "Search", "keyword": keyword, "count": len(results), "results": results})
+    return _result(
+        True,
+        {
+            "action": "Search",
+            "keyword": keyword,
+            "count": len(results),
+            "results": results,
+        },
+    )
 
 
 def decision_by_file(file_path: str) -> dict:
@@ -389,7 +500,15 @@ def decision_by_file(file_path: str) -> dict:
         return _result(False, error="decision_by_file requires file_path")
     data = _load_decision_registry()
     results = [d for d in data.get("decisions", []) if file_path in d.get("files", [])]
-    return _result(True, {"action": "ByFile", "file_path": file_path, "count": len(results), "results": results})
+    return _result(
+        True,
+        {
+            "action": "ByFile",
+            "file_path": file_path,
+            "count": len(results),
+            "results": results,
+        },
+    )
 
 
 def decision_status() -> dict:
@@ -415,20 +534,26 @@ def decision_status() -> dict:
             try:
                 updated = datetime.fromisoformat(d["updated_at"].replace("Z", "+00:00"))
                 if updated >= thirty_days_ago:
-                    recently_superseded.append({
-                        "id": d["id"], "title": d["title"],
-                        "superseded_by": d.get("superseded_by"),
-                    })
+                    recently_superseded.append(
+                        {
+                            "id": d["id"],
+                            "title": d["title"],
+                            "superseded_by": d.get("superseded_by"),
+                        }
+                    )
             except ValueError:
                 pass
 
-    return _result(True, {
-        "action": "Status",
-        "total": total,
-        "by_category": dict(by_category_sorted),
-        "by_status": by_status,
-        "recently_superseded": recently_superseded,
-    })
+    return _result(
+        True,
+        {
+            "action": "Status",
+            "total": total,
+            "by_category": dict(by_category_sorted),
+            "by_status": by_status,
+            "recently_superseded": recently_superseded,
+        },
+    )
 
 
 # ===========================================================================
@@ -467,12 +592,15 @@ def goal_init(goal: str) -> dict:
         "sub_goals": [],
     }
     _save_goal_registry(registry)
-    return _result(True, {
-        "action": "Init",
-        "session_id": registry["session_id"],
-        "original_goal": goal,
-        "status": "initialized",
-    })
+    return _result(
+        True,
+        {
+            "action": "Init",
+            "session_id": registry["session_id"],
+            "original_goal": goal,
+            "status": "initialized",
+        },
+    )
 
 
 def goal_add_subgoal(description: str) -> dict:
@@ -492,7 +620,9 @@ def goal_add_subgoal(description: str) -> dict:
     }
     registry.setdefault("sub_goals", []).append(entry)
     _save_goal_registry(registry)
-    return _result(True, {"action": "AddSubGoal", "id": entry["id"], "description": description})
+    return _result(
+        True, {"action": "AddSubGoal", "id": entry["id"], "description": description}
+    )
 
 
 def goal_complete_subgoal(subgoal_id: int) -> dict:
@@ -505,7 +635,14 @@ def goal_complete_subgoal(subgoal_id: int) -> dict:
             sg["status"] = "completed"
             sg["completed_at"] = _now_iso()
             _save_goal_registry(registry)
-            return _result(True, {"action": "CompleteSubGoal", "id": subgoal_id, "description": sg["description"]})
+            return _result(
+                True,
+                {
+                    "action": "CompleteSubGoal",
+                    "id": subgoal_id,
+                    "description": sg["description"],
+                },
+            )
     return _result(False, error=f"Sub-goal with id={subgoal_id} not found")
 
 
@@ -518,15 +655,20 @@ def goal_check_alignment(current_action: str) -> dict:
         return _result(False, error=str(e))
 
     goal = registry.get("original_goal", "")
-    goal_words = set(w for w in re.split(r'\W+', goal.lower()) if len(w) > 2)
-    action_words = set(w for w in re.split(r'\W+', current_action.lower()) if len(w) > 2)
+    goal_words = set(w for w in re.split(r"\W+", goal.lower()) if len(w) > 2)
+    action_words = set(
+        w for w in re.split(r"\W+", current_action.lower()) if len(w) > 2
+    )
 
     if not goal_words:
-        return _result(True, {
-            "action": "CheckAlignment",
-            "aligned": True,
-            "reason": "insufficient keywords in original goal",
-        })
+        return _result(
+            True,
+            {
+                "action": "CheckAlignment",
+                "aligned": True,
+                "reason": "insufficient keywords in original goal",
+            },
+        )
 
     overlap = goal_words & action_words
     ratio = len(overlap) / len(goal_words)
@@ -539,21 +681,27 @@ def goal_check_alignment(current_action: str) -> dict:
         "status": last_subgoal.get("status") if last_subgoal else None,
     }
 
-    return _result(True, {
-        "action": "CheckAlignment",
-        "aligned": aligned,
-        "ratio": round(ratio, 4),
-        "goal_keywords": sorted(goal_words),
-        "action_keywords": sorted(action_words),
-        "overlap": sorted(overlap),
-        "last_subgoal": last_line,
-    })
+    return _result(
+        True,
+        {
+            "action": "CheckAlignment",
+            "aligned": aligned,
+            "ratio": round(ratio, 4),
+            "goal_keywords": sorted(goal_words),
+            "action_keywords": sorted(action_words),
+            "overlap": sorted(overlap),
+            "last_subgoal": last_line,
+        },
+    )
 
 
 def goal_status() -> dict:
     registry = _load_goal_registry()
     if registry is None:
-        return _result(True, {"action": "Status", "active": False, "message": "No active goal registry"})
+        return _result(
+            True,
+            {"action": "Status", "active": False, "message": "No active goal registry"},
+        )
 
     sub_goals = registry.get("sub_goals", [])
     now_dt = datetime.now(timezone.utc)
@@ -579,7 +727,9 @@ def goal_status() -> dict:
     for sg in sub_goals:
         duration_str = ""
         try:
-            created = datetime.fromisoformat(sg.get("created_at", "").replace("Z", "+00:00"))
+            created = datetime.fromisoformat(
+                sg.get("created_at", "").replace("Z", "+00:00")
+            )
             if sg.get("status") == "completed" and sg.get("completed_at"):
                 end = datetime.fromisoformat(sg["completed_at"].replace("Z", "+00:00"))
                 dur = end - created
@@ -590,22 +740,28 @@ def goal_status() -> dict:
         except (ValueError, TypeError):
             pass
 
-        subgoal_details.append({
-            "id": sg.get("id"),
-            "description": sg.get("description"),
-            "status": sg.get("status", "unknown"),
-            "duration": duration_str,
-            "created_at": sg.get("created_at"),
-            "completed_at": sg.get("completed_at"),
-        })
+        subgoal_details.append(
+            {
+                "id": sg.get("id"),
+                "description": sg.get("description"),
+                "status": sg.get("status", "unknown"),
+                "duration": duration_str,
+                "created_at": sg.get("created_at"),
+                "completed_at": sg.get("completed_at"),
+            }
+        )
 
     alignment = None
-    goal_words = set(w for w in re.split(r'\W+', goal_text.lower()) if len(w) > 2)
+    goal_words = set(w for w in re.split(r"\W+", goal_text.lower()) if len(w) > 2)
     recent = [sg for sg in sub_goals if sg.get("status") != "cancelled"][-3:]
     if recent and goal_words:
         all_words = set()
         for sg in recent:
-            all_words.update(w for w in re.split(r'\W+', sg.get("description", "").lower()) if len(w) > 2)
+            all_words.update(
+                w
+                for w in re.split(r"\W+", sg.get("description", "").lower())
+                if len(w) > 2
+            )
         overlap = all_words & goal_words
         ratio = len(overlap) / len(goal_words) if goal_words else 1.0
         aligned = ratio >= 0.30
@@ -615,16 +771,19 @@ def goal_status() -> dict:
             "keywords": sorted(goal_words),
         }
 
-    return _result(True, {
-        "action": "Status",
-        "active": True,
-        "session_id": registry.get("session_id"),
-        "original_goal": goal_display,
-        "elapsed": elapsed_str,
-        "sub_goals": subgoal_details,
-        "total_sub_goals": len(sub_goals),
-        "alignment": alignment,
-    })
+    return _result(
+        True,
+        {
+            "action": "Status",
+            "active": True,
+            "session_id": registry.get("session_id"),
+            "original_goal": goal_display,
+            "elapsed": elapsed_str,
+            "sub_goals": subgoal_details,
+            "total_sub_goals": len(sub_goals),
+            "alignment": alignment,
+        },
+    )
 
 
 # ===========================================================================
@@ -637,22 +796,61 @@ def goal_status() -> dict:
 COMMITMENTS_PATH = DATA_DIR / "commitments.json"
 
 _SEED_COMMITMENTS = [
-    {"id": "b1", "text": "Batch-load skills at session start before any tool execution", "source": "code_preference", "stored_date": "2026-07-15", "verified_sessions": [], "next_verify": "2026-07-16"},
-    {"id": "b2", "text": "Use 2 targeted memory queries max per round", "source": "code_preference", "stored_date": "2026-07-15", "verified_sessions": [], "next_verify": "2026-07-16"},
-    {"id": "b3", "text": "Verify all file:line claims with read/grep before stating as fact", "source": "code_preference", "stored_date": "2026-07-15", "verified_sessions": [], "next_verify": "2026-07-16"},
-    {"id": "b4", "text": "Group independent reads and searches into single parallel batches", "source": "code_preference", "stored_date": "2026-07-15", "verified_sessions": [], "next_verify": "2026-07-16"},
-    {"id": "b5", "text": "Run lint + typecheck + tests before marking any code task complete", "source": "code_preference", "stored_date": "2026-07-15", "verified_sessions": [], "next_verify": "2026-07-16"},
+    {
+        "id": "b1",
+        "text": "Batch-load skills at session start before any tool execution",
+        "source": "code_preference",
+        "stored_date": "2026-07-15",
+        "verified_sessions": [],
+        "next_verify": "2026-07-16",
+    },
+    {
+        "id": "b2",
+        "text": "Use 2 targeted memory queries max per round",
+        "source": "code_preference",
+        "stored_date": "2026-07-15",
+        "verified_sessions": [],
+        "next_verify": "2026-07-16",
+    },
+    {
+        "id": "b3",
+        "text": "Verify all file:line claims with read/grep before stating as fact",
+        "source": "code_preference",
+        "stored_date": "2026-07-15",
+        "verified_sessions": [],
+        "next_verify": "2026-07-16",
+    },
+    {
+        "id": "b4",
+        "text": "Group independent reads and searches into single parallel batches",
+        "source": "code_preference",
+        "stored_date": "2026-07-15",
+        "verified_sessions": [],
+        "next_verify": "2026-07-16",
+    },
+    {
+        "id": "b5",
+        "text": "Run lint + typecheck + tests before marking any code task complete",
+        "source": "code_preference",
+        "stored_date": "2026-07-15",
+        "verified_sessions": [],
+        "next_verify": "2026-07-16",
+    },
 ]
 
 
 def _ensure_commitments():
     if not COMMITMENTS_PATH.exists():
-        save_json(COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)})
+        save_json(
+            COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)}
+        )
 
 
 def _load_commitments():
     _ensure_commitments()
-    return load_json(COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)})
+    return load_json(
+        COMMITMENTS_PATH, {"version": 1, "commitments": list(_SEED_COMMITMENTS)}
+    )
 
 
 def _save_commitments(data):
@@ -666,19 +864,25 @@ def commitment_list(session_start: bool = False) -> dict:
 
     if session_start:
         pending = [c for c in commitments if c.get("next_verify", "") <= today]
-        return _result(True, {
-            "action": "List",
-            "mode": "session_start",
-            "total_pending": len(pending),
-            "commitments": pending,
-        })
+        return _result(
+            True,
+            {
+                "action": "List",
+                "mode": "session_start",
+                "total_pending": len(pending),
+                "commitments": pending,
+            },
+        )
 
-    return _result(True, {
-        "action": "List",
-        "mode": "all",
-        "total": len(commitments),
-        "commitments": commitments,
-    })
+    return _result(
+        True,
+        {
+            "action": "List",
+            "mode": "all",
+            "total": len(commitments),
+            "commitments": commitments,
+        },
+    )
 
 
 def commitment_verify(commitment_id: str, dry_run: bool = False) -> dict:
@@ -691,24 +895,39 @@ def commitment_verify(commitment_id: str, dry_run: bool = False) -> dict:
         if c.get("id") == commitment_id:
             verified_sessions = c.get("verified_sessions", [])
             if current_session in verified_sessions:
-                return _result(True, {
-                    "action": "Verify", "id": commitment_id,
-                    "status": "already_verified", "session": current_session,
-                })
+                return _result(
+                    True,
+                    {
+                        "action": "Verify",
+                        "id": commitment_id,
+                        "status": "already_verified",
+                        "session": current_session,
+                    },
+                )
 
             if not dry_run:
                 verified_sessions.append(current_session)
                 c["verified_sessions"] = verified_sessions
                 _save_commitments(data)
-                return _result(True, {
-                    "action": "Verify", "id": commitment_id,
-                    "status": "verified", "session": current_session,
-                })
+                return _result(
+                    True,
+                    {
+                        "action": "Verify",
+                        "id": commitment_id,
+                        "status": "verified",
+                        "session": current_session,
+                    },
+                )
             else:
-                return _result(True, {
-                    "action": "Verify", "id": commitment_id,
-                    "status": "dry_run", "session": current_session,
-                })
+                return _result(
+                    True,
+                    {
+                        "action": "Verify",
+                        "id": commitment_id,
+                        "status": "dry_run",
+                        "session": current_session,
+                    },
+                )
 
     return _result(False, error=f"Commitment '{commitment_id}' not found")
 
@@ -741,6 +960,7 @@ def commitment_add(text: str, source: str = "manual") -> dict:
 # ===========================================================================
 # Tool call dispatcher  (mirrors tools-mcp-server.py routing)
 # ===========================================================================
+
 
 def handle_tool_call(name: str, args: dict) -> dict:
     """Route MCP tool calls to the right handler."""
@@ -778,7 +998,7 @@ def handle_tool_call(name: str, args: dict) -> dict:
         "read_commitment_checker_list": lambda a: commitment_list(
             session_start=a.get("session_start", False),
         ),
-        "write_commitment_verify": lambda a: commitment_verify(
+        "mutate_commitment_verify": lambda a: commitment_verify(
             commitment_id=a.get("commitment_id", ""),
             dry_run=a.get("dry_run", False),
         ),
@@ -796,8 +1016,10 @@ def handle_tool_call(name: str, args: dict) -> dict:
 # CLI entry point
 # ===========================================================================
 
+
 def main():
     import sys
+
     args = sys.argv[1:]
     if not args:
         print(__doc__)
@@ -840,7 +1062,15 @@ def main():
     elif cmd == "decision-add":
         kwargs = {}
         for i in range(1, len(args) - 1):
-            if args[i] in ("--title", "--decision", "--category", "--context", "--rationale", "--notes", "--alternatives"):
+            if args[i] in (
+                "--title",
+                "--decision",
+                "--category",
+                "--context",
+                "--rationale",
+                "--notes",
+                "--alternatives",
+            ):
                 key = args[i][2:].replace("-", "_")
                 kwargs[key] = args[i + 1]
         print(json.dumps(decision_add(**kwargs), indent=2))
@@ -887,7 +1117,11 @@ def main():
     # --- commitment checker ---
     elif cmd == "commitment-list":
         session_start = "--session-start" in args
-        print(json.dumps(commitment_list(session_start=session_start), indent=2, default=str))
+        print(
+            json.dumps(
+                commitment_list(session_start=session_start), indent=2, default=str
+            )
+        )
 
     elif cmd == "commitment-verify":
         cid = args[1] if len(args) > 1 else ""
@@ -896,10 +1130,12 @@ def main():
 
     else:
         print(f"Unknown command: {cmd}")
-        print("Commands: error-log, error-search, error-status, error-attempt, error-resolve,"
-              " decision-add, decision-update, decision-search, decision-by-file, decision-status,"
-              " goal-init, goal-add-subgoal, goal-complete, goal-check, goal-status,"
-              " commitment-list, commitment-verify")
+        print(
+            "Commands: error-log, error-search, error-status, error-attempt, error-resolve,"
+            " decision-add, decision-update, decision-search, decision-by-file, decision-status,"
+            " goal-init, goal-add-subgoal, goal-complete, goal-check, goal-status,"
+            " commitment-list, commitment-verify"
+        )
 
 
 if __name__ == "__main__":

@@ -20,8 +20,12 @@ Usage:
     python scripts/test-integration-layer.py --list
 """
 
-import json, os, sys, subprocess, importlib.util, glob, re
-from typing import Optional
+import glob
+import importlib.util
+import json
+import os
+import subprocess
+import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -29,11 +33,17 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = os.path.join(BASE, "scripts")
 DATA = os.path.join(BASE, "data")
 DOCS = os.path.join(BASE, "docs")
-ADR_DIR = os.path.join(DATA, "adr")
+ADR_DIR = os.path.join(DOCS, "adr")
 DAG_DEFS = os.path.join(DATA, "dag-definitions")
 DAG_SCHEMAS = os.path.join(DATA, "dag-schemas")
 
-G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
+G = "\033[92m"
+Y = "\033[93m"
+B = "\033[94m"
+R = "\033[91m"
+C = "\033[96m"
+N = "\033[0m"
+BOLD = "\033[1m"
 PASS = f"{G} PASS{N}"
 FAIL = f"{R} FAIL{N}"
 SKIP = f"{Y}~ SKIP{N}"
@@ -54,7 +64,9 @@ def test(name: str, func):
         print(f"       {R}{e}{N}")
     except Exception as e:
         results["failed"] += 1
-        results["tests"].append({"name": name, "status": "FAIL", "error": f"{type(e).__name__}: {e}"})
+        results["tests"].append(
+            {"name": name, "status": "FAIL", "error": f"{type(e).__name__}: {e}"}
+        )
         print(f"  {FAIL} {name}")
         print(f"       {R}{type(e).__name__}: {e}{N}")
 
@@ -74,10 +86,13 @@ def import_from_path(module_name: str, file_path: str):
     return mod
 
 
-#  Tests 
+#  Tests
+
 
 def test_dag_coordinator_import():
-    mod = import_from_path("dag_coordinator", os.path.join(SCRIPTS, "dag-coordinator.py"))
+    mod = import_from_path(
+        "dag_coordinator", os.path.join(SCRIPTS, "pipeline", "dag-coordinator.py")
+    )
     assert hasattr(mod, "load_dag_definition"), "load_dag_definition not found"
     assert hasattr(mod, "topological_sort"), "topological_sort not found"
     assert hasattr(mod, "execute_pipeline"), "execute_pipeline not found"
@@ -87,7 +102,9 @@ def test_dag_coordinator_import():
 
 
 def test_identity_manager_import():
-    mod = import_from_path("identity_manager", os.path.join(SCRIPTS, "identity-manager.py"))
+    mod = import_from_path(
+        "identity_manager", os.path.join(SCRIPTS, "identity-manager.py")
+    )
     assert hasattr(mod, "IdentityManager"), "IdentityManager class not found"
     mgr = mod.IdentityManager()
     assert hasattr(mgr, "consolidate_identity"), "consolidate_identity not found"
@@ -95,7 +112,9 @@ def test_identity_manager_import():
 
 
 def test_sandbox_manager_import():
-    mod = import_from_path("sandbox_manager", os.path.join(SCRIPTS, "sandbox-manager.py"))
+    mod = import_from_path(
+        "sandbox_manager", os.path.join(SCRIPTS, "sandbox-manager.py")
+    )
     assert hasattr(mod, "SandboxManager"), "SandboxManager class not found"
     mgr = mod.SandboxManager()
     assert hasattr(mgr, "execute_python"), "execute_python not found"
@@ -121,9 +140,18 @@ def test_orchestrator_dag_flag():
         skip("test_orchestrator_dag_flag", "seed-dag.json not found")
         return
     result = subprocess.run(
-        [sys.executable, os.path.join(SCRIPTS, "task-orchestrator.py"),
-         "--dag", dag_file, "--info"],
-        capture_output=True, encoding="utf-8", errors="replace", cwd=BASE, timeout=30
+        [
+            sys.executable,
+            os.path.join(SCRIPTS, "task-orchestrator.py"),
+            "--dag",
+            dag_file,
+            "--info",
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        cwd=BASE,
+        timeout=30,
     )
     assert result.returncode == 0, f"Orchestrator DAG mode failed: {result.stderr}"
 
@@ -133,7 +161,7 @@ def test_dag_json_valid():
     schema_path = os.path.join(DAG_SCHEMAS, "dag-definition-v1.json")
     assert os.path.isfile(schema_path), f"Schema file not found: {schema_path}"
 
-    with open(schema_path, "r", encoding="utf-8") as f:
+    with open(schema_path, encoding="utf-8") as f:
         schema = json.load(f)
 
     dag_files = glob.glob(os.path.join(DAG_DEFS, "*.json"))
@@ -142,7 +170,7 @@ def test_dag_json_valid():
         return
 
     for dag_file in dag_files:
-        with open(dag_file, "r", encoding="utf-8") as f:
+        with open(dag_file, encoding="utf-8") as f:
             dag = json.load(f)
 
         # Required fields
@@ -154,7 +182,9 @@ def test_dag_json_valid():
         assert len(dag["nodes"]) > 0, f"{dag_file}: empty nodes array"
         for n in dag["nodes"]:
             assert "id" in n, f"{dag_file}: node missing id"
-            assert "description" in n, f"{dag_file}: node {n.get('id', '?')} missing description"
+            assert "description" in n, (
+                f"{dag_file}: node {n.get('id', '?')} missing description"
+            )
         for e in dag.get("edges", []):
             assert "from" in e, f"{dag_file}: edge missing 'from'"
             assert "to" in e, f"{dag_file}: edge missing 'to'"
@@ -164,9 +194,18 @@ def test_integration_pipeline():
     """Full pipeline test (plan mode only, no actual execution)."""
     # Test that the unified orchestrator runs
     result = subprocess.run(
-        [sys.executable, os.path.join(SCRIPTS, "task-analyzer.py"),
-         "--task", "Build integration layer", "--json"],
-        capture_output=True, encoding="utf-8", errors="replace", cwd=BASE, timeout=30
+        [
+            sys.executable,
+            os.path.join(SCRIPTS, "task-analyzer.py"),
+            "--task",
+            "Build integration layer",
+            "--json",
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        cwd=BASE,
+        timeout=30,
     )
     assert result.returncode == 0, f"task-analyzer failed: {result.stderr}"
     analysis = json.loads(result.stdout)
@@ -178,28 +217,51 @@ def test_integration_pipeline():
     dag_file = os.path.join(DAG_DEFS, "seed-dag.json")
     if os.path.isfile(dag_file):
         dag_result = subprocess.run(
-            [sys.executable, os.path.join(SCRIPTS, "dag-coordinator.py"),
-             "--dag", dag_file, "--dry-run"],
-            capture_output=True, encoding="utf-8", errors="replace", cwd=BASE, timeout=30
+            [
+                sys.executable,
+                os.path.join(SCRIPTS, "pipeline", "dag-coordinator.py"),
+                "--dag",
+                dag_file,
+                "--dry-run",
+            ],
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=BASE,
+            timeout=30,
         )
-        assert dag_result.returncode == 0, f"DAG coordinator plan failed: {dag_result.stderr}"
+        assert dag_result.returncode == 0, (
+            f"DAG coordinator plan failed: {dag_result.stderr}"
+        )
 
     # Test doc generator scan (no --health flag in WS-D version)
     doc_result = subprocess.run(
         [sys.executable, os.path.join(SCRIPTS, "doc-generator.py"), "--scan"],
-        capture_output=True, encoding="utf-8", errors="replace", cwd=BASE, timeout=30
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        cwd=BASE,
+        timeout=30,
     )
     assert doc_result.returncode == 0, f"doc-generator scan failed: {doc_result.stderr}"
-    assert "Scripts" in doc_result.stdout, f"doc-generator scan output missing: {doc_result.stdout[:200]}"
+    assert "Scripts" in doc_result.stdout, (
+        f"doc-generator scan output missing: {doc_result.stdout[:200]}"
+    )
 
     # Test sandbox verify
     sandbox_result = subprocess.run(
         [sys.executable, os.path.join(SCRIPTS, "sandbox-manager.py"), "--verify"],
-        capture_output=True, encoding="utf-8", errors="replace", cwd=BASE, timeout=30
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        cwd=BASE,
+        timeout=30,
     )
     # Sandbox verification may fail if pwsh is not available; that's OK
     # but the script itself should not crash
-    assert sandbox_result.returncode in (0, 1), f"sandbox-manager verify crashed: {sandbox_result.stderr}"
+    assert sandbox_result.returncode in (0, 1), (
+        f"sandbox-manager verify crashed: {sandbox_result.stderr}"
+    )
 
 
 def test_adr_exists():
@@ -214,7 +276,7 @@ def test_adr_exists():
     for adr in expected:
         path = os.path.join(ADR_DIR, adr)
         assert os.path.isfile(path), f"ADR file missing: {path}"
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             content = f.read()
         assert content.strip(), f"ADR file empty: {path}"
         assert "# ADR-" in content, f"ADR file missing '# ADR-' header: {path}"
@@ -223,15 +285,18 @@ def test_adr_exists():
 def test_all_scripts_executable():
     """Verify all scripts can at least be imported/parsed without syntax errors."""
     python_scripts = glob.glob(os.path.join(SCRIPTS, "*.py"))
-    assert len(python_scripts) > 10, f"Too few Python scripts found: {len(python_scripts)}"
+    assert len(python_scripts) > 10, (
+        f"Too few Python scripts found: {len(python_scripts)}"
+    )
 
     for script in python_scripts:
         fname = os.path.basename(script)
         if fname == "test-integration-layer.py":
             continue  # don't recurse
-        with open(script, "r", encoding="utf-8") as f:
+        with open(script, encoding="utf-8") as f:
             try:
                 import ast
+
                 ast.parse(f.read())
             except SyntaxError as e:
                 assert False, f"Syntax error in {fname}: {e}"
@@ -241,7 +306,9 @@ def test_all_scripts_executable():
     for script in ps_scripts:
         fname = os.path.basename(script)
         size = os.path.getsize(script)
-        assert size > 50, f"PowerShell script too small or empty: {fname} ({size} bytes)"
+        assert size > 50, (
+            f"PowerShell script too small or empty: {fname} ({size} bytes)"
+        )
 
 
 def test_dag_coordinator_plan():
@@ -251,17 +318,28 @@ def test_dag_coordinator_plan():
         skip("test_dag_coordinator_plan", "seed-dag.json not found")
         return
     result = subprocess.run(
-        [sys.executable, os.path.join(SCRIPTS, "dag-coordinator.py"),
-         "--dag", dag_file, "--dry-run"],
-        capture_output=True, encoding="utf-8", errors="replace", cwd=BASE, timeout=30
+        [
+            sys.executable,
+            os.path.join(SCRIPTS, "pipeline", "dag-coordinator.py"),
+            "--dag",
+            dag_file,
+            "--dry-run",
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        cwd=BASE,
+        timeout=30,
     )
     assert result.returncode == 0, f"DAG coordinator dry-run failed: {result.stderr}"
     output = result.stdout or ""
-    assert any(kw in output for kw in ["DAG", "Pipeline", "integration", "seed"]), \
+    assert any(kw in output for kw in ["DAG", "Pipeline", "integration", "seed"]), (
         f"DAG plan output missing expected content: {output[:300]}"
+    )
 
 
-#  Main 
+#  Main
+
 
 def run_all():
     print(f"\n{B}{'=' * 60}{N}")
@@ -316,6 +394,7 @@ def list_tests():
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Integration Layer Test Suite")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     parser.add_argument("--list", action="store_true", help="List available tests")

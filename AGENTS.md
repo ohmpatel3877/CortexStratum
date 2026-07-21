@@ -1,6 +1,6 @@
 # CortexStratum - Agent Instructions
 
-**133-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.3.0.
+**122-tool MCP server** for local memory, trace system, lifecycle hooks, skill routing, and multi-modal AI. Pure Python, stdlib-only core. v0.5.0.
 
 [CLAUDE.md](CLAUDE.md) covers basic MCP tool usage. This file covers everything an agent would likely miss without help.
 
@@ -12,7 +12,7 @@ python scripts/tools-mcp-server.py
 python scripts/tools-mcp-server.py --permissive   # bypass all permission checks
 python scripts/tools-mcp-server.py --debug        # verbose logging
 
-# List all 135 tools (verify registration)
+# List all 122 tools (verify registration)
 python scripts/tools-mcp-server.py --list-tools
 
 # Run full test suite (each script is self-validating, exit non-zero on failure)
@@ -20,7 +20,7 @@ python scripts/test-mcp-server.py         # 10 MCP protocol tests
 python scripts/test-smoke-server.py       # 8 server health checks (spawns real subprocess)
 python scripts/test-skill-pipeline.py     # 157 skill router tests (cross-checks 77 skill refs)
 python scripts/verifier_middleware.py      # 15 verifier middleware tests
-python scripts/memory_search.py           # BM25 smoke test (no assertions)
+python scripts/memory_search.py           # SQLite+FTS5 memory smoke test (no assertions)
 ```
 
 **Prerequisites:** Python 3.10+. No pip required for core. Optional: `pip install -r requirements-full.txt` + `playwright install firefox` for web/OCR/audio tools.
@@ -64,28 +64,34 @@ To add a new module:
 
 ## /check Gate (this project)
 
-This project has no linter or typechecker (pure Python stdlib). The verification gate uses:
+Python linting via **ruff** (install: `pip install ruff` or `pip install -r requirements-full.txt`). The verification gate uses:
 
 ```powershell
-# 1. Syntax check all Python files
+# 1. Ruff linting (all Python files) — MUST be clean before merge
+ruff check .
+
+# 2. Syntax check all Python files
 Get-ChildItem -Recurse -Filter *.py | ForEach-Object { python -m py_compile $_.FullName }
 
-# 2. MCP smoke test (boots server, tests protocol)
+# 3. MCP smoke test (boots server, tests protocol)
 python scripts/test-smoke-server.py
 
-# 3. MCP protocol compliance
+# 4. MCP protocol compliance
 python scripts/test-mcp-server.py
 
-# 4. Skill router integrity (catches dangling references)
+# 5. Skill router integrity (catches dangling references)
 python scripts/test-skill-pipeline.py
 
-# 5. Verifier middleware
+# 6. Verifier middleware
 python scripts/verifier_middleware.py
 
-# 6. Tool count (must be 68)
-python scripts/tools-mcp-server.py --list-tools | python -c "import sys,json; tools=json.load(sys.stdin); print(f'{len(tools)} tools'); assert len(tools)==68"
+# 7. Guardrails safety pipeline
+python scripts/guardrails.py
 
-# 7. Re-read changed files, hunt oversights
+# 8. Tool count (must be 150+)
+python scripts/tools-mcp-server.py --list-tools | python -c "import sys,json; tools=json.load(sys.stdin); print(f'{len(tools)} tools'); assert len(tools)>=150"
+
+# 9. Re-read changed files, hunt oversights
 ```
 
 All test scripts are self-validating (exit 0 on pass, non-zero on failure). No pytest needed.
@@ -108,13 +114,13 @@ All runtime data is local JSON in `data/` and `.memory/`. **Not git-tracked** (e
 
 | Path | Content |
 |------|---------|
-| `data/memory_store.json` | BM25 memory entries (facts, preferences, learnings) |
+| `data/memory_store.json` | Legacy BM25 memory entries (migrated to SQLite+FTS5) |
 | `data/error-registry.json` | Error signatures with occurrence counts and resolutions |
 | `data/decision-registry.json` | Architecture decisions with rationale |
 | `data/goal-registry.json` | Current goal with sub-goal decomposition |
 | `data/commitments.json` | Session promises with cross-session verification |
 | `data/synonyms.json` | BM25 synonym expansion map (**git-tracked**) |
-| `data/tool-inventory.json` | All 135 tool definitions (for verification) |
+| `data/tool-inventory.json` | All 122 tool definitions (for verification) |
 | `.memory/ne/` | BM25 index files |
 | `.memory/profiles/` | Agent identity profiles |
 
@@ -144,7 +150,7 @@ The `previous_task` parameter is accepted by the `read_skill_router_match` MCP t
 `scripts/tools-mcp-server.py` (1238 lines) is the single entrypoint. It owns:
 - Permission guard (`can_call_tool`, line 37)
 - Module factory (`_get_module`, line 85)
-- All 135 tool definitions (`TOOLS` list, starts ~line 150)
+- All 122 tool definitions (`TOOLS` list, starts ~line 150)
 - Tool dispatch (`handle_tool_call`, line 748)
 - CLI flags (`--permissive`, `--debug`, `--list-tools`, `--version`)
 - stdio JSON-RPC loop (`main()`, ~line 1100)

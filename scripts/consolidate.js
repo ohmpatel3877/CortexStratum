@@ -7,9 +7,14 @@ const { DatabaseSync } = require('node:sqlite');
 const fs = require('fs');
 const path = require('path');
 
-const KNOWLEDGE_DB = path.resolve(process.env.USERPROFILE, 'github/agent-memory-mcp/.memory/metadata.db');
-const SKILL_ROUTER = path.resolve(process.env.USERPROFILE, 'github/ai-memory-core/skills/skill-router.json');
-const LIMBIC_BLOCKLIST = path.resolve(process.env.USERPROFILE, 'github/ai-memory-core/data/limbic-blocklist.json');
+// Paths can be overridden via environment variables:
+//   KNOWLEDGE_DB_PATH, SKILL_ROUTER_PATH, LIMBIC_BLOCKLIST_PATH
+const KNOWLEDGE_DB = path.resolve(
+  process.env.KNOWLEDGE_DB_PATH || path.join(process.env.USERPROFILE, 'github/agent-memory-mcp/.memory/metadata.db'));
+const SKILL_ROUTER = path.resolve(
+  process.env.SKILL_ROUTER_PATH || path.join(process.env.USERPROFILE, 'github/ai-memory-core/skills/skill-router.json'));
+const LIMBIC_BLOCKLIST = path.resolve(
+  process.env.LIMBIC_BLOCKLIST_PATH || path.join(process.env.USERPROFILE, 'github/ai-memory-core/data/limbic-blocklist.json'));
 const IMPORTANCE_THRESHOLD = parseFloat(process.env.CONSOLIDATE_IMPORTANCE_THRESHOLD || '0.3');
 const MAX_TRIGGER_TOKENS = parseInt(process.env.CONSOLIDATE_MAX_TRIGGER_TOKENS || '12', 10);
 

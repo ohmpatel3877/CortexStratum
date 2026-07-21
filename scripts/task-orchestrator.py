@@ -12,11 +12,16 @@ Usage:
     python scripts/task-orchestrator.py --dag <dag-file> --dag-execute --task '{"context":{"key":"val"}}'
 """
 
-import json, sys, os, subprocess, time, threading, uuid, re, math
+import json
+import os
+import re
+import subprocess
+import sys
+import threading
+import time
+import uuid
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
-from dataclasses import dataclass, field, asdict
-from typing import Optional
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -30,23 +35,32 @@ CASES_DIR = os.path.join(MEMORY_DIR, "skills", "cases")
 DAG_DEF_DIR = os.path.join(DATA, "dag-definitions")
 DAG_TRACE_DIR = os.path.join(DATA, "dag-traces")
 
-G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; M = "\033[95m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
+G = "\033[92m"
+Y = "\033[93m"
+B = "\033[94m"
+M = "\033[95m"
+R = "\033[91m"
+C = "\033[96m"
+N = "\033[0m"
+BOLD = "\033[1m"
 BAR = ""
 
-#  Dataclasses 
+#  Dataclasses
+
 
 @dataclass
 class WorkstreamStatus:
     id: str
     description: str
-    status: str = "pending"       # pending, running, completed, failed, stalled
+    status: str = "pending"  # pending, running, completed, failed, stalled
     step: str = ""
     output: str = ""
     error: str = ""
-    last_heartbeat: Optional[float] = None
+    last_heartbeat: float | None = None
     temperature: float = 0.7
     files_touched: list = field(default_factory=list)
     dependencies: list = field(default_factory=list)
+
 
 @dataclass
 class ContextDigest:
@@ -54,6 +68,7 @@ class ContextDigest:
     cases_found: int = 0
     patterns_found: list = field(default_factory=list)
     recent_errors: list = field(default_factory=list)
+
 
 @dataclass
 class ConflictReport:
@@ -63,20 +78,26 @@ class ConflictReport:
     merge_ready: int = 0
     total: int = 0
 
-#  Helpers 
+
+#  Helpers
+
 
 def ensure_dirs():
     for d in [MEMORY_DIR, WORKSTREAMS_DIR, PROFILES_DIR, CASES_DIR]:
         os.makedirs(d, exist_ok=True)
 
+
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
+
 
 def _run_dag(dag_path: str, task: str, execute: bool) -> dict:
     """Run a DAG definition through the DAG coordinator."""
     import importlib.util
-    spec = importlib.util.spec_from_file_location("dag_coordinator",
-        os.path.join(SCRIPTS, "dag-coordinator.py"))
+
+    spec = importlib.util.spec_from_file_location(
+        "dag_coordinator", os.path.join(SCRIPTS, "pipeline", "dag-coordinator.py")
+    )
     if spec is None or spec.loader is None:
         print(f"{R}  ERROR: Could not load dag-coordinator.py{N}")
         return {"action": "dag_error"}
@@ -88,7 +109,9 @@ def _run_dag(dag_path: str, task: str, execute: bool) -> dict:
     if not execute:
         mod.show_dag_info(dag)
         print(f"\n  {C}To execute:{N}")
-        print(f"    python scripts/task-orchestrator.py --dag \"{dag_path}\" --dag-execute")
+        print(
+            f'    python scripts/task-orchestrator.py --dag "{dag_path}" --dag-execute'
+        )
         return {"action": "dag_info", "dag": dag}
 
     task_input = None
@@ -102,20 +125,34 @@ def _run_dag(dag_path: str, task: str, execute: bool) -> dict:
 
     # Log to decision trace
     subprocess.run(
-        ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-         os.path.join(SCRIPTS, "decision-trace.ps1"),
-         "-Action", "Add",
-         "-Title", f"DAG Executed: {dag.get('name', 'unknown')[:80]}",
-         "-Decision", f"DAG pipeline with {len(dag.get('nodes', []))} nodes, {len(dag.get('edges', []))} edges",
-         "-Rationale", f"DAG '{dag.get('dag_id', 'N/A')}' executed via dag-coordinator.py",
-         "-Category", "process",
-         "-Files", dag_path],
-        capture_output=True, cwd=BASE
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            os.path.join(SCRIPTS, "decision-trace.ps1"),
+            "-Action",
+            "Add",
+            "-Title",
+            f"DAG Executed: {dag.get('name', 'unknown')[:80]}",
+            "-Decision",
+            f"DAG pipeline with {len(dag.get('nodes', []))} nodes, {len(dag.get('edges', []))} edges",
+            "-Rationale",
+            f"DAG '{dag.get('dag_id', 'N/A')}' executed via dag-coordinator.py",
+            "-Category",
+            "process",
+            "-Files",
+            dag_path,
+        ],
+        capture_output=True,
+        cwd=BASE,
     )
 
     return {"action": "dag_execute", "trace": trace}
 
-def _auto_generate_dag(task: str, workstreams: list, plan_id: str) -> Optional[str]:
+
+def _auto_generate_dag(task: str, workstreams: list, plan_id: str) -> str | None:
     """
     Auto-generate a DAG JSON file from workstreams for multi-phase builds.
     Detects module-pattern (mod-* → parallel, wire-* → serial) and
@@ -136,27 +173,33 @@ def _auto_generate_dag(task: str, workstreams: list, plan_id: str) -> Optional[s
 
     # Phase 1: Parallel module creation nodes
     for ws in parallel_streams:
-        nodes.append({
-            "id": ws["id"],
-            "description": ws["description"][:200],
-            "prompt_template": ws.get("prompt", ws["description"]),
-            "temperature": ws.get("temperature", 0.7),
-            "timeout_seconds": 300,
-            "expected_outputs": ["module_file", "module_summary"],
-        })
+        nodes.append(
+            {
+                "id": ws["id"],
+                "description": ws["description"][:200],
+                "prompt_template": ws.get("prompt", ws["description"]),
+                "temperature": ws.get("temperature", 0.7),
+                "timeout_seconds": 300,
+                "expected_outputs": ["module_file", "module_summary"],
+            }
+        )
         # No edges — these are root nodes (parallel)
 
     # Phase 2: Serial wiring node
     for ws in serial_streams:
-        nodes.append({
-            "id": ws["id"],
-            "description": ws["description"][:200],
-            "prompt_template": ws.get("prompt", ws["description"]),
-            "temperature": ws.get("temperature", 0.3),  # Lower temp for precise wiring
-            "timeout_seconds": 300,
-            "expected_outputs": ["tool_defs", "dispatch_code"],
-            "critical_file": "scripts/tools-mcp-server.py",
-        })
+        nodes.append(
+            {
+                "id": ws["id"],
+                "description": ws["description"][:200],
+                "prompt_template": ws.get("prompt", ws["description"]),
+                "temperature": ws.get(
+                    "temperature", 0.3
+                ),  # Lower temp for precise wiring
+                "timeout_seconds": 300,
+                "expected_outputs": ["tool_defs", "dispatch_code"],
+                "critical_file": "scripts/tools-mcp-server.py",
+            }
+        )
         # Depends on ALL parallel module streams
         for dep_id in ws.get("dependencies", []):
             if any(dep_id == ps["id"] for ps in parallel_streams):
@@ -170,18 +213,22 @@ def _auto_generate_dag(task: str, workstreams: list, plan_id: str) -> Optional[s
         "tags": ["auto-generated", "module-pattern"],
         "nodes": nodes,
         "edges": edges,
-        "merge_rules": [{"type": "independent", "sources": [ws["id"] for ws in parallel_streams]}],
+        "merge_rules": [
+            {"type": "independent", "sources": [ws["id"] for ws in parallel_streams]}
+        ],
         "config": {
             "error_mode": "abort",
             "global_timeout_seconds": 3600,
             "post_merge_verify": "python scripts/phase-verify-full.py",
-        }
+        },
     }
 
     dag_path = os.path.join(DAG_DEF_DIR, f"{dag_id}.json")
     write_json(dag_path, dag)
     print(f"\n  {C}  DAG written: {dag_path}{N}")
-    print(f"  {C}  Levels: Phase 1 (parallel)={len(parallel_streams)} nodes, Phase 2 (serial)={len(serial_streams)} node(s){N}")
+    print(
+        f"  {C}  Levels: Phase 1 (parallel)={len(parallel_streams)} nodes, Phase 2 (serial)={len(serial_streams)} node(s){N}"
+    )
     return dag_path
 
 
@@ -203,15 +250,26 @@ def print_box(title, lines, color=B):
         print(f"    {line}")
     print()
 
-#  Integration 
+
+#  Integration
+
 
 def call_temperature_mcp(task: str, role: str = "developer") -> float:
     """Call get_temperature via MCP or fallback to heuristic."""
     try:
         result = subprocess.run(
-            [sys.executable, os.path.join(SCRIPTS, "tools-mcp-server.py"),
-             "--tool", "get_temperature", "--args", json.dumps({"task": task, "role": role})],
-            capture_output=True, text=True, cwd=BASE, timeout=10
+            [
+                sys.executable,
+                os.path.join(SCRIPTS, "tools-mcp-server.py"),
+                "--tool",
+                "get_temperature",
+                "--args",
+                json.dumps({"task": task, "role": role}),
+            ],
+            capture_output=True,
+            text=True,
+            cwd=BASE,
+            timeout=10,
         )
         if result.returncode == 0:
             data = json.loads(result.stdout)
@@ -219,6 +277,7 @@ def call_temperature_mcp(task: str, role: str = "developer") -> float:
     except Exception:
         pass
     return _heuristic_temperature(task)
+
 
 def _heuristic_temperature(task: str) -> float:
     tl = task.lower()
@@ -230,14 +289,25 @@ def _heuristic_temperature(task: str) -> float:
         return 0.4
     return 0.7
 
-#  Analysis (delegates to task-analyzer.py) 
+
+#  Analysis (delegates to task-analyzer.py)
+
 
 def analyze_task(task: str) -> dict:
     result = subprocess.run(
-        [sys.executable, os.path.join(SCRIPTS, "task-analyzer.py"), "--task", task, "--json"],
-        capture_output=True, text=True, cwd=BASE
+        [
+            sys.executable,
+            os.path.join(SCRIPTS, "task-analyzer.py"),
+            "--task",
+            task,
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=BASE,
     )
     return json.loads(result.stdout)
+
 
 def generate_workstreams(task: str, analysis: dict) -> list:
     task_lower = task.lower()
@@ -245,78 +315,108 @@ def generate_workstreams(task: str, analysis: dict) -> list:
     streams = []
     domains = analysis.get("domains", [])
 
-    #  Module Pattern Detection 
+    #  Module Pattern Detection
     # Detect if task involves creating new MCP modules/tools.
     # Module creation tasks should auto-split into create→wire two-phase.
     MODULE_KEYWORDS = [
-        "create", "module", "tool", "new tool", "mcp tool",
-        "sim-", "compact", "mutat", "plumber", "pedagogy", "consolidat",
-        "phase 4", "phase 5", "implement.*tool", "add.*tool",
-        "sim_mech", "sim_math", "sim_matrix", "sim_ode", "sim_latex",
+        "create",
+        "module",
+        "tool",
+        "new tool",
+        "mcp tool",
+        "sim-",
+        "compact",
+        "mutat",
+        "plumber",
+        "pedagogy",
+        "consolidat",
+        "phase 4",
+        "phase 5",
+        "implement.*tool",
+        "add.*tool",
+        "sim_mech",
+        "sim_math",
+        "sim_matrix",
+        "sim_ode",
+        "sim_latex",
     ]
-    module_pattern_detected = any(
-        kw in task_lower for kw in MODULE_KEYWORDS
-    )
+    module_pattern_detected = any(kw in task_lower for kw in MODULE_KEYWORDS)
 
-    if module_pattern_detected and (analysis.get("recommended_subagents", 0) >= 2 or " and " in task_lower):
+    if module_pattern_detected and (
+        analysis.get("recommended_subagents", 0) >= 2 or " and " in task_lower
+    ):
         # Group independent modules into parallel workstreams,
         # then a final serial wiring workstream for tools-mcp-server.py
         sentences = [s.strip() for s in lines if len(s.strip()) > 20]
         module_streams = []
         for i, s in enumerate(sentences):
             if i < 4:  # max 4 parallel module streams
-                module_streams.append({
-                    "id": f"mod-{i+1}",
-                    "description": s[:100] + ("..." if len(s) > 100 else ""),
-                    "prompt": s,
-                    "dependencies": [],
-                    "type": "module_creation",
-                    "phase": "parallel",
-                })
+                module_streams.append(
+                    {
+                        "id": f"mod-{i + 1}",
+                        "description": s[:100] + ("..." if len(s) > 100 else ""),
+                        "prompt": s,
+                        "dependencies": [],
+                        "type": "module_creation",
+                        "phase": "parallel",
+                    }
+                )
         if module_streams:
             # Add serial wiring workstream that depends on all module streams
             streams = module_streams
-            streams.append({
-                "id": "wire-1",
-                "description": "Wire all new tools into tools-mcp-server.py (tool defs + dispatch)",
-                "prompt": f"Wire the tools from modules {', '.join(s['id'] for s in module_streams)} into tools-mcp-server.py. Add tool definitions to TOOLS list and dispatch handlers to handle_tool_call.",
-                "dependencies": [s["id"] for s in module_streams],
-                "type": "tool_wiring",
-                "phase": "serial",
-                "critical_file": "scripts/tools-mcp-server.py",
-            })
+            streams.append(
+                {
+                    "id": "wire-1",
+                    "description": "Wire all new tools into tools-mcp-server.py (tool defs + dispatch)",
+                    "prompt": f"Wire the tools from modules {', '.join(s['id'] for s in module_streams)} into tools-mcp-server.py. Add tool definitions to TOOLS list and dispatch handlers to handle_tool_call.",
+                    "dependencies": [s["id"] for s in module_streams],
+                    "type": "tool_wiring",
+                    "phase": "serial",
+                    "critical_file": "scripts/tools-mcp-server.py",
+                }
+            )
             return streams
 
-    #  Standard decomposition 
+    #  Standard decomposition
     if " and " in task_lower or analysis.get("can_parallelize"):
         sentences = [s.strip() for s in lines if len(s.strip()) > 20]
         if len(sentences) >= 2:
-            for i, s in enumerate(sentences[:analysis.get("recommended_subagents", 3)]):
-                streams.append({
-                    "id": f"ws-{i+1}",
-                    "description": s[:100] + ("..." if len(s) > 100 else ""),
-                    "prompt": s,
-                    "dependencies": [],
-                })
+            for i, s in enumerate(
+                sentences[: analysis.get("recommended_subagents", 3)]
+            ):
+                streams.append(
+                    {
+                        "id": f"ws-{i + 1}",
+                        "description": s[:100] + ("..." if len(s) > 100 else ""),
+                        "prompt": s,
+                        "dependencies": [],
+                    }
+                )
     if not streams and domains:
         for i, domain in enumerate(domains):
-            streams.append({
-                "id": f"ws-{i+1}",
-                "description": f"Handle {domain} aspects of the task",
+            streams.append(
+                {
+                    "id": f"ws-{i + 1}",
+                    "description": f"Handle {domain} aspects of the task",
+                    "prompt": task,
+                    "dependencies": [],
+                    "focus": domain,
+                }
+            )
+    if not streams:
+        streams.append(
+            {
+                "id": "ws-1",
+                "description": "Complete the task",
                 "prompt": task,
                 "dependencies": [],
-                "focus": domain,
-            })
-    if not streams:
-        streams.append({
-            "id": "ws-1",
-            "description": "Complete the task",
-            "prompt": task,
-            "dependencies": [],
-        })
+            }
+        )
     return streams
 
-#  Background Analyzer 
+
+#  Background Analyzer
+
 
 class BackgroundAnalyzer(threading.Thread):
     def __init__(self, task: str, workstreams: list, memory_dir: str):
@@ -359,15 +459,22 @@ class BackgroundAnalyzer(threading.Thread):
     def _build_context_digest(self):
         digest = ContextDigest()
         if os.path.isdir(PROFILES_DIR):
-            digest.profiles_found = len([f for f in os.listdir(PROFILES_DIR) if f.endswith((".md", ".json"))])
+            digest.profiles_found = len(
+                [f for f in os.listdir(PROFILES_DIR) if f.endswith((".md", ".json"))]
+            )
         if os.path.isdir(CASES_DIR):
-            digest.cases_found = len([f for f in os.listdir(CASES_DIR) if f.endswith((".md", ".json"))])
+            digest.cases_found = len(
+                [f for f in os.listdir(CASES_DIR) if f.endswith((".md", ".json"))]
+            )
         error_registry = os.path.join(DATA, "error-registry.json")
         if os.path.isfile(error_registry):
             try:
                 with open(error_registry) as f:
                     errors = json.load(f)
-                digest.recent_errors = [e.get("signature", "") for e in (errors if isinstance(errors, list) else [])][-5:]
+                digest.recent_errors = [
+                    e.get("signature", "")
+                    for e in (errors if isinstance(errors, list) else [])
+                ][-5:]
             except Exception:
                 pass
         self.results["context_digest"] = asdict(digest)
@@ -408,21 +515,25 @@ class BackgroundAnalyzer(threading.Thread):
                     if bottleneck_overlap:
                         report.has_conflicts = True
                         for bf in bottleneck_overlap:
-                            report.conflicts.append({
-                                "between": [id_a, id_b],
-                                "files": [bf],
-                                "severity": "critical",
-                                "reason": f"SERIAL BOTTLENECK: {SERIAL_BOTTLENECKS[bf]}. These workstreams MUST run sequentially.",
-                                "must_serialize": True,
-                            })
+                            report.conflicts.append(
+                                {
+                                    "between": [id_a, id_b],
+                                    "files": [bf],
+                                    "severity": "critical",
+                                    "reason": f"SERIAL BOTTLENECK: {SERIAL_BOTTLENECKS[bf]}. These workstreams MUST run sequentially.",
+                                    "must_serialize": True,
+                                }
+                            )
                     elif overlap:
                         report.has_conflicts = True
-                        report.conflicts.append({
-                            "between": [id_a, id_b],
-                            "files": list(overlap),
-                            "severity": "high" if len(overlap) > 2 else "low",
-                            "must_serialize": False,
-                        })
+                        report.conflicts.append(
+                            {
+                                "between": [id_a, id_b],
+                                "files": list(overlap),
+                                "severity": "high" if len(overlap) > 2 else "low",
+                                "must_serialize": False,
+                            }
+                        )
 
         # Module pattern: mod-* workstreams are parallel-safe, wire-* is serial
         module_ids = [aid for aid, _, at in all_files if at == "module_creation"]
@@ -430,19 +541,29 @@ class BackgroundAnalyzer(threading.Thread):
         if module_ids and wiring_ids:
             # This is intentional — module creation first (parallel), then wiring (serial)
             # Don't flag as conflicts; they're designed this way
-            report.conflicts = [c for c in report.conflicts if not (
-                c["between"][0] in module_ids and c["between"][1] in wiring_ids and c.get("must_serialize")
-            )]
+            report.conflicts = [
+                c
+                for c in report.conflicts
+                if not (
+                    c["between"][0] in module_ids
+                    and c["between"][1] in wiring_ids
+                    and c.get("must_serialize")
+                )
+            ]
 
         report.parallel_safe = not report.has_conflicts
         report.total = len(self.workstreams)
         self.results["conflicts"] = asdict(report)
 
     def _estimate_files(self, desc: str) -> list:
-        files = re.findall(r'\b[\w./-]+\.\w+\b', desc)
+        files = re.findall(r"\b[\w./-]+\.\w+\b", desc)
         # Always check for known project files by keyword
         desc_lower = desc.lower()
-        if "tools-mcp-server" in desc_lower or "wire" in desc_lower or "dispatch" in desc_lower:
+        if (
+            "tools-mcp-server" in desc_lower
+            or "wire" in desc_lower
+            or "dispatch" in desc_lower
+        ):
             if "scripts/tools-mcp-server.py" not in files:
                 files.append("scripts/tools-mcp-server.py")
         if "opencode.json" in desc_lower and "opencode.json" not in files:
@@ -458,6 +579,7 @@ class BackgroundAnalyzer(threading.Thread):
 #  Workstream State Persistence (for resume after interruptions)
 WORKSTREAMS_DIR = os.path.join(MEMORY_DIR, "workstreams")
 
+
 def save_workstream_state(ws_id, state):
     ensure_dirs()
     ws_dir = os.path.join(WORKSTREAMS_DIR, ws_id)
@@ -467,7 +589,15 @@ def save_workstream_state(ws_id, state):
     with open(sp, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2, default=str)
     with open(hp, "w", encoding="utf-8") as f:
-        json.dump({"timestamp": time.time(), "status": state.get("status","running"), "step": state.get("step","")}, f)
+        json.dump(
+            {
+                "timestamp": time.time(),
+                "status": state.get("status", "running"),
+                "step": state.get("step", ""),
+            },
+            f,
+        )
+
 
 def load_workstream_state(ws_id):
     sp = os.path.join(WORKSTREAMS_DIR, ws_id, "state.json")
@@ -476,6 +606,7 @@ def load_workstream_state(ws_id):
             return json.load(f)
     return None
 
+
 def list_resumable_workstreams():
     ensure_dirs()
     if not os.path.isdir(WORKSTREAMS_DIR):
@@ -483,25 +614,42 @@ def list_resumable_workstreams():
     resumable = []
     for ws_id in os.listdir(WORKSTREAMS_DIR):
         s = load_workstream_state(ws_id)
-        if s and s.get("status") in ("running","pending","interrupted"):
-            resumable.append({"id": ws_id, "status": s["status"], "step": s.get("step",""), "desc": s.get("description","")})
+        if s and s.get("status") in ("running", "pending", "interrupted"):
+            resumable.append(
+                {
+                    "id": ws_id,
+                    "status": s["status"],
+                    "step": s.get("step", ""),
+                    "desc": s.get("description", ""),
+                }
+            )
     return resumable
+
 
 def clear_workstream_state(ws_id):
     ws_dir = os.path.join(WORKSTREAMS_DIR, ws_id)
     if os.path.isdir(ws_dir):
         import shutil
+
         shutil.rmtree(ws_dir, ignore_errors=True)
 
-#  Heartbeat Monitor 
+
+#  Heartbeat Monitor
+
 
 class HeartbeatMonitor:
-    def __init__(self, workstreams: list, poll_interval: float = 2.0, stall_timeout: float = 30.0):
-        self.streams = {ws["id"]: WorkstreamStatus(
-            id=ws["id"], description=ws["description"],
-            dependencies=ws.get("dependencies", []),
-            temperature=ws.get("temperature", 0.7)
-        ) for ws in workstreams}
+    def __init__(
+        self, workstreams: list, poll_interval: float = 2.0, stall_timeout: float = 30.0
+    ):
+        self.streams = {
+            ws["id"]: WorkstreamStatus(
+                id=ws["id"],
+                description=ws["description"],
+                dependencies=ws.get("dependencies", []),
+                temperature=ws.get("temperature", 0.7),
+            )
+            for ws in workstreams
+        }
         self.poll_interval = poll_interval
         self.stall_timeout = stall_timeout
         self._running = False
@@ -522,7 +670,9 @@ class HeartbeatMonitor:
                         status.step = hb.get("step", "")
                         status.last_heartbeat = hb.get("timestamp", time.time())
                         if status.status == "completed":
-                            out_file = os.path.join(WORKSTREAMS_DIR, ws_id, "output.json")
+                            out_file = os.path.join(
+                                WORKSTREAMS_DIR, ws_id, "output.json"
+                            )
                             if os.path.isfile(out_file):
                                 with open(out_file) as f:
                                     out = json.load(f)
@@ -533,7 +683,10 @@ class HeartbeatMonitor:
                     if status.status == "pending":
                         continue
                     # Check if stalled
-                    if status.last_heartbeat and (time.time() - status.last_heartbeat) > self.stall_timeout:
+                    if (
+                        status.last_heartbeat
+                        and (time.time() - status.last_heartbeat) > self.stall_timeout
+                    ):
                         status.status = "stalled"
                     elif status.status == "running" and status.last_heartbeat is None:
                         status.status = "running"
@@ -542,8 +695,16 @@ class HeartbeatMonitor:
         return self.streams
 
     def _render_status(self):
-        sys.stdout.write(f"\r{M}   Monitoring (polling every {self.poll_interval}s){N}  ")
-        icons = {"pending": "", "running": "", "completed": "", "failed": "", "stalled": ""}
+        sys.stdout.write(
+            f"\r{M}   Monitoring (polling every {self.poll_interval}s){N}  "
+        )
+        icons = {
+            "pending": "",
+            "running": "",
+            "completed": "",
+            "failed": "",
+            "stalled": "",
+        }
         parts = []
         for ws_id, s in self.streams.items():
             icon = icons.get(s.status, "")
@@ -556,7 +717,9 @@ class HeartbeatMonitor:
             parts.append(f"{ws_id}: {icon} {label}")
         joined = "  ".join(parts)
         sys.stdout.write(joined[:120] + "  ")
-        done = sum(1 for s in self.streams.values() if s.status in ("completed", "failed"))
+        done = sum(
+            1 for s in self.streams.values() if s.status in ("completed", "failed")
+        )
         total = len(self.streams)
         pct = int((done / total) * 100) if total else 0
         bar_fill = "" * (pct // 5) + "" * (20 - pct // 5)
@@ -567,29 +730,44 @@ class HeartbeatMonitor:
         self._running = False
 
 
-#  Plan Display 
+#  Plan Display
+
 
 def show_plan(task: str, analysis: dict, workstreams: list):
     print(f"\n{B}{BAR}{N}")
     print(f"{B}  ORCHESTRATION PLAN{N}")
     print(f"{B}{BAR}{N}")
     print(f"\n  Task: {task[:120]}{'...' if len(task) > 120 else ''}")
-    print(f"\n  {Y}Complexity Score:{N} {analysis['score']}/100 ({analysis['threshold']})")
+    print(
+        f"\n  {Y}Complexity Score:{N} {analysis['score']}/100 ({analysis['threshold']})"
+    )
     print(f"  {Y}Mode:{N} {analysis['mode'].upper()}")
     print(f"  {Y}Recommended Agents:{N} {analysis['recommended_subagents']}")
     print(f"\n  {Y}Workstreams ({len(workstreams)}):{N}")
     for ws in workstreams:
-        deps = f" → depends on: {', '.join(ws['dependencies'])}" if ws['dependencies'] else " (independent)"
+        deps = (
+            f" → depends on: {', '.join(ws['dependencies'])}"
+            if ws["dependencies"]
+            else " (independent)"
+        )
         print(f"    {ws['id']}: {ws['description']}{deps}")
     if analysis.get("high_risk_flags"):
         print(f"\n  {M}Risk flags:{N} {', '.join(analysis['high_risk_flags'])}")
-    print(f"\n  {''*60}")
+    print(f"\n  {'' * 60}")
 
 
-#  Orchestrator 
+#  Orchestrator
 
-def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: bool = False,
-                dag_path: Optional[str] = None, dag_execute: bool = False, resume: Optional[str] = None):
+
+def orchestrate(
+    task: str,
+    mode: str = "plan",
+    background: bool = False,
+    watch: bool = False,
+    dag_path: str | None = None,
+    dag_execute: bool = False,
+    resume: str | None = None,
+):
     plan_id = resume or str(uuid.uuid4())[:8]
     ensure_dirs()
 
@@ -602,15 +780,19 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
         if resumable:
             print(f"  Found {len(resumable)} workstream(s) with saved state:")
             for ws in resumable:
-                print(f"    {ws['id']}: {ws['status']} — {ws.get('step','')} ({ws.get('desc','')[:60]})")
+                print(
+                    f"    {ws['id']}: {ws['status']} — {ws.get('step', '')} ({ws.get('desc', '')[:60]})"
+                )
         else:
-            print(f"  {Y}No saved workstream state found for '{resume}'. Starting fresh.{N}")
+            print(
+                f"  {Y}No saved workstream state found for '{resume}'. Starting fresh.{N}"
+            )
 
-    #  DAG mode 
+    #  DAG mode
     if dag_path:
         return _run_dag(dag_path, task, dag_execute)
 
-    #  Standard orchestration mode 
+    #  Standard orchestration mode
 
     print(f"\n{C}{BAR}{N}")
     print(f"{C}{BOLD}  ORCHESTRATION ENGINE v2{N}")
@@ -640,17 +822,22 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
     if analysis.get("high_risk_flags"):
         print(f"\n  {M}Risk flags: {', '.join(analysis['high_risk_flags'])}{N}")
 
-    #  PLAN only mode 
+    #  PLAN only mode
     if mode == "plan":
         show_plan(task, analysis, workstreams)
         print(f"\n  {C}To execute:{N}")
-        print(f"    python scripts/task-orchestrator.py --task \"<task>\" --execute")
-        print(f"    python scripts/task-orchestrator.py --task \"<task>\" --background")
-        print(f"    python scripts/task-orchestrator.py --task \"<task>\" --watch")
-        print(f"    python scripts/task-orchestrator.py --task \"<task>\" --orchestrate")
-        return {"action": "plan", "plan_id": plan_id, "analysis": analysis, "workstreams": workstreams}
+        print('    python scripts/task-orchestrator.py --task "<task>" --execute')
+        print('    python scripts/task-orchestrator.py --task "<task>" --background')
+        print('    python scripts/task-orchestrator.py --task "<task>" --watch')
+        print('    python scripts/task-orchestrator.py --task "<task>" --orchestrate')
+        return {
+            "action": "plan",
+            "plan_id": plan_id,
+            "analysis": analysis,
+            "workstreams": workstreams,
+        }
 
-    #  EXECUTE / BACKGROUND mode 
+    #  EXECUTE / BACKGROUND mode
     if mode in ("execute", "background"):
         print(f"\n{G}{BAR}{N}")
         print(f"{G}   Background Work Started{N}")
@@ -667,7 +854,7 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
             "Recommending temperatures...",
         ]
         for i, label in enumerate(thread_labels):
-            print(f"    Thread {i+1}: {label}")
+            print(f"    Thread {i + 1}: {label}")
             time.sleep(0.3)
 
         # Wait briefly for initial results
@@ -677,7 +864,10 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
         last_len = 0
         for tick in range(6):
             done = len(analyzer.results["completed_steps"])
-            print(f"\r    [{'' * done}{'' * (5 - done)}] {done}/5 steps completed    ", end="")
+            print(
+                f"\r    [{'' * done}{'' * (5 - done)}] {done}/5 steps completed    ",
+                end="",
+            )
             time.sleep(0.5)
         print()
 
@@ -688,7 +878,9 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
             print(f"    Profiles found:   {digest['profiles_found']}")
             print(f"    Cases found:      {digest['cases_found']}")
             if digest.get("recent_errors"):
-                print(f"    Recent errors:    {len(digest['recent_errors'])} signatures cached")
+                print(
+                    f"    Recent errors:    {len(digest['recent_errors'])} signatures cached"
+                )
 
         # Print conflict analysis
         conflicts = analyzer.results.get("conflicts")
@@ -696,24 +888,37 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
             if conflicts["has_conflicts"]:
                 print(f"\n  {R}  Merge Conflicts Predicted:{N}")
                 for c in conflicts["conflicts"]:
-                    print(f"    {c['between'][0]} ↔ {c['between'][1]}: {', '.join(c['files'])} ({c['severity']})")
+                    print(
+                        f"    {c['between'][0]} ↔ {c['between'][1]}: {', '.join(c['files'])} ({c['severity']})"
+                    )
                 print(f"    Parallel safe: {Y}NO — use sequential mode{N}")
             else:
                 print(f"\n  {G} No merge conflicts predicted{N}")
-                print(f"    Parallel safe: YES")
+                print("    Parallel safe: YES")
 
         # Temperature recommendations
         if analyzer.results.get("temperatures"):
             print(f"\n  {C}Temperature Recommendations:{N}")
             for ws_id, temp in analyzer.results["temperatures"].items():
-                temp_label = "PRECISE" if temp < 0.3 else "BALANCED" if temp < 0.7 else "CREATIVE"
+                temp_label = (
+                    "PRECISE"
+                    if temp < 0.3
+                    else "BALANCED"
+                    if temp < 0.7
+                    else "CREATIVE"
+                )
                 print(f"    {ws_id}: {temp:.1f} ({temp_label})")
 
         print(f"\n  {G} Background analysis complete.{N}")
-        return {"action": mode, "plan_id": plan_id, "analysis": analysis, "workstreams": workstreams,
-                "background_results": analyzer.results}
+        return {
+            "action": mode,
+            "plan_id": plan_id,
+            "analysis": analysis,
+            "workstreams": workstreams,
+            "background_results": analyzer.results,
+        }
 
-    #  WATCH mode 
+    #  WATCH mode
     if mode == "watch" or watch:
         print(f"\n{M}{BAR}{N}")
         print(f"{M}   Progress Monitor{N}")
@@ -744,9 +949,11 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
         done_count = sum(1 for s in streams.values() if s.status == "completed")
         conflicts = ConflictReport()
         for ws in workstreams:
-            touched = re.findall(r'\b[\w./-]+\.\w+\b', ws.get("prompt", ws["description"]))
+            touched = re.findall(
+                r"\b[\w./-]+\.\w+\b", ws.get("prompt", ws["description"])
+            )
             ws["files_touched"] = touched[:5]
-        print(f"\n  {''*20}")
+        print(f"\n  {'' * 20}")
         conflicts = analyzer.results.get("conflicts", {})
         if conflicts and conflicts.get("has_conflicts"):
             print(f"  {R}Conflicts predicted: {len(conflicts.get('conflicts', []))}{N}")
@@ -755,9 +962,12 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
             print(f"  {G}Conflicts predicted: 0{N}")
             print(f"  Parallel safe: {G}YES{N}")
         print(f"  Merge ready: {done_count}/{len(streams)} workstreams")
-        return {"action": "watch", "streams": {k: asdict(v) for k, v in streams.items()}}
+        return {
+            "action": "watch",
+            "streams": {k: asdict(v) for k, v in streams.items()},
+        }
 
-    #  ORCHESTRATE FULL TASK mode 
+    #  ORCHESTRATE FULL TASK mode
     if mode == "orchestrate":
         print(f"\n{C}{BAR}{N}")
         print(f"{C}   Full Pipeline Execution{N}")
@@ -777,21 +987,28 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
         print(f"\n  {Y}Dispatching {len(workstreams)} workstreams...{N}")
         for ws in workstreams:
             temp = ws.get("temperature", 0.7)
-            deps = f" (after {', '.join(ws['dependencies'])})" if ws.get("dependencies") else ""
+            deps = (
+                f" (after {', '.join(ws['dependencies'])})"
+                if ws.get("dependencies")
+                else ""
+            )
             print(f"  {G}    {ws['id']}: spawning subagent (temp={temp}){deps}{N}")
             print(f"           prompt: {ws['description'][:100]}")
             # Auto-save workstream state for resume capability
-            save_workstream_state(ws["id"], {
-                "plan_id": plan_id,
-                "description": ws["description"],
-                "status": "running",
-                "step": "dispatched",
-                "temperature": temp,
-                "dependencies": ws.get("dependencies", []),
-                "type": ws.get("type", ""),
-                "phase": ws.get("phase", ""),
-                "timestamp": time.time()
-            })
+            save_workstream_state(
+                ws["id"],
+                {
+                    "plan_id": plan_id,
+                    "description": ws["description"],
+                    "status": "running",
+                    "step": "dispatched",
+                    "temperature": temp,
+                    "dependencies": ws.get("dependencies", []),
+                    "type": ws.get("type", ""),
+                    "phase": ws.get("phase", ""),
+                    "timestamp": time.time(),
+                },
+            )
 
         # 4. Would spawn real subagents via task tool
         #    Module creation streams (mod-*) run in parallel.
@@ -800,29 +1017,45 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
         parallel_streams = [ws for ws in workstreams if ws.get("phase") == "parallel"]
         serial_streams = [ws for ws in workstreams if ws.get("phase") == "serial"]
         if parallel_streams:
-            print(f"    Phase 1 (parallel): {', '.join(ws['id'] for ws in parallel_streams)}")
+            print(
+                f"    Phase 1 (parallel): {', '.join(ws['id'] for ws in parallel_streams)}"
+            )
         if serial_streams:
-            print(f"    Phase 2 (serial):   {', '.join(ws['id'] for ws in serial_streams)}")
+            print(
+                f"    Phase 2 (serial):   {', '.join(ws['id'] for ws in serial_streams)}"
+            )
         if not parallel_streams and not serial_streams:
             for ws in workstreams:
-                deps_block = f" after {', '.join(ws['dependencies'])}" if ws.get("dependencies") else ""
+                deps_block = (
+                    f" after {', '.join(ws['dependencies'])}"
+                    if ws.get("dependencies")
+                    else ""
+                )
                 print(f"    Run {ws['id']}{deps_block} → collect output")
 
         # 5. Merge results
         print(f"\n  {G}Merge Status:{N}")
         conflicts = analyzer.results.get("conflicts")
         if conflicts and conflicts.get("has_conflicts"):
-            critical = [c for c in conflicts["conflicts"] if c.get("severity") == "critical"]
-            normal = [c for c in conflicts["conflicts"] if c.get("severity") != "critical"]
+            critical = [
+                c for c in conflicts["conflicts"] if c.get("severity") == "critical"
+            ]
+            normal = [
+                c for c in conflicts["conflicts"] if c.get("severity") != "critical"
+            ]
             if critical:
                 print(f"  {R}   CRITICAL serial bottlenecks:{N}")
                 for c in critical:
-                    print(f"    {c['between'][0]} ↔ {c['between'][1]}: {', '.join(c['files'])}")
+                    print(
+                        f"    {c['between'][0]} ↔ {c['between'][1]}: {', '.join(c['files'])}"
+                    )
                     print(f"      Reason: {c.get('reason', 'Must run sequentially')}")
             if normal:
                 print(f"  {Y}   Conflicts: {len(normal)}{N}")
                 for c in normal:
-                    print(f"    {c['between'][0]} ↔ {c['between'][1]}: {', '.join(c['files'])}")
+                    print(
+                        f"    {c['between'][0]} ↔ {c['between'][1]}: {', '.join(c['files'])}"
+                    )
         else:
             print(f"  {G}  No conflicts predicted — safe to merge{N}")
 
@@ -830,22 +1063,36 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
         has_wiring = any(ws.get("type") == "tool_wiring" for ws in workstreams)
         if has_wiring:
             print(f"\n  {C}Post-Merge Verification Plan:{N}")
-            print(f"    After wiring is complete, auto-run:")
+            print("    After wiring is complete, auto-run:")
             verify_script = os.path.join(SCRIPTS, "phase-verify-full.py")
             if os.path.isfile(verify_script):
-                print(f"    python scripts/phase-verify-full.py")
-            print(f"    python scripts/tools-mcp-server.py --list-tools | python -c \"import sys,json; tools=json.loads(sys.stdin.read()); print(f'{{len(tools)}} tools registered')\"")
+                print("    python scripts/phase-verify-full.py")
+            print(
+                "    python scripts/tools-mcp-server.py --list-tools | python -c \"import sys,json; tools=json.loads(sys.stdin.read()); print(f'{len(tools)} tools registered')\""
+            )
 
         # 7. Log to decision trace
         subprocess.run(
-            ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-             os.path.join(SCRIPTS, "decision-trace.ps1"),
-             "-Action", "Add",
-             "-Title", f"Orchestrated: {task[:80]}",
-             "-Decision", f"Full pipeline with {len(workstreams)} workstreams",
-             "-Rationale", f"Complexity {analysis['score']}/100 triggered {analysis['mode']} mode",
-             "-Category", "process"],
-            capture_output=True, cwd=BASE
+            [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                os.path.join(SCRIPTS, "decision-trace.ps1"),
+                "-Action",
+                "Add",
+                "-Title",
+                f"Orchestrated: {task[:80]}",
+                "-Decision",
+                f"Full pipeline with {len(workstreams)} workstreams",
+                "-Rationale",
+                f"Complexity {analysis['score']}/100 triggered {analysis['mode']} mode",
+                "-Category",
+                "process",
+            ],
+            capture_output=True,
+            cwd=BASE,
         )
 
         print(f"\n  {G} Pipeline plan ready.{N}")
@@ -855,28 +1102,61 @@ def orchestrate(task: str, mode: str = "plan", background: bool = False, watch: 
             "analysis": analysis,
             "workstreams": workstreams,
             "dag_path": dag_path,
-            "auto_verify": "python scripts/phase-verify-full.py" if has_wiring else None
+            "auto_verify": "python scripts/phase-verify-full.py"
+            if has_wiring
+            else None,
         }
 
     return {"action": "unknown", "plan_id": plan_id}
 
 
-#  CLI Entry 
+#  CLI Entry
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Task Orchestrator v2 — Active Orchestrator")
+
+    parser = argparse.ArgumentParser(
+        description="Task Orchestrator v2 — Active Orchestrator"
+    )
     parser.add_argument("--task", type=str, help="Task description")
-    parser.add_argument("--plan", action="store_true", help="Generate plan only (dry-run)")
-    parser.add_argument("--execute", action="store_true", help="Generate plan + run background analysis")
-    parser.add_argument("--background", action="store_true", help="Run analysis threads in background, return plan immediately")
-    parser.add_argument("--watch", action="store_true", help="Poll for heartbeat files and report progress")
-    parser.add_argument("--orchestrate", action="store_true", help="Full pipeline with subagent planning")
+    parser.add_argument(
+        "--plan", action="store_true", help="Generate plan only (dry-run)"
+    )
+    parser.add_argument(
+        "--execute", action="store_true", help="Generate plan + run background analysis"
+    )
+    parser.add_argument(
+        "--background",
+        action="store_true",
+        help="Run analysis threads in background, return plan immediately",
+    )
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        help="Poll for heartbeat files and report progress",
+    )
+    parser.add_argument(
+        "--orchestrate",
+        action="store_true",
+        help="Full pipeline with subagent planning",
+    )
     parser.add_argument("--dag", type=str, help="Path to DAG definition JSON file")
-    parser.add_argument("--dag-execute", action="store_true", help="Execute the DAG pipeline")
-    parser.add_argument("--info", action="store_true", help="Display DAG info and exit (only with --dag)")
-    parser.add_argument("--resume", type=str, help="Resume a previous orchestration plan by ID")
-    parser.add_argument("--list-resumable", action="store_true", help="List workstreams that can be resumed")
+    parser.add_argument(
+        "--dag-execute", action="store_true", help="Execute the DAG pipeline"
+    )
+    parser.add_argument(
+        "--info",
+        action="store_true",
+        help="Display DAG info and exit (only with --dag)",
+    )
+    parser.add_argument(
+        "--resume", type=str, help="Resume a previous orchestration plan by ID"
+    )
+    parser.add_argument(
+        "--list-resumable",
+        action="store_true",
+        help="List workstreams that can be resumed",
+    )
     args = parser.parse_args()
 
     # List resumable workstreams
@@ -891,13 +1171,22 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.dag:
-        result = orchestrate(args.task or "", dag_path=args.dag, dag_execute=args.dag_execute, resume=args.resume)
+        result = orchestrate(
+            args.task or "",
+            dag_path=args.dag,
+            dag_execute=args.dag_execute,
+            resume=args.resume,
+        )
         sys.exit(0)
 
     if not args.task and not args.resume:
         print("Usage:")
-        print("  python scripts/task-orchestrator.py --task \"<task>\" [--plan|--execute|--background|--watch|--orchestrate]")
-        print("  python scripts/task-orchestrator.py --dag <dag-file> [--info|--dag-execute]")
+        print(
+            '  python scripts/task-orchestrator.py --task "<task>" [--plan|--execute|--background|--watch|--orchestrate]'
+        )
+        print(
+            "  python scripts/task-orchestrator.py --dag <dag-file> [--info|--dag-execute]"
+        )
         print("  python scripts/task-orchestrator.py --resume <plan-id>")
         print("  python scripts/task-orchestrator.py --list-resumable")
         sys.exit(1)
@@ -914,4 +1203,10 @@ if __name__ == "__main__":
     elif args.plan:
         mode = "plan"
 
-    result = orchestrate(args.task, mode=mode, background=args.background, watch=args.watch, resume=args.resume)
+    result = orchestrate(
+        args.task,
+        mode=mode,
+        background=args.background,
+        watch=args.watch,
+        resume=args.resume,
+    )

@@ -13,14 +13,16 @@ Usage:
     python scripts/identity-manager.py --log-behavior "pattern:text" --context "situation"
 """
 
-import json, os, sys, shutil, subprocess
-from datetime import datetime, timezone
-from typing import Optional
+import json
+import os
+import subprocess
+import sys
 from collections import Counter
+from datetime import datetime, timezone
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-#  Paths 
+#  Paths
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(BASE, "data")
@@ -33,23 +35,34 @@ EVOLUTION_LOG = os.path.join(DATA, "identity-evolution-log.json")
 IDENTITY_SCHEMA = os.path.join(DATA, "identity-schema.json")
 CURRENT_IDENTITY = os.path.join(IDENTITY_DIR, "current-identity.json")
 
-#  Style 
+#  Style
 
-G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; M = "\033[95m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
+G = "\033[92m"
+Y = "\033[93m"
+B = "\033[94m"
+M = "\033[95m"
+R = "\033[91m"
+C = "\033[96m"
+N = "\033[0m"
+BOLD = "\033[1m"
 BAR = ""
 
-#  Helpers 
+#  Helpers
+
 
 def ensure_dirs() -> None:
     """Create identity storage directories if they don't exist."""
     for d in [IDENTITY_DIR, IDENTITY_HISTORY]:
         os.makedirs(d, exist_ok=True)
 
+
 def now_iso() -> str:
     """Return current UTC ISO 8601 timestamp."""
     return datetime.now(timezone.utc).isoformat()
 
+
 from utils import load_json, save_json
+
 
 def _list_profiles() -> list[dict]:
     """Read all profile files from .memory/profiles/."""
@@ -65,13 +78,16 @@ def _list_profiles() -> list[dict]:
                 profiles.append(data)
         elif fname.endswith(".md"):
             try:
-                with open(fpath, "r", encoding="utf-8") as f:
-                    profiles.append({"_file": fname, "text": f.read(), "source": "profile_md"})
+                with open(fpath, encoding="utf-8") as f:
+                    profiles.append(
+                        {"_file": fname, "text": f.read(), "source": "profile_md"}
+                    )
             except Exception:
                 pass
     return profiles
 
-def _query_local_memories(category: Optional[str] = None, limit: int = 50) -> list[dict]:
+
+def _query_local_memories(category: str | None = None, limit: int = 50) -> list[dict]:
     """Query NE-Memory via subprocess call to memory_search.py or direct file reads."""
     memories = []
     ne_dir = os.path.join(MEMORY_DIR, "ne")
@@ -91,12 +107,15 @@ def _query_local_memories(category: Optional[str] = None, limit: int = 50) -> li
     try:
         result = subprocess.run(
             [sys.executable, os.path.join(SCRIPTS_DIR, "memory_search.py")],
-            capture_output=True, text=True, timeout=10
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         _ = result
     except Exception:
         pass
     return memories[:limit]
+
 
 def _read_local_categories() -> dict[str, str]:
     """Parse categories from local memory config for description mapping."""
@@ -104,7 +123,7 @@ def _read_local_categories() -> dict[str, str]:
     categories = {}
     if os.path.isfile(cat_path):
         try:
-            with open(cat_path, "r", encoding="utf-8") as f:
+            with open(cat_path, encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
                     categories = data
@@ -124,7 +143,7 @@ class IdentityManager:
     def __init__(self):
         ensure_dirs()
 
-    #  Consolidation 
+    #  Consolidation
 
     def consolidate_identity(self, persona_name: str = "default") -> dict:
         """
@@ -144,7 +163,7 @@ class IdentityManager:
         categories = _read_local_categories()
         existing = self._load_current()
 
-        #  Extract principles from architecture decisions 
+        #  Extract principles from architecture decisions
         principles: list[dict] = []
         principle_counter: Counter = Counter()
         for mem in memories:
@@ -156,18 +175,38 @@ class IdentityManager:
                 principle_counter[p_text] += 1
         for p_text, count in principle_counter.most_common(10):
             rationale_cat = categories.get("architecture_decisions", "")
-            principles.append({
-                "principle": p_text[:200],
-                "priority": len(principles) + 1,
-                "rationale": f"Appeared {count}x in architecture decisions. {rationale_cat}"
-            })
+            principles.append(
+                {
+                    "principle": p_text[:200],
+                    "priority": len(principles) + 1,
+                    "rationale": f"Appeared {count}x in architecture decisions. {rationale_cat}",
+                }
+            )
 
-        #  Extract traits from user_preferences 
+        #  Extract traits from user_preferences
         trait_map: dict[str, list[str]] = {}
         pref_patterns = {
-            "conciseness": ["concise", "brief", "short", "terse", "minimal", "succinct"],
-            "thoroughness": ["thorough", "comprehensive", "detailed", "complete", "exhaustive"],
-            "proactiveness": ["proactive", "anticipate", "before being asked", "initiative"],
+            "conciseness": [
+                "concise",
+                "brief",
+                "short",
+                "terse",
+                "minimal",
+                "succinct",
+            ],
+            "thoroughness": [
+                "thorough",
+                "comprehensive",
+                "detailed",
+                "complete",
+                "exhaustive",
+            ],
+            "proactiveness": [
+                "proactive",
+                "anticipate",
+                "before being asked",
+                "initiative",
+            ],
             "formality": ["formal", "professional", "serious", "business", "corporate"],
             "directness": ["direct", "blunt", "straight", "no nonsense", "facts only"],
             "creativity": ["creative", "explore", "innovative", "novel", "imaginative"],
@@ -199,14 +238,12 @@ class IdentityManager:
         for trait, refs in trait_map.items():
             count = len(refs)
             strength = min(1.0, count * 0.15 + 0.1)
-            traits.append({
-                "trait": trait,
-                "strength": round(strength, 2),
-                "evidence": refs[:5]
-            })
+            traits.append(
+                {"trait": trait, "strength": round(strength, 2), "evidence": refs[:5]}
+            )
         traits.sort(key=lambda t: t["strength"], reverse=True)
 
-        #  Extract behavioral patterns 
+        #  Extract behavioral patterns
         behavioral_patterns: list[dict] = []
         anti_pattern_count: Counter = Counter()
         seen_bp = set()
@@ -220,21 +257,38 @@ class IdentityManager:
             key = bp_text[:60]
             if key not in seen_bp:
                 seen_bp.add(key)
-                behavioral_patterns.append({
-                    "pattern": f"AVOID: {bp_text[:200]}",
-                    "context": "anti_pattern",
-                    "frequency": "often" if count >= 3 else "sometimes",
-                    "last_observed": now_iso(),
-                })
+                behavioral_patterns.append(
+                    {
+                        "pattern": f"AVOID: {bp_text[:200]}",
+                        "context": "anti_pattern",
+                        "frequency": "often" if count >= 3 else "sometimes",
+                        "last_observed": now_iso(),
+                    }
+                )
 
-        #  Knowledge boundaries 
+        #  Knowledge boundaries
         strong_areas: Counter = Counter()
         weak_areas: Counter = Counter()
         for profile in profiles:
             text = profile.get("text", json.dumps(profile)).lower()
-            for area in ["python", "typescript", "react", "api", "database", "testing",
-                         "devops", "security", "frontend", "backend", "architecture",
-                         "fastapi", "docker", "kubernetes", "electron", "tauri"]:
+            for area in [
+                "python",
+                "typescript",
+                "react",
+                "api",
+                "database",
+                "testing",
+                "devops",
+                "security",
+                "frontend",
+                "backend",
+                "architecture",
+                "fastapi",
+                "docker",
+                "kubernetes",
+                "electron",
+                "tauri",
+            ]:
                 if area in text:
                     strong_areas[area] += 1
         for mem in memories:
@@ -253,17 +307,19 @@ class IdentityManager:
             if "task_learning" in cats or "session_summaries" in cats:
                 text = mem.get("text", "")
                 if text and len(text) > 20:
-                    recent_learnings.append({
-                        "topic": cats,
-                        "insight": text[:300],
-                        "added": mem.get("timestamp", now_iso()),
-                    })
+                    recent_learnings.append(
+                        {
+                            "topic": cats,
+                            "insight": text[:300],
+                            "added": mem.get("timestamp", now_iso()),
+                        }
+                    )
         recent_learnings = recent_learnings[-5:]
 
-        #  Communication style (evolving defaults) 
+        #  Communication style (evolving defaults)
         comm = self._infer_communication_style(traits, memories)
 
-        #  Build identity 
+        #  Build identity
         old_version = existing.get("version", "0.0.0")
         new_version = self._bump_version(old_version)
 
@@ -282,17 +338,19 @@ class IdentityManager:
             "last_consolidated": now_iso(),
         }
 
-        #  Track evolution 
+        #  Track evolution
         changes = self._diff_identity(existing, identity)
         self._record_evolution(new_version, changes)
 
-        #  Save 
+        #  Save
         self._save_identity(identity)
         self._archive_version(identity)
 
         return identity
 
-    def _infer_communication_style(self, traits: list[dict], memories: list[dict]) -> dict:
+    def _infer_communication_style(
+        self, traits: list[dict], memories: list[dict]
+    ) -> dict:
         """Infer communication style from trait strengths and memory patterns."""
         trait_map = {t["trait"]: t["strength"] for t in traits}
         verbosity = round(0.3 + trait_map.get("thoroughness", 0.0) * 0.4, 2)
@@ -335,17 +393,27 @@ class IdentityManager:
             diff = strength - old_s
             if abs(diff) > 0.1:
                 direction = "strengthened" if diff > 0 else "weakened"
-                changes.append(f"Trait '{trait}' {direction} from {old_s:.2f} to {strength:.2f}")
+                changes.append(
+                    f"Trait '{trait}' {direction} from {old_s:.2f} to {strength:.2f}"
+                )
         old_principle_count = len(old.get("principles", []))
         new_principle_count = len(new.get("principles", []))
         if new_principle_count != old_principle_count:
-            changes.append(f"Principles changed: {old_principle_count} → {new_principle_count}")
+            changes.append(
+                f"Principles changed: {old_principle_count} → {new_principle_count}"
+            )
         old_pattern_count = len(old.get("behavioral_patterns", []))
         new_pattern_count = len(new.get("behavioral_patterns", []))
         if new_pattern_count != old_pattern_count:
-            changes.append(f"Behavioral patterns changed: {old_pattern_count} → {new_pattern_count}")
-        old_learnings = len(old.get("knowledge_boundaries", {}).get("recent_learnings", []))
-        new_learnings = len(new.get("knowledge_boundaries", {}).get("recent_learnings", []))
+            changes.append(
+                f"Behavioral patterns changed: {old_pattern_count} → {new_pattern_count}"
+            )
+        old_learnings = len(
+            old.get("knowledge_boundaries", {}).get("recent_learnings", [])
+        )
+        new_learnings = len(
+            new.get("knowledge_boundaries", {}).get("recent_learnings", [])
+        )
         if new_learnings != old_learnings:
             changes.append(f"Recent learnings: {old_learnings} → {new_learnings}")
         if not changes:
@@ -357,12 +425,14 @@ class IdentityManager:
         log = load_json(EVOLUTION_LOG, {"versions": []})
         if "versions" not in log:
             log["versions"] = []
-        log["versions"].append({
-            "version": version,
-            "date": now_iso(),
-            "changes_made": changes,
-            "triggers": ["consolidation"],
-        })
+        log["versions"].append(
+            {
+                "version": version,
+                "date": now_iso(),
+                "changes_made": changes,
+                "triggers": ["consolidation"],
+            }
+        )
         save_json(EVOLUTION_LOG, log)
 
     def _save_identity(self, identity: dict) -> None:
@@ -389,7 +459,7 @@ class IdentityManager:
         """Load current identity or return empty defaults."""
         return load_json(CURRENT_IDENTITY, {})
 
-    #  Session Prompt Rendering 
+    #  Session Prompt Rendering
 
     def render_session_prompt(self) -> str:
         """
@@ -457,9 +527,9 @@ class IdentityManager:
             "Recent Learnings: (none — run `consolidate_identity` first)"
         )
 
-    #  Trait Accessor 
+    #  Trait Accessor
 
-    def get_trait(self, trait_name: str) -> Optional[float]:
+    def get_trait(self, trait_name: str) -> float | None:
         """
         Return current strength of a named trait (0.0–1.0), or None if not found.
 
@@ -478,7 +548,7 @@ class IdentityManager:
                 return t["strength"]
         return None
 
-    #  Behavior Logger 
+    #  Behavior Logger
 
     def log_behavior(self, behavior_text: str, context: str = "") -> None:
         """
@@ -498,24 +568,28 @@ class IdentityManager:
         entries = load_json(log_path, [])
         if not isinstance(entries, list):
             entries = []
-        entries.append({
-            "behavior": behavior_text,
-            "context": context,
-            "observed": now_iso(),
-        })
+        entries.append(
+            {
+                "behavior": behavior_text,
+                "context": context,
+                "observed": now_iso(),
+            }
+        )
         # Keep last 200 entries
         entries = entries[-200:]
         save_json(log_path, entries)
         print(f"  {G} Behavior logged: {behavior_text[:80]}{N}")
 
-    #  Utility 
+    #  Utility
 
     def status(self) -> dict:
         """Return current identity status summary."""
         identity = self._load_current()
         history_count = 0
         if os.path.isdir(IDENTITY_HISTORY):
-            history_count = len([f for f in os.listdir(IDENTITY_HISTORY) if f.endswith(".json")])
+            history_count = len(
+                [f for f in os.listdir(IDENTITY_HISTORY) if f.endswith(".json")]
+            )
         return {
             "exists": bool(identity.get("traits")),
             "persona": identity.get("persona_name", "N/A"),
@@ -523,13 +597,16 @@ class IdentityManager:
             "traits_count": len(identity.get("traits", [])),
             "principles_count": len(identity.get("principles", [])),
             "patterns_count": len(identity.get("behavioral_patterns", [])),
-            "learnings_count": len(identity.get("knowledge_boundaries", {}).get("recent_learnings", [])),
+            "learnings_count": len(
+                identity.get("knowledge_boundaries", {}).get("recent_learnings", [])
+            ),
             "last_consolidated": identity.get("last_consolidated", "N/A"),
             "history_versions": history_count,
         }
 
 
-#  CLI 
+#  CLI
+
 
 def print_status(status: dict) -> None:
     """Pretty-print identity status."""
@@ -553,13 +630,30 @@ def print_status(status: dict) -> None:
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Identity Manager — persona persistence for CortexStratum")
-    parser.add_argument("--consolidate", action="store_true", help="Consolidate identity from local memories")
-    parser.add_argument("--render", action="store_true", help="Render session prompt fragment")
-    parser.add_argument("--get-trait", type=str, metavar="TRAIT", help="Get strength of a named trait")
-    parser.add_argument("--log-behavior", type=str, metavar="TEXT", help="Log a behavioral observation")
-    parser.add_argument("--context", type=str, default="", help="Context for --log-behavior")
-    parser.add_argument("--persona", type=str, default="default", help="Persona name for consolidation")
+
+    parser = argparse.ArgumentParser(
+        description="Identity Manager — persona persistence for CortexStratum"
+    )
+    parser.add_argument(
+        "--consolidate",
+        action="store_true",
+        help="Consolidate identity from local memories",
+    )
+    parser.add_argument(
+        "--render", action="store_true", help="Render session prompt fragment"
+    )
+    parser.add_argument(
+        "--get-trait", type=str, metavar="TRAIT", help="Get strength of a named trait"
+    )
+    parser.add_argument(
+        "--log-behavior", type=str, metavar="TEXT", help="Log a behavioral observation"
+    )
+    parser.add_argument(
+        "--context", type=str, default="", help="Context for --log-behavior"
+    )
+    parser.add_argument(
+        "--persona", type=str, default="default", help="Persona name for consolidation"
+    )
     parser.add_argument("--status", action="store_true", help="Show identity status")
     args = parser.parse_args()
 
@@ -570,8 +664,10 @@ if __name__ == "__main__":
         print(f"{B}{BOLD}  CONSOLIDATING IDENTITY{N}")
         print(f"{B}{BAR}{N}")
         identity = mgr.consolidate_identity(persona_name=args.persona)
-        print(f"\n  {G} Done. Version {identity['version']} — {len(identity['traits'])} traits, "
-              f"{len(identity['principles'])} principles{N}")
+        print(
+            f"\n  {G} Done. Version {identity['version']} — {len(identity['traits'])} traits, "
+            f"{len(identity['principles'])} principles{N}"
+        )
         print()
 
     elif args.render:
@@ -583,7 +679,7 @@ if __name__ == "__main__":
         if strength is not None:
             print(f"{strength:.2f}")
         else:
-            print(f"none")
+            print("none")
             sys.exit(1)
 
     elif args.log_behavior:
@@ -594,7 +690,7 @@ if __name__ == "__main__":
 
     else:
         print_status(mgr.status())
-        print(f"  Usage: python scripts/identity-manager.py [--consolidate] [--render]")
-        print(f"         [--get-trait <name>] [--log-behavior <text> --context <ctx>]")
-        print(f"         [--status]")
+        print("  Usage: python scripts/identity-manager.py [--consolidate] [--render]")
+        print("         [--get-trait <name>] [--log-behavior <text> --context <ctx>]")
+        print("         [--status]")
         print()

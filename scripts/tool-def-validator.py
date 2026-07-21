@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Tool definition validator — checks TOOLS list integrity."""
-import ast, sys, os, json, re
+
+import os
+import re
+import sys
 
 SCRIPTS = os.path.dirname(os.path.abspath(__file__))
 SERVER = os.path.join(SCRIPTS, "tools-mcp-server.py")
+
 
 def extract_tools_list():
     """Parse the TOOLS list via regex — handles A() and DR() calls that ast can't."""
@@ -32,6 +36,7 @@ def extract_tools_list():
         tools.append({"name": match.group(1), "permission": match.group(2)})
     return tools
 
+
 def extract_dispatch_tools():
     """Extract tool names referenced in handle_tool_call dispatch."""
     with open(SERVER, encoding="utf-8") as f:
@@ -40,6 +45,7 @@ def extract_dispatch_tools():
     for match in re.finditer(r'"(read_|write_|mutate_)\w+"', content):
         tool_refs.add(match.group(0).strip('"'))
     return tool_refs
+
 
 def validate():
     errors = []
@@ -68,7 +74,9 @@ def validate():
 
     dispatch_tools = extract_dispatch_tools()
     for dt in dispatch_tools:
-        if dt not in tool_names and not any(dt.startswith(p) for p in ["read_", "write_", "mutate_"]):
+        if dt not in tool_names and not any(
+            dt.startswith(p) for p in ["read_", "write_", "mutate_"]
+        ):
             continue
         if dt not in tool_names:
             errors.append(f"  DISPATCH REF '{dt}' has no TOOLS list entry")
@@ -85,7 +93,9 @@ def validate():
                     found = True
             if not found:
                 if f'"{tn}"' not in content:
-                    errors.append(f"  TOOL '{tn}' defined but NEVER referenced in dispatch")
+                    errors.append(
+                        f"  TOOL '{tn}' defined but NEVER referenced in dispatch"
+                    )
 
     if errors:
         print(f"\n  ERRORS ({len(errors)}):")
@@ -94,6 +104,7 @@ def validate():
         sys.exit(1)
     else:
         print(f"\n  ALL {len(tools)} tools validated — dispatch complete, no errors")
+
 
 if __name__ == "__main__":
     validate()

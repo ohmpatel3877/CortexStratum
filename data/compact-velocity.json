@@ -11,6 +11,14 @@
     {
       "ts": 1784388791.9010718,
       "context": "verify-sqlite"
+    },
+    {
+      "ts": 1784595080.562014,
+      "context": "session compaction check"
+    },
+    {
+      "ts": 1784595086.429432,
+      "context": "compact_execute"
     }
   ]
 }

@@ -9,7 +9,10 @@ Usage:
     python scripts/integration-status.py --quick
 """
 
-import json, os, sys, subprocess, glob, hashlib
+import glob
+import os
+import subprocess
+import sys
 from datetime import datetime, timezone
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -23,7 +26,13 @@ DAG_DEFS = os.path.join(DATA, "dag-definitions")
 DAG_SCHEMAS = os.path.join(DATA, "dag-schemas")
 DAG_TRACES = os.path.join(DATA, "dag-traces")
 
-G = "\033[92m"; Y = "\033[93m"; B = "\033[94m"; R = "\033[91m"; C = "\033[96m"; N = "\033[0m"; BOLD = "\033[1m"
+G = "\033[92m"
+Y = "\033[93m"
+B = "\033[94m"
+R = "\033[91m"
+C = "\033[96m"
+N = "\033[0m"
+BOLD = "\033[1m"
 BAR = ""
 
 
@@ -34,25 +43,46 @@ def now_iso() -> str:
 def check_file(path: str, label: str) -> dict:
     exists = os.path.isfile(path)
     size = os.path.getsize(path) if exists else 0
-    return {"check": label, "path": path, "exists": exists, "size": size, "status": "PASS" if exists else "FAIL"}
+    return {
+        "check": label,
+        "path": path,
+        "exists": exists,
+        "size": size,
+        "status": "PASS" if exists else "FAIL",
+    }
 
 
 def check_dir(path: str, label: str) -> dict:
     exists = os.path.isdir(path)
     count = len(os.listdir(path)) if exists else 0
-    return {"check": label, "path": path, "exists": exists, "file_count": count, "status": "PASS" if exists else "FAIL"}
+    return {
+        "check": label,
+        "path": path,
+        "exists": exists,
+        "file_count": count,
+        "status": "PASS" if exists else "FAIL",
+    }
 
 
 def check_import(module_name: str, file_path: str, class_name: str) -> dict:
     try:
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(module_name, file_path)
         if spec is None or spec.loader is None:
-            return {"check": f"Import {module_name}", "status": "FAIL", "error": "Could not create spec"}
+            return {
+                "check": f"Import {module_name}",
+                "status": "FAIL",
+                "error": "Could not create spec",
+            }
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         if not hasattr(mod, class_name):
-            return {"check": f"Import {module_name}", "status": "FAIL", "error": f"{class_name} not found"}
+            return {
+                "check": f"Import {module_name}",
+                "status": "FAIL",
+                "error": f"{class_name} not found",
+            }
         return {"check": f"Import {module_name}", "status": "PASS", "class": class_name}
     except Exception as e:
         return {"check": f"Import {module_name}", "status": "FAIL", "error": str(e)}
@@ -67,28 +97,41 @@ def check_adr_completeness() -> list:
         "adr-004-documentation-generation.md",
     ]
     if not os.path.isdir(ADR_DIR):
-        return [{"check": "ADR directory", "status": "FAIL", "error": f"Directory not found: {ADR_DIR}"}]
+        return [
+            {
+                "check": "ADR directory",
+                "status": "FAIL",
+                "error": f"Directory not found: {ADR_DIR}",
+            }
+        ]
 
     for adr in expected:
         path = os.path.join(ADR_DIR, adr)
         exists = os.path.isfile(path)
         has_header = False
         if exists:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 content = f.read()
             has_header = "# ADR-" in content
-        results.append({
-            "check": f"ADR: {adr}",
-            "status": "PASS" if (exists and has_header) else "FAIL",
-            "error": None if (exists and has_header) else ("Missing" if not exists else "Missing header"),
-        })
+        results.append(
+            {
+                "check": f"ADR: {adr}",
+                "status": "PASS" if (exists and has_header) else "FAIL",
+                "error": None
+                if (exists and has_header)
+                else ("Missing" if not exists else "Missing header"),
+            }
+        )
     return results
 
 
 def run_test_suite() -> dict:
     result = subprocess.run(
         [sys.executable, os.path.join(SCRIPTS, "test-integration-layer.py")],
-        capture_output=True, text=True, cwd=BASE, timeout=60
+        capture_output=True,
+        text=True,
+        cwd=BASE,
+        timeout=60,
     )
     return {
         "returncode": result.returncode,
@@ -104,37 +147,84 @@ def generate_report(quick: bool = False) -> str:
     checks = []
 
     # Workstream A: DAG Coordinator
-    checks.append(check_file(os.path.join(SCRIPTS, "dag-coordinator.py"), "DAG Coordinator script"))
+    checks.append(
+        check_file(
+            os.path.join(SCRIPTS, "pipeline", "dag-coordinator.py"),
+            "DAG Coordinator script",
+        )
+    )
     checks.append(check_dir(DAG_DEFS, "DAG definitions directory"))
     checks.append(check_dir(DAG_SCHEMAS, "DAG schema directory"))
     checks.append(check_dir(DAG_TRACES, "DAG traces directory"))
-    checks.append(check_file(os.path.join(DAG_SCHEMAS, "dag-definition-v1.json"), "DAG definition schema"))
+    checks.append(
+        check_file(
+            os.path.join(DAG_SCHEMAS, "dag-definition-v1.json"), "DAG definition schema"
+        )
+    )
     dag_files = glob.glob(os.path.join(DAG_DEFS, "*.json"))
     for df in dag_files:
         checks.append(check_file(df, f"DAG def: {os.path.basename(df)}"))
 
     # Workstream B: Identity Manager
-    checks.append(check_file(os.path.join(SCRIPTS, "identity-manager.py"), "Identity Manager script"))
-    checks.append(check_import("identity_manager", os.path.join(SCRIPTS, "identity-manager.py"), "IdentityManager"))
+    checks.append(
+        check_file(
+            os.path.join(SCRIPTS, "identity-manager.py"), "Identity Manager script"
+        )
+    )
+    checks.append(
+        check_import(
+            "identity_manager",
+            os.path.join(SCRIPTS, "identity-manager.py"),
+            "IdentityManager",
+        )
+    )
 
     # Workstream C: Sandbox
-    checks.append(check_file(os.path.join(SCRIPTS, "sandbox-manager.py"), "Sandbox Manager script"))
-    checks.append(check_import("sandbox_manager", os.path.join(SCRIPTS, "sandbox-manager.py"), "SandboxManager"))
+    checks.append(
+        check_file(
+            os.path.join(SCRIPTS, "sandbox-manager.py"), "Sandbox Manager script"
+        )
+    )
+    checks.append(
+        check_import(
+            "sandbox_manager",
+            os.path.join(SCRIPTS, "sandbox-manager.py"),
+            "SandboxManager",
+        )
+    )
 
     # Workstream D: Doc Generator
-    checks.append(check_file(os.path.join(SCRIPTS, "doc-generator.py"), "Doc Generator script"))
-    checks.append(check_import("doc_generator", os.path.join(SCRIPTS, "doc-generator.py"), "DocGenerator"))
+    checks.append(
+        check_file(os.path.join(SCRIPTS, "doc-generator.py"), "Doc Generator script")
+    )
+    checks.append(
+        check_import(
+            "doc_generator", os.path.join(SCRIPTS, "doc-generator.py"), "DocGenerator"
+        )
+    )
 
     # Workstream E: Integration Layer
-    checks.append(check_file(os.path.join(SCRIPTS, "orchestrate-all.ps1"), "Unified Orchestrator"))
-    checks.append(check_file(os.path.join(SCRIPTS, "test-integration-layer.py"), "Integration test suite"))
-    checks.append(check_file(os.path.join(SCRIPTS, "integration-status.py"), "Status report generator"))
+    checks.append(
+        check_file(os.path.join(SCRIPTS, "orchestrate-all.ps1"), "Unified Orchestrator")
+    )
+    checks.append(
+        check_file(
+            os.path.join(SCRIPTS, "test-integration-layer.py"), "Integration test suite"
+        )
+    )
+    checks.append(
+        check_file(
+            os.path.join(SCRIPTS, "integration-status.py"), "Status report generator"
+        )
+    )
 
     # ADRs
     checks.extend(check_adr_completeness())
 
     # Decision registry
-    checks.append(check_file(os.path.join(DATA, "decision-registry.json"), "Decision registry"))
+    checks.append(
+        check_file(os.path.join(DATA, "decision-registry.json"), "Decision registry")
+    )
 
     passed = sum(1 for c in checks if c.get("status") == "PASS")
     failed = sum(1 for c in checks if c.get("status") == "FAIL")
@@ -164,20 +254,22 @@ def generate_report(quick: bool = False) -> str:
         checks_rows += f"""
         <tr>
             <td>{status_icon}</td>
-            <td>{c.get('status', 'UNKNOWN')}</td>
-            <td><code>{c.get('check', '')}</code></td>
-            <td><code>{c.get('path', '')}</code></td>
+            <td>{c.get("status", "UNKNOWN")}</td>
+            <td><code>{c.get("check", "")}</code></td>
+            <td><code>{c.get("path", "")}</code></td>
             <td>{details}</td>
         </tr>"""
 
     test_section = ""
     if test_results:
         test_lines = test_results["stdout"].split("\n")
-        test_body = "\n".join(f"        <pre>{l}</pre>" for l in test_lines if l.strip())
+        test_body = "\n".join(
+            f"        <pre>{l}</pre>" for l in test_lines if l.strip()
+        )
         test_section = f"""
         <h2>Test Suite Results</h2>
         <div class="test-output">
-            <p>Return code: {test_results['returncode']} | Passed: {test_results['passed']} | Failed: {test_results['failed']} | Skipped: {test_results['skipped']}</p>
+            <p>Return code: {test_results["returncode"]} | Passed: {test_results["passed"]} | Failed: {test_results["failed"]} | Skipped: {test_results["skipped"]}</p>
             {test_body}
         </div>"""
 
@@ -249,9 +341,14 @@ def generate_report(quick: bool = False) -> str:
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Integration Status Report Generator")
-    parser.add_argument("--output", type=str, default=os.path.join(DOCS, "integration-status.html"),
-                        help="Output HTML path")
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=os.path.join(DOCS, "integration-status.html"),
+        help="Output HTML path",
+    )
     parser.add_argument("--quick", action="store_true", help="Skip running tests")
     args = parser.parse_args()
 
@@ -267,19 +364,19 @@ def main():
 
     # Also print summary to console
     check_count = html.count("<tr>")
-    pass_count = html.count('')
-    fail_count = html.count('')
+    pass_count = html.count("")
+    fail_count = html.count("")
     print(f"  Checks:  {check_count} ({pass_count} pass, {fail_count} fail)")
     print(f"  Report:  {G}{args.output}{N}")
-    print(f"\n  {''*50}")
-    print(f"  Workstream A (DAG):      dag-coordinator.py, seed DAG, schemas")
-    print(f"  Workstream B (Identity): identity-manager.py with IdentityManager")
-    print(f"  Workstream C (Sandbox):  sandbox-manager.py with SandboxManager")
-    print(f"  Workstream D (Docs):     doc-generator.py with DocGenerator")
-    print(f"  Workstream E (Integrate): orchestrate-all.ps1, ADRs, tests")
-    print(f"  {''*50}")
-    print(f"\n  To run tests:  python scripts/test-integration-layer.py")
-    print(f"  To re-generate: python scripts/integration-status.py\n")
+    print(f"\n  {'' * 50}")
+    print("  Workstream A (DAG):      dag-coordinator.py, seed DAG, schemas")
+    print("  Workstream B (Identity): identity-manager.py with IdentityManager")
+    print("  Workstream C (Sandbox):  sandbox-manager.py with SandboxManager")
+    print("  Workstream D (Docs):     doc-generator.py with DocGenerator")
+    print("  Workstream E (Integrate): orchestrate-all.ps1, ADRs, tests")
+    print(f"  {'' * 50}")
+    print("\n  To run tests:  python scripts/test-integration-layer.py")
+    print("  To re-generate: python scripts/integration-status.py\n")
 
     return 0
 

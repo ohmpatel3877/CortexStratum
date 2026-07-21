@@ -27,4 +27,5 @@ future/
 |------|----------|--------|
 | Audio Processing Suite (EQ, room analysis, sound design) | agent-skills | Foundation built, expansion planned |
 | Music Personality Engine (personality analyzer, album intel, Spotify sync) | agent-skills | Spec only — needs API credentials |
+| PhET-Inspired Simulation Enhancement | simulation | Spec only — interactive visual/educational layer for mechanics/FEA/CFD/math |
 | Externalize sensory/coder/gamedev/devops as separate MCPs | infrastructure | Plan exists in docs/externalization-plan.md |

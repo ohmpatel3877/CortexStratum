@@ -19,7 +19,6 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
 
 
 class PermissionAudit:
@@ -81,7 +80,9 @@ class PermissionAudit:
                 "length": len(text),
                 "source": args.get("source", "manual"),
             }
-            sim["description"] = f"Would add memory ({len(text)} chars, source: {args.get('source', 'manual')})"
+            sim["description"] = (
+                f"Would add memory ({len(text)} chars, source: {args.get('source', 'manual')})"
+            )
 
         elif tool_name in ("write_xtrace_log_error",):
             sim["preview"] = {
@@ -100,7 +101,9 @@ class PermissionAudit:
                 "title": args.get("title", ""),
                 "category": args.get("category", "process"),
             }
-            sim["description"] = f"Would record architecture decision '{args.get('title', '?')}'"
+            sim["description"] = (
+                f"Would record architecture decision '{args.get('title', '?')}'"
+            )
 
         elif tool_name in ("write_goal_registry_init",):
             sim["preview"] = {
@@ -125,7 +128,9 @@ class PermissionAudit:
                 "target_agent": args.get("target", ""),
                 "strategy": args.get("strategy", "incremental"),
             }
-            sim["description"] = f"Would send renudge to '{args.get('target', '?')}' with strategy '{args.get('strategy', 'incremental')}'"
+            sim["description"] = (
+                f"Would send renudge to '{args.get('target', '?')}' with strategy '{args.get('strategy', 'incremental')}'"
+            )
 
         elif tool_name in ("write_verifier_clear_renudge",):
             sim["preview"] = {
@@ -142,7 +147,9 @@ class PermissionAudit:
                 "event_type": args.get("event_type", "insight"),
                 "description_preview": (args.get("description", "") or "")[:200],
             }
-            sim["description"] = f"Would log observation ({args.get('event_type', 'insight')})"
+            sim["description"] = (
+                f"Would log observation ({args.get('event_type', 'insight')})"
+            )
 
         elif tool_name in ("write_hooks_session_end",):
             sim["preview"] = {
@@ -150,7 +157,9 @@ class PermissionAudit:
                 "target": "session",
                 "session_id": args.get("session_id", ""),
             }
-            sim["description"] = f"Would finalize session '{args.get('session_id', '?')}'"
+            sim["description"] = (
+                f"Would finalize session '{args.get('session_id', '?')}'"
+            )
 
         elif tool_name in ("write_memory_consolidate",):
             threshold = args.get("threshold", 0.85)
@@ -163,7 +172,7 @@ class PermissionAudit:
             }
             sim["description"] = f"Would consolidate memories (threshold={threshold})"
 
-        elif tool_name in ("write_commitment_verify",):
+        elif tool_name in ("mutate_commitment_verify",):
             sim["preview"] = {
                 "action": "update",
                 "target": "commitment_registry",
@@ -171,7 +180,7 @@ class PermissionAudit:
             }
             sim["description"] = f"Would verify commitment '{args.get('id', '?')}'"
 
-        elif tool_name in ("write_sensory_interact",):
+        elif tool_name in ("mutate_sensory_interact",):
             actions = args.get("actions", [])
             sim["preview"] = {
                 "action": "browser_interact",
@@ -180,9 +189,11 @@ class PermissionAudit:
                 "action_count": len(actions),
                 "action_types": list({a.get("type", "") for a in actions}),
             }
-            sim["description"] = f"Would perform {len(actions)} browser actions on '{args.get('url', '?')[:60]}'"
+            sim["description"] = (
+                f"Would perform {len(actions)} browser actions on '{args.get('url', '?')[:60]}'"
+            )
 
-        elif tool_name in ("write_audit_undo",):
+        elif tool_name in ("mutate_audit_undo",):
             ckpt_id = args.get("checkpoint_id", "")
             sim["preview"] = {
                 "action": "restore",
@@ -231,7 +242,7 @@ class PermissionAudit:
         tmp = None
         try:
             fd, tmp = tempfile.mkstemp(
-                suffix=".json", prefix=f"ckpt_", dir=str(self._undo_dir)
+                suffix=".json", prefix="ckpt_", dir=str(self._undo_dir)
             )
             with os.fdopen(fd, "w", encoding="utf-8") as f:
                 json.dump(ckpt, f, indent=2, ensure_ascii=False)
@@ -272,7 +283,7 @@ class PermissionAudit:
             }
 
         try:
-            with open(ckpt_path, "r", encoding="utf-8") as f:
+            with open(ckpt_path, encoding="utf-8") as f:
                 ckpt = json.load(f)
 
             if ckpt.get("restored"):
@@ -296,7 +307,7 @@ class PermissionAudit:
                 "timestamp": ckpt.get("timestamp"),
                 "args": ckpt.get("args"),
                 "message": f"Undo recorded for {ckpt.get('tool')}. "
-                          "State reversion should be handled by the specific tool module.",
+                "State reversion should be handled by the specific tool module.",
             }
 
         except (json.JSONDecodeError, OSError) as e:
@@ -314,17 +325,21 @@ class PermissionAudit:
             return []
 
         checkpoints = []
-        for fname in sorted(self._undo_dir.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True):
+        for fname in sorted(
+            self._undo_dir.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True
+        ):
             if fname.suffix == ".json":
                 try:
-                    with open(fname, "r", encoding="utf-8") as f:
+                    with open(fname, encoding="utf-8") as f:
                         ckpt = json.load(f)
-                    checkpoints.append({
-                        "checkpoint_id": ckpt.get("checkpoint_id", fname.stem),
-                        "tool": ckpt.get("tool", "?"),
-                        "timestamp": ckpt.get("timestamp", ""),
-                        "restored": ckpt.get("restored", False),
-                    })
+                    checkpoints.append(
+                        {
+                            "checkpoint_id": ckpt.get("checkpoint_id", fname.stem),
+                            "tool": ckpt.get("tool", "?"),
+                            "timestamp": ckpt.get("timestamp", ""),
+                            "restored": ckpt.get("restored", False),
+                        }
+                    )
                 except Exception:
                     pass
                 if len(checkpoints) >= limit:
@@ -343,7 +358,7 @@ class PermissionAudit:
                 if fname.suffix == ".json":
                     total += 1
                     try:
-                        with open(fname, "r") as f:
+                        with open(fname) as f:
                             ckpt = json.load(f)
                             if ckpt.get("restored"):
                                 restored += 1
@@ -456,10 +471,22 @@ if __name__ == "__main__":
     print("=== DRY RUN SIMULATIONS ===")
     tests = [
         ("write_memory_add", {"text": "Test memory entry", "source": "manual"}),
-        ("write_xtrace_log_error", {"command": "npm build", "error_output": "Module not found"}),
-        ("write_dtrace_add", {"title": "Use Postgres", "decision": "Yes", "rationale": "ACID"}),
+        (
+            "write_xtrace_log_error",
+            {"command": "npm build", "error_output": "Module not found"},
+        ),
+        (
+            "write_dtrace_add",
+            {"title": "Use Postgres", "decision": "Yes", "rationale": "ACID"},
+        ),
         ("write_memory_consolidate", {"threshold": 0.85}),
-        ("write_sensory_interact", {"url": "https://example.com", "actions": [{"type": "click", "selector": "#btn"}]}),
+        (
+            "mutate_sensory_interact",
+            {
+                "url": "https://example.com",
+                "actions": [{"type": "click", "selector": "#btn"}],
+            },
+        ),
         ("unknown_tool", {}),
     ]
     for name, args in tests:
@@ -477,8 +504,10 @@ if __name__ == "__main__":
     print(f"  Double undo: {result2['status']}")
 
     st = audit.status()
-    print(f"\n=== STATUS ===")
-    print(f"  Undo log: {st['undo_log_count']} entries, {st['restored_count']} restored")
+    print("\n=== STATUS ===")
+    print(
+        f"  Undo log: {st['undo_log_count']} entries, {st['restored_count']} restored"
+    )
 
     print("\n=== ANNOTATIONS ===")
     print(f"  read:  {get_annotations('read')}")

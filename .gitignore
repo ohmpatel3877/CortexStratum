@@ -11,12 +11,17 @@ test_stderr.log
 data/mcp-server-test-results.json
 data/skill-pipeline-test-results.json
 data/commitments.json
+.memory/ne/memory.db
 .memory/ne/memories.json
+.memory/ne/*.imported
+.memory/ne/vectors/
 
 # Runtime data (local state, profiles, logs)
 .memory/
 data/sandbox-log.json
 data/security-scan-report.json
+data/memory-summary.json
+data/registry-backups/
 
 # IDE
 .vscode/

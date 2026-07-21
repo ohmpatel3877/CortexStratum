@@ -15,15 +15,19 @@ Tests:
   7. ALL MCP tools are callable with valid permissions (count from --list-tools)
 """
 
-import json, os, re, sys, subprocess, time
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+import time
 from collections import Counter
+from pathlib import Path
 
 # Windows console encoding fix
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-#  Paths 
+#  Paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = PROJECT_ROOT / "skills"
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
@@ -46,54 +50,69 @@ def log(status: str, test: str, detail: str = ""):
         RESULTS["warnings"] += 1
 
 
-# 
+#
 # Test 1: Validate all local skill SKILL.md files
-# 
+#
+
 
 def test_local_skills():
     """Check every directory under skills/ has a SKILL.md with valid structure."""
     print("\n--- Test 1: Local Skill Files ---")
     skill_dirs = [d for d in SKILLS_DIR.iterdir() if d.is_dir()]
-    
+
     if not skill_dirs:
         log("FAIL", "Local skills", "No skill directories found under skills/")
         return
-    
+
     for skill_dir in sorted(skill_dirs):
         skill_name = skill_dir.name
         skill_file = skill_dir / "SKILL.md"
-        
+
         if not skill_file.exists():
-            log("FAIL", f"  {skill_name}/SKILL.md", "MISSING — skill directory has no SKILL.md")
+            log(
+                "FAIL",
+                f"  {skill_name}/SKILL.md",
+                "MISSING — skill directory has no SKILL.md",
+            )
             continue
-        
+
         content = skill_file.read_text(encoding="utf-8", errors="replace")
-        
+
         # Basic content checks
         checks = []
         if len(content) < 100:
             checks.append(f"too short ({len(content)} chars)")
         if not content.strip():
             checks.append("empty file")
-        if not any(w in content.lower() for w in ["skill", "description", "use when", "purpose"]):
-            checks.append("no recognizable skill structure (missing 'skill', 'description', or 'use when')")
-        
+        if not any(
+            w in content.lower()
+            for w in ["skill", "description", "use when", "purpose"]
+        ):
+            checks.append(
+                "no recognizable skill structure (missing 'skill', 'description', or 'use when')"
+            )
+
         if checks:
             log("WARN", f"  {skill_name}/SKILL.md", "; ".join(checks))
         else:
-            log("PASS", f"  {skill_name}/SKILL.md", f"{len(content)} chars, valid structure")
-    
+            log(
+                "PASS",
+                f"  {skill_name}/SKILL.md",
+                f"{len(content)} chars, valid structure",
+            )
+
     log("INFO", f"  Total skill directories: {len(skill_dirs)}")
 
 
-# 
+#
 # Test 2: Validate skill router JSON
-# 
+#
+
 
 def test_router_structure():
     """Validate the skill-router.json schema and all rule fields."""
     print("\n--- Test 2: Skill Router Structure ---")
-    
+
     if not ROUTER_PATH.exists():
         log("FAIL", "Router file", "skill-router.json not found")
         return
@@ -124,7 +143,7 @@ def test_router_structure():
         triggers = rule.get("triggers", [])
         skills = rule.get("skills", [])
         priority = rule.get("priority", 0)
-        
+
         issues = []
         if not triggers:
             issues.append("no triggers")
@@ -132,19 +151,31 @@ def test_router_structure():
             issues.append("no skills")
         if not isinstance(priority, (int, float)) or priority < 0:
             issues.append(f"invalid priority: {priority}")
-        
+
         for t in triggers:
             seen_triggers[t.lower()] += 1
-        
+
         if issues:
-            log("FAIL", f"  Rule {i}: {', '.join(issues)}", f"triggers={triggers}, skills={skills}")
+            log(
+                "FAIL",
+                f"  Rule {i}: {', '.join(issues)}",
+                f"triggers={triggers}, skills={skills}",
+            )
         else:
-            log("PASS", f"  Rule {i}: {triggers[0]}... ({len(skills)} skills, priority={priority})", "")
+            log(
+                "PASS",
+                f"  Rule {i}: {triggers[0]}... ({len(skills)} skills, priority={priority})",
+                "",
+            )
 
     # Check for duplicate triggers across rules
     duplicates = {t: c for t, c in seen_triggers.items() if c > 1}
     if duplicates:
-        log("WARN", "Duplicate triggers across rules", f"{len(duplicates)} duplicates: {dict(list(duplicates.items())[:10])}")
+        log(
+            "WARN",
+            "Duplicate triggers across rules",
+            f"{len(duplicates)} duplicates: {dict(list(duplicates.items())[:10])}",
+        )
     else:
         log("PASS", "No duplicate trigger across rules", "")
 
@@ -160,19 +191,26 @@ def test_router_structure():
     if conflict == "priority_highest_wins":
         log("PASS", "Conflict resolution: priority_highest_wins", "")
     else:
-        log("WARN", f"Conflict resolution: {conflict}", "expected 'priority_highest_wins'")
+        log(
+            "WARN",
+            f"Conflict resolution: {conflict}",
+            "expected 'priority_highest_wins'",
+        )
 
     # Fallback mechanism
     fallback = router.get("fallback", {})
     if fallback.get("levels"):
-        log("PASS", "Fallback mechanism configured", f"{len(fallback['levels'])} levels")
+        log(
+            "PASS", "Fallback mechanism configured", f"{len(fallback['levels'])} levels"
+        )
     else:
         log("WARN", "Fallback mechanism", "No fallback levels configured")
 
 
-# 
+#
 # Test 3: Router end-to-end matching (direct logic, no subprocess)
-# 
+#
+
 
 def _match_skills_direct(task: str, router_config: dict) -> dict:
     """Replicate the router matching logic from tools-mcp-server.py inline."""
@@ -183,7 +221,9 @@ def _match_skills_direct(task: str, router_config: dict) -> dict:
         for t in rule.get("triggers", []):
             if t.lower() in task_lower:
                 matched.extend(rule.get("skills", []))
-                matched_rules.append({"trigger": t, "priority": rule.get("priority", 0)})
+                matched_rules.append(
+                    {"trigger": t, "priority": rule.get("priority", 0)}
+                )
                 break
     matched = list(dict.fromkeys(matched))
 
@@ -197,11 +237,15 @@ def _match_skills_direct(task: str, router_config: dict) -> dict:
                     matched = [s.strip() for s in env_val.split(",") if s.strip()]
                     break
             if level.get("check_user_config"):
-                user_path = router_config.get("user_config_path", "~/.opencode/skill-router-overrides.json")
+                user_path = router_config.get(
+                    "user_config_path", "~/.opencode/skill-router-overrides.json"
+                )
                 user_path = os.path.expanduser(user_path)
                 if os.path.exists(user_path):
                     try:
-                        user_config = json.loads(open(user_path, encoding="utf-8").read())
+                        user_config = json.loads(
+                            open(user_path, encoding="utf-8").read()
+                        )
                         if "fallback_skills" in user_config:
                             matched = user_config["fallback_skills"]
                             break
@@ -212,29 +256,44 @@ def _match_skills_direct(task: str, router_config: dict) -> dict:
                 matched = level.get("skills", defaults)
                 break
 
-    return {"matched_skills": matched, "matched_rules": matched_rules if matched_rules else "fallback_applied"}
+    return {
+        "matched_skills": matched,
+        "matched_rules": matched_rules if matched_rules else "fallback_applied",
+    }
 
 
 def test_router_matching():
     """Test the router with known task descriptions using direct logic (no MCP server)."""
     print("\n--- Test 3: Router End-to-End Matching ---")
-    
+
     if not ROUTER_PATH.exists():
         log("FAIL", "Router file", "skill-router.json not found")
         return
-    
+
     router_config = json.loads(ROUTER_PATH.read_text(encoding="utf-8"))
 
     test_cases = [
         ("debug error fix this crash", ["troubleshooting-master"], "debug keywords"),
-        ("inno setup windows installer build exe", ["inno-setup-pipeline"], "Inno Setup"),
+        (
+            "inno setup windows installer build exe",
+            ["inno-setup-pipeline"],
+            "Inno Setup",
+        ),
         ("samba nas permission denied smb", ["debug-samba"], "Samba/NAS"),
-        ("kubernetes pod deployment k8s cluster", ["k8s-manifest-generator"], "Kubernetes"),
+        (
+            "kubernetes pod deployment k8s cluster",
+            ["k8s-manifest-generator"],
+            "Kubernetes",
+        ),
         ("design a dark cyberpunk theme", ["art-module"], "Art/theme"),
         ("test the api endpoints unit test", ["test-driven-development"], "Testing"),
         ("security vulnerability authentication", ["security-hardening"], "Security"),
         ("hello world", [], "noise — should fallback to defaults"),
-        ("memory consolidation merge duplicates", [], "memory operation — no direct trigger, should use fallback"),
+        (
+            "memory consolidation merge duplicates",
+            [],
+            "memory operation — no direct trigger, should use fallback",
+        ),
     ]
 
     for task, expected_skills, label in test_cases:
@@ -244,46 +303,69 @@ def test_router_matching():
         if not expected_skills:
             is_fallback = result.get("matched_rules") == "fallback_applied"
             if is_fallback:
-                log("INFO", f"  '{task}' ({label})", f"fallback applied: matched={matched}")
+                log(
+                    "INFO",
+                    f"  '{task}' ({label})",
+                    f"fallback applied: matched={matched}",
+                )
             else:
                 log("INFO", f"  '{task}' ({label})", f"matched={matched}")
         else:
-            found = [s for s in expected_skills if s in matched or any(s in m for m in matched)]
+            found = [
+                s
+                for s in expected_skills
+                if s in matched or any(s in m for m in matched)
+            ]
             if found:
                 log("PASS", f"  '{task}' ({label})", f"matched={matched}")
             else:
-                log("WARN", f"  '{task}' ({label})", f"expected at least one of {expected_skills}, got={matched}")
+                log(
+                    "WARN",
+                    f"  '{task}' ({label})",
+                    f"expected at least one of {expected_skills}, got={matched}",
+                )
 
     # Test fallback: task with zero keyword matches
-    fallback_result = _match_skills_direct("completely unrelated gibberish xyzzy", router_config)
+    fallback_result = _match_skills_direct(
+        "completely unrelated gibberish xyzzy", router_config
+    )
     is_fallback = fallback_result.get("matched_rules") == "fallback_applied"
     if is_fallback:
-        log("PASS", "  Fallback mechanism: no-match task", f"returned defaults: {fallback_result['matched_skills']}")
+        log(
+            "PASS",
+            "  Fallback mechanism: no-match task",
+            f"returned defaults: {fallback_result['matched_skills']}",
+        )
     else:
-        log("WARN", "  Fallback mechanism: no-match task", f"expected fallback, got: {fallback_result['matched_skills']}")
+        log(
+            "WARN",
+            "  Fallback mechanism: no-match task",
+            f"expected fallback, got: {fallback_result['matched_skills']}",
+        )
 
 
-# 
+#
 # Test 4: Identify dud skills (referenced but not available)
-# 
+#
+
 
 def test_dud_skills():
     """
     Check every skill referenced in the router against:
       1. Local skills/ directory
       2. Known OpenCode built-in skills (from available_skills list in the system prompt)
-    
+
     Any skill not found in either location is flagged as a DUD.
     """
     print("\n--- Test 4: Dud Skill Detection ---")
-    
+
     if not ROUTER_PATH.exists():
         return
-    
+
     router = json.loads(ROUTER_PATH.read_text(encoding="utf-8"))
     rules = router.get("rules", [])
     defaults = router.get("default_skills", [])
-    
+
     # Collect all referenced skill names
     referenced = set()
     for rule in rules:
@@ -291,7 +373,7 @@ def test_dud_skills():
             referenced.add(s)
     for s in defaults:
         referenced.add(s)
-    
+
     # Build local skill inventory (directory names + SKILL.md names)
     local_skills = set()
     for d in SKILLS_DIR.iterdir():
@@ -304,57 +386,87 @@ def test_dud_skills():
                 for line in content.split("\n"):
                     if line.startswith("# ") and len(line) > 3:
                         local_skills.add(line[2:].strip().lower())
-    
+
     # Known OpenCode built-in skills (from the system prompt available_skills list)
     known_builtins = {
         # Troubleshooting & debugging
-        "troubleshooting-master", "error-triage", "debug-samba",
+        "troubleshooting-master",
+        "error-triage",
+        "debug-samba",
         # Testing
-        "test-driven-development", "test-patterns", "bats-testing-patterns",
+        "test-driven-development",
+        "test-patterns",
+        "bats-testing-patterns",
         # Review
-        "pr-review", "code-review-excellence",
+        "pr-review",
+        "code-review-excellence",
         # Learning
-        "educate", "wikipedia-ghost", "study-tutor", "tutoring",
+        "educate",
+        "wikipedia-ghost",
+        "study-tutor",
+        "tutoring",
         # Architecture
-        "electron-desktop-architecture", "adr-write", "architecture-decision-records",
-        "brainstorm", "api-contract", "api-design-principles",
+        "electron-desktop-architecture",
+        "adr-write",
+        "architecture-decision-records",
+        "brainstorm",
+        "api-contract",
+        "api-design-principles",
         # Self-improvement
-        "model-psychologist", "anti-ai-pattern", "concise-filter",
+        "model-psychologist",
+        "anti-ai-pattern",
+        "concise-filter",
         # UI/Frontend
-        "openui", "frontend-design", "responsive-design",
+        "openui",
+        "frontend-design",
+        "responsive-design",
         # Browser automation
-        "browser-automation", "playwright-automation", "web-scraping",
+        "browser-automation",
+        "playwright-automation",
+        "web-scraping",
         # API
-        "api-contract", "api-design-principles",
+        "api-contract",
+        "api-design-principles",
         # Release
-        "changelog-generate", "git-release",
+        "changelog-generate",
+        "git-release",
         # Migration
-        "migration", "dependency-upgrade",
+        "migration",
+        "dependency-upgrade",
         # Dependencies
         "dependency-audit",
         # OpenCode config
-        "customize-opencode", "skill-ideator",
+        "customize-opencode",
+        "skill-ideator",
         # Knowledge
         "obsidian-zettelkasten",
         # Session
         "session-artifact",
         # Incident
-        "incident-postmortem", "incident-runbook-templates",
+        "incident-postmortem",
+        "incident-runbook-templates",
         # Environment
         "env-setup",
         # Security
-        "security-hardening", "auth-implementation-patterns",
+        "security-hardening",
+        "auth-implementation-patterns",
         # Parallel
-        "parallel-worktree", "agent-teams-task-coordination-strategies",
+        "parallel-worktree",
+        "agent-teams-task-coordination-strategies",
         # Verification
         "verification-before-completion",
         # Memory
-        "ne-memory-search", "ne-memory-remember", "ne-memory-status",
+        "ne-memory-search",
+        "ne-memory-remember",
+        "ne-memory-status",
         "memory-search",
         # Media
         "context-extractor",
         # Module-specific
-        "art-module", "literature-module", "audio-module", "game-dev-module",
+        "art-module",
+        "literature-module",
+        "audio-module",
+        "game-dev-module",
         "devops-module",
         # Inno Setup
         "inno-setup-pipeline",
@@ -371,21 +483,29 @@ def test_dud_skills():
         # Accessibility
         "accessibility-compliance",
         # Payment
-        "stripe-integration", "billing-automation",
+        "stripe-integration",
+        "billing-automation",
         # Database
-        "postgresql-table-design", "sql-optimization-patterns",
+        "postgresql-table-design",
+        "sql-optimization-patterns",
         # Kubernetes
-        "k8s-manifest-generator", "helm-chart-scaffolding", "gitops-workflow",
+        "k8s-manifest-generator",
+        "helm-chart-scaffolding",
+        "gitops-workflow",
         # Infrastructure
         "terraform-module-library",
         # Monitoring
-        "prometheus-configuration", "grafana-dashboards", "slo-implementation",
+        "prometheus-configuration",
+        "grafana-dashboards",
+        "slo-implementation",
         # CI/CD
-        "github-actions-templates", "deployment-pipeline-design",
+        "github-actions-templates",
+        "deployment-pipeline-design",
         # Excel
         "excel-engineer",
         # Legal
-        "gdpr-data-handling", "employment-contract-templates",
+        "gdpr-data-handling",
+        "employment-contract-templates",
         # Task
         "task-orchestrator",
         # Miscellaneous
@@ -393,44 +513,61 @@ def test_dud_skills():
         # Verifier
         "verifier-middleware",
     }
-    
+
     duds = []
     for skill_name in sorted(referenced):
         sn = skill_name.lower().strip()
         # Check if it's in local skills
         is_local = any(sn == ls.lower() or sn in ls.lower() for ls in local_skills)
         # Check if it's in known builtins
-        is_builtin = sn in known_builtins or any(sn == b or sn in b for b in known_builtins)
-        
+        is_builtin = sn in known_builtins or any(
+            sn == b or sn in b for b in known_builtins
+        )
+
         if is_local:
             log("PASS", f"  {skill_name}", "local skill")
         elif is_builtin:
             log("PASS", f"  {skill_name}", "known OpenCode built-in")
         else:
             duds.append(skill_name)
-            log("WARN", f"  {skill_name}", "DUD — not found locally or in known builtins")
-    
+            log(
+                "WARN",
+                f"  {skill_name}",
+                "DUD — not found locally or in known builtins",
+            )
+
     if duds:
-        log("WARN", f"Dud skills detected", f"{len(duds)} referenced but unavailable: {duds}")
+        log(
+            "WARN",
+            "Dud skills detected",
+            f"{len(duds)} referenced but unavailable: {duds}",
+        )
     else:
-        log("PASS", "All referenced skills accounted for", f"{len(referenced)} total references")
-    
+        log(
+            "PASS",
+            "All referenced skills accounted for",
+            f"{len(referenced)} total references",
+        )
+
     return duds
 
 
-# 
+#
 # Test 5: All MCP tools are properly defined (dynamic count)
-# 
+#
+
 
 def test_tool_inventory():
     """Validate the MCP tool definitions from --list-tools output."""
     print("\n--- Test 5: MCP Tool Inventory ---")
-    
+
     result = subprocess.run(
         [sys.executable, str(SCRIPTS_DIR / "tools-mcp-server.py"), "--list-tools"],
-        capture_output=True, text=True, cwd=str(PROJECT_ROOT),
+        capture_output=True,
+        text=True,
+        cwd=str(PROJECT_ROOT),
     )
-    
+
     try:
         tools = json.loads(result.stdout)
     except json.JSONDecodeError:
@@ -445,7 +582,7 @@ def test_tool_inventory():
     for t in tools:
         name = t.get("name", "")
         permission = t.get("permission", "read")
-        
+
         # Check prefix matches permission
         if permission == "read" and not name.startswith("read_"):
             naming_issues.append(f"{name}: read permission but no read_ prefix")
@@ -453,7 +590,7 @@ def test_tool_inventory():
             naming_issues.append(f"{name}: write permission but no write_ prefix")
         elif permission == "mutate" and not name.startswith("mutate_"):
             naming_issues.append(f"{name}: mutate permission but no mutate_ prefix")
-    
+
     if naming_issues:
         for issue in naming_issues[:5]:
             log("WARN", f"  Naming: {issue}", "")
@@ -463,7 +600,7 @@ def test_tool_inventory():
     # Check all tools have description
     no_desc = [t["name"] for t in tools if not t.get("description")]
     if no_desc:
-        log("WARN", f"Tools without description", str(no_desc))
+        log("WARN", "Tools without description", str(no_desc))
     else:
         log("PASS", "All tools have descriptions", "")
 
@@ -472,13 +609,18 @@ def test_tool_inventory():
     for t in tools:
         p = t.get("permission", "read")
         perms[p] = perms.get(p, 0) + 1
-    
-    log("INFO", f"Permission distribution", f"read={perms['read']} write={perms['write']} mutate={perms['mutate']}")
+
+    log(
+        "INFO",
+        "Permission distribution",
+        f"read={perms['read']} write={perms['write']} mutate={perms['mutate']}",
+    )
 
 
-# 
+#
 # Main
-# 
+#
+
 
 def main():
     print("=" * 60)
@@ -504,7 +646,9 @@ def main():
     print(f"  Warnings: {RESULTS['warnings']}")
     if duds:
         print(f"\n   DUD SKILLS FOUND: {duds}")
-    print(f"\n  {'ALL SKILL PIPELINE TESTS PASSED' if RESULTS['failed'] == 0 else 'SOME TESTS FAILED'}")
+    print(
+        f"\n  {'ALL SKILL PIPELINE TESTS PASSED' if RESULTS['failed'] == 0 else 'SOME TESTS FAILED'}"
+    )
     print("=" * 60)
 
     # Save results

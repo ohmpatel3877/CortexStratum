@@ -2,6 +2,9 @@
 # Install with: pip install -r requirements-full.txt
 # For core-only functionality, no packages are needed (stdlib only).
 
+# Development Tools
+ruff>=0.5.0                    # Python linter & formatter (fast, Rust-based)
+
 # Sensory Module — Web browsing
 playwright>=1.40
 beautifulsoup4>=4.12

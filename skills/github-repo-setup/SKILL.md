@@ -107,7 +107,7 @@ Single line, SemVer pre-1.0:
 | `opencode.json` | Root | `"version": "0.4.0"` |
 | Installer script | e.g. `*.iss` | `#define MyAppVersion "0.4.0"` |
 | CLI constant | e.g. `scripts/*.py` | `VERSION = "0.4.0"` |
-| Plugin config | `.claude-plugin/plugin.json` | `"version": "0.4.0"` |
+| Plugin config | `plugins/claude-plugin/plugin.json` | `"version": "0.4.0"` |
 | `CHANGELOG.md` | Root | Add entry for new version |
 
 > **Anti-pattern**: Having diverging version numbers across these files. Always update all
@@ -471,13 +471,14 @@ Package your project for multiple AI assistants from a single source:
 ### 6.1 Directory Structure
 
 ```
- .claude-plugin/
-    plugin.json          # Claude Code marketplace
- .cursor-plugin/
-    plugin.json          # Cursor IDE
-    marketplace.json     # Cursor marketplace
- .codex-plugin/
-    plugin.json          # Codex CLI
+ plugins/
+    claude-plugin/
+       plugin.json          # Claude Code marketplace
+    cursor-plugin/
+       plugin.json          # Cursor IDE
+       marketplace.json     # Cursor marketplace
+    codex-plugin/
+       plugin.json          # Codex CLI
  .agents/
     plugins/
         marketplace.json # Open Agent marketplace
@@ -487,7 +488,7 @@ Package your project for multiple AI assistants from a single source:
 
 ### 6.2 Claude Code Plugin
 
-`.claude-plugin/plugin.json`:
+`plugins/claude-plugin/plugin.json`:
 ```json
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
@@ -503,7 +504,7 @@ Package your project for multiple AI assistants from a single source:
 
 ### 6.3 Cursor Plugin
 
-`.cursor-plugin/plugin.json`:
+`plugins/cursor-plugin/plugin.json`:
 ```json
 {
   "name": "my-plugin",
@@ -515,8 +516,7 @@ Package your project for multiple AI assistants from a single source:
   "tools": [{"name": "tool-name", "description": "Tool description"}]
 }
 ```
-
-`.cursor-plugin/marketplace.json`:
+`plugins/cursor-plugin/marketplace.json`:
 ```json
 {
   "name": "my-plugin",
@@ -532,7 +532,7 @@ Package your project for multiple AI assistants from a single source:
 
 ### 6.4 Codex Plugin
 
-`.codex-plugin/plugin.json`:
+`plugins/codex-plugin/plugin.json`:
 ```json
 {
   "name": "my-plugin",
@@ -649,7 +649,7 @@ Create `dashboard.html` with:
 ```markdown
 <p align="center">
   <img src="https://img.shields.io/badge/version-0.3.0-blue" />
-  <img src="https://img.shields.io/badge/tools-68-green" />
+  <img src="https://img.shields.io/badge/tools-122-green" />
   <img src="https://img.shields.io/badge/OpenCode-Ready-purple" />
   <img src="https://img.shields.io/badge/license-MIT-brightgreen" />
 </p>
@@ -682,7 +682,7 @@ echo "0.4.0" > VERSION
 # 2. Update CHANGELOG.md with new entry
 
 # 3. Update all config files
-sed -i 's/"version": "0.3.0"/"version": "0.4.0"/' package.json opencode.json .claude-plugin/plugin.json
+sed -i 's/"version": "0.3.0"/"version": "0.4.0"/' package.json opencode.json plugins/claude-plugin/plugin.json
 
 # 4. Update Python constant
 sed -i 's/VERSION = "0.3.0"/VERSION = "0.4.0"/' scripts/server.py
@@ -691,7 +691,7 @@ sed -i 's/VERSION = "0.3.0"/VERSION = "0.4.0"/' scripts/server.py
 sed -i 's/MyAppVersion "0.3.0"/MyAppVersion "0.4.0"/' installer.iss
 
 # 6. Commit and tag
-git add VERSION CHANGELOG.md package.json opencode.json .claude-plugin/plugin.json scripts/server.py installer.iss
+git add VERSION CHANGELOG.md package.json opencode.json plugins/claude-plugin/plugin.json scripts/server.py installer.iss
 git commit -m "bump version 0.3.0 -> 0.4.0"
 git tag v0.4.0
 git push --tags

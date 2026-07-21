@@ -1,478 +1,3905 @@
 [
   {
-    "name": "read_art_design_concept",
-    "permission": "read",
-    "module": "Art",
-    "description": "Generate a design concept with layout, typography, and spacing guidelines from requirements",
-    "param_count": 1
-  },
-  {
-    "name": "read_art_extract_palette",
-    "permission": "read",
-    "module": "Art",
-    "description": "Extract complementary, analogous, and triadic palettes from a base hex color",
-    "param_count": 1
-  },
-  {
-    "name": "read_art_generate_svg",
-    "permission": "read",
-    "module": "Art",
-    "description": "Generate SVG diagrams, flowcharts, and illustrations from a text description",
-    "param_count": 3
-  },
-  {
-    "name": "read_art_generate_theme",
-    "permission": "read",
-    "module": "Art",
-    "description": "Generate a color theme with roles and WCAG contrast validation from a description",
-    "param_count": 1
-  },
-  {
-    "name": "read_audio_analyze_file",
-    "permission": "read",
-    "module": "Audio",
-    "description": "Analyze WAV audio file: duration, channels, sample rate, amplitude stats",
-    "param_count": 3
-  },
-  {
-    "name": "read_audio_convert_guide",
-    "permission": "read",
-    "module": "Audio",
-    "description": "Audio format conversion guide with ffmpeg commands and quality comparison",
-    "param_count": 3
-  },
-  {
-    "name": "read_audio_frequency_analysis",
-    "permission": "read",
-    "module": "Audio",
-    "description": "DFT-based frequency analysis: band energy, dominant frequency, spectral centroid",
-    "param_count": 2
-  },
-  {
-    "name": "read_audio_generate_tone",
-    "permission": "read",
-    "module": "Audio",
-    "description": "Generate sine/square/saw/triangle wave tone as base64 WAV",
-    "param_count": 5
-  },
-  {
-    "name": "read_audio_music_theory",
-    "permission": "read",
-    "module": "Audio",
-    "description": "Music theory analysis: chord detection, scale matching, intervals from notes or frequencies",
-    "param_count": 2
-  },
-  {
-    "name": "read_audio_speech_analysis",
-    "permission": "read",
-    "module": "Audio",
-    "description": "Speech transcript analysis: WPM, filler words, pace rating, readability",
-    "param_count": 2
-  },
-  {
-    "name": "read_audio_waveform",
-    "permission": "read",
-    "module": "Audio",
-    "description": "Generate ASCII waveform visualization from audio file",
-    "param_count": 3
-  },
-  {
-    "name": "read_coder_analyze_code",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Analyze code for quality, complexity, smells, and security issues across 12 languages",
-    "param_count": 2
-  },
-  {
-    "name": "read_coder_architecture",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Architecture pattern recommendation (MVC, Hexagonal, CQRS, Event-Driven, Microservices, etc.)",
-    "param_count": 3
-  },
-  {
-    "name": "read_coder_convert",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Convert code between languages (Python↔JS, Python→Go, Python→Rust, JS↔TS)",
-    "param_count": 3
-  },
-  {
-    "name": "read_coder_debug",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Analyze error messages and stack traces, suggest fixes (50+ error patterns across languages)",
-    "param_count": 3
-  },
-  {
-    "name": "read_coder_explain",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Educational code explanation at beginner/intermediate/advanced level",
-    "param_count": 3
-  },
-  {
-    "name": "read_coder_generate_framework",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Generate complete project scaffold (web-api, cli-tool, library, desktop, microservice, data-pipeline, fullstack) for 12 ",
-    "param_count": 4
-  },
-  {
-    "name": "read_coder_review",
-    "permission": "read",
-    "module": "Coder",
-    "description": "Code review with severity ratings (security, performance, readability, architecture, testing)",
-    "param_count": 3
-  },
-  {
-    "name": "mutate_commitment_checker_verify",
-    "permission": "mutate",
-    "module": "Core",
-    "description": "Mark a commitment as verified for this session",
-    "param_count": 1
-  },
-  {
-    "name": "read_commitment_checker_list",
-    "permission": "read",
-    "module": "Core",
-    "description": "List pending commitments for this session",
-    "param_count": 0
-  },
-  {
-    "name": "read_dtrace_search",
-    "permission": "read",
-    "module": "Core",
-    "description": "Search DTrace decision registry",
-    "param_count": 1
-  },
-  {
-    "name": "read_goal_registry_check_alignment",
-    "permission": "read",
-    "module": "Core",
-    "description": "Check if current action aligns with the original goal",
-    "param_count": 1
-  },
-  {
-    "name": "read_goal_registry_status",
-    "permission": "read",
-    "module": "Core",
-    "description": "Get current goal registry status",
-    "param_count": 0
-  },
-  {
-    "name": "read_skill_router_match",
-    "permission": "read",
-    "module": "Core",
-    "description": "Match a task description to relevant skills using the Skill Router",
-    "param_count": 1
+    "name": "write_xtrace_log_error",
+    "description": " WRITE — Log an error to the xTrace registry. Use dry_run=true to preview before persisting.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "error_output": {
+          "type": "string"
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "command",
+        "error_output"
+      ]
+    }
   },
   {
     "name": "read_xtrace_search",
     "permission": "read",
-    "module": "Core",
-    "description": "Search xTrace error registry for a known error signature",
-    "param_count": 1
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    }
   },
   {
     "name": "read_xtrace_status",
     "permission": "read",
-    "module": "Core",
-    "description": "Get xTrace error tracking summary statistics",
-    "param_count": 0
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "name": "write_dtrace_add",
+    "description": " WRITE — Register an architecture decision. Use dry_run=true to preview.",
     "permission": "write",
-    "module": "Core",
-    "description": "Log an architectural decision to DTrace",
-    "param_count": 6
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "decision": {
+          "type": "string"
+        },
+        "alternatives": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "architecture",
+            "process",
+            "technology",
+            "security"
+          ]
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "title",
+        "decision",
+        "rationale"
+      ]
+    }
   },
   {
-    "name": "write_goal_registry_add_subgoal",
-    "permission": "write",
-    "module": "Core",
-    "description": "Add a sub-goal to the current goal stack",
-    "param_count": 1
+    "name": "read_dtrace_search",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    }
+  },
+  {
+    "name": "read_skill_router_match",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "task"
+      ]
+    }
+  },
+  {
+    "name": "read_tools_suggest",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "Describe what you want to do"
+        },
+        "top_k": {
+          "type": "integer",
+          "default": 3
+        }
+      },
+      "required": [
+        "task"
+      ]
+    }
   },
   {
     "name": "write_goal_registry_init",
+    "description": " WRITE — Initialize a new goal. Use dry_run=true to preview.",
     "permission": "write",
-    "module": "Core",
-    "description": "Initialize a new goal in the Goal Registry",
-    "param_count": 1
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "goal": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "goal"
+      ]
+    }
   },
   {
-    "name": "write_xtrace_log_error",
+    "name": "write_goal_registry_add_subgoal",
+    "description": " WRITE — Add a sub-goal to the current goal. Use dry_run=true to preview.",
     "permission": "write",
-    "module": "Core",
-    "description": "Log an error occurrence with signature for xTrace error tracking",
-    "param_count": 3
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "description"
+      ]
+    }
   },
   {
-    "name": "read_devops_compose_generator",
+    "name": "read_goal_registry_status",
     "permission": "read",
-    "module": "DevOps",
-    "description": "Generate Docker/Podman Compose files from service definitions",
-    "param_count": 3
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
-    "name": "read_devops_container_debug",
+    "name": "read_goal_registry_check_alignment",
     "permission": "read",
-    "module": "DevOps",
-    "description": "Diagnose container issues (Podman/Docker) from error logs",
-    "param_count": 3
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "current_action": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "current_action"
+      ]
+    }
   },
   {
-    "name": "read_devops_dockerfile_analyze",
+    "name": "read_commitment_checker_list",
     "permission": "read",
-    "module": "DevOps",
-    "description": "Analyze and optimize Dockerfiles for security, caching, and size",
-    "param_count": 1
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
-    "name": "read_devops_mergerfs_setup",
-    "permission": "read",
-    "module": "DevOps",
-    "description": "Configure mergerfs for drive pooling with policy explanations and optimization tips",
-    "param_count": 4
-  },
-  {
-    "name": "read_devops_network_troubleshoot",
-    "permission": "read",
-    "module": "DevOps",
-    "description": "Diagnose container networking issues (DNS, ports, bridges, host networking)",
-    "param_count": 1
-  },
-  {
-    "name": "read_devops_permissions_analyze",
-    "permission": "read",
-    "module": "DevOps",
-    "description": "Analyze permission/usernamespace issues in container environments",
-    "param_count": 4
-  },
-  {
-    "name": "read_devops_samba_config",
-    "permission": "read",
-    "module": "DevOps",
-    "description": "Generate Samba/SMB share configurations with OS-specific troubleshooting",
-    "param_count": 4
-  },
-  {
-    "name": "read_gamedev_compare_engines",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Compare game engines (Unity/Unreal/Godot/Roblox) for specific project types",
-    "param_count": 3
-  },
-  {
-    "name": "read_gamedev_design_analyze",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Analyze game concept: fun factor, engagement loops, monetization fit, market position",
-    "param_count": 3
-  },
-  {
-    "name": "read_gamedev_level_design",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Level design principles, flow diagrams, pacing guides, and playtesting checklists",
-    "param_count": 2
-  },
-  {
-    "name": "read_gamedev_mechanics_guide",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Game mechanics design guide: core loops, progression systems, reward schedules by genre",
-    "param_count": 2
-  },
-  {
-    "name": "read_gamedev_monetization",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Monetization strategy recommendations with revenue estimates and ethical guidance",
-    "param_count": 3
-  },
-  {
-    "name": "read_gamedev_optimization",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Engine-specific optimization advice (FPS, draw calls, memory, load times, network)",
-    "param_count": 2
-  },
-  {
-    "name": "read_gamedev_scaffold_project",
-    "permission": "read",
-    "module": "Game Dev",
-    "description": "Generate Unity/Unreal/Roblox project scaffold with real working boilerplate files",
-    "param_count": 4
-  },
-  {
-    "name": "read_lit_analyze_philosophy",
-    "permission": "read",
-    "module": "Literature",
-    "description": "Analyze philosophical arguments: premises, conclusions, reasoning type, detected philosophers, and schools",
-    "param_count": 1
-  },
-  {
-    "name": "read_lit_analyze_text",
-    "permission": "read",
-    "module": "Literature",
-    "description": "Analyze text for reading level (Flesch-Kincaid), key concepts, argument structure, and sentiment",
-    "param_count": 1
-  },
-  {
-    "name": "read_lit_extract_concepts",
-    "permission": "read",
-    "module": "Literature",
-    "description": "Extract key concepts, their definitions, context, and relationships from text",
-    "param_count": 1
-  },
-  {
-    "name": "read_lit_generate_study_guide",
-    "permission": "read",
-    "module": "Literature",
-    "description": "Generate a study guide from content with key terms, discussion questions, and section summaries",
-    "param_count": 1
-  },
-  {
-    "name": "mutate_memory_consolidate",
+    "name": "mutate_commitment_verify",
+    "description": " MUTATE — Verify a commitment (marks as fulfilled). Use dry_run=true to preview.",
     "permission": "mutate",
-    "module": "Memory Search",
-    "description": "Merge duplicate/similar memory entries by Jaccard similarity threshold",
-    "param_count": 1
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "read_hooks_prefetch",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_memories": {
+          "type": "integer",
+          "default": 8
+        },
+        "max_decisions": {
+          "type": "integer",
+          "default": 5
+        },
+        "max_errors": {
+          "type": "integer",
+          "default": 5
+        }
+      }
+    }
+  },
+  {
+    "name": "write_hooks_observe",
+    "description": " WRITE — Log a session event. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "decision",
+            "error",
+            "insight",
+            "preference",
+            "milestone",
+            "handoff"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "session_id",
+        "event_type",
+        "description"
+      ]
+    }
+  },
+  {
+    "name": "read_hooks_session_status",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id"
+      ]
+    }
+  },
+  {
+    "name": "write_hooks_session_end",
+    "description": " WRITE — End a session and persist observations. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "persist_observations": {
+          "type": "boolean",
+          "default": true
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "session_id"
+      ]
+    }
+  },
+  {
+    "name": "mutate_audit_undo",
+    "description": " MUTATE — Undo a previous write/mutate operation via checkpoint ID. Destructive — cannot be reversed.",
+    "permission": "mutate",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "checkpoint_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "checkpoint_id"
+      ]
+    }
+  },
+  {
+    "name": "read_audit_status",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "read_phase_status",
+    "description": "MERGED - Get status for any domain: compact, mutation, audit, consolidation.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "default": "compact",
+          "enum": [
+            "compact",
+            "mutation",
+            "audit",
+            "consolidation"
+          ]
+        }
+      },
+      "required": [
+        "domain"
+      ]
+    }
   },
   {
     "name": "read_memory_search",
+    "description": "MERGED — Search memory. mode=[bm25|vector|hybrid|reranked]. Replaces vector/hybrid/reranked variants.",
     "permission": "read",
-    "module": "Memory Search",
-    "description": "Local BM25 memory search with synonym expansion and fuzzy matching — zero LLM cost",
-    "param_count": 3
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "default": "bm25",
+          "enum": [
+            "bm25",
+            "vector",
+            "hybrid",
+            "reranked"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "default": 10
+        },
+        "fuzzy_threshold": {
+          "type": "number",
+          "default": 0.85
+        },
+        "bm25_weight": {
+          "type": "number",
+          "default": 0.5
+        },
+        "vector_weight": {
+          "type": "number",
+          "default": 0.5
+        },
+        "rrf_k": {
+          "type": "integer",
+          "default": 60
+        },
+        "candidates": {
+          "type": "integer",
+          "default": 20
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "read_memory_synthesize",
+    "description": "Narrative synthesis from search results.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "max_sources": {
+          "type": "integer",
+          "default": 5
+        },
+        "min_confidence": {
+          "type": "number",
+          "default": 0.7
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "write_memory_add",
+    "description": " WRITE — Store a new memory entry. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "default": "manual"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "write_memory_consolidate",
+    "description": " WRITE — Consolidate memory (dedup, prune, index). Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "threshold": {
+          "type": "number",
+          "default": 0.85
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
   },
   {
     "name": "read_memory_status",
     "permission": "read",
-    "module": "Memory Search",
-    "description": "Get NE-Memory engine status: entry count, storage size, unique terms, last timestamp",
-    "param_count": 0
-  },
-  {
-    "name": "read_memory_synthesize",
-    "permission": "read",
-    "module": "Memory Search",
-    "description": "Search and synthesize memory results into a narrative with inline citations",
-    "param_count": 3
-  },
-  {
-    "name": "write_memory_add",
-    "permission": "write",
-    "module": "Memory Search",
-    "description": "Add a memory entry for future BM25 search and synthesis",
-    "param_count": 3
-  },
-  {
-    "name": "mutate_sensory_interact",
-    "permission": "mutate",
-    "module": "Sensory",
-    "description": "Navigate to URL and perform actions (click, type, press, wait) — can modify external state",
-    "param_count": 3
-  },
-  {
-    "name": "read_sensory_api_request",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Make an HTTP API request (GET/POST/PUT/DELETE/PATCH) with structured response",
-    "param_count": 6
-  },
-  {
-    "name": "read_sensory_browse",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Navigate to a URL using Playwright (headless Firefox) and extract content. Modes: text, html, markdown, links, metadata",
-    "param_count": 3
-  },
-  {
-    "name": "read_sensory_extract_article",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Extract clean article content from a URL using trafilatura",
-    "param_count": 1
-  },
-  {
-    "name": "read_sensory_extract_html",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Extract text from raw HTML content. Modes: clean (trafilatura), soup (BeautifulSoup), tables",
-    "param_count": 2
-  },
-  {
-    "name": "read_sensory_extract_image",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Extract text from an image via OCR (if pytesseract installed) or return image metadata",
-    "param_count": 1
-  },
-  {
-    "name": "read_sensory_extract_pdf",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Extract text from a PDF file",
-    "param_count": 2
-  },
-  {
-    "name": "read_sensory_fetch_rss",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Parse an RSS/Atom feed and return structured items",
-    "param_count": 2
-  },
-  {
-    "name": "read_sensory_read_file",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Read a local text file and return its content",
-    "param_count": 2
-  },
-  {
-    "name": "read_sensory_scrape",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Fetch a URL via HTTP (no JS) and extract content. Modes: text, html, links, tables, json",
-    "param_count": 3
-  },
-  {
-    "name": "read_sensory_screenshot",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Take a screenshot of a web page via Playwright",
-    "param_count": 3
-  },
-  {
-    "name": "read_sensory_search",
-    "permission": "read",
-    "module": "Sensory",
-    "description": "Web search via DuckDuckGo (no API key needed). Returns title, URL, snippet.",
-    "param_count": 2
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "name": "read_verifier_status",
     "permission": "read",
-    "module": "Verifier",
-    "description": "Get verifier middleware status: checks run, violations found, renudges sent, uptime",
-    "param_count": 0
-  },
-  {
-    "name": "write_verifier_clear_renudge",
-    "permission": "write",
-    "module": "Verifier",
-    "description": "Clear an active renudge signal for a target tool or agent",
-    "param_count": 1
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
   },
   {
     "name": "write_verifier_renudge",
+    "description": " WRITE — Apply a correction renudge to verifier state. Use dry_run=true to preview.",
     "permission": "write",
-    "module": "Verifier",
-    "description": "Send a correction signal (renudge) to steer the agent back on track",
-    "param_count": 3
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "correction": {
+          "type": "object"
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "incremental",
+            "rollback",
+            "override",
+            "halt"
+          ],
+          "default": "incremental"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "target",
+        "correction"
+      ]
+    }
+  },
+  {
+    "name": "write_verifier_clear_renudge",
+    "description": " WRITE — Clear a previous renudge. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "target"
+      ]
+    }
+  },
+  {
+    "name": "read_art_generate_svg",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "description"
+      ]
+    }
+  },
+  {
+    "name": "read_art_generate_theme",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "default": "dark cyberpunk"
+        }
+      },
+      "required": [
+        "description"
+      ]
+    }
+  },
+  {
+    "name": "read_art_extract_palette",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "color"
+      ]
+    }
+  },
+  {
+    "name": "read_art_design_concept",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "requirements": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "requirements"
+      ]
+    }
+  },
+  {
+    "name": "read_lit_analyze_text",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "read_lit_extract_concepts",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "read_lit_generate_study_guide",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_fetch",
+    "description": "MERGED — Fetch URL content. Replaces browse + scrape + extract_article. method=[browser|http|article]",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "default": "browser",
+          "enum": [
+            "browser",
+            "http",
+            "article"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "default": "text",
+          "enum": [
+            "text",
+            "html",
+            "markdown",
+            "links",
+            "metadata",
+            "tables",
+            "json"
+          ]
+        },
+        "headers": {
+          "type": "object"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "default": 30000
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_screenshot",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "output_path": {
+          "type": "string"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "default": 30000
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "mutate_sensory_interact",
+    "description": " MUTATE — Interact with a web page (click, type, press). Use dry_run=true to preview.",
+    "permission": "mutate",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "click",
+                  "type",
+                  "press",
+                  "wait"
+                ]
+              },
+              "selector": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "url",
+        "actions"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_extract_pdf",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string"
+        },
+        "max_pages": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_extract_html",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "html_content": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "soup",
+            "tables"
+          ],
+          "default": "clean"
+        }
+      },
+      "required": [
+        "html_content"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_extract_image",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_scrape",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "text",
+            "html",
+            "links",
+            "tables",
+            "json"
+          ],
+          "default": "text"
+        },
+        "headers": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_extract_article",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_api_request",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH"
+          ],
+          "default": "GET"
+        },
+        "data": {
+          "type": "object"
+        },
+        "headers": {
+          "type": "object"
+        },
+        "params": {
+          "type": "object"
+        },
+        "timeout": {
+          "type": "integer",
+          "default": 15
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_fetch_rss",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "feed_url": {
+          "type": "string"
+        },
+        "max_items": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "required": [
+        "feed_url"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_read_file",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string"
+        },
+        "max_size_kb": {
+          "type": "integer",
+          "default": 500
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_search",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "num_results": {
+          "type": "integer",
+          "default": 8
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "read_sensory_set_browser_type",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "browser_type": {
+          "type": "string",
+          "enum": [
+            "firefox",
+            "chromium"
+          ]
+        }
+      },
+      "required": [
+        "browser_type"
+      ]
+    }
+  },
+  {
+    "name": "read_audio_analyze_file",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_audio_waveform",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "default": 80
+        },
+        "height": {
+          "type": "integer",
+          "default": 20
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "read_audio_frequency_analysis",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file_path": {
+          "type": "string"
+        },
+        "num_bands": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "required": [
+        "file_path"
+      ]
+    }
+  },
+  {
+    "name": "read_audio_music_theory",
+    "description": "Foundation for audio suite: chord/scale/mode analysis. Future: EQ, room analysis, convolution.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "frequencies": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_audio_generate_tone",
+    "description": "Foundation for audio suite: tone synthesis. Future: sweeps, noise, impulse responses.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "frequency": {
+          "type": "number",
+          "default": 440
+        },
+        "duration_seconds": {
+          "type": "number",
+          "default": 1
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_audio_speech_analysis",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "transcript": {
+          "type": "string"
+        },
+        "duration_seconds": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "transcript",
+        "duration_seconds"
+      ]
+    }
+  },
+  {
+    "name": "read_audio_convert_guide",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_format": {
+          "type": "string"
+        },
+        "target_format": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_format",
+        "target_format"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_analyze_code",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "language"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_generate_framework",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "project_type": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "project_type",
+        "language"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_debug",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code_context": {
+          "type": "string",
+          "default": ""
+        },
+        "language": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "error",
+        "language"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_review",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "focus": {
+          "type": "string",
+          "default": "all"
+        }
+      },
+      "required": [
+        "code",
+        "language"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_explain",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string",
+          "default": "intermediate"
+        }
+      },
+      "required": [
+        "code",
+        "language"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_convert",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "from",
+        "to"
+      ]
+    }
+  },
+  {
+    "name": "read_coder_architecture",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "project_type": {
+          "type": "string"
+        },
+        "scale": {
+          "type": "string",
+          "default": "medium"
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "project_type"
+      ]
+    }
+  },
+  {
+    "name": "read_devops_container_debug",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "error_log": {
+          "type": "string"
+        },
+        "runtime": {
+          "type": "string",
+          "default": "podman"
+        }
+      },
+      "required": [
+        "error_log"
+      ]
+    }
+  },
+  {
+    "name": "read_devops_permissions_analyze",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mount_path": {
+          "type": "string"
+        },
+        "container_user": {
+          "type": "string"
+        },
+        "host_user": {
+          "type": "string"
+        },
+        "error_symptom": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_devops_compose_generator",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "services": {
+          "type": "array"
+        },
+        "networks": {
+          "type": "array"
+        },
+        "runtime": {
+          "type": "string",
+          "default": "docker"
+        }
+      },
+      "required": [
+        "services"
+      ]
+    }
+  },
+  {
+    "name": "read_devops_mergerfs_setup",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source_paths": {
+          "type": "array"
+        },
+        "mount_point": {
+          "type": "string"
+        },
+        "policy": {
+          "type": "string",
+          "default": "epmfs"
+        }
+      },
+      "required": [
+        "source_paths",
+        "mount_point"
+      ]
+    }
+  },
+  {
+    "name": "read_devops_dockerfile_analyze",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dockerfile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dockerfile"
+      ]
+    }
+  },
+  {
+    "name": "read_devops_network_troubleshoot",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "symptom": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "symptom"
+      ]
+    }
+  },
+  {
+    "name": "read_gamedev_design_analyze",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "concept": {
+          "type": "string"
+        },
+        "genre": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "concept",
+        "genre"
+      ]
+    }
+  },
+  {
+    "name": "read_gamedev_scaffold_project",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "engine": {
+          "type": "string"
+        },
+        "genre": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "default": "MyGame"
+        }
+      },
+      "required": [
+        "engine",
+        "genre"
+      ]
+    }
+  },
+  {
+    "name": "read_gamedev_mechanics_guide",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "genre": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "genre"
+      ]
+    }
+  },
+  {
+    "name": "read_gamedev_optimization",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "engine": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "engine",
+        "issue"
+      ]
+    }
+  },
+  {
+    "name": "read_gamedev_compare_engines",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "project_type": {
+          "type": "string"
+        },
+        "team_size": {
+          "type": "string",
+          "default": "solo"
+        },
+        "budget": {
+          "type": "string",
+          "default": "indie"
+        }
+      },
+      "required": [
+        "project_type"
+      ]
+    }
+  },
+  {
+    "name": "read_gamedev_level_design",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "genre": {
+          "type": "string"
+        },
+        "level_type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "genre",
+        "level_type"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_beam_analysis",
+    "description": "MERGED - Beam analysis: calculate=[stress,shear,deflection,all]. Replaces 3 tools.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "calculate": {
+          "type": "string",
+          "default": "all",
+          "enum": [
+            "stress",
+            "shear",
+            "deflection",
+            "all"
+          ]
+        },
+        "moment": {
+          "type": "number"
+        },
+        "distance_neutral": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "shear_force": {
+          "type": "number"
+        },
+        "Q": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "load": {
+          "type": "number"
+        },
+        "length": {
+          "type": "number"
+        },
+        "E": {
+          "type": "number"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_sim_mech_buckle",
+    "description": "MERGED — Column buckling: Euler (E,I) or Johnson (sigma_y,A,r). Auto-selects based on params.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number",
+          "description": "Moment of inertia (m^4) — for Euler"
+        },
+        "K": {
+          "type": "number",
+          "default": 1.0
+        },
+        "L": {
+          "type": "number"
+        },
+        "sigma_y": {
+          "type": "number",
+          "description": "Yield strength (Pa) — for Johnson"
+        },
+        "A": {
+          "type": "number",
+          "description": "Area (m^2) — for Johnson"
+        },
+        "r": {
+          "type": "number",
+          "description": "Radius of gyration (m) — for Johnson"
+        }
+      },
+      "required": [
+        "E",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_buckle_johnson",
+    "description": "Johnson column buckling for intermediate columns.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "sigma_y": {
+          "type": "number",
+          "description": "Yield strength (Pa)"
+        },
+        "A": {
+          "type": "number",
+          "description": "Cross-sectional area (m^2)"
+        },
+        "K": {
+          "type": "number",
+          "default": 1.0
+        },
+        "L": {
+          "type": "number"
+        },
+        "r": {
+          "type": "number",
+          "description": "Radius of gyration (m)"
+        }
+      },
+      "required": [
+        "E",
+        "sigma_y",
+        "A",
+        "L",
+        "r"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_fatigue",
+    "description": "MERGED — S-N fatigue: solve for 'stress' or 'cycles'. Replaces sn + cycles.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "Sf_prime": {
+          "type": "number",
+          "description": "Fatigue strength coefficient (Pa)"
+        },
+        "b": {
+          "type": "number",
+          "default": -0.1
+        },
+        "N": {
+          "type": "integer",
+          "default": 1000
+        },
+        "stress_amplitude": {
+          "type": "number"
+        },
+        "solve_for": {
+          "type": "string",
+          "default": "stress",
+          "enum": [
+            "stress",
+            "cycles"
+          ]
+        }
+      },
+      "required": [
+        "Sf_prime"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_fatigue_goodman",
+    "description": "Goodman mean stress correction. Checks (S_alt/S_e)+(S_mean/S_ut) <= 1.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "S_alt": {
+          "type": "number"
+        },
+        "S_mean": {
+          "type": "number"
+        },
+        "S_ut": {
+          "type": "number",
+          "description": "Ultimate tensile strength"
+        },
+        "S_e": {
+          "type": "number",
+          "description": "Endurance limit"
+        }
+      },
+      "required": [
+        "S_alt",
+        "S_mean",
+        "S_ut",
+        "S_e"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_fatigue_miner",
+    "description": "Miner's cumulative damage: D = Σ(n_i/N_i).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cycles": {
+                "type": "integer"
+              },
+              "cycles_to_failure": {
+                "type": "integer"
+              }
+            }
+          },
+          "description": "Load blocks"
+        }
+      },
+      "required": [
+        "blocks"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_joint",
+    "description": "MERGED - Joint analysis: type=[fastener,bolt,bonded]. Replaces 3 tools.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "fastener",
+            "bolt",
+            "bonded"
+          ]
+        },
+        "force": {
+          "type": "number"
+        },
+        "area": {
+          "type": "number"
+        },
+        "num_fasteners": {
+          "type": "integer",
+          "default": 1
+        },
+        "K": {
+          "type": "number",
+          "default": 0.2
+        },
+        "D": {
+          "type": "number"
+        },
+        "F": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "overlap_length": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_mech_moi",
+    "description": "MERGED — Moment of inertia: shape=[rect|circle]. Replaces moi_rect + moi_circle.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "shape": {
+          "type": "string",
+          "default": "rect",
+          "enum": [
+            "rect",
+            "circle"
+          ]
+        },
+        "width": {
+          "type": "number",
+          "description": "For rect"
+        },
+        "height": {
+          "type": "number",
+          "description": "For rect"
+        },
+        "diameter": {
+          "type": "number",
+          "description": "For circle"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_mutate_scope",
+    "description": "Parse execution triggers → define functional boundaries and target metrics.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "description": "Task description, error log, or command to analyze"
+        }
+      },
+      "required": [
+        "trigger"
+      ]
+    }
+  },
+  {
+    "name": "read_mutate_audit",
+    "description": "Scan tool inventories + DAGs for redundancy and overlapping execution flows.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "type": "string"
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_execute",
+    "description": " MUTATE — Execute algorithmic mutation cycle (audit → refactor plan → persist). Use dry_run=true to preview.",
+    "permission": "mutate",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_compact_token_velocity",
+    "description": "Check current token velocity and compaction recommendation.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "read_compact_synthesize",
+    "description": "Condense verbose content into a high-density summary (preserves code/math blocks).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "max_chars": {
+          "type": "integer",
+          "default": 2000
+        }
+      },
+      "required": [
+        "content"
+      ]
+    }
+  },
+  {
+    "name": "write_compact_execute",
+    "description": " WRITE — Execute context compaction cycle. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Content to compact (leave empty to status-only)"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_compact_record_tick",
+    "description": "Record a manual token velocity tick.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "string",
+          "default": "manual"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_plumber_inspect_socket",
+    "description": "Check socket latency and structural integrity (TCP or Unix).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "default": "localhost"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "socket_path": {
+          "type": "string",
+          "description": "Unix socket path (alternative to TCP)"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_plumber_trace_handoff",
+    "description": "Trace data handoff between components. Filter by source/target/protocol.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "protocol_filter": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_plumber_checkpoint",
+    "description": " WRITE — Create runtime checkpoint before destructive ops. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "artifact_type": {
+          "type": "string",
+          "default": "session"
+        },
+        "file_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_plumber_checkpoints",
+    "description": "List recent checkpoints from history.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "default": 5
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_cad_validate_scad",
+    "description": "Validate OpenSCAD file syntax and structure.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "read_cad_beam_stress",
+    "description": "Rectangular beam stress analysis for 3D printed parts.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "force_N": {
+          "type": "number"
+        },
+        "length_mm": {
+          "type": "number"
+        },
+        "width_mm": {
+          "type": "number"
+        },
+        "height_mm": {
+          "type": "number"
+        },
+        "yield_MPa": {
+          "type": "number",
+          "default": 40
+        }
+      },
+      "required": [
+        "force_N",
+        "length_mm",
+        "width_mm",
+        "height_mm"
+      ]
+    }
+  },
+  {
+    "name": "read_electrical_design_circuit",
+    "description": "Design a circuit schematic with components and connections.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "components",
+        "connections"
+      ]
+    }
+  },
+  {
+    "name": "read_electrical_analyze_circuit",
+    "description": "Analyze a circuit for connectivity and validation.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "circuit_json": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "circuit_json"
+      ]
+    }
+  },
+  {
+    "name": "read_focus_scope_check",
+    "description": "Check user input for scope creep, topic switching, feature bloat.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "input_text": {
+          "type": "string"
+        },
+        "current_project": {
+          "type": "string",
+          "default": "CortexStratum"
+        }
+      },
+      "required": [
+        "input_text"
+      ]
+    }
+  },
+  {
+    "name": "read_focus_nudge",
+    "description": "Generate context-aware nudge message based on scope analysis.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "scope_result": {
+          "type": "object"
+        },
+        "user_input": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_result",
+        "user_input"
+      ]
+    }
+  },
+  {
+    "name": "write_focus_store_global",
+    "description": " WRITE — Store out-of-scope task in Global Projects Memory. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "task": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "source_session": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "project",
+        "task"
+      ]
+    }
+  },
+  {
+    "name": "read_focus_global",
+    "description": "Retrieve global projects memory. Filter by project.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_focus_pipeline_status",
+    "description": "Show current session pipeline phase and stats.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "write_focus_pipeline_advance",
+    "description": " WRITE — Advance session pipeline phase. Phases: help→context→executing→wrapping→learning→end.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "next_phase": {
+          "type": "string",
+          "enum": [
+            "help",
+            "context",
+            "executing",
+            "wrapping",
+            "learning",
+            "end"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "next_phase"
+      ]
+    }
+  },
+  {
+    "name": "read_focus_decompose",
+    "description": "Decompose complex prompt into atomic tasks grouped by category.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "prompt_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "prompt_text"
+      ]
+    }
+  },
+  {
+    "name": "read_focus_prioritize",
+    "description": "Score and sequence tasks from decomposer into execution plan.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "tasks"
+      ]
+    }
+  },
+  {
+    "name": "mutate_focus_learn",
+    "description": " MUTATE — Post-session learning analysis. Use dry_run=true to preview.",
+    "permission": "mutate",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "session_id"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_beam",
+    "description": "1D beam element stiffness matrix (4x4). Returns K, LaTeX.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number",
+          "description": "Young's modulus (Pa)"
+        },
+        "I": {
+          "type": "number",
+          "description": "Moment of inertia (m^4)"
+        },
+        "L": {
+          "type": "number",
+          "description": "Element length (m)"
+        }
+      },
+      "required": [
+        "E",
+        "I",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_truss",
+    "description": "1D truss element axial stiffness k=EA/L. Returns stiffness and stress.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "A": {
+          "type": "number",
+          "description": "Cross-section (m^2)"
+        },
+        "L": {
+          "type": "number"
+        },
+        "force": {
+          "type": "number",
+          "description": "Axial force (N)"
+        }
+      },
+      "required": [
+        "E",
+        "A",
+        "L",
+        "force"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_modal",
+    "description": "Cantilever beam 1st natural frequency: f1 = (1.875²/2πL²)·√(EI/ρA).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "number"
+        },
+        "I": {
+          "type": "number"
+        },
+        "rho": {
+          "type": "number",
+          "description": "Density (kg/m³)"
+        },
+        "A": {
+          "type": "number"
+        },
+        "L": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "E",
+        "I",
+        "rho",
+        "A",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_fea_heat",
+    "description": "1D steady-state heat conduction: q = -k·A·(T2-T1)/L.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "k": {
+          "type": "number",
+          "description": "Thermal conductivity (W/mK)"
+        },
+        "A": {
+          "type": "number",
+          "description": "Area (m²)"
+        },
+        "T1": {
+          "type": "number",
+          "description": "Temperature 1 (°C)"
+        },
+        "T2": {
+          "type": "number",
+          "description": "Temperature 2 (°C)"
+        },
+        "L": {
+          "type": "number",
+          "description": "Length (m)"
+        }
+      },
+      "required": [
+        "k",
+        "A",
+        "T1",
+        "T2",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_pipe",
+    "description": "Pipe flow: Darcy-Weisbach ΔP, Reynolds number, friction factor.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "rho": {
+          "type": "number",
+          "description": "Density (kg/m³)"
+        },
+        "v": {
+          "type": "number",
+          "description": "Velocity (m/s)"
+        },
+        "D": {
+          "type": "number",
+          "description": "Pipe diameter (m)"
+        },
+        "mu": {
+          "type": "number",
+          "description": "Dynamic viscosity (Pa·s)"
+        },
+        "L": {
+          "type": "number",
+          "description": "Pipe length (m)"
+        }
+      },
+      "required": [
+        "rho",
+        "v",
+        "D",
+        "mu",
+        "L"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_boundary",
+    "description": "Boundary layer thickness (laminar/turbulent) on flat plate.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "rho": {
+          "type": "number"
+        },
+        "v": {
+          "type": "number"
+        },
+        "x": {
+          "type": "number",
+          "description": "Position along plate (m)"
+        },
+        "mu": {
+          "type": "number"
+        },
+        "regime": {
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "laminar",
+            "turbulent"
+          ]
+        }
+      },
+      "required": [
+        "rho",
+        "v",
+        "x",
+        "mu"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_drag",
+    "description": "Drag force: Fd = 0.5·ρ·v²·Cd·A.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "rho": {
+          "type": "number"
+        },
+        "v": {
+          "type": "number"
+        },
+        "Cd": {
+          "type": "number",
+          "description": "Drag coefficient"
+        },
+        "A": {
+          "type": "number",
+          "description": "Reference area (m²)"
+        }
+      },
+      "required": [
+        "rho",
+        "v",
+        "Cd",
+        "A"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_cfd_bernoulli",
+    "description": "Bernoulli: solve for any one unknown from P, v, h.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "P1": {
+          "type": "number",
+          "description": "Pressure 1 (Pa)"
+        },
+        "v1": {
+          "type": "number",
+          "description": "Velocity 1 (m/s)"
+        },
+        "h1": {
+          "type": "number",
+          "description": "Height 1 (m)"
+        },
+        "P2": {
+          "type": "number"
+        },
+        "v2": {
+          "type": "number"
+        },
+        "h2": {
+          "type": "number"
+        },
+        "rho": {
+          "type": "number",
+          "description": "Fluid density (kg/m³)"
+        },
+        "solve_for": {
+          "type": "string",
+          "enum": [
+            "P1",
+            "v1",
+            "h1",
+            "P2",
+            "v2",
+            "h2"
+          ]
+        }
+      },
+      "required": [
+        "rho",
+        "solve_for"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_matrix_solve",
+    "description": "Solve Ax = b via Gaussian elimination. Returns solution + LaTeX derivation.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "A": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "b": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "A",
+        "b"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_ode",
+    "description": "Solve ODE system (RK4 or Euler). Returns trajectory + LaTeX system.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "derivatives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "y0": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "t_start": {
+          "type": "number",
+          "default": 0
+        },
+        "t_end": {
+          "type": "number",
+          "default": 10
+        },
+        "steps": {
+          "type": "integer",
+          "default": 100
+        },
+        "method": {
+          "type": "string",
+          "default": "rk4",
+          "enum": [
+            "rk4",
+            "euler"
+          ]
+        }
+      },
+      "required": [
+        "derivatives",
+        "y0"
+      ]
+    }
+  },
+  {
+    "name": "read_sim_latex",
+    "description": "Generate LaTeX from common expressions (quadratic, buckling, bending, integral, derivative).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expression": {
+          "type": "string"
+        },
+        "notation": {
+          "type": "string",
+          "default": "aligned",
+          "enum": [
+            "aligned",
+            "derivation"
+          ]
+        }
+      },
+      "required": [
+        "expression"
+      ]
+    }
+  },
+  {
+    "name": "read_pedagogy_assess",
+    "description": "Assess user understanding level from queries/topic. Returns depth recommendation.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "topic": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_pedagogy_adapt",
+    "description": "Generate explanation prompt at appropriate depth for a topic.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        },
+        "complexity": {
+          "type": "integer",
+          "description": "1-5 (intuitive to expert)"
+        },
+        "format": {
+          "type": "string",
+          "default": "text"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "write_pedagogy_profile",
+    "description": " WRITE — Store user comprehension profile. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "depth": {
+          "type": "integer",
+          "description": "1-5"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "feedback_score": {
+          "type": "number"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "mutate_consolidation_run",
+    "description": " MUTATE — Execute cross-pollination cycle (TF-IDF similarity linking). Use dry_run=true to preview.",
+    "permission": "mutate",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_consolidation_links",
+    "description": "Show discovered cross-pollination links between memory entries.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "default": 10
+        },
+        "min_similarity": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "read_db_query",
+    "description": "Execute a SQL SELECT/PRAGMA query on a SQLite database.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "db_path": {
+          "type": "string"
+        },
+        "sql": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "db_path",
+        "sql"
+      ]
+    }
+  },
+  {
+    "name": "read_db_schema",
+    "description": "List tables and columns in a SQLite database.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "db_path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "db_path"
+      ]
+    }
+  },
+  {
+    "name": "write_db_execute",
+    "description": " WRITE — Execute INSERT/UPDATE/DELETE on a SQLite database. Use dry_run=true to preview.",
+    "permission": "write",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "db_path": {
+          "type": "string"
+        },
+        "sql": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": [
+        "db_path",
+        "sql"
+      ]
+    }
+  },
+  {
+    "name": "read_convert_csv_to_json",
+    "description": "Convert CSV text to JSON.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "csv_text": {
+          "type": "string"
+        },
+        "dialect": {
+          "type": "string",
+          "default": "excel"
+        },
+        "has_header": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "csv_text"
+      ]
+    }
+  },
+  {
+    "name": "read_convert_json_to_csv",
+    "description": "Convert JSON array to CSV text.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "json_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "json_text"
+      ]
+    }
+  },
+  {
+    "name": "read_convert_json_to_xml",
+    "description": "Convert JSON to XML string.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "json_text": {
+          "type": "string"
+        },
+        "root_name": {
+          "type": "string",
+          "default": "root"
+        },
+        "item_name": {
+          "type": "string",
+          "default": "item"
+        }
+      },
+      "required": [
+        "json_text"
+      ]
+    }
+  },
+  {
+    "name": "read_convert_xml_to_json",
+    "description": "Convert XML string to JSON.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "xml_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "xml_text"
+      ]
+    }
+  },
+  {
+    "name": "read_convert_json_to_yaml",
+    "description": "Convert JSON to YAML (requires PyYAML).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "json_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "json_text"
+      ]
+    }
+  },
+  {
+    "name": "read_convert_yaml_to_json",
+    "description": "Convert YAML to JSON (requires PyYAML).",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "yaml_text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "yaml_text"
+      ]
+    }
+  },
+  {
+    "name": "read_regex_test",
+    "description": "Test a regex pattern against text and return matches.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "flags": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "required": [
+        "pattern",
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "read_regex_explain",
+    "description": "Explain what a regex pattern does in plain language.",
+    "permission": "read",
+    "annotations": {
+      "destructiveHint": false,
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern"
+      ]
+    }
+  },
+  {
+    "name": "mutate_verify_run",
+    "description": " MUTATE — Run the full verification gate (ruff lint, syntax check, MCP test, skill pipeline, verifier, tool count). Use dry_run=true to preview.",
+    "permission": "mutate",
+    "annotations": {
+      "destructiveHint": true,
+      "readOnlyHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ruff",
+              "syntax",
+              "mcp_test",
+              "skill_pipeline",
+              "verifier",
+              "tool_count"
+            ]
+          },
+          "description": "Optional subset of steps to run (default: all)"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview without executing"
+        }
+      },
+      "required": []
+    }
   }
 ]

@@ -6,7 +6,7 @@
   "mcpServers": {
     "CortexStratum": {
       "name": "CortexStratum",
-      "description": "68-tool MCP server: local BM25 memory, trace system, skill routing, multi-modal AI generation",
+      "description": "115-tool MCP server (v0.5.0): SQLite+FTS5 memory, trace system, skill routing, multi-modal AI. See root opencode.json for full config.",
       "command": "python",
       "args": ["scripts/tools-mcp-server.py"],
       "env": {}

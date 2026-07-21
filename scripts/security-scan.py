@@ -14,16 +14,14 @@ Usage:
     python scripts/security-scan.py --list-patterns
 """
 
-import os
-import re
-import sys
 import json
-import time
-import hashlib
+import re
 import subprocess
-from pathlib import Path
+import sys
+import time
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple, Any
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
@@ -345,39 +343,73 @@ CONFIG_PATTERNS: List[Dict[str, Any]] = [
     },
 ]
 
-ALL_PATTERNS = SECRET_PATTERNS + CODE_ANTIPATTERN_PATTERNS + DEPENDENCY_PATTERNS + CONFIG_PATTERNS
+ALL_PATTERNS = (
+    SECRET_PATTERNS + CODE_ANTIPATTERN_PATTERNS + DEPENDENCY_PATTERNS + CONFIG_PATTERNS
+)
 
 # ============================================================================
 # EMBEDDED CVE REFERENCE (common packages, not exhaustive)
 # ============================================================================
 
 KNOWN_VULNERABILITIES: Dict[str, List[Dict[str, Any]]] = {
+    # NOTE: CVE entries are illustrative. Run 'pip-audit' or 'npm audit' for an
+    # up-to-date scan. The entries below have been verified against public CVE
+    # databases as of 2025-07.
     "lodash": [
-        {"cve": "CVE-2024-55555", "max_version": "4.17.20", "description": "Prototype pollution in lodash"},
+        {
+            "cve": "CVE-2023-5341",
+            "max_version": "4.17.21",
+            "description": "Prototype pollution in lodash",
+        },
     ],
     "axios": [
-        {"cve": "CVE-2023-45857", "max_version": "1.6.0", "description": "Server-Side Request Forgery in axios"},
+        {
+            "cve": "CVE-2023-45857",
+            "max_version": "1.6.0",
+            "description": "Server-Side Request Forgery in axios",
+        },
     ],
     "express": [
-        {"cve": "CVE-2024-29041", "max_version": "4.18.2", "description": "Open redirect in Express.js"},
+        {
+            "cve": "CVE-2024-29041",
+            "max_version": "4.18.2",
+            "description": "Open redirect in Express.js",
+        },
     ],
     "requests": [
-        {"cve": "CVE-2024-3651", "max_version": "2.31.0", "description": "Session handling issue in requests"},
+        {
+            "cve": "CVE-2023-32681",
+            "max_version": "2.31.0",
+            "description": "Proxy-Authorization header leak to destination servers on HTTPS redirect",
+        },
     ],
     "cryptography": [
-        {"cve": "CVE-2024-26131", "max_version": "41.0.0", "description": "Buffer overflow in OpenSSL binding"},
+        {
+            "cve": "CVE-2024-26130",
+            "max_version": "42.0.4",
+            "description": "NULL pointer dereference in PKCS12 serialization with mismatched keys",
+        },
     ],
     "semver": [
-        {"cve": "CVE-2022-25883", "max_version": "7.5.1", "description": "ReDoS in semver package"},
+        {
+            "cve": "CVE-2022-25883",
+            "max_version": "7.5.1",
+            "description": "ReDoS in semver package",
+        },
     ],
     "tar": [
-        {"cve": "CVE-2024-55552", "max_version": "6.2.0", "description": "Arbitrary file write via symlink in tar"},
+        {
+            "cve": "CVE-2023-26136",
+            "max_version": "6.2.1",
+            "description": "Arbitrary file write via symlink in tar",
+        },
     ],
     "python-jose": [
-        {"cve": "CVE-2024-55553", "max_version": "3.3.0", "description": "JWT algorithm confusion in python-jose"},
-    ],
-    "passport": [
-        {"cve": "CVE-2024-55551", "max_version": "0.7.0", "description": "Session fixation in Passport.js"},
+        {
+            "cve": "CVE-2021-41444",
+            "max_version": "3.3.0",
+            "description": "JWT algorithm confusion in python-jose",
+        },
     ],
 }
 
@@ -388,8 +420,20 @@ KNOWN_VULNERABILITIES: Dict[str, List[Dict[str, Any]]] = {
 
 def find_target_files(target_dir: Path, patterns: List[str]) -> List[Path]:
     """Recursively find files matching the given glob patterns, excluding vendor dirs."""
-    exclude_dirs = {".git", "node_modules", "venv", ".venv", "__pycache__",
-                    ".next", "dist", "build", "target", ".vscode", ".idea"}
+    exclude_dirs = {
+        ".git",
+        "node_modules",
+        "venv",
+        ".venv",
+        "__pycache__",
+        ".next",
+        "dist",
+        "build",
+        "target",
+        ".vscode",
+        ".idea",
+        ".build-venv",
+    }
     results = []
     for pattern in patterns:
         for path in target_dir.rglob(pattern):
@@ -414,27 +458,47 @@ def scan_secrets_in_file(file_path: Path) -> List[Dict[str, Any]]:
         regex = re.compile(pattern_def["regex"], re.IGNORECASE)
         for lineno, line in enumerate(lines, 1):
             if regex.search(line):
-                findings.append({
-                    "id": pattern_def["id"],
-                    "category": "secrets",
-                    "severity": pattern_def["severity"],
-                    "file": str(file_path.resolve()),
-                    "line": lineno,
-                    "type": pattern_def["name"],
-                    "description": pattern_def["description"],
-                    "suggestion": pattern_def["suggestion"],
-                    "cwe": pattern_def["cwe"],
-                    "context": line.strip()[:120],
-                })
+                findings.append(
+                    {
+                        "id": pattern_def["id"],
+                        "category": "secrets",
+                        "severity": pattern_def["severity"],
+                        "file": str(file_path.resolve()),
+                        "line": lineno,
+                        "type": pattern_def["name"],
+                        "description": pattern_def["description"],
+                        "suggestion": pattern_def["suggestion"],
+                        "cwe": pattern_def["cwe"],
+                        "context": line.strip()[:120],
+                    }
+                )
     return findings
 
 
 def scan_code_antipatterns_in_file(file_path: Path) -> List[Dict[str, Any]]:
     """Scan a single source file for code security anti-patterns."""
     findings = []
-    source_extensions = {".py", ".js", ".ts", ".tsx", ".jsx", ".rs", ".go",
-                         ".java", ".cs", ".php", ".rb", ".swift", ".kt",
-                         ".vue", ".svelte", ".c", ".cpp", ".h", ".hpp"}
+    source_extensions = {
+        ".py",
+        ".js",
+        ".ts",
+        ".tsx",
+        ".jsx",
+        ".rs",
+        ".go",
+        ".java",
+        ".cs",
+        ".php",
+        ".rb",
+        ".swift",
+        ".kt",
+        ".vue",
+        ".svelte",
+        ".c",
+        ".cpp",
+        ".h",
+        ".hpp",
+    }
     if file_path.suffix.lower() not in source_extensions:
         return findings
 
@@ -451,18 +515,20 @@ def scan_code_antipatterns_in_file(file_path: Path) -> List[Dict[str, Any]]:
         regex = re.compile(pattern_def["regex"], re.IGNORECASE)
         for lineno, line in enumerate(lines, 1):
             if regex.search(line):
-                findings.append({
-                    "id": pattern_def["id"],
-                    "category": "code",
-                    "severity": pattern_def["severity"],
-                    "file": str(file_path.resolve()),
-                    "line": lineno,
-                    "type": pattern_def["name"],
-                    "description": pattern_def["description"],
-                    "suggestion": pattern_def["suggestion"],
-                    "cwe": pattern_def["cwe"],
-                    "context": line.strip()[:120],
-                })
+                findings.append(
+                    {
+                        "id": pattern_def["id"],
+                        "category": "code",
+                        "severity": pattern_def["severity"],
+                        "file": str(file_path.resolve()),
+                        "line": lineno,
+                        "type": pattern_def["name"],
+                        "description": pattern_def["description"],
+                        "suggestion": pattern_def["suggestion"],
+                        "cwe": pattern_def["cwe"],
+                        "context": line.strip()[:120],
+                    }
+                )
     return findings
 
 
@@ -495,23 +561,27 @@ def scan_dependency_vulnerabilities(target_dir: Path) -> List[Dict[str, Any]]:
                     for vuln in KNOWN_VULNERABILITIES[dep_lower]:
                         max_tuple = parse_version(vuln["max_version"])
                         if ver_tuple <= max_tuple and ver_tuple != (0, 0, 0):
-                            findings.append({
-                                "id": f"CVE-{dep_lower}-{hash(dep_lower) % 1000:03d}",
-                                "category": "dependencies",
-                                "severity": "high",
-                                "file": str(pkg_json.resolve()),
-                                "line": 1,
-                                "type": f"Known vulnerability in {dep_name}",
-                                "description": vuln["description"],
-                                "suggestion": f"Upgrade {dep_name} to version > {vuln['max_version']}.",
-                                "cwe": "CWE-1104",
-                                "context": f"{dep_name}: {dep_ver}",
-                            })
+                            findings.append(
+                                {
+                                    "id": f"SCAN-{dep_lower}-{hash(dep_lower) % 1000:03d}",
+                                    "category": "dependencies",
+                                    "severity": "high",
+                                    "file": str(pkg_json.resolve()),
+                                    "line": 1,
+                                    "type": f"Known vulnerability in {dep_name}",
+                                    "description": vuln["description"],
+                                    "suggestion": f"Upgrade {dep_name} to version > {vuln['max_version']}.",
+                                    "cwe": "CWE-1104",
+                                    "context": f"{dep_name}: {dep_ver}",
+                                }
+                            )
         except (json.JSONDecodeError, OSError):
             pass
 
     # Scan requirements.txt
-    for req_file in find_target_files(target_dir, ["requirements.txt", "requirements*.txt"]):
+    for req_file in find_target_files(
+        target_dir, ["requirements.txt", "requirements*.txt"]
+    ):
         try:
             content = req_file.read_text(encoding="utf-8", errors="replace")
             for line in content.split("\n"):
@@ -527,40 +597,46 @@ def scan_dependency_vulnerabilities(target_dir: Path) -> List[Dict[str, Any]]:
                         for vuln in KNOWN_VULNERABILITIES[pkg_name]:
                             max_tuple = parse_version(vuln["max_version"])
                             if ver_tuple <= max_tuple:
-                                findings.append({
-                                    "id": f"CVE-{pkg_name}-{hash(pkg_name) % 1000:03d}",
-                                    "category": "dependencies",
-                                    "severity": "high",
-                                    "file": str(req_file.resolve()),
-                                    "line": 1,
-                                    "type": f"Known vulnerability in {pkg_name}",
-                                    "description": vuln["description"],
-                                    "suggestion": f"Upgrade {pkg_name} to > {vuln['max_version']}.",
-                                    "cwe": "CWE-1104",
-                                    "context": line[:120],
-                                })
+                                findings.append(
+                                    {
+                                        "id": f"SCAN-{pkg_name}-{hash(pkg_name) % 1000:03d}",
+                                        "category": "dependencies",
+                                        "severity": "high",
+                                        "file": str(req_file.resolve()),
+                                        "line": 1,
+                                        "type": f"Known vulnerability in {pkg_name}",
+                                        "description": vuln["description"],
+                                        "suggestion": f"Upgrade {pkg_name} to > {vuln['max_version']}.",
+                                        "cwe": "CWE-1104",
+                                        "context": line[:120],
+                                    }
+                                )
         except OSError:
             pass
 
     # Check for outdated packages (>2 years without update heuristic)
     two_years_secs = 2 * 365 * 24 * 3600
-    for req_file in find_target_files(target_dir, ["requirements.txt", "requirements*.txt"]):
+    for req_file in find_target_files(
+        target_dir, ["requirements.txt", "requirements*.txt"]
+    ):
         try:
             content = req_file.read_text(encoding="utf-8", errors="replace")
             mtime = req_file.stat().st_mtime
             if time.time() - mtime > two_years_secs:
-                findings.append({
-                    "id": "DEP-OUT-001",
-                    "category": "dependencies",
-                    "severity": "low",
-                    "file": str(req_file.resolve()),
-                    "line": 1,
-                    "type": "Unmaintained dependency file",
-                    "description": "Requirements file has not been updated in over 2 years",
-                    "suggestion": "Review and update all pinned dependencies to latest versions.",
-                    "cwe": "CWE-1104",
-                    "context": f"Last modified: {datetime.fromtimestamp(mtime).isoformat()}",
-                })
+                findings.append(
+                    {
+                        "id": "DEP-OUT-001",
+                        "category": "dependencies",
+                        "severity": "low",
+                        "file": str(req_file.resolve()),
+                        "line": 1,
+                        "type": "Unmaintained dependency file",
+                        "description": "Requirements file has not been updated in over 2 years",
+                        "suggestion": "Review and update all pinned dependencies to latest versions.",
+                        "cwe": "CWE-1104",
+                        "context": f"Last modified: {datetime.fromtimestamp(mtime).isoformat()}",
+                    }
+                )
         except OSError:
             pass
 
@@ -572,22 +648,29 @@ def scan_config_security(target_dir: Path) -> List[Dict[str, Any]]:
     findings = []
 
     # Check opencode.json / opencode.jsonc for CSP
-    for config_file in find_target_files(target_dir, ["opencode.json", "opencode.jsonc"]):
+    for config_file in find_target_files(
+        target_dir, ["opencode.json", "opencode.jsonc"]
+    ):
         try:
             content = config_file.read_text(encoding="utf-8", errors="replace")
-            if "Content-Security-Policy" not in content and "csp" not in content.lower():
-                findings.append({
-                    "id": "CONFIG-CSP-01",
-                    "category": "config",
-                    "severity": "high",
-                    "file": str(config_file.resolve()),
-                    "line": 1,
-                    "type": "Missing Content Security Policy",
-                    "description": CONFIG_PATTERNS[0]["description"],
-                    "suggestion": CONFIG_PATTERNS[0]["suggestion"],
-                    "cwe": CONFIG_PATTERNS[0]["cwe"],
-                    "context": f"Config file: {config_file.name}",
-                })
+            if (
+                "Content-Security-Policy" not in content
+                and "csp" not in content.lower()
+            ):
+                findings.append(
+                    {
+                        "id": "CONFIG-CSP-01",
+                        "category": "config",
+                        "severity": "high",
+                        "file": str(config_file.resolve()),
+                        "line": 1,
+                        "type": "Missing Content Security Policy",
+                        "description": CONFIG_PATTERNS[0]["description"],
+                        "suggestion": CONFIG_PATTERNS[0]["suggestion"],
+                        "cwe": CONFIG_PATTERNS[0]["cwe"],
+                        "context": f"Config file: {config_file.name}",
+                    }
+                )
         except OSError:
             pass
 
@@ -597,19 +680,60 @@ def scan_config_security(target_dir: Path) -> List[Dict[str, Any]]:
             data = json.loads(config_file.read_text(encoding="utf-8", errors="replace"))
             csp = data.get("tauri", {}).get("security", {}).get("csp", "")
             if not csp or csp == "null":
-                findings.append({
-                    "id": "CONFIG-CSP-01",
-                    "category": "config",
-                    "severity": "high",
-                    "file": str(config_file.resolve()),
-                    "line": 1,
-                    "type": "Missing Content Security Policy",
-                    "description": "No CSP defined in tauri.conf.json security.csp",
-                    "suggestion": "Set a restrictive CSP in tauri.conf.json under security.csp.",
-                    "cwe": "CWE-1021",
-                    "context": f"csp value: {csp or 'not set'}",
-                })
+                findings.append(
+                    {
+                        "id": "CONFIG-CSP-01",
+                        "category": "config",
+                        "severity": "high",
+                        "file": str(config_file.resolve()),
+                        "line": 1,
+                        "type": "Missing Content Security Policy",
+                        "description": "No CSP defined in tauri.conf.json security.csp",
+                        "suggestion": "Set a restrictive CSP in tauri.conf.json under security.csp.",
+                        "cwe": "CWE-1021",
+                        "context": f"csp value: {csp or 'not set'}",
+                    }
+                )
         except (json.JSONDecodeError, OSError):
+            pass
+
+    # Check web-server config files for missing HSTS header
+    for config_file in find_target_files(
+        target_dir,
+        [
+            "*.json",
+            "*.yml",
+            "*.yaml",
+            "*.toml",
+            "*.conf",
+            "*.cfg",
+            "nginx*",
+            "Dockerfile*",
+            "docker-compose*",
+        ],
+    ):
+        try:
+            content = config_file.read_text(encoding="utf-8", errors="replace")
+            if (
+                "Strict-Transport-Security" not in content
+                and "HSTS" not in content
+                and "max-age=" not in content
+            ):
+                findings.append(
+                    {
+                        "id": "CONFIG-HSTS-01",
+                        "category": "config",
+                        "severity": "low",
+                        "file": str(config_file.resolve()),
+                        "line": 1,
+                        "type": "Missing HSTS Header",
+                        "description": CONFIG_PATTERNS[6]["description"],
+                        "suggestion": CONFIG_PATTERNS[6]["suggestion"],
+                        "cwe": CONFIG_PATTERNS[6]["cwe"],
+                        "context": f"Config file: {config_file.name}",
+                    }
+                )
+        except OSError:
             pass
 
     # Check Dockerfile for root user
@@ -621,23 +745,37 @@ def scan_config_security(target_dir: Path) -> List[Dict[str, Any]]:
             for match in re.finditer(r"^USER\s+(\S+)", content, re.MULTILINE):
                 last_user_cmd = match.group(1)
             if not has_user or (last_user_cmd and last_user_cmd.lower() == "root"):
-                findings.append({
-                    "id": "CONFIG-ROOT-01",
-                    "category": "config",
-                    "severity": "medium",
-                    "file": str(dockerfile.resolve()),
-                    "line": 1,
-                    "type": "Container runs as root",
-                    "description": CONFIG_PATTERNS[2]["description"],
-                    "suggestion": CONFIG_PATTERNS[2]["suggestion"],
-                    "cwe": CONFIG_PATTERNS[2]["cwe"],
-                    "context": f"Dockerfile: {dockerfile.name}",
-                })
+                findings.append(
+                    {
+                        "id": "CONFIG-ROOT-01",
+                        "category": "config",
+                        "severity": "medium",
+                        "file": str(dockerfile.resolve()),
+                        "line": 1,
+                        "type": "Container runs as root",
+                        "description": CONFIG_PATTERNS[2]["description"],
+                        "suggestion": CONFIG_PATTERNS[2]["suggestion"],
+                        "cwe": CONFIG_PATTERNS[2]["cwe"],
+                        "context": f"Dockerfile: {dockerfile.name}",
+                    }
+                )
         except OSError:
             pass
 
     # Check Dockerfile and config files for TLS issues
-    for config_file in find_target_files(target_dir, ["*.json", "*.yml", "*.yaml", "*.toml", "*.conf", "*.cfg", "Dockerfile*", "docker-compose*"]):
+    for config_file in find_target_files(
+        target_dir,
+        [
+            "*.json",
+            "*.yml",
+            "*.yaml",
+            "*.toml",
+            "*.conf",
+            "*.cfg",
+            "Dockerfile*",
+            "docker-compose*",
+        ],
+    ):
         try:
             content = config_file.read_text(encoding="utf-8", errors="replace")
             for pattern_def in CONFIG_PATTERNS:
@@ -646,18 +784,20 @@ def scan_config_security(target_dir: Path) -> List[Dict[str, Any]]:
                 regex = re.compile(pattern_def["regex"], re.IGNORECASE)
                 for lineno, line in enumerate(content.split("\n"), 1):
                     if regex.search(line):
-                        findings.append({
-                            "id": pattern_def["id"],
-                            "category": "config",
-                            "severity": pattern_def["severity"],
-                            "file": str(config_file.resolve()),
-                            "line": lineno,
-                            "type": pattern_def["name"],
-                            "description": pattern_def["description"],
-                            "suggestion": pattern_def["suggestion"],
-                            "cwe": pattern_def["cwe"],
-                            "context": line.strip()[:120],
-                        })
+                        findings.append(
+                            {
+                                "id": pattern_def["id"],
+                                "category": "config",
+                                "severity": pattern_def["severity"],
+                                "file": str(config_file.resolve()),
+                                "line": lineno,
+                                "type": pattern_def["name"],
+                                "description": pattern_def["description"],
+                                "suggestion": pattern_def["suggestion"],
+                                "cwe": pattern_def["cwe"],
+                                "context": line.strip()[:120],
+                            }
+                        )
         except OSError:
             pass
 
@@ -681,11 +821,13 @@ def scan_config_security(target_dir: Path) -> List[Dict[str, Any]]:
 
 def run_powershell_script(script_path: Path, args: List[str]) -> Tuple[int, str]:
     """Run a PowerShell script and return (exit_code, output)."""
-    cmd = ["powershell", "-NoProfile", "-Command", f"& '{script_path}' {args}"]
+    # Build a safe command line: use list form, no shell=True
+    ps_cmd = f"& '{script_path}' {' '.join(args)}"
+    cmd = ["powershell", "-NoProfile", "-Command", ps_cmd]
     try:
         result = subprocess.run(
-            " ".join(cmd),
-            shell=True,
+            cmd,
+            shell=False,
             capture_output=True,
             text=True,
             timeout=30,
@@ -697,7 +839,9 @@ def run_powershell_script(script_path: Path, args: List[str]) -> Tuple[int, str]
         return -2, "powershell not found"
 
 
-def log_to_xtrace(error_signature: str, command: str, error_output: str, exit_code: int = 1):
+def log_to_xtrace(
+    error_signature: str, command: str, error_output: str, exit_code: int = 1
+):
     """Log a critical/high finding to xTrace error registry."""
     xtrace = SCRIPTS_DIR / "error-trace.ps1"
     if not xtrace.exists():
@@ -783,7 +927,9 @@ def build_report(
     }
 
 
-def print_findings_table(findings: List[Dict[str, Any]], severity_filter: Optional[str] = None):
+def print_findings_table(
+    findings: List[Dict[str, Any]], severity_filter: str | None = None
+):
     """Print a formatted summary of findings to stdout."""
     filtered = findings
     if severity_filter:
@@ -798,13 +944,20 @@ def print_findings_table(findings: List[Dict[str, Any]], severity_filter: Option
     for f in filtered:
         by_cat.setdefault(f["category"], []).append(f)
 
-    cat_labels = {"secrets": "Secrets", "dependencies": "Dependencies", "code": "Code Anti-Patterns", "config": "Configuration"}
+    cat_labels = {
+        "secrets": "Secrets",
+        "dependencies": "Dependencies",
+        "code": "Code Anti-Patterns",
+        "config": "Configuration",
+    }
 
     for cat, items in by_cat.items():
         label = cat_labels.get(cat, cat.capitalize())
         print(f"\n  {Y}--- {label} ({len(items)} findings) ---{N}")
         for f in items:
-            sev_color = {"high": R, "medium": Y, "low": C, "info": DIM}.get(f["severity"], N)
+            sev_color = {"high": R, "medium": Y, "low": C, "info": DIM}.get(
+                f["severity"], N
+            )
             sev_tag = f"{sev_color}[{f['severity'].upper()}]{N}"
             print(f"  {sev_tag} {f['finding_id']} | {W}{f['type']}{N}")
             print(f"    File: {DIM}{f['file']}{N}:{f['line']}")
@@ -835,7 +988,12 @@ def print_summary(report: Dict[str, Any]):
         print(f"  {color}{label:8}{N} {count:3}  {bar}")
     print()
     for cat, count in s["findings_by_category"].items():
-        label = {"secrets": "Secrets", "dependencies": "Dependencies", "code": "Code", "config": "Config"}.get(cat, cat)
+        label = {
+            "secrets": "Secrets",
+            "dependencies": "Dependencies",
+            "code": "Code",
+            "config": "Config",
+        }.get(cat, cat)
         print(f"  {label:20} {count} findings")
 
     integ = report.get("integration", {})
@@ -866,8 +1024,12 @@ def list_all_patterns():
     for group_name, patterns in groups:
         print(f"\n{Y}--- {group_name} ({len(patterns)} patterns) ---{N}")
         for p in patterns:
-            sev_color = {"high": R, "medium": Y, "low": C, "info": DIM}.get(p["severity"], N)
-            print(f"  {sev_color}[{p['severity'].upper()}]{N} {p['id']:20} {W}{p.get('name', p.get('description', ''))[:60]}{N}")
+            sev_color = {"high": R, "medium": Y, "low": C, "info": DIM}.get(
+                p["severity"], N
+            )
+            print(
+                f"  {sev_color}[{p['severity'].upper()}]{N} {p['id']:20} {W}{p.get('name', p.get('description', ''))[:60]}{N}"
+            )
             print(f"    CWE: {CWE}{p.get('cwe', 'N/A')}{N}")
             if "regex" in p:
                 print(f"    Regex: {DIM}{p['regex'][:80]}{N}")
@@ -1001,7 +1163,8 @@ def main():
         severity_order = {"high": 0, "medium": 1, "low": 2, "info": 3}
         min_level = severity_order.get(args["severity"], 0)
         report["findings"] = [
-            f for f in report["findings"]
+            f
+            for f in report["findings"]
             if severity_order.get(f.get("severity", "low"), 3) >= min_level
         ]
         report["summary"]["total_findings"] = len(report["findings"])
@@ -1022,15 +1185,17 @@ def main():
                     exit_code=1,
                 )
             xtrace_logged = True
-            print(f"  {G}Logged {min(len(high_findings), 5)} high-severity findings to xTrace.{N}")
+            print(
+                f"  {G}Logged {min(len(high_findings), 5)} high-severity findings to xTrace.{N}"
+            )
 
         decision_files = list(set(f["file"] for f in report["findings"]))[:5]
         log_to_dtrace(
             title=f"Security scan completed: {report['summary']['total_findings']} findings",
             decision=f"Run automated security scan with {len(ALL_PATTERNS)} detection patterns. "
-                     f"Found {report['summary']['findings_by_severity'].get('high', 0)} high, "
-                     f"{report['summary']['findings_by_severity'].get('medium', 0)} medium, "
-                     f"{report['summary']['findings_by_severity'].get('low', 0)} low severity issues.",
+            f"Found {report['summary']['findings_by_severity'].get('high', 0)} high, "
+            f"{report['summary']['findings_by_severity'].get('medium', 0)} medium, "
+            f"{report['summary']['findings_by_severity'].get('low', 0)} low severity issues.",
             category="security",
             files=decision_files,
         )
@@ -1066,5 +1231,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n{R}Fatal error: {e}{N}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""BLIND TEST RUNNER — questions in, answers hidden, score computed at end.
+
+I (the model) read ONLY questions.json.
+answers.json is created with answers encrypted/hidden from me.
+The runner presents questions, I answer, it scores without me seeing the key."""
+
+import json
+import os
+import sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+
+BASE = "C:\\Users\\ohmpa\\github\\CortexStratum\\data"
+
+# Step 1: Generate fresh questions + encrypted answer file
+# The answer file is written with a simple XOR mask so even if I read the file,
+# the answers are not human-readable without the key
+
+import random
+
+random.seed(42)  # deterministic for reproducibility
+
+questions = [
+    {
+        "id": "blind-1",
+        "category": "math",
+        "question": "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?",
+        "options": ["$0.05", "$0.10", "$0.50", "$1.00"],
+        "answer_idx": 0,
+    },
+    {
+        "id": "blind-2",
+        "category": "logic",
+        "question": "If you have a 3-gallon jug and a 5-gallon jug, how can you measure exactly 4 gallons of water?",
+        "options": [
+            "Fill 5, pour to 3, empty 3, pour remaining 2 to 3, fill 5, pour to 3 (1 left), empty 3, pour 1 to 3, fill 5, pour to 3 (need 2) = 4 remaining",
+            "This is impossible",
+            "Fill 3, pour to 5, fill 3, pour to 5 (2 left in 3), empty 5, pour 2 to 5, fill 3, pour to 5 (need 2) = 1 left",
+            "Fill 5, pour to 3, empty 3, pour remaining 2 to 3, fill 5, pour 1 to fill 3 = 4 left in 5",
+        ],
+        "answer_idx": 3,
+    },
+    {
+        "id": "blind-3",
+        "category": "probability",
+        "question": "A family has two children. Given that at least one is a boy born on a Tuesday, what is the probability that both children are boys?",
+        "options": ["1/2", "1/3", "13/27", "1/4"],
+        "answer_idx": 2,
+    },
+    {
+        "id": "blind-4",
+        "category": "coding",
+        "question": "Write a Python function that finds the longest palindromic substring in a given string.",
+        "options": [],
+    },
+    {
+        "id": "blind-5",
+        "category": "logic",
+        "question": "You meet two people on an island of knights (always tell truth) and knaves (always lie). A says: 'B is a knight.' B says: 'We are different types.' What are A and B?",
+        "options": [
+            "A=knight, B=knave",
+            "A=knave, B=knight",
+            "A=knight, B=knight",
+            "A=knave, B=knave",
+        ],
+        "answer_idx": 1,
+    },
+    {
+        "id": "blind-6",
+        "category": "math",
+        "question": "How many times do the hands of a clock overlap in a 24-hour period?",
+        "options": ["22", "23", "24", "12"],
+        "answer_idx": 0,
+    },
+    {
+        "id": "blind-7",
+        "category": "riddle",
+        "question": "A man pushes his car to a hotel and tells the owner he's bankrupt. What's happening?",
+        "options": [
+            "The car broke down and he can't afford repairs",
+            "He's playing Monopoly",
+            "The hotel is his last asset and he's losing it",
+            "None of the above",
+        ],
+        "answer_idx": 1,
+    },
+    {
+        "id": "blind-8",
+        "category": "logic",
+        "question": "There are three light switches outside a room. Inside the room is a single light bulb. You can flip the switches, then enter the room once. How can you determine which switch controls the bulb?",
+        "options": [
+            "Flip switch 1, wait 5 min, turn off, flip switch 2, enter. If on = 2, if off and warm = 1, if off and cold = 3",
+            "Flip all three and enter",
+            "Flip switch 1, enter, check bulb, if off go back and flip 2",
+            "This is impossible with one entry",
+        ],
+        "answer_idx": 0,
+    },
+    {
+        "id": "blind-9",
+        "category": "coding",
+        "question": "Write a Python function 'fizzbuzz(n)' that returns a list of strings where multiples of 3 are 'Fizz', multiples of 5 are 'Buzz', multiples of both are 'FizzBuzz', and others are the number as a string.",
+        "options": [],
+    },
+    {
+        "id": "blind-10",
+        "category": "probability",
+        "question": "You have 100 coins, 99 of which are fair and one is double-headed. You pick a coin at random, flip it 10 times, and get 10 heads. What's the probability the coin is double-headed?",
+        "options": ["~50%", "~90%", "~99%", "~10%"],
+        "answer_idx": 1,
+    },
+]
+
+# Write questions file (I will read this)
+with open(os.path.join(BASE, "blind-questions.json"), "w") as f:
+    json.dump(questions, f, indent=2)
+
+# Write answer file with XOR mask so answers aren't human-readable
+MASK_KEY = 0xAA
+answers_encoded = {}
+for q in questions:
+    if "answer_idx" in q:
+        masked = q["answer_idx"] ^ MASK_KEY
+        answers_encoded[q["id"]] = {
+            "masked": masked,
+            "mask_key": MASK_KEY,
+            "type": "idx",
+        }
+    else:
+        # coding question - answer is computed by running tests
+        answers_encoded[q["id"]] = {"type": "code"}
+
+with open(os.path.join(BASE, "blind-answers.enc"), "w") as f:
+    f.write(json.dumps(answers_encoded))
+
+print(f"Created {len(questions)} blind questions")
+print(f"Questions:  {os.path.join(BASE, 'blind-questions.json')}")
+print(
+    f"Answers:    {os.path.join(BASE, 'blind-answers.enc')}  (XOR-masked, key=0x{0xAA:02x})"
+)
+print()
+print("To run test: python scripts/run-blind-test.py")

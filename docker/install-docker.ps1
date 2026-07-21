@@ -29,14 +29,14 @@ if (-not $isAdmin) {
 try {
     $version = docker --version 2>&1
     docker info 2>&1 | Out-Null
-    Write-Host "  ✓ Docker already installed: $version" -ForegroundColor Green
+    Write-Host "   Docker already installed: $version" -ForegroundColor Green
     exit 0
 } catch {}
 
 # ─── Check if Docker binary exists but daemon not running ──────────
 try {
     $version = docker --version 2>&1
-    Write-Host "  ⚠ Docker binary found but not running. Starting..." -ForegroundColor Yellow
+    Write-Host "   Docker binary found but not running. Starting..." -ForegroundColor Yellow
     # Try starting Docker Desktop
     $dockerPath = "$env:ProgramFiles\Docker\Docker\Docker Desktop.exe"
     if (Test-Path $dockerPath) {
@@ -45,10 +45,10 @@ try {
         Start-Sleep -Seconds 15
         try {
             docker info 2>&1 | Out-Null
-            Write-Host "  ✓ Docker started!" -ForegroundColor Green
+            Write-Host "   Docker started!" -ForegroundColor Green
             exit 0
         } catch {
-            Write-Host "  ✗ Could not start Docker. Reinstalling..." -ForegroundColor Red
+            Write-Host "   Could not start Docker. Reinstalling..." -ForegroundColor Red
         }
     }
 } catch {}
@@ -72,9 +72,9 @@ Write-Host "  (This may take a few minutes. The installer will run silently.)" -
 $proc = Start-Process -FilePath $installer -ArgumentList "install --quiet" -Wait -PassThru
 
 if ($proc.ExitCode -eq 0) {
-    Write-Host "  ✓ Docker Desktop installed" -ForegroundColor Green
+    Write-Host "   Docker Desktop installed" -ForegroundColor Green
 } else {
-    Write-Host "  ⚠ Installer exited with code $($proc.ExitCode). Trying to launch anyway..." -ForegroundColor Yellow
+    Write-Host "   Installer exited with code $($proc.ExitCode). Trying to launch anyway..." -ForegroundColor Yellow
 }
 
 # ─── Start Docker ──────────────────────────────────────────────────
@@ -85,14 +85,14 @@ if (Test-Path $dockerPath) {
 }
 
 Write-Host ""
-Write-Host "  ⚡ Verifying installation..." -ForegroundColor Yellow
+Write-Host "   Verifying installation..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10
 
 try {
     docker info 2>&1 | Out-Null
-    Write-Host "  ✓ Docker is running: $(docker --version)" -ForegroundColor Green
+    Write-Host "   Docker is running: $(docker --version)" -ForegroundColor Green
 } catch {
-    Write-Host "  ⚠ Docker installed but not yet running." -ForegroundColor Yellow
+    Write-Host "   Docker installed but not yet running." -ForegroundColor Yellow
     Write-Host "  Launch Docker Desktop manually from the Start Menu," -ForegroundColor Yellow
     Write-Host "  then run ONE-CLICK.cmd again." -ForegroundColor Yellow
 }

@@ -12,6 +12,12 @@
 | `hashlib`, `uuid` | stdlib | Identity and integrity |
 | `importlib.util` | stdlib | Module factory |
 
+## Development Tools
+
+| Package | Install | Purpose |
+|---------|---------|---------|
+| `ruff` | `pip install ruff` | Python linter & formatter (replaces flake8, isort, pycodestyle) |
+
 ## Optional Modules
 
 ### Sensory Module (web browsing, scraping, API)

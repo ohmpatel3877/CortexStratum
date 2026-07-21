@@ -18,11 +18,11 @@ echo "╚═══════════════════════�
 
 # Prerequisites
 for cmd in podman mount; do
-  command -v "$cmd" >/dev/null 2>&1 || { echo "✗ $cmd required"; exit 1; }
+  command -v "$cmd" >/dev/null 2>&1 || { echo " $cmd required"; exit 1; }
 done
 
 if ! mountpoint -q "$MERGERFS_MOUNT"; then
-  echo "✗ $MERGERFS_MOUNT is not a mount point"
+  echo " $MERGERFS_MOUNT is not a mount point"
   exit 1
 fi
 
@@ -39,10 +39,10 @@ check() {
   shift
   echo -n "  $label ... "
   if "$@" 2>/dev/null; then
-    echo "✓"
+    echo ""
     ((PASS++))
   else
-    echo "✗"
+    echo ""
     ((FAIL++))
   fi
 }

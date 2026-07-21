@@ -1,20 +1,31 @@
 {
-    "version":  1,
-    "errors":  [
-                   {
-                       "id":  "err-001",
-                       "resolution":  "",
-                       "root_cause":  "",
-                       "first_seen":  "2026-07-16T00:50:03Z",
-                       "command":  "terminal-bench",
-                       "last_seen":  "2026-07-16T00:51:27Z",
-                       "occurrence_count":  2,
-                       "status":  "unresolved",
-                       "attempts":  [
-
-                                    ],
-                       "exit_code":  1,
-                       "error_signature":  "test error logging"
-                   }
-               ]
+  "version": 1,
+  "errors": [
+    {
+      "id": "err-001",
+      "error_signature": "permission_denied",
+      "command": "nonexistent_tool",
+      "exit_code": 1,
+      "first_seen": "2026-07-21T01:28:54Z",
+      "last_seen": "2026-07-21T03:20:55Z",
+      "occurrence_count": 16,
+      "status": "unresolved",
+      "root_cause": "",
+      "resolution": "",
+      "attempts": []
+    },
+    {
+      "id": "err-002",
+      "error_signature": "test error",
+      "command": "test",
+      "exit_code": 0,
+      "first_seen": "2026-07-21T01:31:25Z",
+      "last_seen": "2026-07-21T03:20:55Z",
+      "occurrence_count": 7,
+      "status": "unresolved",
+      "root_cause": "",
+      "resolution": "",
+      "attempts": []
+    }
+  ]
 }

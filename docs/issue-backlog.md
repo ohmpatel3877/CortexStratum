@@ -222,7 +222,7 @@ Add a dry-run protocol to all write/mutate tools so agents can preview what a mu
 ### Status:  COMPLETED (2026-07-17)
 - Created `scripts/permission_audit.py` with `simulate()`, `checkpoint()`, `undo()` methods
 - All 12 write/mutate tools accept `dry_run=true` parameter
-- New tools: `write_audit_undo`, `read_audit_status`
+- New tools: `mutate_audit_undo`, `read_audit_status`
 - All 79 tools have MCP annotations (`destructiveHint`, `readOnlyHint`, `idempotentHint`)
 - No checkpoint created on dry_run (only on real execution)
 
@@ -298,6 +298,103 @@ Only 12% of the codebase serves the stated purpose. Split into: cortexstratum-co
 **Area**: Infrastructure
 
 No auth at all. Any MCP client can read/write all memory. Add API key or token-based auth.
+
+---
+
+## Issue 15: Tool Descriptions — All 122 Tools Annotated
+
+**Type**: Polish
+**Priority**: Completed (2026-07-20)
+**Area**: Documentation
+
+### Description
+53 of 122 tool definitions lacked a `"description"` field, making MCP clients unable to describe them.
+
+### Changes Made
+- Added context-aware descriptions to all 53 missing tools
+- Each description includes the permission prefix ( READ /  WRITE /  MUTATE)
+- Updated stale comment "79 tools, all annotated" → "122 tools, all annotated"
+
+### Files Changed
+- `scripts/tools-mcp-server.py` — descriptions added to TOOLS list
+
+---
+
+## Issue 16: Write/Mutate Naming Convention
+
+**Type**: Polish
+**Priority**: Completed (2026-07-20)
+**Area**: Permissions
+
+### Description
+7 tools with `permission: "mutate"` had names starting with `write_` instead of `mutate_`, violating naming convention.
+
+### Changes Made
+- Renamed: `write_commitment_verify`→`mutate_commitment_verify`, `write_audit_undo`→`mutate_audit_undo`, `write_sensory_interact`→`mutate_sensory_interact`, `write_mutate_execute`→`mutate_execute`, `write_focus_learn`→`mutate_focus_learn`, `write_consolidation_run`→`mutate_consolidation_run`, `write_verify_run`→`mutate_verify_run`
+- Updated all references across 12 files (engine modules, pipeline, docs, configs, tests)
+
+---
+
+## Issue 17: CVE Reference Hallucination Fix
+
+**Type**: Bugfix
+**Priority**: Completed (2026-07-20)
+**Area**: Security Scanner
+
+### Description
+Three CVE-to-package mappings in `KNOWN_VULNERABILITIES` were hallucinated — the CVE IDs were real but attached to wrong packages:
+- CVE-2024-3651 (idna library) was mapped to `requests` package
+- CVE-2024-26131 (Element Android) was mapped to `cryptography` package
+- CVE-2024-55551 (Exasol JDBC) was mapped to `passport` package
+- Lines 501+ generated fake CVE IDs like `CVE-lodash-123` which don't exist
+
+### Changes Made
+- `requests` → CVE-2023-32681 (proxy auth leak, patched in 2.31.0) — VERIFIED REAL
+- `cryptography` → CVE-2024-26130 (NULL ptr deref, patched in 42.0.4) — VERIFIED REAL
+- `passport` → CVE-2022-25893 with verification note
+- Dynamic IDs changed from `CVE-` prefix to `SCAN-` prefix to avoid impersonating real CVEs
+
+### Files Changed
+- `scripts/security-scan.py` — corrected entries, SCAN- prefix for dynamic IDs
+
+---
+
+## Issue 18: Simulation Engine Integration
+
+**Type**: Feature
+**Priority**: Completed (2026-07-20)
+**Area**: Engineering Analysis
+
+### Description
+4 simulation engine modules were exiled to `future/simulation/engines/` but never wired into the MCP server. This integrated them with enhancements.
+
+### Changes Made
+- **CFD** (`engine/sim-cfd-module.py`): Pipe flow (Darcy-Weisbach), boundary layer, drag, Bernoulli solver, pump sizing — added Colebrook-White friction for rough pipes
+- **FEA** (`engine/sim-fea-module.py`): Beam stiffness matrix, truss elements, modal analysis, heat conduction — added stress recovery
+- **Mechanics** (`engine/sim-mechanics-module.py`): Beam stress/shear/deflection, column buckling (Euler+Johnson), fatigue (S-N, Goodman, Miner), fasteners
+- **Math** (`engine/sim-math-module.py`): 20-tool Wolfram Alpha-class engine
+- 36 new tools added to TOOLS list with proper dispatch handlers
+- Moved from `future/simulation/engines/` to `engine/`
+
+### Math Engine Capabilities
+- **Linear algebra**: matrix solve, determinant (LU), inverse, eigenvalue (power iteration)
+- **Calculus**: numerical differentiation, integration (Simpson/trapezoidal), Taylor series
+- **Root finding**: Newton-Raphson, bisection, secant
+- **Statistics**: descriptive stats, linear regression with R²
+- **Fourier**: radix-2 Cooley-Tukey FFT
+- **Complex numbers**: arithmetic, polar/rectangular conversion
+- **Number theory**: prime factorization, GCD/LCM
+- **Polynomials**: Horner evaluation
+- **Unit conversion**: SI ↔ imperial, temperature, pressure
+- **Plus existing**: ODE solver (RK4/Euler), ASCII plotting, LaTeX generation
+
+### Files Changed
+- `engine/sim-cfd-module.py` — NEW
+- `engine/sim-fea-module.py` — NEW
+- `engine/sim-mechanics-module.py` — NEW
+- `engine/sim-math-module.py` — NEW (28KB, fully rewritten)
+- `scripts/tools-mcp-server.py` — 36 tool defs + dispatch handlers
+
 
 ---
 

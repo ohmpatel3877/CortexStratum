@@ -37,27 +37,9 @@ RUN pip install --break-system-packages pydantic==2.5.0 httpx==0.25.0 2>/dev/nul
 # ─── Set ownership ────────────────────────────────────────────────
 RUN chown -R appuser:appgroup /app
 
-# ─── Entrypoint (inline — no external script needed) ──────────────
-RUN echo '#!/usr/bin/env bash
-set -Eeuo pipefail
-MODE="${1:-server}"
-case "$MODE" in
-  server)
-    exec python3 /app/scripts/tools-mcp-server.py
-    ;;
-  health)
-    python3 -c "import json; t=json.load(open('"'/app/data/tool-inventory.json'"')); print(f"'"'"'"'"'"'"'"' {len(t)} tools ready'"'"'"'"'"'"'"'")"
-    echo "Memory: local BM25 search"
-    echo "OK"
-    ;;
-  shell)
-    exec /bin/bash
-    ;;
-  *)
-    echo "Usage: docker run opencode-server [server|shell|health]"
-    exit 1
-    ;;
-esac' > /entrypoint.sh && chmod +x /entrypoint.sh
+# ─── Copy entrypoint script ───────────────────────────────────────
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3100
 USER appuser

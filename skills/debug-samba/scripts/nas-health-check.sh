@@ -46,7 +46,7 @@ if mount | grep -q "mergerfs"; then
     [ -r "$f" ] && echo "  $f: $(cat $f)"
   done 2>/dev/null || echo "  (no FUSE sysfs entries)"
 else
-  echo "  ✗ mergerfs NOT mounted"
+  echo "   mergerfs NOT mounted"
 fi
 
 # ─── LAYER 3: Shares (Samba) ────────────────────────────────────
@@ -63,9 +63,9 @@ if command -v smbstatus &>/dev/null; then
   testparm -s -q 2>/dev/null && echo "  smb.conf: valid" || echo "  smb.conf: INVALID"
   echo ""
   echo "Listeners:"
-  ss -tlnp 2>/dev/null | grep -E '445|139' || echo "  ✗ Not listening on 445/139"
+  ss -tlnp 2>/dev/null | grep -E '445|139' || echo "   Not listening on 445/139"
 else
-  echo "  ✗ smbstatus not installed"
+  echo "   smbstatus not installed"
 fi
 
 # ─── LAYER 4: Containers (Podman) ───────────────────────────────
@@ -83,7 +83,7 @@ if command -v podman &>/dev/null; then
   echo "Networks:"
   podman network ls 2>/dev/null
 else
-  echo "  ✗ podman not installed"
+  echo "   podman not installed"
 fi
 
 # ─── LAYER 5: Applications ──────────────────────────────────────
@@ -92,18 +92,18 @@ echo "=== APPLICATION HEALTH ==="
 
 # Jellyfin
 if curl -so /dev/null -w "%{http_code}" http://localhost:8096 2>/dev/null | grep -q 200; then
-  echo "  ✓ Jellyfin (port 8096)"
+  echo "   Jellyfin (port 8096)"
 else
-  echo "  ○ Jellyfin not responding on :8096"
+  echo "   Jellyfin not responding on :8096"
 fi
 
 # Nextcloud (check common ports)
 for port in 80 443 8080 4443; do
   if curl -so /dev/null -w "%{http_code}" "http://localhost:$port" 2>/dev/null | grep -qE '200|302|401'; then
-    echo "  ✓ Nextcloud/web on :$port"
+    echo "   Nextcloud/web on :$port"
     break
   fi
-done || echo "  ○ No web service detected on common ports"
+done || echo "   No web service detected on common ports"
 
 # ─── LAYER 6: Log Errors ────────────────────────────────────────
 echo ""

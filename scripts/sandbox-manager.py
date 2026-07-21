@@ -17,20 +17,23 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stderr.reconfigure(encoding="utf-8")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
-SANDBOX_BASE = Path(os.environ.get("TEMP", "C:\\Users\\ohmpa\\AppData\\Local\\Temp")) / "opencode" / "sandbox"
+SANDBOX_BASE = (
+    Path(os.environ.get("TEMP", "C:\\Users\\ohmpa\\AppData\\Local\\Temp"))
+    / "opencode"
+    / "sandbox"
+)
 SANDBOX_LOG = DATA_DIR / "sandbox-log.json"
 
 G = "\033[92m"
@@ -42,44 +45,176 @@ N = "\033[0m"
 DIM = "\033[2m"
 
 BLOCKLIST_PATTERNS: List[Dict[str, Any]] = [
-    {"pattern": r"os\.system\s*\(", "weight": 9, "reason": "os.system allows arbitrary command execution"},
-    {"pattern": r"os\.popen\s*\(", "weight": 9, "reason": "os.popen allows arbitrary command execution"},
-    {"pattern": r"os\.fork\s*\(", "weight": 8, "reason": "Process forking is prohibited in sandbox"},
-    {"pattern": r"os\.kill\s*\(", "weight": 7, "reason": "Process killing is prohibited in sandbox"},
-    {"pattern": r"subprocess\.(call|run|Popen|check_call|check_output)\s*\(", "weight": 9, "reason": "Subprocess execution is prohibited"},
-    {"pattern": r"eval\s*\(", "weight": 9, "reason": "eval() allows arbitrary code execution"},
-    {"pattern": r"exec\s*\(", "weight": 9, "reason": "exec() allows arbitrary code execution"},
-    {"pattern": r"__import__\s*\(", "weight": 8, "reason": "Dynamic imports can bypass safety checks"},
-    {"pattern": r"compile\s*\(", "weight": 8, "reason": "compile() can be used to generate executable code"},
-    {"pattern": r"open\s*\(\s*['\"][^'\"]+['\"]\s*,\s*['\"]w", "weight": 6, "reason": "File writes can modify the filesystem"},
-    {"pattern": r"open\s*\(\s*['\"][^'\"]+['\"]\s*,\s*['\"]a", "weight": 6, "reason": "File appends can modify the filesystem"},
-    {"pattern": r"shutil\.rmtree\s*\(", "weight": 9, "reason": "Recursive directory deletion is destructive"},
-    {"pattern": r"shutil\.move\s*\(", "weight": 6, "reason": "File moves can alter filesystem structure"},
-    {"pattern": r"os\.remove\s*\(", "weight": 8, "reason": "File deletion is destructive"},
-    {"pattern": r"os\.rmdir\s*\(", "weight": 8, "reason": "Directory deletion is destructive"},
-    {"pattern": r"os\.unlink\s*\(", "weight": 8, "reason": "File unlink is destructive"},
-    {"pattern": r"os\.chmod\s*\(", "weight": 6, "reason": "Permission changes are prohibited"},
-    {"pattern": r"os\.chown\s*\(", "weight": 6, "reason": "Ownership changes are prohibited"},
-    {"pattern": r"ctypes\.", "weight": 8, "reason": "ctypes allows C-level memory manipulation"},
-    {"pattern": r"socket\.", "weight": 7, "reason": "Network socket operations are restricted"},
-    {"pattern": r"requests\.", "weight": 5, "reason": "Network requests are restricted without --network flag"},
-    {"pattern": r"urllib\.(request|urlopen)", "weight": 5, "reason": "Network requests are restricted without --network flag"},
-    {"pattern": r"http\.client\.", "weight": 5, "reason": "HTTP client operations are restricted"},
+    {
+        "pattern": r"os\.system\s*\(",
+        "weight": 9,
+        "reason": "os.system allows arbitrary command execution",
+    },
+    {
+        "pattern": r"os\.popen\s*\(",
+        "weight": 9,
+        "reason": "os.popen allows arbitrary command execution",
+    },
+    {
+        "pattern": r"os\.fork\s*\(",
+        "weight": 8,
+        "reason": "Process forking is prohibited in sandbox",
+    },
+    {
+        "pattern": r"os\.kill\s*\(",
+        "weight": 7,
+        "reason": "Process killing is prohibited in sandbox",
+    },
+    {
+        "pattern": r"subprocess\.(call|run|Popen|check_call|check_output)\s*\(",
+        "weight": 9,
+        "reason": "Subprocess execution is prohibited",
+    },
+    {
+        "pattern": r"eval\s*\(",
+        "weight": 9,
+        "reason": "eval() allows arbitrary code execution",
+    },
+    {
+        "pattern": r"exec\s*\(",
+        "weight": 9,
+        "reason": "exec() allows arbitrary code execution",
+    },
+    {
+        "pattern": r"__import__\s*\(",
+        "weight": 8,
+        "reason": "Dynamic imports can bypass safety checks",
+    },
+    {
+        "pattern": r"compile\s*\(",
+        "weight": 8,
+        "reason": "compile() can be used to generate executable code",
+    },
+    {
+        "pattern": r"open\s*\(\s*['\"][^'\"]+['\"]\s*,\s*['\"]w",
+        "weight": 6,
+        "reason": "File writes can modify the filesystem",
+    },
+    {
+        "pattern": r"open\s*\(\s*['\"][^'\"]+['\"]\s*,\s*['\"]a",
+        "weight": 6,
+        "reason": "File appends can modify the filesystem",
+    },
+    {
+        "pattern": r"shutil\.rmtree\s*\(",
+        "weight": 9,
+        "reason": "Recursive directory deletion is destructive",
+    },
+    {
+        "pattern": r"shutil\.move\s*\(",
+        "weight": 6,
+        "reason": "File moves can alter filesystem structure",
+    },
+    {
+        "pattern": r"os\.remove\s*\(",
+        "weight": 8,
+        "reason": "File deletion is destructive",
+    },
+    {
+        "pattern": r"os\.rmdir\s*\(",
+        "weight": 8,
+        "reason": "Directory deletion is destructive",
+    },
+    {
+        "pattern": r"os\.unlink\s*\(",
+        "weight": 8,
+        "reason": "File unlink is destructive",
+    },
+    {
+        "pattern": r"os\.chmod\s*\(",
+        "weight": 6,
+        "reason": "Permission changes are prohibited",
+    },
+    {
+        "pattern": r"os\.chown\s*\(",
+        "weight": 6,
+        "reason": "Ownership changes are prohibited",
+    },
+    {
+        "pattern": r"ctypes\.",
+        "weight": 8,
+        "reason": "ctypes allows C-level memory manipulation",
+    },
+    {
+        "pattern": r"socket\.",
+        "weight": 7,
+        "reason": "Network socket operations are restricted",
+    },
+    {
+        "pattern": r"requests\.",
+        "weight": 5,
+        "reason": "Network requests are restricted without --network flag",
+    },
+    {
+        "pattern": r"urllib\.(request|urlopen)",
+        "weight": 5,
+        "reason": "Network requests are restricted without --network flag",
+    },
+    {
+        "pattern": r"http\.client\.",
+        "weight": 5,
+        "reason": "HTTP client operations are restricted",
+    },
 ]
 
 SANDBOX_VERSION = "1.0.0"
 
 PS_BLOCKLIST_PATTERNS: List[Dict[str, Any]] = [
-    {"pattern": r"Remove-Item\s+-Recurse", "weight": 9, "reason": "Recursive deletion is destructive"},
-    {"pattern": r"Remove-Item.*-Force", "weight": 8, "reason": "Force deletion is destructive"},
-    {"pattern": r"Stop-Process|kill\s+", "weight": 8, "reason": "Process termination is prohibited"},
-    {"pattern": r"Start-Process.*-Verb\s+RunAs", "weight": 9, "reason": "Elevated execution is prohibited"},
-    {"pattern": r"Invoke-Command|Invoke-Expression", "weight": 9, "reason": "Remote/invoke execution is prohibited"},
-    {"pattern": r"New-Object.*Net\.WebClient", "weight": 7, "reason": "Network downloads are restricted"},
-    {"pattern": r"\[System\.IO\.File\]::", "weight": 6, "reason": "Direct .NET file I/O is restricted"},
-    {"pattern": r"Add-Type.*-AssemblyName", "weight": 7, "reason": "Loading arbitrary assemblies is restricted"},
-    {"pattern": r"Set-ExecutionPolicy", "weight": 9, "reason": "Changing execution policy is prohibited"},
-    {"pattern": r"Register-ScheduledJob|Register-ScheduledTask", "weight": 9, "reason": "Scheduled task creation is prohibited"},
+    {
+        "pattern": r"Remove-Item\s+-Recurse",
+        "weight": 9,
+        "reason": "Recursive deletion is destructive",
+    },
+    {
+        "pattern": r"Remove-Item.*-Force",
+        "weight": 8,
+        "reason": "Force deletion is destructive",
+    },
+    {
+        "pattern": r"Stop-Process|kill\s+",
+        "weight": 8,
+        "reason": "Process termination is prohibited",
+    },
+    {
+        "pattern": r"Start-Process.*-Verb\s+RunAs",
+        "weight": 9,
+        "reason": "Elevated execution is prohibited",
+    },
+    {
+        "pattern": r"Invoke-Command|Invoke-Expression",
+        "weight": 9,
+        "reason": "Remote/invoke execution is prohibited",
+    },
+    {
+        "pattern": r"New-Object.*Net\.WebClient",
+        "weight": 7,
+        "reason": "Network downloads are restricted",
+    },
+    {
+        "pattern": r"\[System\.IO\.File\]::",
+        "weight": 6,
+        "reason": "Direct .NET file I/O is restricted",
+    },
+    {
+        "pattern": r"Add-Type.*-AssemblyName",
+        "weight": 7,
+        "reason": "Loading arbitrary assemblies is restricted",
+    },
+    {
+        "pattern": r"Set-ExecutionPolicy",
+        "weight": 9,
+        "reason": "Changing execution policy is prohibited",
+    },
+    {
+        "pattern": r"Register-ScheduledJob|Register-ScheduledTask",
+        "weight": 9,
+        "reason": "Scheduled task creation is prohibited",
+    },
 ]
 
 
@@ -117,7 +252,9 @@ def _append_log(entry: Dict[str, Any]) -> None:
     log = _load_log()
     log.append(entry)
     SANDBOX_LOG.parent.mkdir(parents=True, exist_ok=True)
-    SANDBOX_LOG.write_text(json.dumps(log, indent=2, ensure_ascii=False), encoding="utf-8")
+    SANDBOX_LOG.write_text(
+        json.dumps(log, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
 
 class SandboxManager:
@@ -143,7 +280,7 @@ class SandboxManager:
         cmd: List[str],
         cwd: Path,
         timeout: int,
-        env: Optional[Dict[str, str]] = None,
+        env: Dict[str, str] | None = None,
     ) -> Dict[str, Any]:
         """Execute a subprocess with timeout and output capture."""
         start = time.monotonic()
@@ -189,7 +326,9 @@ class SandboxManager:
             "killed": killed,
         }
 
-    def evaluate_code_safety(self, code: str, language: str = "python") -> Dict[str, Any]:
+    def evaluate_code_safety(
+        self, code: str, language: str = "python"
+    ) -> Dict[str, Any]:
         """Static safety analysis of code before execution.
 
         Scans for dangerous patterns and returns a safety assessment.
@@ -210,6 +349,7 @@ class SandboxManager:
 
         for entry in patterns:
             import re
+
             if re.search(entry["pattern"], code, re.IGNORECASE):
                 warnings.append(entry["reason"])
                 total_weight += entry["weight"]
@@ -362,10 +502,42 @@ class SandboxManager:
             }
 
     # Tokenized blocklist of dangerous commands — rejected before execution
+    # Uses prefix matching to catch variants (e.g. "rm -rf" matches "rm -rf /" and "rm -rf /var")
     _SHELL_BLOCKLIST = {
-        "rm -rf /", "rm -rf /home", "mkfs.", "dd if=", ":(){ :|:& };:", "eval ",
-        "wget ", "curl ", "chmod 777", "chown ", "> /dev/sda", "| bash",
-        "| sh", "| pwsh", "| powershell", "iex ", "Invoke-Expression",
+        "rm -rf",
+        "mkfs.",
+        "dd if=",
+        ":(){ :|:& };:",
+        "eval ",
+        "wget",
+        "curl",
+        "chmod 777",
+        "chown ",
+        "> /dev/sda",
+        "| bash",
+        "| sh",
+        "| pwsh",
+        "| powershell",
+        "iex ",
+        "Invoke-Expression",
+        # Additional dangerous patterns
+        ">/dev/",
+        "dd of=",
+        "format ",
+        "mkswap",
+        "swapoff",
+        "chmod -R 777",
+        "chown -R",
+        "mv /",
+        "cp /etc",
+        ":(){:",
+        "fork()",
+        "exec(",
+        "system(",
+        "bash -c ",
+        "sh -c ",
+        "pwsh -c ",
+        "powershell -c",
     }
 
     @staticmethod
@@ -514,7 +686,9 @@ class SandboxManager:
                 timeout=10,
             )
             results["python"] = {
-                "status": "PASS" if py_result["success"] and "sandbox-ok" in py_result["stdout"] else "FAIL",
+                "status": "PASS"
+                if py_result["success"] and "sandbox-ok" in py_result["stdout"]
+                else "FAIL",
                 "stdout": py_result["stdout"],
                 "stderr": py_result["stderr"],
                 "duration": py_result["duration"],
@@ -528,7 +702,9 @@ class SandboxManager:
                 timeout=10,
             )
             results["powershell"] = {
-                "status": "PASS" if ps_result["success"] and "sandbox-ok" in ps_result["stdout"] else "FAIL",
+                "status": "PASS"
+                if ps_result["success"] and "sandbox-ok" in ps_result["stdout"]
+                else "FAIL",
                 "stdout": ps_result["stdout"],
                 "stderr": ps_result["stderr"],
                 "duration": ps_result["duration"],
@@ -538,11 +714,13 @@ class SandboxManager:
 
         try:
             shell_result = self.execute_shell(
-                'echo sandbox-ok',
+                "echo sandbox-ok",
                 timeout=10,
             )
             results["shell"] = {
-                "status": "PASS" if shell_result["success"] and "sandbox-ok" in shell_result["stdout"] else "FAIL",
+                "status": "PASS"
+                if shell_result["success"] and "sandbox-ok" in shell_result["stdout"]
+                else "FAIL",
                 "stdout": shell_result["stdout"],
                 "stderr": shell_result["stderr"],
                 "duration": shell_result["duration"],
@@ -556,16 +734,16 @@ class SandboxManager:
                 "python",
             )
             results["safety_check"] = {
-                "status": "PASS" if not safety["safe"] and safety["risk_score"] > 7 else "FAIL",
+                "status": "PASS"
+                if not safety["safe"] and safety["risk_score"] > 7
+                else "FAIL",
                 "risk_score": safety["risk_score"],
                 "warnings_count": len(safety["warnings"]),
             }
         except Exception as e:
             results["safety_check"] = {"status": "ERROR", "error": str(e)}
 
-        all_pass = all(
-            r.get("status") == "PASS" for r in results.values()
-        )
+        all_pass = all(r.get("status") == "PASS" for r in results.values())
 
         return {
             "version": SANDBOX_VERSION,
@@ -660,14 +838,31 @@ def main():
         epilog=__doc__,
     )
     parser.add_argument("--run", action="store_true", help="Execute code in sandbox")
-    parser.add_argument("--language", choices=["python", "powershell", "shell"], default="python", help="Code language")
+    parser.add_argument(
+        "--language",
+        choices=["python", "powershell", "shell"],
+        default="python",
+        help="Code language",
+    )
     parser.add_argument("--code", type=str, help="Inline code string to execute")
     parser.add_argument("--file", type=str, help="File containing code to execute")
-    parser.add_argument("--timeout", type=int, default=30, help="Execution timeout in seconds")
-    parser.add_argument("--network", action="store_true", help="Allow network access (Python only)")
-    parser.add_argument("--verify", action="store_true", help="Run sandbox health check")
-    parser.add_argument("--check-safety", action="store_true", help="Run safety check on code without executing")
-    parser.add_argument("--keep-files", action="store_true", help="Keep sandbox files after execution")
+    parser.add_argument(
+        "--timeout", type=int, default=30, help="Execution timeout in seconds"
+    )
+    parser.add_argument(
+        "--network", action="store_true", help="Allow network access (Python only)"
+    )
+    parser.add_argument(
+        "--verify", action="store_true", help="Run sandbox health check"
+    )
+    parser.add_argument(
+        "--check-safety",
+        action="store_true",
+        help="Run safety check on code without executing",
+    )
+    parser.add_argument(
+        "--keep-files", action="store_true", help="Keep sandbox files after execution"
+    )
     parser.add_argument("--log", action="store_true", help="Show sandbox execution log")
 
     args = parser.parse_args()
@@ -682,12 +877,14 @@ def main():
         print(f"{B}{'=' * 60}{N}")
         for entry in log[-20:]:
             color = G if entry["success"] else R
-            print(f"  {color}{'' if entry['success'] else ''}{N} "
-                  f"{entry['timestamp'][:19]}  "
-                  f"{entry['language']:12}  "
-                  f"{entry['duration']:>6.3f}s  "
-                  f"risk={entry['risk_score']}/10  "
-                  f"hash={entry['code_hash'][:12]}...")
+            print(
+                f"  {color}{'' if entry['success'] else ''}{N} "
+                f"{entry['timestamp'][:19]}  "
+                f"{entry['language']:12}  "
+                f"{entry['duration']:>6.3f}s  "
+                f"risk={entry['risk_score']}/10  "
+                f"hash={entry['code_hash'][:12]}..."
+            )
         print(f"{'=' * 60}\n")
         return 0
 
@@ -726,7 +923,9 @@ def main():
 
         try:
             if args.language == "python":
-                result = manager.execute_python(code, timeout=args.timeout, network=args.network)
+                result = manager.execute_python(
+                    code, timeout=args.timeout, network=args.network
+                )
             elif args.language == "powershell":
                 result = manager.execute_powershell(code, timeout=args.timeout)
             elif args.language == "shell":
@@ -755,5 +954,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n{R}Fatal error: {e}{N}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
