@@ -40,3 +40,7 @@ Desktop.ini
 dist/
 build/
 *.egg-info/
+
+# Runtime state files
+data/rbac-roles.json
+data/.hmac_key
