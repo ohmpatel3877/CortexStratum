@@ -49,7 +49,7 @@ Every session starts fresh. Agents don't remember yesterday's bugs, the architec
 - A security boundary — no auth, no encryption, no sandboxing ([see constraints](#hard-constraints))
 
 ### Version
-**0.5.0** — 159 tools across 18 engine modules, 4 simulation engines, and 14 skills.  
+**0.5.x** — 159 tools across 18 engine modules, 4 simulation engines, and 14 skills.  
 Full changelog in [`CHANGELOG.md`](CHANGELOG.md).
 
 ---

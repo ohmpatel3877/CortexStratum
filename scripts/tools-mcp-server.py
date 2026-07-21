@@ -35,7 +35,7 @@ _VERSION_FILE = _SCRIPT_DIR.parent / "VERSION"
 try:
     VERSION = _VERSION_FILE.read_text(encoding="utf-8").strip()
 except Exception:
-    VERSION = "0.5.0"  # fallback
+    VERSION = "0.5.1-dev"  # fallback
 
 
 def _log(level, msg):
