@@ -2,7 +2,7 @@
 
 **Status:** Draft · **Target:** v0.5.0–v0.7.0
 
-Move 7 largest non-core modules from the monolithic `tools-mcp-server.py` into standalone MCP servers. This shrinks the core server from ~122 tools to ~86, reduces startup risk from optional dependencies, and enables independent release cycles.
+Move 7 largest non-core modules from the monolithic `tools-mcp-server.py` into standalone MCP servers. This shrinks the core server from ~176 tools to ~86, reduces startup risk from optional dependencies, and enables independent release cycles.
 
 ---
 
@@ -207,7 +207,7 @@ Core server retains tools AND dispatch. External servers are registered alongsid
 
 ```python
 # In tools-mcp-server.py — unchanged during Phase 1
-TOOLS = [...]  # includes all 122 tools (sim engines removed to future/)
+TOOLS = [...]  # includes all 176 tools (sim engines removed to future/)
 # Dispatch retains all module branches
 ```
 

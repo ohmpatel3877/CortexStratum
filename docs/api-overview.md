@@ -74,7 +74,7 @@
 ---
 ## MCP Tools
 
-Total: **122** tools across **26** modules.
+Total: **176** tools across **26** modules.
 
 ### Art
 
@@ -902,7 +902,7 @@ _2 tools_
 
 ### MCP Server
 - Entry point: `scripts/tools-mcp-server.py` — JSON-RPC over stdio
-- Exposes 122 tools across 26 modules
+- Exposes 176 tools across 26 modules
 - Protocol: Model Context Protocol (MCP) v2024-11-05
 
 ### Data Flow

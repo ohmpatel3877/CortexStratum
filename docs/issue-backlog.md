@@ -372,7 +372,7 @@ Three CVE-to-package mappings in `KNOWN_VULNERABILITIES` were hallucinated — t
 - **CFD** (`engine/sim-cfd-module.py`): Pipe flow (Darcy-Weisbach), boundary layer, drag, Bernoulli solver, pump sizing — added Colebrook-White friction for rough pipes
 - **FEA** (`engine/sim-fea-module.py`): Beam stiffness matrix, truss elements, modal analysis, heat conduction — added stress recovery
 - **Mechanics** (`engine/sim-mechanics-module.py`): Beam stress/shear/deflection, column buckling (Euler+Johnson), fatigue (S-N, Goodman, Miner), fasteners
-- **Math** (`engine/sim-math-module.py`): 20-tool Wolfram Alpha-class engine
+- **Math** (`engine/sim-math-module.py`): 20-tool stdlib numerical engine
 - 36 new tools added to TOOLS list with proper dispatch handlers
 - Moved from `future/simulation/engines/` to `engine/`
 
